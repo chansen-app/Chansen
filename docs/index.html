@@ -59,6 +59,10 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1.5px solid var(--n-300);display:flex;justify-content:center;gap:6px;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
 nav button{flex:1;max-width:150px;min-height:46px;border:none;background:transparent;border-radius:999px;font-family:var(--body);font-size:13px;font-weight:700;color:var(--n-700);cursor:pointer}
 nav button.on{background:var(--accent);color:var(--bg)}
+.knapprad{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1.5px solid var(--n-300)}
+.mini{min-height:38px;padding:8px 14px;border-radius:999px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800)}
+.mini.on{background:var(--sage-100);border-color:var(--sage-800);color:var(--sage-800)}
+nav button{font-size:12px}
 .dold{display:none}
 a{color:var(--accent-700)}
 a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -133,6 +137,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <div class="rakning" id="rakning"></div>
   <div id="lista"></div>
+</div>
+
+<div id="v-mina" class="dold">
+  <h1>Mina jobb</h1>
+  <p class="sub">Sparade, sökta och de du fått svar på.</p>
+  <div id="mina-innehall"></div>
 </div>
 
 <div id="v-tider" class="dold info">
@@ -212,6 +222,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
 <nav>
   <button id="n-jobb" class="on" onclick="visaVy('jobb')">Jobb</button>
+  <button id="n-mina" onclick="visaVy('mina')">Mina jobb</button>
   <button id="n-tider" onclick="visaVy('tider')">Arbetstider</button>
   <button id="n-utdrag" onclick="visaVy('utdrag')">Utdrag</button>
 </nav>
@@ -258,16 +269,17 @@ function spara(){
 }
 
 function visaVy(vy){
-  var vyer = ["start","jobb","tider","utdrag"];
+  var vyer = ["start","jobb","mina","tider","utdrag"];
   for (var i = 0; i < vyer.length; i++){
     var el = document.getElementById("v-" + vyer[i]);
     var bas = (vyer[i] === "tider" || vyer[i] === "utdrag") ? "info" : "";
     el.className = (vy === vyer[i]) ? bas : (bas + " dold").trim();
   }
-  var nk = ["jobb","tider","utdrag"];
+  var nk = ["jobb","mina","tider","utdrag"];
   for (var k = 0; k < nk.length; k++){
     document.getElementById("n-" + nk[k]).className = (vy === nk[k]) ? "on" : "";
   }
+  if (vy === "mina") ritaMina();
   window.scrollTo(0,0);
 }
 
@@ -309,6 +321,26 @@ function justeradPoang(j){
 
 function niva(p){ return p >= 5 ? "hog" : (p >= 2 ? "medel" : "lag"); }
 
+var status = {};
+try { var st = localStorage.getItem("chansen-status"); if (st) status = JSON.parse(st); } catch(e){}
+
+function sparaStatus(){
+  try { localStorage.setItem("chansen-status", JSON.stringify(status)); } catch(e){}
+}
+
+function settStatus(lank, lage){
+  if (lage === "bort") { delete status[lank]; }
+  else { status[lank] = { lage: lage, datum: new Date().toISOString() }; }
+  sparaStatus();
+  ritaMina();
+  visa(aktivtFilter);
+}
+
+function dagarSedan(iso){
+  if (!iso) return 0;
+  return Math.floor((new Date() - new Date(iso)) / 86400000);
+}
+
 function dagarKvar(d){ if(!d) return null; return Math.ceil((new Date(d)-new Date())/86400000); }
 
 function kort(j){
@@ -332,10 +364,74 @@ function kort(j){
     '<div class="ag">'+j.arbetsgivare+(j.ort ? ' &middot; '+j.ort : '')+'</div>'+
     '<div class="taggar">'+taggar+'</div>'+
     '<div class="rad"><a class="btn liten" href="'+j.lank+'" target="_blank">Se annonsen</a>'+
-    '<span class="dagar">'+dagtext+'</span></div></div>';
+    '<span class="dagar">'+dagtext+'</span></div>'+
+    '<div class="knapprad">'+ statusknappar(j.lank) +'</div></div>';
 }
 
+function statusknappar(lank){
+  var nu = status[lank] ? status[lank].lage : null;
+  var ut = "";
+  ut += '<button class="mini'+(nu === "sparad" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sparad" ? "bort" : "sparad")+'\')">'+(nu === "sparad" ? "Sparad" : "Spara")+'</button>';
+  ut += '<button class="mini'+(nu === "sokt" || nu === "svar" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sokt" ? "bort" : "sokt")+'\')">'+(nu === "sokt" || nu === "svar" ? "Sökt" : "Jag har sökt")+'</button>';
+  return ut;
+}
+
+function hittaJobb(lank){
+  for (var i = 0; i < JOBB.length; i++){ if (JOBB[i].lank === lank) return JOBB[i]; }
+  return null;
+}
+
+function minirad(lank, visaSvarsknapp){
+  var j = hittaJobb(lank);
+  var s = status[lank];
+  var titel = j ? j.titel : "Jobb";
+  var ag = j ? (j.arbetsgivare + (j.ort ? " &middot; " + j.ort : "")) : "";
+  var dagar = dagarSedan(s.datum);
+  var pafyll = "";
+  if (visaSvarsknapp && dagar >= 7 && s.lage === "sokt"){
+    pafyll = '<div class="tag varm" style="margin-bottom:10px">Sökte för '+dagar+' dagar sedan. Hör av dig och fråga.</div>';
+  }
+  var knappar = "";
+  if (s.lage === "sparad"){
+    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'sokt\')">Jag har sökt</button>'+
+              '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+  } else if (s.lage === "sokt"){
+    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'svar\')">Fick svar</button>'+
+              '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+  } else {
+    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+  }
+  return '<div class="card">'+pafyll+
+    '<div class="titel">'+titel+'</div>'+
+    '<div class="ag">'+ag+'</div>'+
+    '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank">Se annonsen</a></div>'+
+    '<div class="knapprad">'+knappar+'</div></div>';
+}
+
+function ritaMina(){
+  var el = document.getElementById("mina-innehall");
+  if (!el) return;
+  var grupper = [
+    ["sparad", "Sparade", false],
+    ["sokt", "Sökta, väntar på svar", true],
+    ["svar", "Fått svar", false]
+  ];
+  var ut = "", totalt = 0;
+  for (var g = 0; g < grupper.length; g++){
+    var lankar = [];
+    for (var lank in status){ if (status[lank].lage === grupper[g][0]) lankar.push(lank); }
+    if (!lankar.length) continue;
+    totalt += lankar.length;
+    ut += '<h2>'+grupper[g][1]+' ('+lankar.length+')</h2>';
+    for (var i = 0; i < lankar.length; i++){ ut += minirad(lankar[i], grupper[g][2]); }
+  }
+  el.innerHTML = totalt ? ut : '<div class="tomt">Inget här än. Spara ett jobb i listan, så dyker det upp.</div>';
+}
+
+var aktivtFilter = "alla";
+
 function visa(filter){
+  aktivtFilter = filter;
   var ids = ["alla","hog","deltid","utdrag"];
   for(var i=0;i<ids.length;i++){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
@@ -356,6 +452,7 @@ function visa(filter){
 
 ritaFragor();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
+ritaMina();
 if (svar.alder) { startaLista(); } else { visaVy("start"); }
 </script>
 </body>
