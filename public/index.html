@@ -56,6 +56,7 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
 .tag{font-size:11px;padding:4px 11px;border-radius:999px;background:var(--n-100);color:var(--n-800)}
 .tag.varm{background:var(--accent-100);color:var(--accent-800)}
 .tag.sage{background:var(--sage-100);color:var(--sage-800)}
+.tag.varning{background:#fdeaea;color:#8a2b2b}
 .rad{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .dagar{font-size:12px;color:var(--n-600)}
 .tomt{text-align:center;padding:50px 20px;color:var(--n-700)}
@@ -143,6 +144,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button id="f-hog" onclick="visa('hog')">Bäst chans</button>
     <button id="f-deltid" onclick="visa('deltid')">Deltid</button>
     <button id="f-heltid" onclick="visa('heltid')">Heltid</button>
+    <button id="f-nyborjare" onclick="visa('nyborjare')">Ingen erfarenhet</button>
     <button id="f-utdrag" onclick="visa('utdrag')">Nämner inte utdrag</button>
   </div>
 
@@ -238,7 +240,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>En gratis tjänst som visar jobb med låga ingångskrav och sorterar dem efter hur få hinder som står mellan dig och en ansökan. Den är byggd med förstagångssökande i åtanke, men är öppen för alla och stänger inte ute någon.</p>
 
   <h2>Så fungerar rangordningen</h2>
-  <p>Varje annons får poäng utifrån vad den kräver. Krävs ingen erfarenhet eller utbildning, är det deltid, säsong eller behovsanställning, eller skriver arbetsgivaren att de utbildar på plats, hamnar jobbet högre upp. Krävs körkort, examen eller flera års erfarenhet hamnar det längre ned.</p>
+  <p>Annonser som kräver examen, legitimation eller flera års erfarenhet tas bort helt, liksom yrken som förutsätter en utbildning du inte hinner ha ännu. Resten får poäng: är det extrajobb, deltid, säsong eller behovsanställning, eller skriver arbetsgivaren att de lär upp på plats, hamnar jobbet högre upp. Krävs körkort hamnar det längre ned, om du inte sagt att du har ett.</p>
+  <p>Taggen "Ingen erfarenhet krävs" sätts när arbetsgivaren själv skrivit det i annonsen, eller kryssat i det hos Arbetsförmedlingen. Det är deras ord, inte vår bedömning.</p>
   <p>Poängen mäter hur många formella hinder som finns i annonsen. Den mäter inte dig, och den säger ingenting om hur troligt det är att du får jobbet.</p>
 
   <h2>Det här lovar vi</h2>
@@ -246,6 +249,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <li>Vi frågar aldrig om etnicitet, kön, hälsa, religion eller brottshistorik</li>
     <li>Vi märker jobb, inte människor. Allt som visas handlar om vad annonsen kräver</li>
     <li>Vi gömmer inga jobb utom sådant som enligt lag inte får utföras av den som är under 18</li>
+    <li>Vi märker jobb som betalar enbart i provision, så att du vet innan du söker</li>
     <li>Vi lovar aldrig att du får ett jobb, och räknar inte ut sannolikheter</li>
     <li>Tjänsten är gratis och kommer alltid att vara det för dig som söker jobb</li>
   </ul>
@@ -256,6 +260,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <h2>Var jobben kommer ifrån</h2>
   <p>Annonserna hämtas från Arbetsförmedlingens öppna API JobSearch och uppdateras en gång per dygn. Chansen skapar inga egna annonser och ansvarar inte för innehållet i dem. Klickar du på Se annonsen kommer du till originalet i Platsbanken.</p>
+
+  <h2>Lön på provision</h2>
+  <p>Vissa jobb betalar ingen fast lön alls, bara provision på det du säljer. Det är lagligt, men det betyder att du kan jobba en hel månad och få väldigt lite. Ibland krävs dessutom att du startar eget. Vi tar inte bort de jobben, men märker dem, så att du kan välja själv. Är du osäker, fråga vad grundlönen är innan du tackar ja.</p>
 
   <h2>Det vi inte kan veta</h2>
   <p>Vi kan bara läsa vad som står i annonsen. Står det inget om registerutdrag betyder det inte att arbetsgivaren låter bli att begära ett. Är något viktigt för dig, fråga arbetsgivaren innan du lägger tid på ansökan.</p>
@@ -396,7 +403,7 @@ function matcharOmrade(j){
 function justeradPoang(j){
   var p = j.poang;
   if (j.korkortKravs === true && svar.korkort === "Ja") p += 3;
-  if (svar.erfarenhet === "Aldrig jobbat" && j.erfarenhetKravs === false) p += 1;
+  if (svar.erfarenhet === "Aldrig jobbat" && j.nyborjarvanlig === true) p += 2;
   var nar = svar.nar || [];
   if (nar.indexOf("Lov och sommar") > -1 && (j.anstallningsform || "").toLowerCase().indexOf("behov") > -1) p += 1;
   if (nar.indexOf("Helger") > -1 && (j.omfattning || "") === "Deltid") p += 1;
@@ -448,8 +455,11 @@ function kort(j){
   var taggar = "";
   if(j.omfattning) taggar += '<span class="tag">'+esc(j.omfattning)+'</span>';
   if(j.anstallningsform) taggar += '<span class="tag sage">'+esc(j.anstallningsform)+'</span>';
+  if(j.nyborjarvanlig === true) taggar += '<span class="tag sage">Ingen erfarenhet krävs</span>';
   if(j.korkortKravs === true && svar.korkort !== "Ja") taggar += '<span class="tag">Kräver körkort</span>';
   if(j.utdrag === "kravs") taggar += '<span class="tag">Kräver registerutdrag</span>';
+  if(j.nattarbete === true) taggar += '<span class="tag">Natt eller skift</span>';
+  if(j.provisionslon === true) taggar += '<span class="tag varning">Lön på provision</span>';
 
   var d = dagarKvar(j.sistaAnsokningsdag), dagtext = "";
   if(d !== null && d >= 0 && d <= 7){
@@ -593,11 +603,12 @@ function bortfiltrerade(){
 }
 
 function underSexton(){ return svar.alder === "Under 16"; }
+function underArton(){ return svar.alder === "Under 16" || svar.alder === "16 till 17"; }
 
 function visa(filter){
   if (underSexton() && filter === "heltid") filter = "alla";
   aktivtFilter = filter;
-  var ids = ["alla","hog","deltid","heltid","utdrag"];
+  var ids = ["alla","hog","deltid","heltid","nyborjare","utdrag"];
   for(var i=0;i<ids.length;i++){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
@@ -606,9 +617,11 @@ function visa(filter){
 
   var valda = JOBB.filter(matcharOrt).filter(matcharOmrade).filter(harLagaKrav);
   if (underSexton()) valda = valda.filter(function(j){ return j.omfattning !== "Heltid"; });
+  if (underArton()) valda = valda.filter(function(j){ return j.nattarbete !== true; });
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
   if(filter === "deltid") valda = valda.filter(function(j){ return j.omfattning === "Deltid"; });
   if(filter === "heltid") valda = valda.filter(function(j){ return j.omfattning === "Heltid"; });
+  if(filter === "nyborjare") valda = valda.filter(function(j){ return j.nyborjarvanlig === true; });
   if(filter === "utdrag") valda = valda.filter(function(j){ return j.utdrag !== "kravs"; });
 
   valda = valda.slice().sort(function(a,b){ return justeradPoang(b) - justeradPoang(a); });
@@ -618,6 +631,12 @@ function visa(filter){
     var text = "";
     if (underSexton()) {
       text += '<div class="ruta" style="font-size:14px">Heltidsjobb visas inte för dig. Är du under 16 får du jobba högst 12 timmar i veckan under skolveckor och 7 timmar om dagen under lov, aldrig efter klockan 20. <button class="lank" onclick="visaVy(\'tider\')">Läs mer om arbetstider</button></div>';
+    }
+    if (underArton() && !underSexton()) {
+      text += '<div class="ruta" style="font-size:14px">Jobb med natt- eller skiftarbete visas inte för dig. Är du under 18 får du inte jobba mellan 22 och 06. <button class="lank" onclick="visaVy(\'tider\')">Läs mer om arbetstider</button></div>';
+    }
+    if (filter === "nyborjare") {
+      text += '<div class="ruta" style="font-size:14px">Här är jobben där arbetsgivaren själv skrivit att erfarenhet inte behövs, eller att de lär upp på plats. Det är arbetsgivarens ord, inte ett löfte från oss.</div>';
     }
     if (filter === "utdrag") {
       text += '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte nämner registerutdrag. Arbetsgivaren kan ändå begära ett. Fråga innan du lägger tid på ansökan.</div>';
