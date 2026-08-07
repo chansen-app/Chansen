@@ -271,10 +271,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br><span id="uppdaterad"></span></footer>
 </div>
 
 <nav>
+  <button id="n-start" onclick="visaVy('start')">Mina svar</button>
   <button id="n-jobb" class="on" onclick="visaVy('jobb')">Jobb</button>
   <button id="n-mina" onclick="visaVy('mina')">Mina jobb</button>
   <button id="n-tider" onclick="visaVy('tider')">Arbetstider</button>
@@ -294,6 +295,8 @@ function esc(v){
 // Om jobb.js inte laddat far sidan inte krascha tyst
 var jobbSaknas = false;
 if (typeof JOBB === "undefined" || !Array.isArray(JOBB)) { JOBB = []; jobbSaknas = true; }
+if (typeof KOMMUNLAN === "undefined") { KOMMUNLAN = {}; }
+if (typeof UPPDATERAD === "undefined") { UPPDATERAD = ""; }
 
 var fragor = {
   alder:      ["Under 16","16 till 17","18 eller äldre"],
@@ -362,7 +365,7 @@ function visaVy(vy){
     var bas = (vyer[i] === "tider" || vyer[i] === "utdrag" || vyer[i] === "om") ? "info" : "";
     el.className = (vy === vyer[i]) ? bas : (bas + " dold").trim();
   }
-  var nk = ["jobb","mina","tider","utdrag","om"];
+  var nk = ["start","jobb","mina","tider","utdrag","om"];
   for (var k = 0; k < nk.length; k++){
     document.getElementById("n-" + nk[k]).className = (vy === nk[k]) ? "on" : "";
   }
@@ -385,9 +388,42 @@ function startaLista(){
   visa("alla");
 }
 
+// Gor om text sa att Malmo och Malmö blir samma sak
+function slat(v){
+  return String(v == null ? "" : v).toLowerCase()
+    .replace(/å/g,"a").replace(/ä/g,"a").replace(/ö/g,"o")
+    .replace(/é/g,"e").replace(/ü/g,"u").trim();
+}
+
+var smeknamn = {
+  "gbg": "goteborg", "sthlm": "stockholm", "sthml": "stockholm",
+  "mmx": "malmo", "kbh": "kopenhamn", "uppsalla": "uppsala"
+};
+
+function sokordOrt(){
+  var v = slat(svar.ort);
+  return smeknamn[v] || v;
+}
+
 function matcharOrt(j){
   if (!svar.ort) return true;
-  return (j.ort || "").toLowerCase().indexOf(svar.ort.toLowerCase()) > -1;
+  return slat(j.ort).indexOf(sokordOrt()) > -1;
+}
+
+function matcharLan(j){
+  if (!svar.ort) return true;
+  return slat(j.lan).indexOf(sokordOrt()) > -1;
+}
+
+// Vilket lan ligger den skrivna kommunen i? Bygger pa uppslagslistan
+// fran hamtningen, sa den funkar aven for kommuner utan jobb i dag.
+function lanForOrt(){
+  var v = sokordOrt();
+  if (!v) return "";
+  for (var kommun in KOMMUNLAN){
+    if (slat(kommun).indexOf(v) > -1) return KOMMUNLAN[kommun];
+  }
+  return "";
 }
 
 function matcharOmrade(j){
@@ -411,6 +447,34 @@ function justeradPoang(j){
 }
 
 function niva(p){ return p >= 5 ? "hog" : (p >= 2 ? "medel" : "lag"); }
+
+// Tom lista ska alltid ge en vag vidare, inte bara ett konstaterande.
+function tomtLage(){
+  if (svar.ort){
+    return '<div class="tomt"><p>Inga jobb i ' + esc(svar.ort) + ' just nu.</p>' +
+           '<p>Det kan bero på att orten stavas annorlunda i annonserna, eller att det inte finns något där i dag.</p>' +
+           '<button class="btn liten" id="visa-hela-sverige">Visa jobb i hela Sverige</button></div>';
+  }
+  return '<div class="tomt">Inga jobb med det filtret just nu. Prova Alla, eller ändra vad du vill jobba med.</div>';
+}
+
+function visaHelaSverige(){
+  svar.ort = "";
+  var f = document.getElementById("ort");
+  if (f) f.value = "";
+  spara();
+  document.getElementById("profil").textContent = profilrad();
+  visa(aktivtFilter);
+}
+
+function visaUppdaterad(){
+  var el = document.getElementById("uppdaterad");
+  if (!el || !UPPDATERAD) return;
+  var dagar = Math.floor((new Date() - new Date(UPPDATERAD)) / 86400000);
+  var text = dagar <= 0 ? "Jobben hämtades i dag" : (dagar === 1 ? "Jobben hämtades i går" : "Jobben hämtades för " + dagar + " dagar sedan");
+  if (dagar >= 3) text += ". Något är fel hos oss, hör gärna av dig.";
+  el.textContent = text;
+}
 
 var minaJobb = {};
 try {
@@ -489,7 +553,9 @@ function statusknappar(lank){
 
 // En enda lyssnare for alla status-knappar, i stallet for onclick i varje knapp
 document.addEventListener("click", function(e){
-  var b = e.target && e.target.closest ? e.target.closest("button[data-lank]") : null;
+  if (!e.target || !e.target.closest) return;
+  if (e.target.closest("#visa-hela-sverige")) { visaHelaSverige(); return; }
+  var b = e.target.closest("button[data-lank]");
   if (!b) return;
   settStatus(b.getAttribute("data-lank"), b.getAttribute("data-lage"));
 });
@@ -602,8 +668,10 @@ function bortfiltrerade(){
   });
 }
 
-function underSexton(){ return svar.alder === "Under 16"; }
-function underArton(){ return svar.alder === "Under 16" || svar.alder === "16 till 17"; }
+// Har anvandaren inte svarat pa aldern behandlas hen som yngst.
+// Annars kan man ga forbi skyddet genom att hoppa over fragan.
+function underSexton(){ return svar.alder !== "16 till 17" && svar.alder !== "18 eller äldre"; }
+function underArton(){ return svar.alder !== "18 eller äldre"; }
 
 function visa(filter){
   if (underSexton() && filter === "heltid") filter = "alla";
@@ -615,7 +683,16 @@ function visa(filter){
   var heltidsknapp = document.getElementById("f-heltid");
   if (heltidsknapp && underSexton()) heltidsknapp.className = "dold";
 
-  var valda = JOBB.filter(matcharOrt).filter(matcharOmrade).filter(harLagaKrav);
+  var lanfall = "";
+  var iOmradet = JOBB.filter(matcharOrt);
+  if (svar.ort && iOmradet.length === 0){
+    var lan = lanForOrt();
+    if (lan){
+      var iLanet = JOBB.filter(function(j){ return j.lan === lan; });
+      if (iLanet.length){ iOmradet = iLanet; lanfall = lan; }
+    }
+  }
+  var valda = iOmradet.filter(matcharOmrade).filter(harLagaKrav);
   if (underSexton()) valda = valda.filter(function(j){ return j.omfattning !== "Heltid"; });
   if (underArton()) valda = valda.filter(function(j){ return j.nattarbete !== true; });
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
@@ -635,6 +712,9 @@ function visa(filter){
     if (underArton() && !underSexton()) {
       text += '<div class="ruta" style="font-size:14px">Jobb med natt- eller skiftarbete visas inte för dig. Är du under 18 får du inte jobba mellan 22 och 06. <button class="lank" onclick="visaVy(\'tider\')">Läs mer om arbetstider</button></div>';
     }
+    if (lanfall) {
+      text += '<div class="ruta" style="font-size:14px">Inga jobb i ' + esc(svar.ort) + ' just nu. Här är jobben i ' + esc(lanfall) + ' i stället.</div>';
+    }
     if (filter === "nyborjare") {
       text += '<div class="ruta" style="font-size:14px">Här är jobben där arbetsgivaren själv skrivit att erfarenhet inte behövs, eller att de lär upp på plats. Det är arbetsgivarens ord, inte ett löfte från oss.</div>';
     }
@@ -648,15 +728,17 @@ function visa(filter){
     document.getElementById("lista").innerHTML = '<div class="tomt">Kunde inte hämta jobben just nu. Kontrollera att du har internet och ladda om sidan. Står det kvar en stund är det fel hos oss, inte hos dig.</div>';
     return;
   }
-  document.getElementById("rakning").textContent = valda.length + " jobb i " + (svar.ort ? svar.ort : "hela Sverige");
+  document.getElementById("rakning").textContent =
+    valda.length + " jobb i " + (lanfall ? lanfall : (svar.ort ? svar.ort : "hela Sverige"));
   document.getElementById("lista").innerHTML = valda.length
     ? valda.map(kort).join("")
-    : '<div class="tomt">Inga jobb med det filtret just nu. Prova Alla, töm ortsrutan, eller ändra vad du vill jobba med.</div>';
+    : tomtLage();
 }
 
 ritaFragor();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
 ritaMina();
+visaUppdaterad();
 if (svar.alder) { startaLista(); } else { visaVy("start"); }
 </script>
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ba6ba77531354915b4838cee296406a5"}'></script>
