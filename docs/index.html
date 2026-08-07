@@ -79,7 +79,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <div class="field">
     <label class="fraga">Var bor du?</label>
-    <input class="txt" id="ort" placeholder="Malmö" value="Malmö">
+    <input class="txt" id="ort" placeholder="Skriv din kommun" value="">
+    <div class="hint">Lämna tomt om du vill se jobb i hela Sverige.</div>
   </div>
 
   <div class="field">
@@ -235,7 +236,7 @@ var omradeOrd = {
   "Barn": ["barn","fritids","förskola","forskola","elevassistent","skola"]
 };
 
-var svar = { alder:null, ort:"Malmö", nar:null, utbildning:null, korkort:null, erfarenhet:null, omrade:null };
+var svar = { alder:null, ort:"", nar:null, utbildning:null, korkort:null, erfarenhet:null, omrade:null };
 try { var sparat = localStorage.getItem("chansen"); if (sparat) svar = JSON.parse(sparat); } catch(e){}
 
 function ritaFragor(){
@@ -252,7 +253,7 @@ function valj(falt, varde){ svar[falt] = varde; ritaFragor(); }
 
 function spara(){
   var f = document.getElementById("ort");
-  svar.ort = (f && f.value) ? f.value : "Malmö";
+  svar.ort = f ? f.value.trim() : "";
   try { localStorage.setItem("chansen", JSON.stringify(svar)); } catch(e){}
 }
 
@@ -271,7 +272,7 @@ function visaVy(vy){
 }
 
 function profilrad(){
-  var delar = [svar.ort || "Malmö"];
+  var delar = [svar.ort ? svar.ort : "Hela Sverige"];
   if (svar.nar) delar.push(svar.nar.toLowerCase());
   if (svar.korkort === "Ja") delar.push("körkort");
   if (svar.omrade && svar.omrade !== "Allt möjligt") delar.push(svar.omrade.toLowerCase());
@@ -283,6 +284,11 @@ function startaLista(){
   document.getElementById("profil").textContent = profilrad();
   visaVy("jobb");
   visa("alla");
+}
+
+function matcharOrt(j){
+  if (!svar.ort) return true;
+  return (j.ort || "").toLowerCase().indexOf(svar.ort.toLowerCase()) > -1;
 }
 
 function matcharOmrade(j){
@@ -323,7 +329,7 @@ function kort(j){
   return '<div class="card">'+
     '<div class="kicker'+(top ? "" : " medel")+'">'+(top ? "Bäst chans" : "Värd att söka")+'</div>'+
     '<div class="titel">'+j.titel+'</div>'+
-    '<div class="ag">'+j.arbetsgivare+'</div>'+
+    '<div class="ag">'+j.arbetsgivare+(j.ort ? ' · '+j.ort : '')+'</div>'+
     '<div class="taggar">'+taggar+'</div>'+
     '<div class="rad"><a class="btn liten" href="'+j.lank+'" target="_blank">Se annonsen</a>'+
     '<span class="dagar">'+dagtext+'</span></div></div>';
@@ -335,20 +341,21 @@ function visa(filter){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
 
-  var valda = JOBB.filter(matcharOmrade);
+  var valda = JOBB.filter(matcharOrt).filter(matcharOmrade);
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
   if(filter === "deltid") valda = valda.filter(function(j){ return j.omfattning === "Deltid"; });
   if(filter === "utdrag") valda = valda.filter(function(j){ return j.utdrag !== "kravs"; });
 
   valda = valda.slice().sort(function(a,b){ return justeradPoang(b) - justeradPoang(a); });
 
-  document.getElementById("rakning").textContent = valda.length + " jobb i " + (svar.ort || "Malmö");
+  document.getElementById("rakning").textContent = valda.length + " jobb i " + (svar.ort ? svar.ort : "hela Sverige");
   document.getElementById("lista").innerHTML = valda.length
     ? valda.map(kort).join("")
-    : '<div class="tomt">Inga jobb med det filtret just nu. Prova Alla, eller ändra vad du vill jobba med.</div>';
+    : '<div class="tomt">Inga jobb med det filtret just nu. Prova Alla, töm ortsrutan, eller ändra vad du vill jobba med.</div>';
 }
 
 ritaFragor();
+if (svar.ort) document.getElementById("ort").value = svar.ort;
 if (svar.alder) { startaLista(); } else { visaVy("start"); }
 </script>
 </body>
