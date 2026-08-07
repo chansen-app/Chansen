@@ -4,55 +4,100 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chansen</title>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background: #faf9f7; color: #1a1a1a; }
-  h1 { font-size: 22px; margin: 0 0 4px; }
-  .info { color: #666; font-size: 14px; margin-bottom: 16px; }
-  .knappar { margin-bottom: 16px; }
-  button { font: inherit; padding: 8px 14px; margin-right: 8px; border: 1px solid #ccc; background: white; border-radius: 20px; cursor: pointer; }
-  button.aktiv { background: #1a1a1a; color: white; border-color: #1a1a1a; }
-  .jobb { background: white; border: 1px solid #e5e3df; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
-  .titel { font-weight: 500; margin-bottom: 4px; }
-  .meta { color: #666; font-size: 14px; margin-bottom: 8px; }
-  .niva { display: inline-block; font-size: 13px; padding: 3px 10px; border-radius: 20px; }
-  .hog { background: #e1f5ee; color: #0f6e56; }
-  .medel { background: #faeeda; color: #854f0b; }
-  .lag { background: #f1efe8; color: #5f5e5a; }
-  a { color: #185fa5; font-size: 14px; }
+:root{
+  --bg:#f5ead8; --surface:#ebddc5; --text:#201e1d;
+  --accent:#c67139; --accent-100:#fff2eb; --accent-700:#8c491a; --accent-800:#643312;
+  --sage-100:#f0fae1; --sage-800:#3d472b;
+  --n-100:#f9f4ed; --n-300:#dcd3c4; --n-600:#82796a; --n-700:#645c50; --n-800:#474238;
+  --heading:"Caprasimo",system-ui,sans-serif; --body:"Figtree",system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.55}
+.wrap{max-width:520px;margin:0 auto;padding:26px 18px 60px}
+h1{font-family:var(--heading);font-weight:400;font-size:34px;line-height:1.1;letter-spacing:-.015em;margin:0 0 6px}
+.sub{font-size:15.5px;color:var(--n-700);margin-bottom:22px;max-width:30ch}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chips button{min-height:40px;padding:8px 16px;border-radius:999px;font-family:var(--body);font-size:13.5px;font-weight:700;cursor:pointer;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800)}
+.chips button.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.rakning{font-size:14px;color:var(--n-700);margin-bottom:16px}
+.card{background:var(--surface);border-radius:32px;padding:20px;margin-bottom:14px;box-shadow:0 1px 2px rgba(46,43,37,.14)}
+.kicker{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-700);margin-bottom:8px}
+.kicker.medel{color:var(--n-600)}
+.titel{font-family:var(--heading);font-weight:400;font-size:20px;line-height:1.2;margin-bottom:4px}
+.ag{font-size:14px;color:var(--n-700);margin-bottom:14px}
+.taggar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.tag{font-size:11px;letter-spacing:.02em;padding:4px 11px;border-radius:999px;background:var(--n-100);color:var(--n-800)}
+.tag.varm{background:var(--accent-100);color:var(--accent-800)}
+.tag.sage{background:var(--sage-100);color:var(--sage-800)}
+.rad{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--heading);font-weight:400;font-size:14px;text-decoration:none;padding:11px 20px;border-radius:999px;background:var(--accent);color:var(--bg)}
+.btn:hover{background:var(--accent-700)}
+.dagar{font-size:12px;color:var(--n-600)}
+.tomt{text-align:center;padding:50px 20px;color:var(--n-700)}
+footer{margin-top:32px;font-size:12px;color:var(--n-600);text-align:center}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<h1>Chansen</h1>
-<div class="info" id="info"></div>
+<h1>Jobb för dig</h1>
+<p class="sub">Sorterade efter hur låga kraven är. Inget konto, inget krångel.</p>
 
-<div class="knappar">
-  <button onclick="visa('alla')" id="b-alla" class="aktiv">Alla</button>
-  <button onclick="visa('hog')" id="b-hog">Hög chans</button>
+<div class="chips">
+  <button id="f-alla" class="on" onclick="visa('alla')">Alla</button>
+  <button id="f-hog" onclick="visa('hog')">Bäst chans</button>
+  <button id="f-deltid" onclick="visa('deltid')">Deltid</button>
 </div>
 
+<div class="rakning" id="rakning"></div>
 <div id="lista"></div>
+
+<footer>Källa: Platsbanken, Arbetsförmedlingen</footer>
+</div>
 
 <script src="jobb.js"></script>
 <script>
-function visa(filter) {
-  document.getElementById("b-alla").className = filter === "alla" ? "aktiv" : "";
-  document.getElementById("b-hog").className = filter === "hog" ? "aktiv" : "";
+function dagarKvar(d){ if(!d) return null; return Math.ceil((new Date(d)-new Date())/86400000); }
 
-  const valda = filter === "hog" ? JOBB.filter(j => j.chansniva === "hog") : JOBB;
-  document.getElementById("info").textContent = valda.length + " jobb i Malmö";
+function kort(j){
+  var top = j.chansniva === "hog";
+  var taggar = "";
+  if(j.omfattning) taggar += '<span class="tag">'+j.omfattning+'</span>';
+  if(j.anstallningsform) taggar += '<span class="tag sage">'+j.anstallningsform+'</span>';
+  if(j.korkortKravs === true) taggar += '<span class="tag">Kräver körkort</span>';
 
-  document.getElementById("lista").innerHTML = valda.map(j => `
-    <div class="jobb">
-      <div class="titel">${j.titel}</div>
-      <div class="meta">${j.arbetsgivare} · ${j.omfattning || j.anstallningsform}</div>
-      <span class="niva ${j.chansniva}">${j.chansniva === "hog" ? "Hög chans" : j.chansniva === "medel" ? "Medel" : "Låg"}</span>
-      <div><a href="${j.lank}" target="_blank">Se annonsen</a></div>
-    </div>
-  `).join("");
+  var d = dagarKvar(j.sistaAnsokningsdag), dagtext = "";
+  if(d !== null && d >= 0 && d <= 7){
+    taggar += '<span class="tag varm">'+(d === 0 ? "Sista dagen" : d+" dagar kvar")+'</span>';
+  } else if(d !== null && d > 7){ dagtext = d+" dagar kvar"; }
+
+  return '<div class="card">'+
+    '<div class="kicker'+(top ? "" : " medel")+'">'+(top ? "Bäst chans" : "Värd att söka")+'</div>'+
+    '<div class="titel">'+j.titel+'</div>'+
+    '<div class="ag">'+j.arbetsgivare+'</div>'+
+    '<div class="taggar">'+taggar+'</div>'+
+    '<div class="rad"><a class="btn" href="'+j.lank+'" target="_blank">Se annonsen</a>'+
+    '<span class="dagar">'+dagtext+'</span></div></div>';
+}
+
+function visa(filter){
+  var ids = ["alla","hog","deltid"];
+  for(var i=0;i<ids.length;i++){
+    document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
+  }
+  var valda = JOBB;
+  if(filter === "hog") valda = JOBB.filter(function(j){ return j.chansniva === "hog"; });
+  if(filter === "deltid") valda = JOBB.filter(function(j){ return j.omfattning === "Deltid"; });
+
+  document.getElementById("rakning").textContent = valda.length + " jobb i Malmö";
+  document.getElementById("lista").innerHTML = valda.length
+    ? valda.map(kort).join("")
+    : '<div class="tomt">Inga jobb med det filtret just nu. Prova Alla.</div>';
 }
 visa("alla");
 </script>
-
 </body>
 </html>
