@@ -119,6 +119,8 @@ async function hamtaJobb() {
   const jobb = [];
   const sidor = 20;
   const sedda = {};
+  const seddaAnnonser = {};
+  const kommunLan = {};
 
   for (let i = 0; i < sidor; i++) {
     const offset = i * 100;
@@ -137,10 +139,21 @@ async function hamtaJobb() {
     if (!data.hits || data.hits.length === 0) break;
 
     for (const a of data.hits) {
+      // Byggs av ALLA annonser, aven de vi sorterar bort, sa att sidan
+      // kan foresla lanet aven for kommuner utan traffar just nu.
+      const adr = a.workplace_address;
+      if (adr && adr.municipality && adr.region) kommunLan[adr.municipality] = adr.region;
+
       if (!a.webpage_url || sedda[a.webpage_url]) continue;
+
+      // Samma annons laggs ofta upp flera ganger. Behall den forsta.
+      const nyckel = ((a.headline || "") + "|" + (a.employer ? a.employer.name : "")).toLowerCase();
+      if (seddaAnnonser[nyckel]) continue;
+
       const p = poang(a);
       if (p < 0) continue;
       sedda[a.webpage_url] = true;
+      seddaAnnonser[nyckel] = true;
 
       const skal = nyborjarskal(a);
 
@@ -176,7 +189,9 @@ async function hamtaJobb() {
   jobb.sort(function (x, y) { return y.poang - x.poang; });
 
   const uppdaterad = new Date().toISOString();
-  const js = "const JOBB = " + JSON.stringify(jobb) + ";\nconst UPPDATERAD = " + JSON.stringify(uppdaterad) + ";";
+  const js = "const JOBB = " + JSON.stringify(jobb) + ";\n" +
+             "const UPPDATERAD = " + JSON.stringify(uppdaterad) + ";\n" +
+             "const KOMMUNLAN = " + JSON.stringify(kommunLan) + ";";
 
   fs.writeFileSync("public/jobb.json", JSON.stringify(jobb, null, 2));
   fs.writeFileSync("public/jobb.js", js);
@@ -195,6 +210,7 @@ async function hamtaJobb() {
   console.log("Klart. " + jobb.length + " jobb i " + Object.keys(orter).length + " kommuner.");
   console.log("Hög chans: " + hog + ". Nybörjarvänliga: " + nyb + ".");
   console.log("Nämner natt eller skift: " + natt + ". Provisionslön: " + prov + ".");
+  console.log("Kommuner i uppslagslistan: " + Object.keys(kommunLan).length + ".");
 }
 
 hamtaJobb();
