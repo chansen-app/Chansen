@@ -68,7 +68,7 @@ nav button.on{background:var(--accent);color:var(--bg)}
 .knapprad{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1.5px solid var(--n-300)}
 .mini{min-height:38px;padding:8px 14px;border-radius:999px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800)}
 .mini.on{background:var(--sage-100);border-color:var(--sage-800);color:var(--sage-800)}
-nav button{font-size:12px}
+nav button{font-size:11px;padding:0 4px}
 .dold{display:none}
 a{color:var(--accent-700)}
 a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -227,6 +227,39 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div class="kallor">Källa: Polismyndigheten. Reglerna kan ändras, så kolla alltid polisens sida om något är viktigt för dig.</div>
 </div>
 
+<div id="v-om" class="dold info">
+  <h1>Om Chansen</h1>
+  <p class="sub">Vad tjänsten gör, vad den inte gör, och vad som sparas.</p>
+
+  <h2>Vad Chansen är</h2>
+  <p>En gratis tjänst som visar jobb med låga ingångskrav och sorterar dem efter hur få hinder som står mellan dig och en ansökan. Den är byggd med förstagångssökande i åtanke, men är öppen för alla och stänger inte ute någon.</p>
+
+  <h2>Så fungerar rangordningen</h2>
+  <p>Varje annons får poäng utifrån vad den kräver. Krävs ingen erfarenhet eller utbildning, är det deltid, säsong eller behovsanställning, eller skriver arbetsgivaren att de utbildar på plats, hamnar jobbet högre upp. Krävs körkort, examen eller flera års erfarenhet hamnar det längre ned.</p>
+  <p>Poängen mäter hur många formella hinder som finns i annonsen. Den mäter inte dig, och den säger ingenting om hur troligt det är att du får jobbet.</p>
+
+  <h2>Det här lovar vi</h2>
+  <ul>
+    <li>Vi frågar aldrig om etnicitet, kön, hälsa, religion eller brottshistorik</li>
+    <li>Vi märker jobb, inte människor. Allt som visas handlar om vad annonsen kräver</li>
+    <li>Vi gömmer inga jobb utom sådant som enligt lag inte får utföras av den som är under 18</li>
+    <li>Vi lovar aldrig att du får ett jobb, och räknar inte ut sannolikheter</li>
+    <li>Tjänsten är gratis och kommer alltid att vara det för dig som söker jobb</li>
+  </ul>
+
+  <h2>Vad som sparas</h2>
+  <p>Dina svar på frågorna och de jobb du sparat ligger i din egen webbläsare, på din telefon eller dator. De skickas ingenstans och vi kan inte se dem. Rensar du webbläsarens data försvinner de.</p>
+  <p>Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies och spårar inte enskilda besökare.</p>
+
+  <h2>Var jobben kommer ifrån</h2>
+  <p>Annonserna hämtas från Arbetsförmedlingens öppna API JobSearch och uppdateras en gång per dygn. Chansen skapar inga egna annonser och ansvarar inte för innehållet i dem. Klickar du på Se annonsen kommer du till originalet i Platsbanken.</p>
+
+  <h2>Det vi inte kan veta</h2>
+  <p>Vi kan bara läsa vad som står i annonsen. Står det inget om registerutdrag betyder det inte att arbetsgivaren låter bli att begära ett. Är något viktigt för dig, fråga arbetsgivaren innan du lägger tid på ansökan.</p>
+
+  <div class="kallor">Chansen drivs av en privatperson. Har du synpunkter eller ser något som är fel, hör gärna av dig.</div>
+</div>
+
 <footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen</footer>
 </div>
 
@@ -235,6 +268,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <button id="n-mina" onclick="visaVy('mina')">Mina jobb</button>
   <button id="n-tider" onclick="visaVy('tider')">Arbetstider</button>
   <button id="n-utdrag" onclick="visaVy('utdrag')">Utdrag</button>
+  <button id="n-om" onclick="visaVy('om')">Om</button>
 </nav>
 
 <script src="jobb.js"></script>
@@ -300,13 +334,13 @@ function spara(){
 }
 
 function visaVy(vy){
-  var vyer = ["start","jobb","mina","tider","utdrag"];
+  var vyer = ["start","jobb","mina","tider","utdrag","om"];
   for (var i = 0; i < vyer.length; i++){
     var el = document.getElementById("v-" + vyer[i]);
-    var bas = (vyer[i] === "tider" || vyer[i] === "utdrag") ? "info" : "";
+    var bas = (vyer[i] === "tider" || vyer[i] === "utdrag" || vyer[i] === "om") ? "info" : "";
     el.className = (vy === vyer[i]) ? bas : (bas + " dold").trim();
   }
-  var nk = ["jobb","mina","tider","utdrag"];
+  var nk = ["jobb","mina","tider","utdrag","om"];
   for (var k = 0; k < nk.length; k++){
     document.getElementById("n-" + nk[k]).className = (vy === nk[k]) ? "on" : "";
   }
