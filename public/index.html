@@ -96,6 +96,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div class="field">
     <label class="fraga">När kan du jobba?</label>
     <div class="seg" id="q-nar"></div>
+    <div class="hint">Välj ett eller flera.</div>
   </div>
 
   <div class="avsnitt">Det här kan ge dig fler träffar</div>
@@ -119,7 +120,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div class="field">
     <label class="fraga">Vad vill du helst jobba med?</label>
     <div class="seg" id="q-omrade"></div>
-    <div class="hint">Välj ett, eller Allt möjligt om du är öppen för det mesta.</div>
+    <div class="hint">Välj ett eller flera. Väljer du inget visas alla sorters jobb.</div>
   </div>
 
   <button class="btn block" onclick="startaLista()">Visa jobben</button>
@@ -242,7 +243,7 @@ var fragor = {
   utbildning: ["Går i grundskolan","Går på gymnasiet","Gymnasieexamen"],
   korkort:    ["Ja","Nej"],
   erfarenhet: ["Aldrig jobbat","Lite","En del"],
-  omrade:     ["Allt möjligt","Butik","Lager","Café och restaurang","Städ","Vård och omsorg","Barn"]
+  omrade:     ["Butik","Lager","Café och restaurang","Städ","Vård och omsorg","Barn"]
 };
 
 var omradeOrd = {
@@ -254,12 +255,17 @@ var omradeOrd = {
   "Barn": ["barn","fritids","förskola","forskola","elevassistent","skola"]
 };
 
-var svar = { alder:null, ort:"", nar:null, utbildning:null, korkort:null, erfarenhet:null, omrade:null };
+var flerval = { nar:true, omrade:true };
+var svar = { alder:null, ort:"", nar:[], utbildning:null, korkort:null, erfarenhet:null, omrade:[] };
 try {
   var sparat = localStorage.getItem("chansen");
   var tolkatSvar = sparat ? JSON.parse(sparat) : null;
   if (tolkatSvar && typeof tolkatSvar === "object" && !Array.isArray(tolkatSvar)) {
     for (var n in tolkatSvar) { svar[n] = tolkatSvar[n]; }
+    for (var fl in flerval) {
+      if (!svar[fl]) { svar[fl] = []; }
+      else if (!Array.isArray(svar[fl])) { svar[fl] = [svar[fl]]; }
+    }
   }
 } catch(e){}
 
@@ -268,12 +274,22 @@ function ritaFragor(){
     var el = document.getElementById("q-" + falt);
     if (!el) continue;
     el.innerHTML = fragor[falt].map(function(v){
-      return '<button class="'+(svar[falt] === v ? "on" : "")+'" onclick="valj(\''+falt+'\',\''+v.replace(/'/g,"")+'\')">'+v+'</button>';
+      var pa = flerval[falt] ? (svar[falt] || []).indexOf(v) > -1 : svar[falt] === v;
+      return '<button class="'+(pa ? "on" : "")+'" onclick="valj(\''+falt+'\',\''+v.replace(/'/g,"")+'\')">'+v+'</button>';
     }).join("");
   }
 }
 
-function valj(falt, varde){ svar[falt] = varde; ritaFragor(); }
+function valj(falt, varde){
+  if (flerval[falt]) {
+    if (!Array.isArray(svar[falt])) svar[falt] = [];
+    var i = svar[falt].indexOf(varde);
+    if (i > -1) svar[falt].splice(i, 1); else svar[falt].push(varde);
+  } else {
+    svar[falt] = varde;
+  }
+  ritaFragor();
+}
 
 function spara(){
   var f = document.getElementById("ort");
@@ -298,9 +314,9 @@ function visaVy(vy){
 
 function profilrad(){
   var delar = [svar.ort ? svar.ort : "Hela Sverige"];
-  if (svar.nar) delar.push(svar.nar.toLowerCase());
+  if (svar.nar && svar.nar.length) delar.push(svar.nar.join(", ").toLowerCase());
   if (svar.korkort === "Ja") delar.push("körkort");
-  if (svar.omrade && svar.omrade !== "Allt möjligt") delar.push(svar.omrade.toLowerCase());
+  if (svar.omrade && svar.omrade.length) delar.push(svar.omrade.join(", ").toLowerCase());
   return delar.join(" · ");
 }
 
@@ -317,10 +333,12 @@ function matcharOrt(j){
 }
 
 function matcharOmrade(j){
-  if (!svar.omrade || svar.omrade === "Allt möjligt") return true;
-  var ord = omradeOrd[svar.omrade] || [];
+  if (!svar.omrade || !svar.omrade.length) return true;
   var t = (j.titel || "").toLowerCase();
-  for (var i = 0; i < ord.length; i++){ if (t.indexOf(ord[i]) > -1) return true; }
+  for (var o = 0; o < svar.omrade.length; o++){
+    var ord = omradeOrd[svar.omrade[o]] || [];
+    for (var i = 0; i < ord.length; i++){ if (t.indexOf(ord[i]) > -1) return true; }
+  }
   return false;
 }
 
@@ -328,7 +346,9 @@ function justeradPoang(j){
   var p = j.poang;
   if (j.korkortKravs === true && svar.korkort === "Ja") p += 3;
   if (svar.erfarenhet === "Aldrig jobbat" && j.erfarenhetKravs === false) p += 1;
-  if (svar.nar === "Lov och sommar" && (j.anstallningsform || "").toLowerCase().indexOf("behov") > -1) p += 1;
+  var nar = svar.nar || [];
+  if (nar.indexOf("Lov och sommar") > -1 && (j.anstallningsform || "").toLowerCase().indexOf("behov") > -1) p += 1;
+  if (nar.indexOf("Helger") > -1 && (j.omfattning || "") === "Deltid") p += 1;
   return p;
 }
 
