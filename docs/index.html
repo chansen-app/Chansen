@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chansen</title>
 <link rel="manifest" href="manifest.json">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#c67139">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -558,14 +561,20 @@ function bortfiltrerade(){
   });
 }
 
+function underSexton(){ return svar.alder === "Under 16"; }
+
 function visa(filter){
+  if (underSexton() && filter === "heltid") filter = "alla";
   aktivtFilter = filter;
   var ids = ["alla","hog","deltid","heltid","utdrag"];
   for(var i=0;i<ids.length;i++){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
+  var heltidsknapp = document.getElementById("f-heltid");
+  if (heltidsknapp && underSexton()) heltidsknapp.className = "dold";
 
   var valda = JOBB.filter(matcharOrt).filter(matcharOmrade).filter(harLagaKrav);
+  if (underSexton()) valda = valda.filter(function(j){ return j.omfattning !== "Heltid"; });
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
   if(filter === "deltid") valda = valda.filter(function(j){ return j.omfattning === "Deltid"; });
   if(filter === "heltid") valda = valda.filter(function(j){ return j.omfattning === "Heltid"; });
@@ -575,9 +584,14 @@ function visa(filter){
 
   var notis = document.getElementById("notis");
   if (notis) {
-    notis.innerHTML = (filter === "utdrag")
-      ? '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte nämner registerutdrag. Arbetsgivaren kan ändå begära ett. Fråga innan du lägger tid på ansökan.</div>'
-      : "";
+    var text = "";
+    if (underSexton()) {
+      text += '<div class="ruta" style="font-size:14px">Heltidsjobb visas inte för dig. Är du under 16 får du jobba högst 12 timmar i veckan under skolveckor och 7 timmar om dagen under lov, aldrig efter klockan 20. <button class="lank" onclick="visaVy(\'tider\')">Läs mer om arbetstider</button></div>';
+    }
+    if (filter === "utdrag") {
+      text += '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte nämner registerutdrag. Arbetsgivaren kan ändå begära ett. Fråga innan du lägger tid på ansökan.</div>';
+    }
+    notis.innerHTML = text;
   }
   document.getElementById("rakning").textContent = valda.length + " jobb i " + (svar.ort ? svar.ort : "hela Sverige");
   document.getElementById("lista").innerHTML = valda.length
