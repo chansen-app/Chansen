@@ -277,6 +277,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
 <script src="jobb.js"></script>
 <script>
+// Gor om tecken som annars kan sla sonder kortet eller korakod
+function esc(v){
+  return String(v == null ? "" : v)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+// Om jobb.js inte laddat far sidan inte krascha tyst
+var jobbSaknas = false;
+if (typeof JOBB === "undefined" || !Array.isArray(JOBB)) { JOBB = []; jobbSaknas = true; }
+
 var fragor = {
   alder:      ["Under 16","16 till 17","18 eller äldre"],
   nar:        ["Helger","Kvällar","Lov och sommar","När som helst"],
@@ -315,7 +326,7 @@ function ritaFragor(){
     if (!el) continue;
     el.innerHTML = fragor[falt].map(function(v){
       var pa = flerval[falt] ? (svar[falt] || []).indexOf(v) > -1 : svar[falt] === v;
-      return '<button class="'+(pa ? "on" : "")+'" onclick="valj(\''+falt+'\',\''+v.replace(/'/g,"")+'\')">'+v+'</button>';
+      return '<button class="'+(pa ? "on" : "")+'" aria-pressed="'+(pa ? "true" : "false")+'" onclick="valj(\''+falt+'\',\''+v.replace(/'/g,"")+'\')">'+esc(v)+'</button>';
     }).join("");
   }
 }
@@ -408,7 +419,16 @@ function sparaStatus(){
 
 function settStatus(lank, lage){
   if (lage === "bort") { delete minaJobb[lank]; }
-  else { minaJobb[lank] = { lage: lage, datum: new Date().toISOString() }; }
+  else {
+    var j = hittaJobb(lank), gammal = minaJobb[lank] || {};
+    minaJobb[lank] = {
+      lage: lage,
+      datum: new Date().toISOString(),
+      titel: (j && j.titel) || gammal.titel || "",
+      arbetsgivare: (j && j.arbetsgivare) || gammal.arbetsgivare || "",
+      ort: (j && j.ort) || gammal.ort || ""
+    };
+  }
   sparaStatus();
   ritaMina();
   visa(aktivtFilter);
@@ -426,8 +446,8 @@ function kort(j){
   var n = niva(p);
   var top = n === "hog";
   var taggar = "";
-  if(j.omfattning) taggar += '<span class="tag">'+j.omfattning+'</span>';
-  if(j.anstallningsform) taggar += '<span class="tag sage">'+j.anstallningsform+'</span>';
+  if(j.omfattning) taggar += '<span class="tag">'+esc(j.omfattning)+'</span>';
+  if(j.anstallningsform) taggar += '<span class="tag sage">'+esc(j.anstallningsform)+'</span>';
   if(j.korkortKravs === true && svar.korkort !== "Ja") taggar += '<span class="tag">Kräver körkort</span>';
   if(j.utdrag === "kravs") taggar += '<span class="tag">Kräver registerutdrag</span>';
 
@@ -438,21 +458,31 @@ function kort(j){
 
   return '<div class="card">'+
     '<div class="kicker'+(top ? "" : " medel")+'">'+(top ? "Bäst chans" : "Värd att söka")+'</div>'+
-    '<div class="titel">'+j.titel+'</div>'+
-    '<div class="ag">'+j.arbetsgivare+(j.ort ? ' &middot; '+j.ort : '')+'</div>'+
+    '<div class="titel">'+esc(j.titel)+'</div>'+
+    '<div class="ag">'+esc(j.arbetsgivare)+(j.ort ? ' &middot; '+esc(j.ort) : '')+'</div>'+
     '<div class="taggar">'+taggar+'</div>'+
-    '<div class="rad"><a class="btn liten" href="'+j.lank+'" target="_blank">Se annonsen</a>'+
+    '<div class="rad"><a class="btn liten" href="'+esc(j.lank)+'" target="_blank" rel="noopener">Se annonsen</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
     '<div class="knapprad">'+ statusknappar(j.lank) +'</div></div>';
 }
 
+function knapp(lank, lage, text, pa){
+  return '<button class="mini'+(pa ? " on" : "")+'" aria-pressed="'+(pa ? "true" : "false")+
+         '" data-lank="'+esc(lank)+'" data-lage="'+lage+'">'+text+'</button>';
+}
+
 function statusknappar(lank){
   var nu = minaJobb[lank] ? minaJobb[lank].lage : null;
-  var ut = "";
-  ut += '<button class="mini'+(nu === "sparad" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sparad" ? "bort" : "sparad")+'\')">'+(nu === "sparad" ? "Sparad" : "Spara")+'</button>';
-  ut += '<button class="mini'+(nu === "sokt" || nu === "svar" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sokt" ? "bort" : "sokt")+'\')">'+(nu === "sokt" || nu === "svar" ? "Sökt" : "Jag har sökt")+'</button>';
-  return ut;
+  return knapp(lank, nu === "sparad" ? "bort" : "sparad", nu === "sparad" ? "Sparad" : "Spara", nu === "sparad") +
+         knapp(lank, nu === "sokt" ? "bort" : "sokt", (nu === "sokt" || nu === "svar") ? "Sökt" : "Jag har sökt", nu === "sokt" || nu === "svar");
 }
+
+// En enda lyssnare for alla status-knappar, i stallet for onclick i varje knapp
+document.addEventListener("click", function(e){
+  var b = e.target && e.target.closest ? e.target.closest("button[data-lank]") : null;
+  if (!b) return;
+  settStatus(b.getAttribute("data-lank"), b.getAttribute("data-lage"));
+});
 
 function hittaJobb(lank){
   for (var i = 0; i < JOBB.length; i++){ if (JOBB[i].lank === lank) return JOBB[i]; }
@@ -462,8 +492,11 @@ function hittaJobb(lank){
 function minirad(lank, visaSvarsknapp){
   var j = hittaJobb(lank);
   var s = minaJobb[lank];
-  var titel = j ? j.titel : "Jobb";
-  var ag = j ? (j.arbetsgivare + (j.ort ? " &middot; " + j.ort : "")) : "";
+  var titel = (j && j.titel) || s.titel || "Sparat jobb";
+  var ag = (j && j.arbetsgivare) || s.arbetsgivare || "";
+  var ort = (j && j.ort) || s.ort || "";
+  if (ort) ag += " &middot; " + ort;
+  var borta = !j ? '<div class="tag" style="margin-bottom:10px">Annonsen ligger inte kvar i Platsbanken</div>' : "";
   var dagar = dagarSedan(s.datum);
   var pafyll = "";
   if (visaSvarsknapp && dagar >= 7 && s.lage === "sokt"){
@@ -471,18 +504,16 @@ function minirad(lank, visaSvarsknapp){
   }
   var knappar = "";
   if (s.lage === "sparad"){
-    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'sokt\')">Jag har sökt</button>'+
-              '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+    knappar = knapp(lank, "sokt", "Jag har sökt", false) + knapp(lank, "bort", "Ta bort", false);
   } else if (s.lage === "sokt"){
-    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'svar\')">Fick svar</button>'+
-              '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+    knappar = knapp(lank, "svar", "Fick svar", false) + knapp(lank, "bort", "Ta bort", false);
   } else {
-    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+    knappar = knapp(lank, "bort", "Ta bort", false);
   }
-  return '<div class="card">'+pafyll+
-    '<div class="titel">'+titel+'</div>'+
+  return '<div class="card">'+borta+pafyll+
+    '<div class="titel">'+esc(titel)+'</div>'+
     '<div class="ag">'+ag+'</div>'+
-    '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank">Se annonsen</a></div>'+
+    '<div class="rad"><a class="btn liten" href="'+esc(lank)+'" target="_blank" rel="noopener">Se annonsen</a></div>'+
     '<div class="knapprad">'+knappar+'</div></div>';
 }
 
@@ -592,6 +623,11 @@ function visa(filter){
       text += '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte nämner registerutdrag. Arbetsgivaren kan ändå begära ett. Fråga innan du lägger tid på ansökan.</div>';
     }
     notis.innerHTML = text;
+  }
+  if (jobbSaknas) {
+    document.getElementById("rakning").textContent = "";
+    document.getElementById("lista").innerHTML = '<div class="tomt">Kunde inte hämta jobben just nu. Kontrollera att du har internet och ladda om sidan. Står det kvar en stund är det fel hos oss, inte hos dig.</div>';
+    return;
   }
   document.getElementById("rakning").textContent = valda.length + " jobb i " + (svar.ort ? svar.ort : "hela Sverige");
   document.getElementById("lista").innerHTML = valda.length
