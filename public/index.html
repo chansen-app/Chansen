@@ -504,6 +504,59 @@ function ritaMina(){
 }
 
 var aktivtFilter = "alla";
+var STOPP_TITEL = [
+  "engineer","ingenjör","utvecklare","developer","arkitekt","tekniker",
+  "produktägare","product owner","projektledare","scrum",
+  "chef","ansvarig","ledare","samordnare","koordinator","controller",
+  "senior","specialist","konsult","analytiker","strateg",
+  "sjuksköterska","undersköterska","läkare","socionom","psykolog",
+  "lärare","förskollärare","pedagog",
+  "ekonom","revisor","jurist","advokat","mäklare",
+  "elektriker","snickare","svetsare","montör","mekaniker",
+  "designer","art director","copywriter","key account"
+];
+
+var STOPP_TEXT = [
+  "års erfarenhet","flerårig","mångårig",
+  "erfarenhet krävs","krav på erfarenhet","dokumenterad erfarenhet",
+  "eftergymnasial","högskoleutbildning","universitetsutbildning",
+  "akademisk examen","yrkeshögskola","legitimerad","legitimation",
+  "certifierad","behörighet krävs","utbildad inom"
+];
+
+function harLagaKrav(j){
+  var titel = (j.titel || "").toLowerCase();
+  for (var i = 0; i < STOPP_TITEL.length; i++){
+    if (titel.indexOf(STOPP_TITEL[i]) !== -1) return false;
+  }
+  var text = "";
+  for (var k in j){ if (typeof j[k] === "string") text += " " + j[k]; }
+  text = text.toLowerCase();
+  for (var n = 0; n < STOPP_TEXT.length; n++){
+    if (text.indexOf(STOPP_TEXT[n]) !== -1) return false;
+  }
+  return true;
+}
+
+// Hjalp vid felsokning: skriv bortfiltrerade() i webblasarens konsol
+// for att se vilka jobb filtret tog bort och varfor.
+function bortfiltrerade(){
+  return JOBB.filter(function(j){ return !harLagaKrav(j); }).map(function(j){
+    var titel = (j.titel || "").toLowerCase(), orsak = "";
+    for (var i = 0; i < STOPP_TITEL.length; i++){
+      if (titel.indexOf(STOPP_TITEL[i]) !== -1){ orsak = "titel: " + STOPP_TITEL[i]; break; }
+    }
+    if (!orsak){
+      var text = "";
+      for (var k in j){ if (typeof j[k] === "string") text += " " + j[k]; }
+      text = text.toLowerCase();
+      for (var n = 0; n < STOPP_TEXT.length; n++){
+        if (text.indexOf(STOPP_TEXT[n]) !== -1){ orsak = "text: " + STOPP_TEXT[n]; break; }
+      }
+    }
+    return j.titel + "  [" + orsak + "]";
+  });
+}
 
 function visa(filter){
   aktivtFilter = filter;
@@ -512,7 +565,7 @@ function visa(filter){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
 
-  var valda = JOBB.filter(matcharOrt).filter(matcharOmrade);
+  var valda = JOBB.filter(matcharOrt).filter(matcharOmrade).filter(harLagaKrav);
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
   if(filter === "deltid") valda = valda.filter(function(j){ return j.omfattning === "Deltid"; });
   if(filter === "heltid") valda = valda.filter(function(j){ return j.omfattning === "Heltid"; });
