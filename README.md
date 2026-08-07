@@ -58,4 +58,4 @@ Under utveckling. Första versionen omfattar en ort.
 
 ## Kontakt
 
-Läggs till när repot görs publikt.
+chansen.jobb@gmail.com
