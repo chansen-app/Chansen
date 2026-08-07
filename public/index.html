@@ -132,6 +132,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button id="f-alla" class="on" onclick="visa('alla')">Alla</button>
     <button id="f-hog" onclick="visa('hog')">Bäst chans</button>
     <button id="f-deltid" onclick="visa('deltid')">Deltid</button>
+    <button id="f-heltid" onclick="visa('heltid')">Heltid</button>
     <button id="f-utdrag" onclick="visa('utdrag')">Utan utdrag</button>
   </div>
 
@@ -248,7 +249,13 @@ var omradeOrd = {
 };
 
 var svar = { alder:null, ort:"", nar:null, utbildning:null, korkort:null, erfarenhet:null, omrade:null };
-try { var sparat = localStorage.getItem("chansen"); if (sparat) svar = JSON.parse(sparat); } catch(e){}
+try {
+  var sparat = localStorage.getItem("chansen");
+  var tolkatSvar = sparat ? JSON.parse(sparat) : null;
+  if (tolkatSvar && typeof tolkatSvar === "object" && !Array.isArray(tolkatSvar)) {
+    for (var n in tolkatSvar) { svar[n] = tolkatSvar[n]; }
+  }
+} catch(e){}
 
 function ritaFragor(){
   for (var falt in fragor){
@@ -322,7 +329,12 @@ function justeradPoang(j){
 function niva(p){ return p >= 5 ? "hog" : (p >= 2 ? "medel" : "lag"); }
 
 var minaJobb = {};
-try { var st = localStorage.getItem("chansen-status"); if (st) minaJobb = JSON.parse(st); } catch(e){}
+try {
+  var st = localStorage.getItem("chansen-status");
+  var tolkat = st ? JSON.parse(st) : null;
+  if (tolkat && typeof tolkat === "object" && !Array.isArray(tolkat)) { minaJobb = tolkat; }
+  else if (st) { localStorage.removeItem("chansen-status"); }
+} catch(e){ try { localStorage.removeItem("chansen-status"); } catch(e2){} }
 
 function sparaStatus(){
   try { localStorage.setItem("chansen-status", JSON.stringify(minaJobb)); } catch(e){}
@@ -432,7 +444,7 @@ var aktivtFilter = "alla";
 
 function visa(filter){
   aktivtFilter = filter;
-  var ids = ["alla","hog","deltid","utdrag"];
+  var ids = ["alla","hog","deltid","heltid","utdrag"];
   for(var i=0;i<ids.length;i++){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
@@ -440,6 +452,7 @@ function visa(filter){
   var valda = JOBB.filter(matcharOrt).filter(matcharOmrade);
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
   if(filter === "deltid") valda = valda.filter(function(j){ return j.omfattning === "Deltid"; });
+  if(filter === "heltid") valda = valda.filter(function(j){ return j.omfattning === "Heltid"; });
   if(filter === "utdrag") valda = valda.filter(function(j){ return j.utdrag !== "kravs"; });
 
   valda = valda.slice().sort(function(a,b){ return justeradPoang(b) - justeradPoang(a); });
