@@ -292,6 +292,24 @@ function esc(v){
     .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 
+// ---- Matning ----
+// Tom strang = ingen matning alls, ingenting lamnar telefonen.
+// Fyll i din GoatCounter-adress for att borja rakna, t.ex. "chansen".
+var MATNING = "";
+
+// Raknar en handelse. Skickar bara ett namn, aldrig nagot om personen.
+function matHandelse(namn){
+  if (!MATNING) return;
+  try {
+    var bild = new Image();
+    bild.src = "https://" + MATNING + ".goatcounter.com/count"
+             + "?p=" + encodeURIComponent("/handelse/" + namn)
+             + "&t=" + encodeURIComponent(namn)
+             + "&r=" + encodeURIComponent(document.referrer || "")
+             + "&rnd=" + Math.random();
+  } catch(e){}
+}
+
 // Om jobb.js inte laddat far sidan inte krascha tyst
 var jobbSaknas = false;
 if (typeof JOBB === "undefined" || !Array.isArray(JOBB)) { JOBB = []; jobbSaknas = true; }
@@ -383,6 +401,8 @@ function profilrad(){
 
 function startaLista(){
   spara();
+  matHandelse("visade-jobb");
+  if (svar.alder) matHandelse("alder-" + slat(svar.alder).replace(/ /g, "-"));
   document.getElementById("profil").textContent = profilrad();
   visaVy("jobb");
   visa("alla");
@@ -489,6 +509,8 @@ function sparaStatus(){
 }
 
 function settStatus(lank, lage){
+  if (lage === "sparad") matHandelse("sparade-jobb");
+  if (lage === "sokt") matHandelse("markte-som-sokt");
   if (lage === "bort") { delete minaJobb[lank]; }
   else {
     var j = hittaJobb(lank), gammal = minaJobb[lank] || {};
@@ -555,6 +577,8 @@ function statusknappar(lank){
 document.addEventListener("click", function(e){
   if (!e.target || !e.target.closest) return;
   if (e.target.closest("#visa-hela-sverige")) { visaHelaSverige(); return; }
+  var lank = e.target.closest("a.btn.liten");
+  if (lank) { matHandelse("klick-annons"); return; }
   var b = e.target.closest("button[data-lank]");
   if (!b) return;
   settStatus(b.getAttribute("data-lank"), b.getAttribute("data-lage"));
@@ -675,6 +699,7 @@ function underArton(){ return svar.alder !== "18 eller äldre"; }
 
 function visa(filter){
   if (underSexton() && filter === "heltid") filter = "alla";
+  if (filter !== aktivtFilter) matHandelse("filter-" + filter);
   aktivtFilter = filter;
   var ids = ["alla","hog","deltid","heltid","nyborjare","utdrag"];
   for(var i=0;i<ids.length;i++){
