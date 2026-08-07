@@ -40,7 +40,9 @@ Poängen mäter hur många hinder som står mellan användaren och en ansökan. 
 
 ## Registerutdrag
 
-Vissa jobb kräver utdrag ur belastningsregistret, till exempel arbete med barn. Varje annons märks med om utdrag krävs, inte krävs, eller om det inte framgår. Det finns ett filter för att bara visa jobb utan krav på utdrag.
+Vissa jobb kräver utdrag ur belastningsregistret, till exempel arbete med barn. Varje annons märks utifrån vad som faktiskt står i den: nämner den utdrag eller inte. Det finns ett filter för jobb där utdrag inte nämns.
+
+Filtret lovar ingenting. En arbetsgivare kan begära utdrag även om annonsen inte säger det, och det skrivs ut i tjänsten så att ingen blir överraskad senare.
 
 Tjänsten frågar aldrig användaren om hens bakgrund och lagrar ingenting om den. Filtret finns för att ingen ska behöva lägga tid på en ansökan som ändå stoppas, och det används utan att någon behöver berätta något.
 
