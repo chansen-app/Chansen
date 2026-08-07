@@ -329,7 +329,7 @@ function kort(j){
   return '<div class="card">'+
     '<div class="kicker'+(top ? "" : " medel")+'">'+(top ? "Bäst chans" : "Värd att söka")+'</div>'+
     '<div class="titel">'+j.titel+'</div>'+
-    '<div class="ag">'+j.arbetsgivare+(j.ort ? ' · '+j.ort : '')+'</div>'+
+    '<div class="ag">'+j.arbetsgivare+(j.ort ? ' &middot; '+j.ort : '')+'</div>'+
     '<div class="taggar">'+taggar+'</div>'+
     '<div class="rad"><a class="btn liten" href="'+j.lank+'" target="_blank">Se annonsen</a>'+
     '<span class="dagar">'+dagtext+'</span></div></div>';
