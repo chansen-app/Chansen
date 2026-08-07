@@ -140,10 +140,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button id="f-hog" onclick="visa('hog')">Bäst chans</button>
     <button id="f-deltid" onclick="visa('deltid')">Deltid</button>
     <button id="f-heltid" onclick="visa('heltid')">Heltid</button>
-    <button id="f-utdrag" onclick="visa('utdrag')">Utan utdrag</button>
+    <button id="f-utdrag" onclick="visa('utdrag')">Nämner inte utdrag</button>
   </div>
 
   <div class="rakning" id="rakning"></div>
+  <div id="notis"></div>
   <div id="lista"></div>
 </div>
 
@@ -220,7 +221,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p><a href="https://polisen.se/tjanster-tillstand/belastningsregistret/" target="_blank">Läs mer och begär ditt utdrag hos polisen</a></p>
 
   <h2>Så använder Chansen det här</h2>
-  <p>Chansen frågar dig aldrig om din bakgrund och sparar ingenting om den. Vi märker jobben, inte människor. Filtret "Utan utdrag" finns så att du slipper lägga tid på en ansökan som ändå stoppas, utan att behöva berätta något för någon.</p>
+  <p>Chansen frågar dig aldrig om din bakgrund och sparar ingenting om den. Vi märker jobben, inte människor.</p>
+  <p>Filtret heter "Nämner inte utdrag", och det är precis vad det betyder. Vi kan bara se vad som står i annonsen. Står det inget om registerutdrag kan arbetsgivaren ändå begära ett senare i processen, och vi kan inte lova något. Vill du veta säkert, fråga arbetsgivaren innan du lägger tid på ansökan. Det är en helt vanlig fråga att ställa.</p>
 
   <div class="kallor">Källa: Polismyndigheten. Reglerna kan ändras, så kolla alltid polisens sida om något är viktigt för dig.</div>
 </div>
@@ -483,6 +485,12 @@ function visa(filter){
 
   valda = valda.slice().sort(function(a,b){ return justeradPoang(b) - justeradPoang(a); });
 
+  var notis = document.getElementById("notis");
+  if (notis) {
+    notis.innerHTML = (filter === "utdrag")
+      ? '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte nämner registerutdrag. Arbetsgivaren kan ändå begära ett. Fråga innan du lägger tid på ansökan.</div>'
+      : "";
+  }
   document.getElementById("rakning").textContent = valda.length + " jobb i " + (svar.ort ? svar.ort : "hela Sverige");
   document.getElementById("lista").innerHTML = valda.length
     ? valda.map(kort).join("")
