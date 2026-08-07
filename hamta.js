@@ -60,7 +60,7 @@ async function hamtaJobb() {
       ort: a.workplace_address ? a.workplace_address.municipality : "",
       omfattning: a.working_hours_type ? a.working_hours_type.label : "",
       anstallningsform: a.employment_type ? a.employment_type.label : "",
-      korkortKravs: a.driving_license_required,
+      korkortKravs: a.driving_license_required, utdrag: (function(){ var t = (a.description ? a.description.text : "").toLowerCase(); return (t.indexOf("belastningsregister") > -1 || t.indexOf("registerutdrag") > -1) ? "kravs" : "framgar inte"; })(),
       poang: p,
       chansniva: niva,
       lank: a.webpage_url,
