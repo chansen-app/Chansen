@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chansen</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background: #faf9f7; color: #1a1a1a; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .info { color: #666; font-size: 14px; margin-bottom: 16px; }
+  .knappar { margin-bottom: 16px; }
+  button { font: inherit; padding: 8px 14px; margin-right: 8px; border: 1px solid #ccc; background: white; border-radius: 20px; cursor: pointer; }
+  button.aktiv { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+  .jobb { background: white; border: 1px solid #e5e3df; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .titel { font-weight: 500; margin-bottom: 4px; }
+  .meta { color: #666; font-size: 14px; margin-bottom: 8px; }
+  .niva { display: inline-block; font-size: 13px; padding: 3px 10px; border-radius: 20px; }
+  .hog { background: #e1f5ee; color: #0f6e56; }
+  .medel { background: #faeeda; color: #854f0b; }
+  .lag { background: #f1efe8; color: #5f5e5a; }
+  a { color: #185fa5; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h1>Chansen</h1>
+<div class="info" id="info"></div>
+
+<div class="knappar">
+  <button onclick="visa('alla')" id="b-alla" class="aktiv">Alla</button>
+  <button onclick="visa('hog')" id="b-hog">Hög chans</button>
+</div>
+
+<div id="lista"></div>
+
+<script src="jobb.js"></script>
+<script>
+function visa(filter) {
+  document.getElementById("b-alla").className = filter === "alla" ? "aktiv" : "";
+  document.getElementById("b-hog").className = filter === "hog" ? "aktiv" : "";
+
+  const valda = filter === "hog" ? JOBB.filter(j => j.chansniva === "hog") : JOBB;
+  document.getElementById("info").textContent = valda.length + " jobb i Malmö";
+
+  document.getElementById("lista").innerHTML = valda.map(j => `
+    <div class="jobb">
+      <div class="titel">${j.titel}</div>
+      <div class="meta">${j.arbetsgivare} · ${j.omfattning || j.anstallningsform}</div>
+      <span class="niva ${j.chansniva}">${j.chansniva === "hog" ? "Hög chans" : j.chansniva === "medel" ? "Medel" : "Låg"}</span>
+      <div><a href="${j.lank}" target="_blank">Se annonsen</a></div>
+    </div>
+  `).join("");
+}
+visa("alla");
+</script>
+
+</body>
+</html>

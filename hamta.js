@@ -71,6 +71,7 @@ async function hamtaJobb() {
   jobb.sort(function (x, y) { return y.poang - x.poang; });
 
   fs.writeFileSync("jobb.json", JSON.stringify(jobb, null, 2));
+fs.writeFileSync("jobb.js", "const JOBB = " + JSON.stringify(jobb, null, 2) + ";");
 
   let hog = 0, medel = 0;
   for (const j of jobb) {
