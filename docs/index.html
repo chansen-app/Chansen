@@ -321,16 +321,16 @@ function justeradPoang(j){
 
 function niva(p){ return p >= 5 ? "hog" : (p >= 2 ? "medel" : "lag"); }
 
-var status = {};
-try { var st = localStorage.getItem("chansen-status"); if (st) status = JSON.parse(st); } catch(e){}
+var minaJobb = {};
+try { var st = localStorage.getItem("chansen-status"); if (st) minaJobb = JSON.parse(st); } catch(e){}
 
 function sparaStatus(){
-  try { localStorage.setItem("chansen-status", JSON.stringify(status)); } catch(e){}
+  try { localStorage.setItem("chansen-status", JSON.stringify(minaJobb)); } catch(e){}
 }
 
 function settStatus(lank, lage){
-  if (lage === "bort") { delete status[lank]; }
-  else { status[lank] = { lage: lage, datum: new Date().toISOString() }; }
+  if (lage === "bort") { delete minaJobb[lank]; }
+  else { minaJobb[lank] = { lage: lage, datum: new Date().toISOString() }; }
   sparaStatus();
   ritaMina();
   visa(aktivtFilter);
@@ -369,7 +369,7 @@ function kort(j){
 }
 
 function statusknappar(lank){
-  var nu = status[lank] ? status[lank].lage : null;
+  var nu = minaJobb[lank] ? minaJobb[lank].lage : null;
   var ut = "";
   ut += '<button class="mini'+(nu === "sparad" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sparad" ? "bort" : "sparad")+'\')">'+(nu === "sparad" ? "Sparad" : "Spara")+'</button>';
   ut += '<button class="mini'+(nu === "sokt" || nu === "svar" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sokt" ? "bort" : "sokt")+'\')">'+(nu === "sokt" || nu === "svar" ? "Sökt" : "Jag har sökt")+'</button>';
@@ -383,7 +383,7 @@ function hittaJobb(lank){
 
 function minirad(lank, visaSvarsknapp){
   var j = hittaJobb(lank);
-  var s = status[lank];
+  var s = minaJobb[lank];
   var titel = j ? j.titel : "Jobb";
   var ag = j ? (j.arbetsgivare + (j.ort ? " &middot; " + j.ort : "")) : "";
   var dagar = dagarSedan(s.datum);
@@ -419,7 +419,7 @@ function ritaMina(){
   var ut = "", totalt = 0;
   for (var g = 0; g < grupper.length; g++){
     var lankar = [];
-    for (var lank in status){ if (status[lank].lage === grupper[g][0]) lankar.push(lank); }
+    for (var lank in minaJobb){ if (minaJobb[lank].lage === grupper[g][0]) lankar.push(lank); }
     if (!lankar.length) continue;
     totalt += lankar.length;
     ut += '<h2>'+grupper[g][1]+' ('+lankar.length+')</h2>';
