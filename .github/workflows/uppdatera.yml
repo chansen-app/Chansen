@@ -1,4 +1,30 @@
+name: Uppdatera jobben
+
 on:
   schedule:
     - cron: "0 4 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  uppdatera:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Hamta jobb fran Platsbanken
+        run: node hamta.js
+
+      - name: Spara resultatet
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add public/jobb.json public/jobb.js docs/jobb.js
+          git diff --staged --quiet || git commit -m "Uppdaterade jobben"
+          git push
