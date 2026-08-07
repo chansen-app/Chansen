@@ -5,12 +5,12 @@ function poang(a) {
   const text = ((a.description ? a.description.text : "") + " " + titel).toLowerCase();
   let p = 0;
 
-  const yrkesstopp = ["lakare", "läkare", "sjukskoterska", "sjuksköterska", "barnmorska", "psykolog", "tandlakare", "tandläkare", "socionom", "jurist", "advokat", "ingenjor", "ingenjör", "utvecklare", "arkitekt", "revisor", "larare", "lärare", "forskollarare", "förskollärare", "chef", "controller", "specialist"];
+  const yrkesstopp = ["lakare", "läkare", "sjukskoterska", "sjuksköterska", "barnmorska", "psykolog", "tandlakare", "tandläkare", "socionom", "jurist", "advokat", "ingenjor", "ingenjör", "utvecklare", "arkitekt", "revisor", "larare", "lärare", "forskollarare", "förskollärare", "chef", "controller", "specialist", "konsult", "analytiker", "projektledare"];
   for (const ord of yrkesstopp) {
     if (titel.includes(ord)) return -20;
   }
 
-  const bratitel = ["extrajobb", "sommarjobb", "helgjobb", "ferie", "extra personal", "timanstalld", "timanställd"];
+  const bratitel = ["extrajobb", "sommarjobb", "helgjobb", "ferie", "extra personal", "extrahjalp", "extrahjälp", "timanstalld", "timanställd", "studerande", "student"];
   for (const ord of bratitel) {
     if (titel.includes(ord)) { p += 3; break; }
   }
@@ -39,46 +39,63 @@ function poang(a) {
   return p;
 }
 
+function utdragskrav(a) {
+  const t = (a.description ? a.description.text : "").toLowerCase();
+  if (t.indexOf("belastningsregister") > -1 || t.indexOf("registerutdrag") > -1) return "kravs";
+  return "framgar inte";
+}
+
 async function hamtaJobb() {
-  const url = "https://jobsearch.api.jobtechdev.se/search?q=malm%C3%B6&limit=100";
-  const svar = await fetch(url);
-  const data = await svar.json();
-
   const jobb = [];
+  const sidor = 20;
 
-  for (const a of data.hits) {
-    const p = poang(a);
-    if (p < 0) continue;
+  for (let i = 0; i < sidor; i++) {
+    const offset = i * 100;
+    const url = "https://jobsearch.api.jobtechdev.se/search?limit=100&offset=" + offset;
 
-    let niva = "lag";
-    if (p >= 5) niva = "hog";
-    else if (p >= 2) niva = "medel";
+    const svar = await fetch(url);
+    if (!svar.ok) { console.log("Stopp vid offset " + offset); break; }
 
-    jobb.push({
-      titel: a.headline,
-      arbetsgivare: a.employer ? a.employer.name : "",
-      ort: a.workplace_address ? a.workplace_address.municipality : "",
-      omfattning: a.working_hours_type ? a.working_hours_type.label : "",
-      anstallningsform: a.employment_type ? a.employment_type.label : "",
-      korkortKravs: a.driving_license_required, utdrag: (function(){ var t = (a.description ? a.description.text : "").toLowerCase(); return (t.indexOf("belastningsregister") > -1 || t.indexOf("registerutdrag") > -1) ? "kravs" : "framgar inte"; })(),
-      poang: p,
-      chansniva: niva,
-      lank: a.webpage_url,
-      sistaAnsokningsdag: a.application_deadline
-    });
+    const data = await svar.json();
+    if (!data.hits || data.hits.length === 0) break;
+
+    for (const a of data.hits) {
+      const p = poang(a);
+      if (p < 0) continue;
+
+      jobb.push({
+        titel: a.headline,
+        arbetsgivare: a.employer ? a.employer.name : "",
+        ort: a.workplace_address && a.workplace_address.municipality ? a.workplace_address.municipality : "",
+        lan: a.workplace_address && a.workplace_address.region ? a.workplace_address.region : "",
+        omfattning: a.working_hours_type ? a.working_hours_type.label : "",
+        anstallningsform: a.employment_type ? a.employment_type.label : "",
+        erfarenhetKravs: a.experience_required,
+        korkortKravs: a.driving_license_required,
+        utdrag: utdragskrav(a),
+        poang: p,
+        chansniva: p >= 5 ? "hog" : (p >= 2 ? "medel" : "lag"),
+        lank: a.webpage_url,
+        sistaAnsokningsdag: a.application_deadline
+      });
+    }
+
+    console.log("Hämtat sida " + (i + 1) + " av " + sidor);
   }
 
   jobb.sort(function (x, y) { return y.poang - x.poang; });
 
-fs.writeFileSync("public/jobb.json", JSON.stringify(jobb, null, 2));
-  fs.writeFileSync("public/jobb.js", "const JOBB = " + JSON.stringify(jobb, null, 2) + ";");
+  fs.writeFileSync("public/jobb.json", JSON.stringify(jobb, null, 2));
+  fs.writeFileSync("public/jobb.js", "const JOBB = " + JSON.stringify(jobb) + ";");
+  fs.writeFileSync("docs/jobb.js", "const JOBB = " + JSON.stringify(jobb) + ";");
 
-  let hog = 0, medel = 0;
-  for (const j of jobb) {
-    if (j.chansniva === "hog") hog++;
-    if (j.chansniva === "medel") medel++;
-  }
-  console.log("Sparade " + jobb.length + " jobb. Hog chans: " + hog + ", medel: " + medel);
+  const orter = {};
+  for (const j of jobb) { if (j.ort) orter[j.ort] = true; }
+
+  let hog = 0;
+  for (const j of jobb) { if (j.chansniva === "hog") hog++; }
+
+  console.log("Klart. " + jobb.length + " jobb i " + Object.keys(orter).length + " kommuner. Hog chans: " + hog);
 }
 
 hamtaJobb();
