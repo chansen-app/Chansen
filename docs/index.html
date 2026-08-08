@@ -99,6 +99,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div class="hint">Välj ett eller flera.</div>
   </div>
 
+  <div class="field">
+    <label class="fraga">Heltid eller deltid?</label>
+    <div class="seg" id="q-omfattning"></div>
+    <div class="hint">Söker du på heltid lyfts heltidsjobben överst.</div>
+  </div>
+
   <div class="avsnitt">Det här kan ge dig fler träffar</div>
 
   <div class="field">
@@ -280,20 +286,13 @@ var fragor = {
   utbildning: ["Går i grundskolan","Går på gymnasiet","Gymnasieexamen"],
   korkort:    ["Ja","Nej"],
   erfarenhet: ["Aldrig jobbat","Lite","En del"],
-  omrade:     ["Butik","Lager","Café och restaurang","Städ","Vård och omsorg","Barn"]
-};
-
-var omradeOrd = {
-  "Butik": ["butik","säljare","saljare","shop","store","kassa","expedit"],
-  "Lager": ["lager","terminal","plock","truck","gods","paket","bud","distribution"],
-  "Café och restaurang": ["café","cafe","restaurang","kock","servitris","servitör","servitor","barista","kallskänka","diskare","pizzabagare","host"],
-  "Städ": ["städ","stad ","lokalvård","cleaner","cleaning"],
-  "Vård och omsorg": ["assistent","vård","vard","omsorg","undersköterska","hemtjänst","boende"],
-  "Barn": ["barn","fritids","förskola","forskola","elevassistent","skola"]
+  omfattning: ["Heltid","Deltid","Spelar ingen roll"],
+  omrade:     ["Sälj","Kundtjänst","Butik","Lager och logistik","Restaurang och café",
+               "Städ","Vård och omsorg","Barn och skola","Industri och produktion","Kontor"]
 };
 
 var flerval = { nar:true, omrade:true };
-var svar = { alder:null, ort:"", nar:[], utbildning:null, korkort:null, erfarenhet:null, omrade:[] };
+var svar = { alder:null, ort:"", nar:[], omfattning:null, utbildning:null, korkort:null, erfarenhet:null, omrade:[] };
 try {
   var sparat = localStorage.getItem("chansen");
   var tolkatSvar = sparat ? JSON.parse(sparat) : null;
@@ -351,6 +350,7 @@ function visaVy(vy){
 
 function profilrad(){
   var delar = [svar.ort ? svar.ort : "Hela Sverige"];
+  if (svar.omfattning && svar.omfattning !== "Spelar ingen roll") delar.push(svar.omfattning.toLowerCase());
   if (svar.nar && svar.nar.length) delar.push(svar.nar.join(", ").toLowerCase());
   if (svar.korkort === "Ja") delar.push("körkort");
   if (svar.omrade && svar.omrade.length) delar.push(svar.omrade.join(", ").toLowerCase());
@@ -376,25 +376,24 @@ function matcharOrt(j){
 
 function matcharOmrade(j){
   if (!svar.omrade || !svar.omrade.length) return true;
-  var t = (j.titel || "").toLowerCase();
-  for (var o = 0; o < svar.omrade.length; o++){
-    var ord = omradeOrd[svar.omrade[o]] || [];
-    for (var i = 0; i < ord.length; i++){ if (t.indexOf(ord[i]) > -1) return true; }
-  }
-  return false;
+  return svar.omrade.indexOf(j.kategori) > -1;
 }
 
 function justeradPoang(j){
   var p = j.poang;
-  if (j.korkortKravs === true && svar.korkort === "Ja") p += 3;
+  if (j.korkortKravs === true && svar.korkort === "Ja") p += 2;
   if (svar.erfarenhet === "Aldrig jobbat" && j.erfarenhetKravs === false) p += 1;
+
+  if (svar.omfattning === "Heltid" && j.omfattning === "Heltid") p += 3;
+  if (svar.omfattning === "Deltid" && j.omfattning === "Deltid") p += 3;
+
   var nar = svar.nar || [];
   if (nar.indexOf("Lov och sommar") > -1 && (j.anstallningsform || "").toLowerCase().indexOf("behov") > -1) p += 1;
   if (nar.indexOf("Helger") > -1 && (j.omfattning || "") === "Deltid") p += 1;
   return p;
 }
 
-function niva(p){ return p >= 6 ? "hog" : (p >= 4 ? "medel" : "lag"); }
+function niva(p){ return p >= 9 ? "hog" : (p >= 6 ? "medel" : "lag"); }
 
 var minaJobb = {};
 try {
@@ -440,6 +439,7 @@ function kort(j){
   var etikett = n === "hog" ? "Bäst chans" : (n === "medel" ? "Värd att söka" : "Högre krav");
   var taggar = "";
   if(j.omfattning) taggar += '<span class="tag">'+j.omfattning+'</span>';
+  if(j.kategori && j.kategori !== "Övrigt") taggar += '<span class="tag">'+j.kategori+'</span>';
   if(j.anstallningsform) taggar += '<span class="tag sage">'+j.anstallningsform+'</span>';
   if(j.korkortKravs === true && svar.korkort !== "Ja") taggar += '<span class="tag">Kräver körkort</span>';
   if(j.utdrag === "kravs") taggar += '<span class="tag">Kräver registerutdrag</span>';
