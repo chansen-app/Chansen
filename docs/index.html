@@ -91,6 +91,7 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
 .kicker.medel{color:var(--n-600)}
 .titel{font-family:var(--heading);font-weight:400;font-size:20px;line-height:1.2;margin-bottom:4px}
 .ag{font-size:14px;color:var(--n-700);margin-bottom:14px}
+.beskrivning{font-size:14.5px;line-height:1.5;color:var(--n-700);margin:0 0 14px}
 .taggar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .tag{font-size:11px;padding:4px 11px;border-radius:999px;background:var(--n-100);color:var(--n-800)}
 .tag.varm{background:var(--accent-100);color:var(--accent-800)}
@@ -247,7 +248,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div class="rakning" id="rakning"></div>
-  <div style="margin:-6px 0 16px"><button class="lank" onclick="delaChansen()">Tipsa någon om Chansen</button></div>
+  <div style="margin:-6px 0 16px;display:flex;gap:16px;flex-wrap:wrap">
+    <button class="lank" onclick="delaChansen()">Tipsa någon om Chansen</button>
+    <a class="lank" style="text-decoration:underline" href="mailto:chansen.jobb@gmail.com?subject=Fel%20i%20Chansen&body=Beskriv%20vad%20som%20är%20fel,%20och%20klistra%20gärna%20in%20jobbtiteln%20om%20det%20gäller%20en%20annons.">Hittade du något fel?</a>
+  </div>
   <div id="notis"></div>
   <div id="lista"></div>
 </div>
@@ -779,11 +783,27 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <h2>Tipsa någon</h2>
   <p>Känner du någon som söker jobb? <button class="lank" onclick="delaChansen()">Dela Chansen</button></p>
 
+  <h2>Personuppgifter</h2>
+  <p>Chansen drivs av en privatperson, som är personuppgiftsansvarig för de uppgifter som beskrivs här.</p>
+
+  <p><b>Du som söker jobb.</b> Dina svar på frågorna, dina sparade jobb och ditt CV lagras i din egen webbläsare och skickas aldrig till oss. Vi kan inte se dem. Rensar du webbläsarens data försvinner de. Vi har inga konton och samlar inte in namn, mejladress eller något annat om dig.</p>
+
+  <p><b>Besöksstatistik.</b> Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies, spårar inte enskilda besökare och sparar inga uppgifter som kan kopplas till dig.</p>
+
+  <p><b>Du som är arbetsgivare.</b> Skickar du in en annons sparar vi det du fyllt i: företagets namn och organisationsnummer, uppgifter om jobbet, samt ditt namn, din mejladress och ditt telefonnummer. Det sparas i ett kalkylblad hos Google som bara vi har tillgång till.</p>
+  <p>Vi använder uppgifterna för att kontrollera att företaget finns, för att kunna kontakta dig om annonsen, och för att publicera jobbet. Den rättsliga grunden är berättigat intresse. Kontaktuppgifter du själv angett som kontakt för sökande publiceras i annonsen, resten publiceras inte.</p>
+  <p>Uppgifterna sparas så länge annonsen är aktuell och som längst tolv månader därefter. Sedan raderas de.</p>
+
+  <p><b>Dina rättigheter.</b> Du har rätt att få veta vilka uppgifter vi har om dig, att få dem rättade eller raderade, och att invända mot behandlingen. Mejla <a href="mailto:chansen.jobb@gmail.com?subject=Personuppgifter">chansen.jobb@gmail.com</a> så fixar vi det. Är du missnöjd med hur vi hanterar dina uppgifter kan du klaga hos Integritetsskyddsmyndigheten, imy.se.</p>
+
+  <h2>Hittade du något fel?</h2>
+  <p>Ser du en annons som verkar falsk, en uppgift som är felaktig eller något som inte fungerar, mejla <a href="mailto:chansen.jobb@gmail.com?subject=Fel%20i%20Chansen">chansen.jobb@gmail.com</a>. Vi tar bort dåliga annonser så fort vi får veta.</p>
+
   <h2>Kontakt</h2>
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 27</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 28</footer>
 </div>
 
 <div id="delabesked" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:6;font-size:14px"></div>
@@ -1003,6 +1023,7 @@ function kort(j){
     '<div class="titel">'+titel+'</div>'+
     '<div class="ag">'+arbetsgivare+(ort ? ' &middot; '+ort : '')+(j.egen ? ' &middot; <b>lagd upp av arbetsgivaren</b>' : '')+'</div>'+
     (j.kontaktSokande ? '<div class="ag" style="margin-top:-8px">Kontakt: '+fly(j.kontaktSokande)+'</div>' : '')+
+    (j.beskrivning ? '<div class="beskrivning">'+fly(j.beskrivning)+'</div>' : '')+
     '<div class="taggar">'+taggar+'</div>'+
     '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow">Se annonsen</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
