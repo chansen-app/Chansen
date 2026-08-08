@@ -302,6 +302,14 @@ try {
       if (!svar[fl]) { svar[fl] = []; }
       else if (!Array.isArray(svar[fl])) { svar[fl] = [svar[fl]]; }
     }
+    // rensa gamla svar som inte längre finns bland alternativen
+    for (var f2 in fragor) {
+      if (Array.isArray(svar[f2])) {
+        svar[f2] = svar[f2].filter(function(v){ return fragor[f2].indexOf(v) > -1; });
+      } else if (svar[f2] && fragor[f2].indexOf(svar[f2]) === -1) {
+        svar[f2] = null;
+      }
+    }
   }
 } catch(e){}
 
@@ -522,6 +530,32 @@ function ritaMina(){
   el.innerHTML = totalt ? ut : '<div class="tomt">Inget här än. Spara ett jobb i listan, så dyker det upp.</div>';
 }
 
+function tomtLage(filter){
+  var skal = [];
+  if (svar.ort) skal.push("orten " + svar.ort);
+  if (svar.omrade && svar.omrade.length) skal.push(svar.omrade.join(" och "));
+  if (svar.omfattning && svar.omfattning !== "Spelar ingen roll") skal.push(svar.omfattning.toLowerCase());
+  if (filter === "hog") skal.push("bara bäst chans");
+  if (filter === "deltid") skal.push("bara deltid");
+  if (filter === "heltid") skal.push("bara heltid");
+  if (filter === "utdrag") skal.push("utan registerutdrag");
+
+  var text = skal.length
+    ? "Inga jobb matchar " + skal.join(", ") + " just nu."
+    : "Inga jobb just nu. Prova igen om en stund.";
+
+  return '<div class="tomt">' + text +
+    '<div style="margin-top:18px"><button class="mini" onclick="nollstall()">Visa alla jobb</button></div></div>';
+}
+
+function nollstall(){
+  var f = document.getElementById("ort"); if (f) f.value = "";
+  svar.ort = ""; svar.omrade = []; svar.omfattning = null;
+  spara(); ritaFragor();
+  document.getElementById("profil").textContent = profilrad();
+  visa("alla");
+}
+
 var aktivtFilter = "alla";
 
 function visa(filter){
@@ -551,7 +585,7 @@ function visa(filter){
   document.getElementById("rakning").textContent = valda.length + " jobb i " + (svar.ort ? svar.ort : "hela Sverige");
   document.getElementById("lista").innerHTML = valda.length
     ? valda.map(kort).join("")
-    : '<div class="tomt">Inga jobb med det filtret just nu. Prova Alla, töm ortsrutan, eller ändra vad du vill jobba med.</div>';
+    : tomtLage(filter);
 }
 
 ritaFragor();
