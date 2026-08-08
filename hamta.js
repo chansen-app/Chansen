@@ -10,7 +10,11 @@ const SOKNINGAR = [
   "extrajobb","sommarjobb","helgjobb","utan erfarenhet",
   "montör","produktionsmedarbetare","maskinoperatör",
   "bud","chaufför utan erfarenhet","telefonförsäljare",
-  "administratör","kontorsassistent","butiksbiträde"
+  "administratör","kontorsassistent","butiksbiträde",
+  "butik","kassa","expedit","varuhus","butikssäljare helg",
+  "kontor","administration","orderadministratör","vaktmästare",
+  "hotell","frukostvärd","diskare","cafépersonal","serveringspersonal",
+  "elevassistent","fritidsledare","ledsagare","avlösare"
 ];
 const SIDOR_PER_SOKNING = 5;   // 100 annonser per sida
 
@@ -50,9 +54,10 @@ const POSITIV_TEXT = [
 
 // ── kategorier: nyckelord i titeln ────────────────────────────────────
 const KATEGORIER = {
+  "Butik": ["butik","kassa","expedit","store","shop","varuhus","varupafyllare","varupåfyllare",
+            "ica ","coop","willys","lidl","dollarstore","rusta","åhléns","ahlens"],
   "Sälj": ["saljare","säljare","salj","sälj","account manager","innesaljare","innesäljare",
            "utesaljare","utesäljare","telefonforsaljare","telefonförsäljare","telemarketing"],
-  "Butik": ["butik","kassa","expedit","store","shop","varuhus","varupafyllare","varupåfyllare"],
   "Kundtjänst": ["kundtjanst","kundtjänst","kundservice","kundsupport","support","customer",
                  "kundvard","kundvärd","reception","receptionist","vaxel","växel"],
   "Lager och logistik": ["lager","terminal","plock","truck","gods","paket","distribution",
@@ -66,7 +71,7 @@ const KATEGORIER = {
   "Industri och produktion": ["montor","montör","produktion","maskinoperator","maskinoperatör",
                               "fabrik","tillverkning","packare","operator","operatör"],
   "Kontor": ["administrator","administratör","kontorsassistent","assistent till","backoffice",
-             "orderadministrator","orderadministratör","registrator"]
+             "orderadministrator","orderadministratör","registrator","kontor","arkiv","kansli"]
 };
 
 const BRATITEL = [
@@ -119,6 +124,22 @@ function poang(a) {
   return p;
 }
 
+function kortBeskrivning(a) {
+  var t = (a.description ? a.description.text : "") || "";
+  t = t.replace(/\s+/g, " ").trim();
+  if (!t) return "";
+  // hoppa över inledande företagspresentationer om texten är lång
+  if (t.length > 700) {
+    var m = t.search(/(Vi söker|Vi erbjuder|Dina arbetsuppgifter|Om tjänsten|Arbetsuppgifter|Din roll|Om jobbet)/i);
+    if (m > 0 && m < 900) t = t.slice(m);
+  }
+  if (t.length > 260) {
+    var brytpunkt = t.lastIndexOf(".", 260);
+    t = (brytpunkt > 140) ? t.slice(0, brytpunkt + 1) : t.slice(0, 250).trim() + "...";
+  }
+  return t;
+}
+
 function utdragskrav(a) {
   const t = (a.description ? a.description.text : "").toLowerCase();
   if (t.indexOf("belastningsregister") > -1 || t.indexOf("registerutdrag") > -1) return "kravs";
@@ -166,6 +187,7 @@ async function hamtaJobb() {
 
         jobb.push({
           titel: a.headline,
+        beskrivning: kortBeskrivning(a),
           arbetsgivare: a.employer ? a.employer.name : "",
           ort: a.workplace_address && a.workplace_address.municipality ? a.workplace_address.municipality : "",
           omfattning: a.working_hours_type ? a.working_hours_type.label : "",
