@@ -208,8 +208,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 </div>
 
 <div id="v-mina" class="dold">
-  <h1>Mina jobb</h1>
-  <p class="sub">Sparade, sökta och de du fått svar på.</p>
+  <h1>Sparade jobb</h1>
+  <p class="sub">De du sparat, de du sökt, och de du fått svar på.</p>
   <div id="mina-innehall"></div>
 </div>
 
@@ -394,6 +394,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button id="h-soka" class="on" onclick="hjalpVisa('soka')">Söka jobb</button>
     <button id="h-tider" onclick="hjalpVisa('tider')">Arbetstider</button>
     <button id="h-utdrag" onclick="hjalpVisa('utdrag')">Utdrag</button>
+    <button id="h-dom" onclick="hjalpVisa('dom')">Med dom</button>
   </div>
 
 <div id="hjalp-soka" class="info">
@@ -441,6 +442,56 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
       <h3>Om det tar tid</h3>
       <p style="margin:0">Att söka många jobb utan att få svar är utmattande och det är helt normalt att bli nedstämd av det. Det är inte ett mått på vad du är värd. Prata med någon om det tar hårt, en kompis, en förälder, en studievägledare eller Arbetsförmedlingen. Du behöver inte klara det ensam.</p>
     </div>
+  </div>
+
+<div id="hjalp-dom" class="dold info">
+    <h1 style="font-size:28px;margin-bottom:6px">Söka jobb med en dom</h1>
+    <p class="sub">Det är tyngre, och det är orättvist. Men det finns vägar, och de är konkreta.</p>
+
+    <h2>Du behöver inte berätta självmant</h2>
+    <p>Det finns ingen skyldighet att ta upp en gammal dom i en ansökan eller på en intervju. Men ljug inte om du får en direkt fråga, och sök inte jobb där du vet att utdraget stoppar dig, det är bortkastad tid för er båda.</p>
+
+    <h2>Vilka jobb kräver utdrag</h2>
+    <p><b>Enligt lag:</b> skola, förskola, fritids, barnomsorg och arbete med barn eller personer med funktionsnedsättning.</p>
+    <p><b>Frivilligt, men vanligt:</b> väktare och ordningsvakt, bank och finans, en del butikskedjor, jobb med nycklar eller tillgång till kontanter.</p>
+    <p><b>Frågar sällan:</b> lager och logistik, industri och produktion, bygg, restaurang och kök, städ, lantbruk och trädgård. Det är där du ska lägga din tid först.</p>
+
+    <h2>Om du får frågan</h2>
+    <p>Ha ett svar förberett som är kort och sant. Tre delar, ungefär trettio sekunder:</p>
+    <ul>
+      <li>Vad som hände, utan detaljer och utan att skylla på andra</li>
+      <li>Vad som är annorlunda nu, konkret. Studier, behandling, flyttat, brutit med folk</li>
+      <li>Varför du vill ha just det här jobbet</li>
+    </ul>
+    <p>Sedan går du vidare och pratar om vad du kan. Ju kortare och lugnare du tar det, desto mindre blir det. Sväva inte ut, och be inte om ursäkt tre gånger.</p>
+
+    <div class="ruta">
+      <h3>Kolla vad som faktiskt står</h3>
+      <p style="margin:0">Du kan begära ut ditt eget utdrag gratis från polisen. Många tror att en gammal sak sitter kvar för alltid när den redan är gallrad. Läs mer under fliken Utdrag.</p>
+    </div>
+
+    <h2>Krami, om du är över 18</h2>
+    <p>Krami är ett samarbete mellan Kriminalvården, Arbetsförmedlingen och kommunen, för dig från 18 år som har en dom eller kommer från kriminella sammanhang och vill förändra din situation.</p>
+    <p>Du får en tvåveckorskurs, sedan individuell vägledning och oftast praktik, och de fortsätter stötta både dig och arbetsgivaren efter att du fått jobbet. Kravet är att du är fri från droger och att du verkligen vill.</p>
+    <p>Krami finns på ett antal orter i landet. Läs mer och hitta närmaste kontor på <a href="https://www.krami.se" target="_blank">krami.se</a>.</p>
+
+    <h2>Du kan vara billigare att anställa</h2>
+    <p>Arbetsförmedlingen har stöd som gör att en arbetsgivare får en del av lönen betald när de anställer någon som stått utanför arbetsmarknaden, bland annat efter avtjänat straff. Det heter nystartsjobb och liknande stödformer.</p>
+    <p>Det är ett riktigt argument att ta upp: du kostar mindre än nästa person. Prata med Arbetsförmedlingen om vad just du kan ha rätt till, och nämn det för arbetsgivaren.</p>
+
+    <h2>Företag som anställer med flit</h2>
+    <p>Arbetsintegrerande sociala företag finns för att ge jobb åt folk som har svårt att komma in. Det finns runt 150 av dem samlade hos <a href="https://skoopi.coop" target="_blank">Skoopi</a>, ofta inom secondhand, städ, café, bygg och trädgård.</p>
+    <p>Skyddsvärnet erbjuder arbetsträning där du får färska referenser och intyg, vilket är precis det som saknas i ett CV efter en period utanför.</p>
+
+    <h2>Folk som varit där själva</h2>
+    <p>KRIS och X-CONS drivs av personer med egen erfarenhet av kriminalitet och hjälper med kontakter, stöd och praktiska saker. De dömer dig inte, och de vet hur systemet fungerar. Sök på deras namn plus din stad.</p>
+
+    <div class="ruta">
+      <h3>En ärlig sak</h3>
+      <p style="margin:0">Du kommer få fler nej än andra, och det beror inte på att du är sämre. Det tar längre tid, och det är rimligt att bli trött och förbannad på det. Men de flesta jobb i den här appen frågar aldrig, och en dom som är gallrad finns inte längre. Ge det fler försök än du tycker att du borde.</p>
+    </div>
+
+    <div class="kallor">Källor: Kriminalvården, Arbetsförmedlingen, Krami, Skoopi, Skyddsvärnet. Det här är allmän information och inte juridisk rådgivning. Reglerna kan ändras, så kolla alltid med myndigheten om något är avgörande för dig.</div>
   </div>
 
   <div id="hjalp-tider" class="dold info">
@@ -511,6 +562,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <h2>Så använder Chansen det här</h2>
   <p>Chansen frågar dig aldrig om din bakgrund och sparar ingenting om den. Vi märker jobben, inte människor.</p>
+  <p style="margin-bottom:18px"><button class="mini" onclick="hjalpVisa('dom')">Tips om att söka jobb med en dom</button></p>
   <p>Filtret heter "Nämner inte utdrag", och det är precis vad det betyder. Vi kan bara se vad som står i annonsen. Står det inget om registerutdrag kan arbetsgivaren ändå begära ett senare i processen, och vi kan inte lova något. Vill du veta säkert, fråga arbetsgivaren innan du lägger tid på ansökan. Det är en helt vanlig fråga att ställa.</p>
 
   <div class="kallor">Källa: Polismyndigheten. Reglerna kan ändras, så kolla alltid polisens sida om något är viktigt för dig.</div>
@@ -551,14 +603,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 11</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 12</footer>
 </div>
 
 <div id="cv-utskrift"></div>
 
 <nav>
   <button id="n-jobb" class="on" onclick="visaVy('jobb')">Jobb</button>
-  <button id="n-mina" onclick="visaVy('mina')">Mina</button>
+  <button id="n-mina" onclick="visaVy('mina')">Sparade</button>
   <button id="n-cv" onclick="visaVy('cv')">CV</button>
   <button id="n-hjalp" onclick="visaVy('hjalp')">Hjälp</button>
   <button id="n-om" onclick="visaVy('om')">Om</button>
@@ -805,7 +857,7 @@ function ritaMina(){
   var el = document.getElementById("mina-innehall");
   if (!el) return;
   var grupper = [
-    ["sparad", "Sparade", false],
+    ["sparad", "Sparade, inte sökta än", false],
     ["sokt", "Sökta, väntar på svar", true],
     ["svar", "Fått svar", false]
   ];
@@ -818,7 +870,7 @@ function ritaMina(){
     ut += '<h2>'+grupper[g][1]+' ('+lankar.length+')</h2>';
     for (var i = 0; i < lankar.length; i++){ ut += minirad(lankar[i], grupper[g][2]); }
   }
-  el.innerHTML = totalt ? ut : '<div class="tomt">Inget här än. Spara ett jobb i listan, så dyker det upp.</div>';
+  el.innerHTML = totalt ? ut : '<div class="tomt">Inget sparat än. Tryck Spara på ett jobb i listan, så hamnar det här.</div>';
 }
 
 function tomtLage(filter){
@@ -853,7 +905,7 @@ var hjalpDel = "soka";
 
 function hjalpVisa(del){
   hjalpDel = del;
-  var delar = ["soka","tider","utdrag"];
+  var delar = ["soka","tider","utdrag","dom"];
   for (var i = 0; i < delar.length; i++){
     var d = delar[i];
     var el = document.getElementById("hjalp-" + d);
