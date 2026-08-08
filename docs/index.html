@@ -88,12 +88,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div class="field">
-    <label class="fraga">Vad heter du?</label>
-    <input class="txt" id="namn" placeholder="För- och efternamn" value="">
-    <div class="hint">Används bara för att skriva under din ansökan. Sparas i din telefon.</div>
-  </div>
-
-  <div class="field">
     <label class="fraga">Var bor du?</label>
     <input class="txt" id="ort" placeholder="Skriv din kommun" value="">
     <div class="hint">Lämna tomt om du vill se jobb i hela Sverige.</div>
@@ -170,6 +164,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <button class="lank" onclick="visaVy('jobb')">Tillbaka till jobben</button>
   <h1 style="margin-top:16px;font-size:30px" id="a-rubrik">Din ansökan</h1>
   <div style="font-size:15px;color:var(--n-700);margin-bottom:20px" id="a-jobb"></div>
+
+  <div class="field" style="margin-bottom:16px">
+    <label class="fraga">Ditt namn, till underskriften</label>
+    <input class="txt" id="namn" placeholder="För- och efternamn" value="" oninput="namnAndrat()">
+  </div>
 
   <textarea id="a-text" style="width:100%;min-height:420px;padding:20px;font:inherit;font-size:15px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical"></textarea>
 
@@ -361,8 +360,7 @@ function valj(falt, varde){
 function spara(){
   var f = document.getElementById("ort");
   svar.ort = f ? f.value.trim() : "";
-  var n = document.getElementById("namn");
-  if (n) svar.namn = n.value.trim();
+
   try { localStorage.setItem("chansen", JSON.stringify(svar)); } catch(e){}
 }
 
@@ -741,7 +739,12 @@ function oppnaAnsokan(lank){
   aktuelltJobb = j;
   document.getElementById("a-jobb").textContent =
     j.titel + " · " + j.arbetsgivare + (j.ort ? " · " + j.ort : "");
-  document.getElementById("a-text").value = byggBrev(j);
+  var nf = document.getElementById("namn");
+  if (nf) nf.value = svar.namn || "";
+  var ta = document.getElementById("a-text");
+  ta.value = byggBrev(j);
+  if (ta.dataset) ta.dataset.andrad = "";
+  ta.oninput = function(){ if (this.dataset) this.dataset.andrad = "1"; };
 
   var kat = KATEGORITEXT[j.kategori] || KATEGORITEXT["Övrigt"];
   var tips = kat.tips.slice();
@@ -765,8 +768,24 @@ function oppnaAnsokan(lank){
   visaVy("ansokan");
 }
 
+function namnAndrat(){
+  var n = document.getElementById("namn");
+  svar.namn = n ? n.value.trim() : "";
+  try { localStorage.setItem("chansen", JSON.stringify(svar)); } catch(e){}
+  if (aktuelltJobb) {
+    var f = document.getElementById("a-text");
+    var gammalt = f.value;
+    var nytt = byggBrev(aktuelltJobb);
+    // skriv bara om användaren inte redan ändrat texten själv
+    if (!f.dataset || !f.dataset.andrad) f.value = nytt;
+  }
+}
+
 function skrivOm(){
-  if (aktuelltJobb) document.getElementById("a-text").value = byggBrev(aktuelltJobb);
+  if (!aktuelltJobb) return;
+  var ta = document.getElementById("a-text");
+  ta.value = byggBrev(aktuelltJobb);
+  if (ta.dataset) ta.dataset.andrad = "";
 }
 
 function kopiera(){
@@ -817,7 +836,6 @@ function visa(filter){
 
 ritaFragor();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
-if (svar.namn) document.getElementById("namn").value = svar.namn;
 ritaMina();
 if (svar.alder) { startaLista(); } else { visaVy("start"); }
 </script>
