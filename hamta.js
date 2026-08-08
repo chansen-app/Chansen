@@ -12,7 +12,7 @@ const SOKNINGAR = [
   "bud","chaufför utan erfarenhet","telefonförsäljare",
   "administratör","kontorsassistent","butiksbiträde"
 ];
-const SIDOR_PER_SOKNING = 2;   // 100 per sida
+const SIDOR_PER_SOKNING = 5;   // 100 annonser per sida
 
 // ── titlar som aldrig visas ───────────────────────────────────────────
 const YRKESSTOPP = [
