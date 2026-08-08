@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chansen-app.github.io/Chansen/sitemap.xml
