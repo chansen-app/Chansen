@@ -388,7 +388,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
 <div id="v-hjalp" class="dold">
   <h1>Hjälp</h1>
-  <p class="sub">Så söker du jobb, vad du får jobba under 18, och hur registerutdrag fungerar.</p>
+  <p class="sub">Så söker du jobb, vad du får jobba under 18, och hur registerutdrag fungerar. Är du arbetsgivare kan du lägga upp ett jobb gratis under sista fliken.</p>
 
   <div class="cvflik" style="margin-bottom:24px">
     <button id="h-soka" class="on" onclick="hjalpVisa('soka')">Söka jobb</button>
@@ -499,6 +499,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div class="field">
       <label class="fraga">Kategori</label>
       <div class="seg" id="ag-kategori"></div>
+      <div id="ag-annat-ruta" class="dold" style="margin-top:12px">
+        <input class="txt agf" id="ag-annat" placeholder="Skriv vilken bransch det är">
+      </div>
     </div>
 
     <div class="field">
@@ -529,9 +532,15 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     </div>
 
     <div class="field">
+      <label class="fraga">Kontakt för den som söker</label>
+      <input class="txt agf" id="ag-publik" placeholder="Anna Andersson, 040-123456">
+      <div class="hint">Visas i annonsen så att den som söker kan höra av sig. Skriv bara uppgifter du vill ha offentliga, gärna en arbetsplats-telefon eller en funktionsmejl.</div>
+    </div>
+
+    <div class="field">
       <label class="fraga">Din mejladress på företagets domän</label>
       <input class="txt agf" id="ag-mejl" placeholder="namn@foretaget.se" inputmode="email">
-      <div class="hint" id="ag-mejl-svar"></div>
+      <div class="hint" id="ag-mejl-svar">Använder vi bara för att kontakta dig. Visas inte i appen.</div>
     </div>
 
     <div class="field">
@@ -708,6 +717,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Dina svar på frågorna och de jobb du sparat ligger i din egen webbläsare, på din telefon eller dator. De skickas ingenstans och vi kan inte se dem. Rensar du webbläsarens data försvinner de.</p>
   <p>Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies och spårar inte enskilda besökare.</p>
 
+  <h2>Är du arbetsgivare?</h2>
+  <p>Söker du personal och kräver ingen erfarenhet kan du lägga upp ett jobb gratis. Gå till Hjälp och fliken Arbetsgivare. Varje annons granskas av en människa innan den publiceras.</p>
+
   <h2>Var jobben kommer ifrån</h2>
   <p>Annonserna hämtas från Arbetsförmedlingens öppna API JobSearch och uppdateras en gång per dygn. Chansen skapar inga egna annonser och ansvarar inte för innehållet i dem. Klickar du på Se annonsen kommer du till originalet i Platsbanken.</p>
 
@@ -718,7 +730,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 19</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 20</footer>
 </div>
 
 <div id="cv-utskrift"></div>
@@ -920,6 +932,7 @@ function kort(j){
     '<div class="kicker'+(top ? "" : " medel")+'">'+etikett+'</div>'+
     '<div class="titel">'+titel+'</div>'+
     '<div class="ag">'+arbetsgivare+(ort ? ' &middot; '+ort : '')+(j.egen ? ' &middot; <b>lagd upp av arbetsgivaren</b>' : '')+'</div>'+
+    (j.kontaktSokande ? '<div class="ag" style="margin-top:-8px">Kontakt: '+fly(j.kontaktSokande)+'</div>' : '')+
     '<div class="taggar">'+taggar+'</div>'+
     '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow">Se annonsen</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
@@ -1054,6 +1067,9 @@ function hittaKolumn(rubriker, ord){
   return -1;
 }
 
+var KANDA_KATEGORIER = ["Sälj","Kundtjänst","Butik","Lager och logistik","Restaurang och café",
+  "Städ","Vård och omsorg","Barn och skola","Industri och produktion","Kontor"];
+
 function bladTillJobb(csv){
   var rader = csvRader(csv);
   if (rader.length < 2) return [];
@@ -1070,7 +1086,8 @@ function bladTillJobb(csv){
     lank:     hittaKolumn(rubrik, ["lank","link","ansoker","ansoka"]),
     utdrag:   hittaKolumn(rubrik, ["utdrag","belastningsregister"]),
     sista:    hittaKolumn(rubrik, ["sista","deadline"]),
-    minder:   hittaKolumn(rubrik, ["under 18","minderarig"])
+    minder:   hittaKolumn(rubrik, ["under 18","minderarig"]),
+    publik:   hittaKolumn(rubrik, ["kontakt for sokande","publik"])
   };
 
   if (k.godkand === -1 || k.titel === -1 || k.lank === -1) return [];
@@ -1102,7 +1119,8 @@ function bladTillJobb(csv){
       ort: f(k.ort),
       omfattning: f(k.omfattning),
       anstallningsform: f(k.form),
-      kategori: f(k.kategori) || "Övrigt",
+      kategori: (KANDA_KATEGORIER.indexOf(f(k.kategori)) > -1) ? f(k.kategori) : "Övrigt",
+      kontaktSokande: f(k.publik),
       erfarenhetKravs: false,
       korkortKravs: false,
       utdrag: (utdragSvar.indexOf("ja") === 0) ? "kravs" : "framgar inte",
@@ -1195,7 +1213,7 @@ var AG_VAL = {
   omfattning: ["Heltid","Deltid"],
   form: ["Tillsvidare","Behovsanställning","Sommar","Vikariat"],
   kategori: ["Sälj","Kundtjänst","Butik","Lager och logistik","Restaurang och café",
-             "Städ","Vård och omsorg","Barn och skola","Industri och produktion","Kontor"],
+             "Städ","Vård och omsorg","Barn och skola","Industri och produktion","Kontor","Annat"],
   utdrag: ["Ja","Nej"],
   minder: ["Ja","Nej"]
 };
@@ -1234,7 +1252,14 @@ function agRita(){
   agKolla();
 }
 
-function agValj(f, v){ ag[f] = v; agRita(); }
+function agValj(f, v){
+  ag[f] = v;
+  if (f === "kategori"){
+    var r = document.getElementById("ag-annat-ruta");
+    if (r) r.className = (v === "Annat") ? "" : "dold";
+  }
+  agRita();
+}
 
 function agFalt(id){
   var el = document.getElementById("ag-" + id);
@@ -1273,6 +1298,7 @@ function agKolla(){
   var saknas = [];
   for (var i = 0; i < kravda.length; i++){ if (!agFalt(kravda[i][0])) saknas.push(kravda[i][1]); }
   for (var f in AG_VAL){ if (!ag[f]) saknas.push(f === "minder" ? "om under 18 får jobba" : f); }
+  if (ag.kategori === "Annat" && !agFalt("annat")) saknas.push("vilken bransch");
 
   var st = document.getElementById("ag-status");
   var kn = document.getElementById("ag-skicka");
@@ -1299,6 +1325,8 @@ function agData(){
     lon: agFalt("lon"),
     utdrag: ag.utdrag || "",
     minder: ag.minder || "",
+    annat: agFalt("annat"),
+    publik: agFalt("publik"),
     lank: agFalt("lank"),
     sista: agFalt("sista"),
     mejl: agFalt("mejl"),
@@ -1335,7 +1363,8 @@ function agMejlText(d){
     "Ort: " + d.ort,
     "Omfattning: " + d.omfattning,
     "Anställningsform: " + d.form,
-    "Kategori: " + d.kategori,
+    "Kategori: " + (d.kategori === "Annat" ? "Annat: " + d.annat : d.kategori),
+    "Kontakt för sökande: " + (d.publik || "ej angiven"),
     "Lön: " + d.lon,
     "Utdrag krävs: " + d.utdrag,
     "Under 18 tillåtet: " + d.minder,
