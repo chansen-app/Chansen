@@ -69,6 +69,41 @@ nav button.on{background:var(--accent);color:var(--bg)}
 .mini{min-height:38px;padding:8px 14px;border-radius:999px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800)}
 .mini.on{background:var(--sage-100);border-color:var(--sage-800);color:var(--sage-800)}
 nav button{font-size:11px;padding:0 4px}
+
+/* ── CV-mallar ─────────────────────────────────────────── */
+#cv-utskrift{display:none}
+.cvm{background:#fff;color:#201e1d;padding:38px 34px;border-radius:20px;border:1.5px solid var(--n-300);font-family:var(--body);font-size:13px;line-height:1.55}
+.cvm h3{margin:0 0 4px}
+.cvm .m-namn{font-family:var(--heading);font-weight:400;font-size:30px;line-height:1.1;letter-spacing:-.01em;margin:0 0 6px}
+.cvm .m-kontakt{font-size:12.5px;color:#5a5a50;margin-bottom:22px}
+.cvm .m-rub{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin:20px 0 7px;font-weight:700}
+.cvm p{margin:0 0 8px}
+.cvm ul{margin:0;padding-left:16px}
+.cvm li{margin-bottom:5px}
+.cvm .m-linje{height:2px;background:#c67139;margin:0 0 22px;width:56px;border-radius:2px}
+
+/* modern: två spalter */
+.cvm-modern{display:grid;grid-template-columns:33% 1fr;gap:0;padding:0;overflow:hidden}
+.cvm-modern .m-sido{background:#f0fae1;padding:34px 22px}
+.cvm-modern .m-huvud{padding:34px 28px}
+.cvm-modern .m-namn{font-size:26px}
+.cvm-modern .m-rub{margin-top:18px}
+.cvm-modern .m-sido .m-rub:first-child{margin-top:0}
+
+/* formell: centrerad, återhållsam */
+.cvm-formell{text-align:left}
+.cvm-formell .m-topp{text-align:center;border-bottom:1.5px solid #dcd3c4;padding-bottom:18px;margin-bottom:6px}
+.cvm-formell .m-namn{font-family:var(--body);font-weight:700;font-size:24px;letter-spacing:.06em;text-transform:uppercase}
+.cvm-formell .m-rub{color:#201e1d;border-bottom:1px solid #dcd3c4;padding-bottom:5px}
+
+@media print{
+  body{background:#fff;padding:0}
+  .wrap,nav{display:none !important}
+  #cv-utskrift{display:block}
+  #cv-utskrift .cvm{border:none;border-radius:0;padding:0;font-size:11.5pt}
+  #cv-utskrift .cvm-modern{padding:0}
+  @page{margin:16mm}
+}
 .cvstapel{height:8px;background:var(--n-300);border-radius:4px;overflow:hidden;margin-bottom:12px}
 .cvstapel-fyll{height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width .3s ease}
 .cvsteg-nr{font-size:13px;color:var(--n-600);margin-bottom:26px}
@@ -80,6 +115,7 @@ nav button{font-size:11px;padding:0 4px}
 .cvflik button.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15px;line-height:1.55;background:var(--surface);border:1.5px solid var(--n-300);border-radius:24px;color:var(--text);resize:vertical}
 .forslag{font-size:13px;padding:9px 15px;border-radius:999px;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800);cursor:pointer;font-family:var(--body);font-weight:600}
+.forslag.pa{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 .forslag:hover{background:var(--accent-100);border-color:var(--accent)}
 .dold{display:none}
 a{color:var(--accent-700)}
@@ -315,9 +351,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div id="cv-klar" class="dold">
       <h2 class="cvfraga" style="margin-bottom:6px">Ditt CV är klart</h2>
       <div class="rakning" id="cv-status"></div>
+      <div class="hint" style="margin:0 0 10px">Välj utseende</div>
+      <div class="chips" id="cv-mallval" style="margin-bottom:18px"></div>
+      <div id="cv-forhandsvisning"></div>
+
+      <details style="margin:20px 0">
+        <summary style="cursor:pointer;font-size:15px;color:var(--accent-700)">Visa som ren text, för att klistra in i formulär</summary>
       <textarea id="cv-resultat" style="width:100%;min-height:440px;padding:20px;font:inherit;font-size:14px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical"></textarea>
+      </details>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 30px">
-        <button class="btn" onclick="kopieraCV()">Kopiera CV</button>
+        <button class="btn" onclick="skrivUtCV()">Spara som PDF</button>
+        <button class="mini" onclick="kopieraCV()">Kopiera texten</button>
         <button class="mini" onclick="cvOm()">Ändra något</button>
         <button class="mini" onclick="cvVisa('guide')">Till guiden</button>
       </div>
@@ -432,8 +476,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 9</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 10</footer>
 </div>
+
+<div id="cv-utskrift"></div>
 
 <nav>
   <button id="n-jobb" class="on" onclick="visaVy('jobb')">Jobb</button>
@@ -888,6 +934,8 @@ function byggCV(){
 
   var ut = document.getElementById("cv-resultat");
   if (ut) ut.value = rader.join("\n");
+  ritaMallval();
+  ritaForhandsvisning();
 
   var klara = 0, viktiga = ["namn","tel","mejl","om","skola","erf"];
   for (var i = 0; i < viktiga.length; i++){ if (cv[viktiga[i]] && String(cv[viktiga[i]]).trim()) klara++; }
@@ -897,6 +945,117 @@ function byggCV(){
       ? "Allt viktigt är ifyllt. Kopiera och klistra in där du söker."
       : klara + " av " + viktiga.length + " viktiga delar ifyllda. Du kan lämna in det så här, eller trycka Ändra något.";
   }
+}
+
+
+// ── CV-mallar ───────────────────────────────────────────
+var CV_MALLAR = [
+  ["enkel", "Enkel"],
+  ["modern", "Modern"],
+  ["formell", "Formell"]
+];
+var valdMall = "enkel";
+try { valdMall = localStorage.getItem("chansen-cv-mall") || "enkel"; } catch(e){}
+
+function fly(t){
+  return String(t == null ? "" : t)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function radlista(text){
+  if (!text || !text.trim()) return "";
+  var rader = text.split("\n").filter(function(r){ return r.trim(); });
+  return "<ul>" + rader.map(function(r){ return "<li>" + fly(r.trim()) + "</li>"; }).join("") + "</ul>";
+}
+
+function cvDelar(){
+  var kontakt = [];
+  if (cv.ort) kontakt.push(fly(cv.ort));
+  if (cv.tel) kontakt.push(fly(cv.tel));
+  if (cv.mejl) kontakt.push(fly(cv.mejl));
+  return {
+    namn: fly(cv.namn || "[ditt namn]"),
+    kontakt: kontakt.length ? kontakt.join(" &nbsp;·&nbsp; ") : "[ort] &nbsp;·&nbsp; [telefon] &nbsp;·&nbsp; [mejl]",
+    om: cv.om && cv.om.trim() ? "<p>" + fly(cv.om.trim()).replace(/\n/g,"<br>") + "</p>" : "",
+    utbildning: (cv.skola || cv.skolaar)
+      ? "<p>" + fly(cv.skola || "[skola]") + (cv.skolaar ? "<br>" + fly(cv.skolaar) : "") + "</p>" : "",
+    erfarenhet: radlista(cv.erf),
+    sprak: cv.sprak && cv.sprak.trim() ? "<p>" + fly(cv.sprak) + "</p>" : "",
+    ovrigt: cv.ovrigt && cv.ovrigt.trim() ? "<p>" + fly(cv.ovrigt) + "</p>" : ""
+  };
+}
+
+function mallHtml(mall){
+  var d = cvDelar();
+  var ref = '<div class="m-rub">Referenser</div><p>Lämnas på begäran.</p>';
+
+  if (mall === "modern") {
+    return '<div class="cvm cvm-modern">' +
+      '<div class="m-sido">' +
+        '<div class="m-rub">Kontakt</div><p>' + d.kontakt.replace(/ &nbsp;·&nbsp; /g,"<br>") + '</p>' +
+        (d.sprak ? '<div class="m-rub">Språk</div>' + d.sprak : '') +
+        (d.ovrigt ? '<div class="m-rub">Övrigt</div>' + d.ovrigt : '') +
+        '<div class="m-rub">Referenser</div><p>Lämnas på begäran.</p>' +
+      '</div>' +
+      '<div class="m-huvud">' +
+        '<div class="m-namn">' + d.namn + '</div><div class="m-linje"></div>' +
+        (d.om ? '<div class="m-rub">Om mig</div>' + d.om : '') +
+        (d.utbildning ? '<div class="m-rub">Utbildning</div>' + d.utbildning : '') +
+        (d.erfarenhet ? '<div class="m-rub">Erfarenhet</div>' + d.erfarenhet : '') +
+      '</div></div>';
+  }
+
+  if (mall === "formell") {
+    return '<div class="cvm cvm-formell">' +
+      '<div class="m-topp"><div class="m-namn">' + d.namn + '</div>' +
+      '<div class="m-kontakt" style="margin:8px 0 0">' + d.kontakt + '</div></div>' +
+      (d.om ? '<div class="m-rub">Om mig</div>' + d.om : '') +
+      (d.utbildning ? '<div class="m-rub">Utbildning</div>' + d.utbildning : '') +
+      (d.erfarenhet ? '<div class="m-rub">Erfarenhet</div>' + d.erfarenhet : '') +
+      (d.sprak ? '<div class="m-rub">Språk</div>' + d.sprak : '') +
+      (d.ovrigt ? '<div class="m-rub">Övrigt</div>' + d.ovrigt : '') +
+      ref + '</div>';
+  }
+
+  return '<div class="cvm cvm-enkel">' +
+    '<div class="m-namn">' + d.namn + '</div>' +
+    '<div class="m-kontakt">' + d.kontakt + '</div>' +
+    '<div class="m-linje"></div>' +
+    (d.om ? '<div class="m-rub">Om mig</div>' + d.om : '') +
+    (d.utbildning ? '<div class="m-rub">Utbildning</div>' + d.utbildning : '') +
+    (d.erfarenhet ? '<div class="m-rub">Erfarenhet</div>' + d.erfarenhet : '') +
+    (d.sprak ? '<div class="m-rub">Språk</div>' + d.sprak : '') +
+    (d.ovrigt ? '<div class="m-rub">Övrigt</div>' + d.ovrigt : '') +
+    ref + '</div>';
+}
+
+function valjMall(m){
+  valdMall = m;
+  try { localStorage.setItem("chansen-cv-mall", m); } catch(e){}
+  ritaMallval();
+  ritaForhandsvisning();
+}
+
+function ritaMallval(){
+  var el = document.getElementById("cv-mallval");
+  if (!el) return;
+  el.innerHTML = CV_MALLAR.map(function(par){
+    return '<button class="forslag' + (par[0] === valdMall ? ' pa' : '') +
+      '" onclick="valjMall(\'' + par[0] + '\')">' + par[1] + '</button>';
+  }).join("");
+}
+
+function ritaForhandsvisning(){
+  var html = mallHtml(valdMall);
+  var f = document.getElementById("cv-forhandsvisning");
+  if (f) f.innerHTML = html;
+  var u = document.getElementById("cv-utskrift");
+  if (u) u.innerHTML = html;
+}
+
+function skrivUtCV(){
+  ritaForhandsvisning();
+  window.print();
 }
 
 function kopieraCV(){
