@@ -155,9 +155,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div class="field">
-    <label class="fraga">Heltid eller deltid?</label>
+    <label class="fraga">Vad söker du för sorts jobb?</label>
     <div class="seg" id="q-omfattning"></div>
-    <div class="hint">Söker du på heltid lyfts heltidsjobben överst.</div>
+    <div class="hint">Välj ett eller flera. Väljer du inget visas alla sorter.</div>
   </div>
 
   <div class="avsnitt">Det här kan ge dig fler träffar</div>
@@ -737,7 +737,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 23</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 24</footer>
 </div>
 
 <div id="cv-utskrift"></div>
@@ -761,13 +761,13 @@ var fragor = {
   utbildning: ["Går i grundskolan","Går på gymnasiet","Gymnasieexamen"],
   korkort:    ["Ja","Nej"],
   erfarenhet: ["Aldrig jobbat","Lite","En del"],
-  omfattning: ["Heltid","Deltid","Spelar ingen roll"],
+  omfattning: ["Heltid","Deltid","Helger","Kvällar","Sommarjobb","Vid behov","Praktik"],
   omrade:     ["Sälj","Kundtjänst","Butik","Lager och logistik","Restaurang och café",
                "Städ","Vård och omsorg","Barn och skola","Industri och produktion","Kontor"]
 };
 
-var flerval = { nar:true, omrade:true };
-var svar = { namn:"", alder:null, ort:"", nar:[], omfattning:null, utbildning:null, korkort:null, erfarenhet:null, omrade:[] };
+var flerval = { nar:true, omrade:true, omfattning:true };
+var svar = { namn:"", alder:null, ort:"", nar:[], omfattning:[], utbildning:null, korkort:null, erfarenhet:null, omrade:[] };
 try {
   var sparat = localStorage.getItem("chansen");
   var tolkatSvar = sparat ? JSON.parse(sparat) : null;
@@ -836,7 +836,7 @@ function visaVy(vy){
 
 function profilrad(){
   var delar = [svar.ort ? svar.ort : "Hela Sverige"];
-  if (svar.omfattning && svar.omfattning !== "Spelar ingen roll") delar.push(svar.omfattning.toLowerCase());
+  if (svar.omfattning && svar.omfattning.length) delar.push(svar.omfattning.join(", ").toLowerCase());
   if (svar.nar && svar.nar.length) delar.push(svar.nar.join(", ").toLowerCase());
   if (svar.korkort === "Ja") delar.push("körkort");
   if (svar.omrade && svar.omrade.length) delar.push(svar.omrade.join(", ").toLowerCase());
@@ -870,8 +870,19 @@ function justeradPoang(j){
   if (j.korkortKravs === true && svar.korkort === "Ja") p += 2;
   if (svar.erfarenhet === "Aldrig jobbat" && j.erfarenhetKravs === false) p += 1;
 
-  if (svar.omfattning === "Heltid" && (j.omfattning||"").indexOf("Heltid") > -1) p += 3;
-  if (svar.omfattning === "Deltid" && (j.omfattning||"").indexOf("Deltid") > -1) p += 3;
+  var sokt = svar.omfattning || [];
+  if (sokt.length){
+    var allt = ((j.omfattning || "") + " " + (j.anstallningsform || "") + " " + (j.titel || "")).toLowerCase();
+    var nyckel = { "Heltid":["heltid"], "Deltid":["deltid"], "Helger":["helg"], "Kvällar":["kväll","kvall"],
+                   "Sommarjobb":["sommar","säsong","sasong","ferie"], "Vid behov":["behov","timanst","extra"],
+                   "Praktik":["praktik","lia "] };
+    for (var si = 0; si < sokt.length; si++){
+      var ord = nyckel[sokt[si]] || [];
+      for (var oi = 0; oi < ord.length; oi++){
+        if (allt.indexOf(ord[oi]) > -1) { p += 3; si = sokt.length; break; }
+      }
+    }
+  }
 
   var nar = svar.nar || [];
   if (nar.indexOf("Lov och sommar") > -1 && (j.anstallningsform || "").toLowerCase().indexOf("behov") > -1) p += 1;
@@ -1019,7 +1030,7 @@ function tomtLage(filter){
   var skal = [];
   if (svar.ort) skal.push("orten " + svar.ort);
   if (svar.omrade && svar.omrade.length) skal.push(svar.omrade.join(" och "));
-  if (svar.omfattning && svar.omfattning !== "Spelar ingen roll") skal.push(svar.omfattning.toLowerCase());
+  if (svar.omfattning && svar.omfattning.length) skal.push(svar.omfattning.join(" och ").toLowerCase());
   if (filter === "hog") skal.push("bara bäst chans");
   if (filter === "deltid") skal.push("bara deltid");
   if (filter === "heltid") skal.push("bara heltid");
@@ -1035,7 +1046,7 @@ function tomtLage(filter){
 
 function nollstall(){
   var f = document.getElementById("ort"); if (f) f.value = "";
-  svar.ort = ""; svar.omrade = []; svar.omfattning = null;
+  svar.ort = ""; svar.omrade = []; svar.omfattning = [];
   spara(); ritaFragor();
   document.getElementById("profil").textContent = profilrad();
   visa("alla");
