@@ -1,60 +1,84 @@
 const fs = require("fs");
 
-// ── ord i titeln som gör att ett jobb aldrig visas ────────────────────
+// ── sökningar: yrkesområden med låga ingångskrav ──────────────────────
+const SOKNINGAR = [
+  "säljare","butikssäljare","kundtjänst","kundsupport","kundservice",
+  "lagerarbetare","lagermedarbetare","orderplockare","terminalarbetare",
+  "restaurang","kock","servitör","cafébiträde","köksbiträde",
+  "städ","lokalvårdare","reception","receptionist",
+  "personlig assistent","vårdbiträde","stödassistent",
+  "extrajobb","sommarjobb","helgjobb","utan erfarenhet",
+  "montör","produktionsmedarbetare","maskinoperatör",
+  "bud","chaufför utan erfarenhet","telefonförsäljare",
+  "administratör","kontorsassistent","butiksbiträde"
+];
+const SIDOR_PER_SOKNING = 2;   // 100 per sida
+
+// ── titlar som aldrig visas ───────────────────────────────────────────
 const YRKESSTOPP = [
   "lakare","läkare","sjukskoterska","sjuksköterska","barnmorska","psykolog",
   "tandlakare","tandläkare","socionom","jurist","advokat","ingenjor","ingenjör",
   "utvecklare","arkitekt","revisor","larare","lärare","forskollarare","förskollärare",
   "chef","controller","specialist","konsult","analytiker","projektledare",
   "intendent","antikvarie","bibliotekarie","kurator","handlaggare","handläggare",
-  "samordnare","koordinator","ekonom","redovisning","rekryterare",
+  "samordnare","koordinator","ekonom","redovisningsass","rekryterare",
   "forskare","doktorand","adjunkt","lektor","professor","veterinar","veterinär",
   "arbetsterapeut","fysioterapeut","sjukgymnast","logoped","dietist","optiker",
-  "farmaceut","apotekare","tekniker","elektriker","rormokare","rörmokare",
-  "snickare","svetsare","maskinforare","maskinförare","chauffor","chaufför",
-  "pilot","polis","brandman","officer","maklare","mäklare","designer",
-  "art director","copywriter","fotograf","journalist","redaktor","redaktör"
+  "farmaceut","apotekare","elektriker","rormokare","rörmokare",
+  "snickare","svetsare","pilot","polis","brandman","officer","maklare","mäklare",
+  "art director","copywriter","journalist","redaktor","redaktör","undersköterska",
+  "underskoterska","barnskötare","barnskotare","tandhygienist","key account"
 ];
 
-// ── text som avslöjar krav på utbildning eller lång erfarenhet ─────────
 const TEXTSTOPP = [
   "examen","legitimation","legitimerad","hogskoleutbildning","högskoleutbildning",
   "universitetsutbildning","akademisk utbildning","eftergymnasial","yrkeshogskola",
-  "yrkeshögskola","relevant utbildning","flera ars erfarenhet","flera års erfarenhet",
-  "dokumenterad erfarenhet","gedigen erfarenhet","minst 2 ars","minst 2 års",
-  "minst 3 ars","minst 3 års","minst 5 ars","minst 5 års","minst tva ars",
-  "minst två års","minst tre ars","minst tre års"
-];
-
-// ── titlar som är typiska ingångsjobb ─────────────────────────────────
-const BRATITEL = [
-  "extrajobb","sommarjobb","helgjobb","ferie","extra personal","extrahjalp",
-  "extrahjälp","timanstalld","timanställd","studerande","student","feriearbete",
-  "sasongsjobb","säsongsjobb"
-];
-const INGANGSJOBB = [
-  "butikssaljare","butikssäljare","butiksmedarbetare","butiksbitrade","butiksbiträde",
-  "kassa","lagerarbetare","lagermedarbetare","orderplockare","plockare","terminalarbetare",
-  "stad","städ","lokalvardare","lokalvårdare","cleaner","diskare","kokbitrade",
-  "koksbitrade","köksbiträde","cafebitrade","cafébiträde","barista","servitris","servitor",
-  "servitör","runner","host","hostess","varuplockare","varupafyllare","varupåfyllare",
-  "budbil","tidningsbud","utdelare","vaktmastare","vaktmästare","skolmaltid","skolmåltid",
-  "maltidsbitrade","måltidsbiträde","personlig assistent","stodassistent","stödassistent"
-];
-
-// ── sådant en minderårig inte får eller bör göra ──────────────────────
-const EJ_MINDERARIG = [
-  "vaktare","väktare","ordningsvakt","bygg","byggnads","stallning","ställning",
-  "truck","maskinforare","maskinförare","nattarbete","bartender",
-  "alkohol","systembolag","kemikalie","hogtryck","högtryck","asfalt",
-  "svets","industri","fabrik","slakteri","skogsbruk","lantbruk","gruv"
+  "yrkeshögskola","flera ars erfarenhet","flera års erfarenhet",
+  "gedigen erfarenhet","minst 3 ars","minst 3 års","minst 5 ars","minst 5 års",
+  "minst tre ars","minst tre års","minst fem ars","minst fem års"
 ];
 
 const POSITIV_TEXT = [
-  "inga forkunskaper","inga förkunskaper","ingen erfarenhet","vi utbildar dig",
-  "vi larer dig","vi lär dig","du behover inte ha jobbat","du behöver inte ha jobbat",
-  "utbildning pa plats","utbildning på plats","inget krav pa erfarenhet",
-  "inget krav på erfarenhet","du behover ingen erfarenhet","du behöver ingen erfarenhet"
+  "inga forkunskaper","inga förkunskaper","ingen erfarenhet","ingen tidigare erfarenhet",
+  "vi utbildar dig","vi larer dig","vi lär dig","du behover inte ha jobbat",
+  "du behöver inte ha jobbat","utbildning pa plats","utbildning på plats",
+  "inget krav pa erfarenhet","inget krav på erfarenhet","du behover ingen erfarenhet",
+  "du behöver ingen erfarenhet","vi ser till att du far ratt utbildning",
+  "internutbildning","upplarning","upplärning","du far en gedigen introduktion",
+  "du får en gedigen introduktion","erfarenhet ar inget krav","erfarenhet är inget krav"
+];
+
+// ── kategorier: nyckelord i titeln ────────────────────────────────────
+const KATEGORIER = {
+  "Sälj": ["saljare","säljare","salj","sälj","account manager","innesaljare","innesäljare",
+           "utesaljare","utesäljare","telefonforsaljare","telefonförsäljare","telemarketing"],
+  "Butik": ["butik","kassa","expedit","store","shop","varuhus","varupafyllare","varupåfyllare"],
+  "Kundtjänst": ["kundtjanst","kundtjänst","kundservice","kundsupport","support","customer",
+                 "kundvard","kundvärd","reception","receptionist","vaxel","växel"],
+  "Lager och logistik": ["lager","terminal","plock","truck","gods","paket","distribution",
+                         "logistik","bud","chauffor","chaufför","transport","akeri","åkeri"],
+  "Restaurang och café": ["restaurang","kock","servit","cafe","café","barista","kok","kök",
+                          "diskare","pizza","sushi","bar ","hotell","runner","host"],
+  "Städ": ["stad","städ","lokalvard","lokalvård","cleaner","cleaning","fonsterputs","fönsterputs"],
+  "Vård och omsorg": ["assistent","vard","vård","omsorg","hemtjanst","hemtjänst","boende",
+                      "ledsagare","avlosare","avlösare"],
+  "Barn och skola": ["barn","fritids","forskola","förskola","elevassistent","skolmaltid","skolmåltid"],
+  "Industri och produktion": ["montor","montör","produktion","maskinoperator","maskinoperatör",
+                              "fabrik","tillverkning","packare","operator","operatör"],
+  "Kontor": ["administrator","administratör","kontorsassistent","assistent till","backoffice",
+             "orderadministrator","orderadministratör","registrator"]
+};
+
+const BRATITEL = [
+  "extrajobb","sommarjobb","helgjobb","ferie","extra personal","extrahjalp","extrahjälp",
+  "timanstalld","timanställd","studerande","student","feriearbete","sasongsjobb","säsongsjobb"
+];
+
+const EJ_MINDERARIG = [
+  "vaktare","väktare","ordningsvakt","bygg","byggnads","stallning","ställning",
+  "truck","maskinforare","maskinförare","nattarbete","bartender","alkohol",
+  "systembolag","kemikalie","hogtryck","högtryck","asfalt","svets","slakteri",
+  "skogsbruk","gruv","chaufför","chauffor","montör","montor","maskinoperatör","maskinoperator"
 ];
 
 function harNagot(text, lista) {
@@ -62,6 +86,16 @@ function harNagot(text, lista) {
   return false;
 }
 
+function kategori(a) {
+  const titel = (a.headline || "").toLowerCase();
+  for (const namn in KATEGORIER) {
+    if (harNagot(titel, KATEGORIER[namn])) return namn;
+  }
+  return "Övrigt";
+}
+
+// Poängen mäter BARA hur få hinder som finns. Inget om heltid eller deltid,
+// den preferensen hör hemma i användarens egna svar.
 function poang(a) {
   const titel = (a.headline || "").toLowerCase();
   const text = ((a.description ? a.description.text : "") + " " + titel).toLowerCase();
@@ -71,21 +105,16 @@ function poang(a) {
   if (harNagot(text, TEXTSTOPP)) return -20;
 
   const positiv = harNagot(text, POSITIV_TEXT);
-  if (a.experience_required === true && !positiv) p -= 1;
 
-  if (harNagot(titel, BRATITEL)) p += 3;
-  if (harNagot(titel, INGANGSJOBB)) p += 2;
-  if (a.experience_required === false) p += 3;
-  if (positiv) p += 3;
+  if (a.experience_required === false) p += 4;
+  if (positiv) p += 4;
+  if (harNagot(titel, BRATITEL)) p += 2;
+  if (kategori(a) !== "Övrigt") p += 2;
 
-  const omfattning = ((a.working_hours_type ? a.working_hours_type.label : "") || "").toLowerCase();
-  if (omfattning.indexOf("deltid") > -1) p += 2;
-
-  const form = ((a.employment_type ? a.employment_type.label : "") || "").toLowerCase();
-  if (form.indexOf("behov") > -1 || form.indexOf("sommar") > -1 ||
-      form.indexOf("sasong") > -1 || form.indexOf("säsong") > -1) p += 2;
-
-  if (a.driving_license_required === true) p -= 3;
+  if (a.experience_required === true && !positiv) p -= 2;
+  if (a.driving_license_required === true) p -= 2;
+  if (harNagot(text, ["minst 2 ars","minst 2 års","minst tva ars","minst två års",
+                      "nagra ars erfarenhet","några års erfarenhet"])) p -= 3;
 
   return p;
 }
@@ -100,50 +129,60 @@ function okForMinderarig(a) {
   const titel = (a.headline || "").toLowerCase();
   const text = ((a.description ? a.description.text : "") + " " + titel).toLowerCase();
   if (harNagot(titel, EJ_MINDERARIG)) return false;
-  if (harNagot(text, ["fyllda 18","myndig","minst 18 ar","minst 18 år"])) return false;
+  if (harNagot(text, ["fyllda 18","minst 18 ar","minst 18 år","myndig"])) return false;
   return true;
 }
 
 async function hamtaJobb() {
+  const sedda = {};
   const jobb = [];
   const nu = new Date();
-  const sidor = 20;
-  let bortsorterade = 0;
+  let hamtade = 0, bortsorterade = 0;
 
-  for (let i = 0; i < sidor; i++) {
-    const url = "https://jobsearch.api.jobtechdev.se/search?limit=100&offset=" + (i * 100);
-    const svar = await fetch(url);
-    if (!svar.ok) { console.log("Stopp vid sida " + (i + 1)); break; }
+  for (const term of SOKNINGAR) {
+    for (let sida = 0; sida < SIDOR_PER_SOKNING; sida++) {
+      const url = "https://jobsearch.api.jobtechdev.se/search?q=" +
+                  encodeURIComponent(term) + "&limit=100&offset=" + (sida * 100);
+      let data;
+      try {
+        const svar = await fetch(url);
+        if (!svar.ok) break;
+        data = await svar.json();
+      } catch (e) { break; }
+      if (!data.hits || data.hits.length === 0) break;
 
-    const data = await svar.json();
-    if (!data.hits || data.hits.length === 0) break;
+      for (const a of data.hits) {
+        hamtade++;
+        if (sedda[a.id]) continue;
+        sedda[a.id] = true;
 
-    for (const a of data.hits) {
-      if (a.application_deadline) {
-        const slut = new Date(a.application_deadline);
-        if (!isNaN(slut) && slut < nu) { bortsorterade++; continue; }
+        if (a.application_deadline) {
+          const slut = new Date(a.application_deadline);
+          if (!isNaN(slut) && slut < nu) { bortsorterade++; continue; }
+        }
+
+        const p = poang(a);
+        if (p < 3) { bortsorterade++; continue; }
+
+        jobb.push({
+          titel: a.headline,
+          arbetsgivare: a.employer ? a.employer.name : "",
+          ort: a.workplace_address && a.workplace_address.municipality ? a.workplace_address.municipality : "",
+          omfattning: a.working_hours_type ? a.working_hours_type.label : "",
+          anstallningsform: a.employment_type ? a.employment_type.label : "",
+          kategori: kategori(a),
+          erfarenhetKravs: a.experience_required,
+          korkortKravs: a.driving_license_required,
+          utdrag: utdragskrav(a),
+          minderarigOk: okForMinderarig(a),
+          poang: p,
+          chansniva: p >= 8 ? "hog" : (p >= 5 ? "medel" : "lag"),
+          lank: a.webpage_url,
+          sistaAnsokningsdag: a.application_deadline
+        });
       }
-
-      const p = poang(a);
-      if (p < 2) { bortsorterade++; continue; }
-
-      jobb.push({
-        titel: a.headline,
-        arbetsgivare: a.employer ? a.employer.name : "",
-        ort: a.workplace_address && a.workplace_address.municipality ? a.workplace_address.municipality : "",
-        omfattning: a.working_hours_type ? a.working_hours_type.label : "",
-        anstallningsform: a.employment_type ? a.employment_type.label : "",
-        erfarenhetKravs: a.experience_required,
-        korkortKravs: a.driving_license_required,
-        utdrag: utdragskrav(a),
-        minderarigOk: okForMinderarig(a),
-        poang: p,
-        chansniva: p >= 6 ? "hog" : (p >= 4 ? "medel" : "lag"),
-        lank: a.webpage_url,
-        sistaAnsokningsdag: a.application_deadline
-      });
     }
-    console.log("Hämtat sida " + (i + 1) + " av " + sidor);
+    console.log("Sökt: " + term + "  (" + jobb.length + " jobb hittills)");
   }
 
   jobb.sort(function (x, y) { return y.poang - x.poang; });
@@ -151,20 +190,18 @@ async function hamtaJobb() {
   fs.writeFileSync("docs/jobb.json", JSON.stringify(jobb, null, 2));
   fs.writeFileSync("docs/jobb.js", "const JOBB = " + JSON.stringify(jobb) + ";");
 
-  const orter = {};
-  let hog = 0, medel = 0, lag = 0, minder = 0;
+  const orter = {}, kat = {}, omf = {};
   for (const j of jobb) {
     if (j.ort) orter[j.ort] = true;
-    if (j.chansniva === "hog") hog++;
-    else if (j.chansniva === "medel") medel++;
-    else lag++;
-    if (j.minderarigOk) minder++;
+    kat[j.kategori] = (kat[j.kategori] || 0) + 1;
+    const o = j.omfattning || "Ej angivet";
+    omf[o] = (omf[o] || 0) + 1;
   }
 
-  console.log("Klart. " + jobb.length + " jobb i " + Object.keys(orter).length + " kommuner.");
-  console.log("Bäst chans: " + hog + ", Värd att söka: " + medel + ", Högre krav: " + lag);
-  console.log("Okej för under 18: " + minder);
-  console.log("Bortsorterade: " + bortsorterade);
+  console.log("\nKlart. " + jobb.length + " jobb i " + Object.keys(orter).length + " kommuner.");
+  console.log("Omfattning:", omf);
+  console.log("Kategorier:", kat);
+  console.log("Hämtade annonser totalt: " + hamtade + ", bortsorterade: " + bortsorterade);
 }
 
 hamtaJobb();
