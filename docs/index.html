@@ -88,6 +88,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div class="field">
+    <label class="fraga">Vad heter du?</label>
+    <input class="txt" id="namn" placeholder="För- och efternamn" value="">
+    <div class="hint">Används bara för att skriva under din ansökan. Sparas i din telefon.</div>
+  </div>
+
+  <div class="field">
     <label class="fraga">Var bor du?</label>
     <input class="txt" id="ort" placeholder="Skriv din kommun" value="">
     <div class="hint">Lämna tomt om du vill se jobb i hela Sverige.</div>
@@ -158,6 +164,23 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <h1>Mina jobb</h1>
   <p class="sub">Sparade, sökta och de du fått svar på.</p>
   <div id="mina-innehall"></div>
+</div>
+
+<div id="v-ansokan" class="dold">
+  <button class="lank" onclick="visaVy('jobb')">Tillbaka till jobben</button>
+  <h1 style="margin-top:16px;font-size:30px" id="a-rubrik">Din ansökan</h1>
+  <div style="font-size:15px;color:var(--n-700);margin-bottom:20px" id="a-jobb"></div>
+
+  <textarea id="a-text" style="width:100%;min-height:420px;padding:20px;font:inherit;font-size:15px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical"></textarea>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 26px">
+    <button class="btn" onclick="kopiera()">Kopiera texten</button>
+    <button class="mini" onclick="skrivOm()">Skriv om</button>
+    <button class="mini" id="a-sokt">Jag har sökt</button>
+  </div>
+
+  <h2 style="font-family:var(--heading);font-weight:400;font-size:21px;margin:0 0 10px">Innan du skickar</h2>
+  <div id="a-tips"></div>
 </div>
 
 <div id="v-tider" class="dold info">
@@ -292,7 +315,7 @@ var fragor = {
 };
 
 var flerval = { nar:true, omrade:true };
-var svar = { alder:null, ort:"", nar:[], omfattning:null, utbildning:null, korkort:null, erfarenhet:null, omrade:[] };
+var svar = { namn:"", alder:null, ort:"", nar:[], omfattning:null, utbildning:null, korkort:null, erfarenhet:null, omrade:[] };
 try {
   var sparat = localStorage.getItem("chansen");
   var tolkatSvar = sparat ? JSON.parse(sparat) : null;
@@ -338,11 +361,13 @@ function valj(falt, varde){
 function spara(){
   var f = document.getElementById("ort");
   svar.ort = f ? f.value.trim() : "";
+  var n = document.getElementById("namn");
+  if (n) svar.namn = n.value.trim();
   try { localStorage.setItem("chansen", JSON.stringify(svar)); } catch(e){}
 }
 
 function visaVy(vy){
-  var vyer = ["start","jobb","mina","tider","utdrag","om"];
+  var vyer = ["start","jobb","mina","ansokan","tider","utdrag","om"];
   for (var i = 0; i < vyer.length; i++){
     var el = document.getElementById("v-" + vyer[i]);
     var bas = (vyer[i] === "tider" || vyer[i] === "utdrag" || vyer[i] === "om") ? "info" : "";
@@ -464,7 +489,9 @@ function kort(j){
     '<div class="taggar">'+taggar+'</div>'+
     '<div class="rad"><a class="btn liten" href="'+j.lank+'" target="_blank">Se annonsen</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
-    '<div class="knapprad">'+ statusknappar(j.lank) +'</div></div>';
+    '<div class="knapprad">'+
+      '<button class="mini" onclick="oppnaAnsokan(\''+j.lank+'\')">Skriv ansökan</button>'+
+      statusknappar(j.lank) +'</div></div>';
 }
 
 function statusknappar(lank){
@@ -556,6 +583,206 @@ function nollstall(){
   visa("alla");
 }
 
+
+// ══════════════ ansökningshjälpen ══════════════
+var KATEGORITEXT = {
+  "Sälj": {
+    styrka: "Jag är inte rädd för att ta kontakt med människor och tycker om att prata med folk jag inte känt sedan tidigare.",
+    tips: ["Nämn en gång du övertygat någon om något, det behöver inte vara på ett jobb",
+           "Säljjobb rekryterar ofta löpande, så ring gärna upp några dagar efter",
+           "Skriv att du är nyfiken på att lära dig, det väger tyngre än erfarenhet här"]
+  },
+  "Kundtjänst": {
+    styrka: "Jag är lugn när folk är stressade och tycker om att reda ut saker åt andra.",
+    tips: ["Skriv tydligt och utan stavfel, det är precis det jobbet går ut på",
+           "Nämn om du är bekväm med telefon, många är inte det",
+           "Kan du fler språk än svenska, skriv det"]
+  },
+  "Butik": {
+    styrka: "Jag trivs med att möta kunder och att ha något att göra hela passet.",
+    tips: ["Gå in i butiken och lämna ansökan personligen om du kan, det gör stor skillnad",
+           "Nämn vilka tider du kan jobba, butiker behöver oftast kvällar och helger",
+           "Skriv kort, butikschefer läser många ansökningar"]
+  },
+  "Lager och logistik": {
+    styrka: "Jag jobbar på i eget tempo, är noggrann och har inget emot fysiskt arbete.",
+    tips: ["Nämn att du kommer i tid, det är det viktigaste för lager",
+           "Skriv om du kan jobba tidiga morgnar eller kvällar",
+           "Har du truckkort eller körkort, sätt det högt upp"]
+  },
+  "Restaurang och café": {
+    styrka: "Jag håller huvudet kallt när det är mycket att göra och tycker om högt tempo.",
+    tips: ["Gå in personligen under lugn tid, alltså inte lunch eller fredagkväll",
+           "Nämn helger och kvällar, det är då de behöver folk",
+           "Skriv om du är snabb att lära, resten lär de dig på plats"]
+  },
+  "Städ": {
+    styrka: "Jag är noggrann, jobbar självständigt och blir klar med det jag börjat.",
+    tips: ["Nämn att du kan jobba tidigt eller sent, det är då städ oftast sker",
+           "Skriv att du klarar att jobba ensam, det är vanligt i städjobb",
+           "Har du körkort, nämn det, många städjobb kräver att man tar sig mellan objekt"]
+  },
+  "Vård och omsorg": {
+    styrka: "Jag är lyhörd, tålmodig och tycker om att göra något som betyder något för någon annan.",
+    tips: ["Skriv varför du vill jobba med människor, det är det de letar efter",
+           "Nämn om du kan jobba helger, det är då bemanningen är tunnast",
+           "Räkna med att de begär utdrag ur belastningsregistret"]
+  },
+  "Barn och skola": {
+    styrka: "Jag är tålmodig med barn och tycker om att vara den som håller ordning utan att bli sträng.",
+    tips: ["Nämn erfarenhet av barn även om den inte är från jobb, syskon eller barnvakt räknas",
+           "De kommer begära utdrag ur belastningsregistret, det är helt normalt",
+           "Skriv vilka tider på dagen du kan, fritids behöver oftast eftermiddagar"]
+  },
+  "Industri och produktion": {
+    styrka: "Jag är noggrann, följer instruktioner och har inget emot att göra samma sak flera gånger om det blir rätt.",
+    tips: ["Nämn om du kan jobba skift, det är ofta ett krav",
+           "Skriv att du kommer i tid och är pålitlig, det är det de bryr sig om",
+           "Har du jobbat med händerna på något sätt, nämn det"]
+  },
+  "Kontor": {
+    styrka: "Jag är ordningsam, håller reda på detaljer och är van vid dator.",
+    tips: ["Nämn vilka program du kan, även bara Word och Excel",
+           "Skriv tydligt och kort, det är ett arbetsprov i sig",
+           "Nämn om du är noggrann med stavning"]
+  },
+  "Övrigt": {
+    styrka: "Jag lär mig snabbt och är inte rädd för att fråga när jag är osäker.",
+    tips: ["Skriv varför just det här jobbet, inte varför du vill ha ett jobb",
+           "Håll brevet under en halv A4, längre läses sällan",
+           "Hör av dig efter en vecka om du inte fått svar"]
+  }
+};
+
+function tillganglighet(){
+  var n = svar.nar || [];
+  if (!n.length) return "";
+  if (n.indexOf("När som helst") > -1) return "Jag kan jobba när som helst";
+  var d = [];
+  if (n.indexOf("Helger") > -1) d.push("helger");
+  if (n.indexOf("Kvällar") > -1) d.push("kvällar");
+  if (n.indexOf("Lov och sommar") > -1) d.push("lov och sommar");
+  return "Jag kan jobba " + d.join(" och ");
+}
+
+function erfarenhetsrad(){
+  if (svar.erfarenhet === "Aldrig jobbat")
+    return "Jag har inte jobbat tidigare, men jag är van vid att ta ansvar och lär mig snabbt när någon visar hur ni vill ha det gjort.";
+  if (svar.erfarenhet === "Lite")
+    return "Jag har jobbat lite tidigare och vet hur det är att passa tider och göra det man blivit tillsagd att göra.";
+  if (svar.erfarenhet === "En del")
+    return "Jag har jobbat en del tidigare och behöver ingen lång upplärning för att komma in i rutinerna.";
+  return "";
+}
+
+function utbildningsrad(){
+  if (svar.utbildning === "Går i grundskolan") return "Jag går i grundskolan just nu.";
+  if (svar.utbildning === "Går på gymnasiet") return "Jag går på gymnasiet just nu.";
+  if (svar.utbildning === "Gymnasieexamen") return "Jag har gymnasieexamen.";
+  return "";
+}
+
+function kortTitel(t){
+  var s = (t || "jobbet").trim();
+  // klipp vid utropstecken, tankstreck, komma eller parentes om det som blir kvar duger
+  var brytare = ["!", " – ", " - ", ",", "(", "?"];
+  for (var i = 0; i < brytare.length; i++){
+    var pos = s.indexOf(brytare[i]);
+    if (pos > 7) s = s.slice(0, pos);
+  }
+  s = s.replace(/\.\.\.$/, "").trim();
+  if (s.length > 55) s = s.slice(0, 55).trim();
+  return s;
+}
+
+function byggBrev(j){
+  var kat = KATEGORITEXT[j.kategori] || KATEGORITEXT["Övrigt"];
+  var namn = svar.namn || "[ditt namn]";
+  var arb = j.arbetsgivare || "er";
+  var rader = [];
+
+  rader.push("Hej,");
+  rader.push("");
+  rader.push("Jag såg er annons om jobbet som " + kortTitel(j.titel) + " hos " + arb + " och vill gärna söka det.");
+  rader.push("");
+
+  var stycke2 = [];
+  var u = utbildningsrad(); if (u) stycke2.push(u);
+  var e = erfarenhetsrad(); if (e) stycke2.push(e);
+  if (stycke2.length) { rader.push(stycke2.join(" ")); rader.push(""); }
+
+  var stycke3 = [kat.styrka];
+  var t = tillganglighet();
+  if (t) {
+    var extra = "";
+    if (svar.omfattning === "Heltid") extra = ", och jag söker heltid";
+    else if (svar.omfattning === "Deltid") extra = ", och jag söker deltid";
+    stycke3.push(t + extra + ".");
+  }
+  if (svar.korkort === "Ja") stycke3.push("Jag har körkort.");
+  rader.push(stycke3.join(" "));
+  rader.push("");
+
+  rader.push("Jag kan börja omgående och kommer gärna in på en intervju när det passar er. Hör av er om ni vill veta något mer.");
+  rader.push("");
+  rader.push("Vänliga hälsningar");
+  rader.push(namn);
+  rader.push("[din mejladress]");
+  rader.push("[ditt telefonnummer]");
+
+  return rader.join("\n");
+}
+
+var aktuelltJobb = null;
+
+function oppnaAnsokan(lank){
+  var j = hittaJobb(lank);
+  if (!j) return;
+  aktuelltJobb = j;
+  document.getElementById("a-jobb").textContent =
+    j.titel + " · " + j.arbetsgivare + (j.ort ? " · " + j.ort : "");
+  document.getElementById("a-text").value = byggBrev(j);
+
+  var kat = KATEGORITEXT[j.kategori] || KATEGORITEXT["Övrigt"];
+  var tips = kat.tips.slice();
+  if (j.utdrag === "kravs") tips.push("Annonsen nämner registerutdrag, så räkna med att de begär ett");
+  if (j.sistaAnsokningsdag) {
+    var d = dagarKvar(j.sistaAnsokningsdag);
+    if (d !== null && d >= 0 && d <= 7) tips.unshift("Skynda dig, det är bara " + (d === 0 ? "sista dagen" : d + " dagar kvar"));
+  }
+  document.getElementById("a-tips").innerHTML = tips.map(function(x){
+    return '<div class="card" style="padding:16px 20px;border-radius:24px;margin-bottom:10px;font-size:15px">' + x + '</div>';
+  }).join("");
+
+  document.getElementById("a-sokt").onclick = function(){
+    settStatus(lank, "sokt");
+    this.textContent = "Markerad som sökt";
+  };
+  document.getElementById("a-sokt").textContent =
+    (minaJobb[lank] && (minaJobb[lank].lage === "sokt" || minaJobb[lank].lage === "svar"))
+      ? "Markerad som sökt" : "Jag har sökt";
+
+  visaVy("ansokan");
+}
+
+function skrivOm(){
+  if (aktuelltJobb) document.getElementById("a-text").value = byggBrev(aktuelltJobb);
+}
+
+function kopiera(){
+  var f = document.getElementById("a-text");
+  f.select();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(f.value);
+    } else {
+      document.execCommand("copy");
+    }
+    var k = event && event.target;
+    if (k) { var gammal = k.textContent; k.textContent = "Kopierat"; setTimeout(function(){ k.textContent = gammal; }, 1800); }
+  } catch(e){}
+}
+
 var aktivtFilter = "alla";
 
 function visa(filter){
@@ -590,6 +817,7 @@ function visa(filter){
 
 ritaFragor();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
+if (svar.namn) document.getElementById("namn").value = svar.namn;
 ritaMina();
 if (svar.alder) { startaLista(); } else { visaVy("start"); }
 </script>
