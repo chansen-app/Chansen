@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chansen</title>
+<title>Chansen — jobb du faktiskt kan få | extrajobb, sommarjobb och deltid utan erfarenhet</title>
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="description" content="Chansen visar jobb med låga ingångskrav i hela Sverige, sorterade efter hur få hinder som finns. Hjälp med ansökan och CV. Gratis, inget konto.">
 
 <meta property="og:type" content="website">
@@ -22,6 +24,28 @@
 <meta name="twitter:image" content="https://chansen-app.github.io/Chansen/delning.png">
 
 <link rel="canonical" href="https://chansen-app.github.io/Chansen/">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Chansen",
+  "url": "https://chansen-app.github.io/Chansen/",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Alla, fungerar i webbläsaren",
+  "inLanguage": "sv-SE",
+  "description": "Chansen visar jobb med låga ingångskrav i hela Sverige, sorterade efter hur få hinder som finns. Hjälp med ansökan och CV. Gratis, inget konto.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "SEK" },
+  "featureList": [
+    "Jobb utan krav på erfarenhet",
+    "Sortering efter hur låga kraven är",
+    "Förslag på ansökan",
+    "CV-byggare med mallar och PDF",
+    "Arbetstidsregler för minderåriga",
+    "Information om belastningsregistret"
+  ]
+}
+</script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#c67139">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -223,6 +247,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div class="rakning" id="rakning"></div>
+  <div style="margin:-6px 0 16px"><button class="lank" onclick="delaChansen()">Tipsa någon om Chansen</button></div>
   <div id="notis"></div>
   <div id="lista"></div>
 </div>
@@ -751,12 +776,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <h2>Det vi inte kan veta</h2>
   <p>Vi kan bara läsa vad som står i annonsen. Står det inget om registerutdrag betyder det inte att arbetsgivaren låter bli att begära ett. Är något viktigt för dig, fråga arbetsgivaren innan du lägger tid på ansökan.</p>
 
+  <h2>Tipsa någon</h2>
+  <p>Känner du någon som söker jobb? <button class="lank" onclick="delaChansen()">Dela Chansen</button></p>
+
   <h2>Kontakt</h2>
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 26</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 27</footer>
 </div>
+
+<div id="delabesked" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:6;font-size:14px"></div>
 
 <div id="cv-utskrift"></div>
 
@@ -978,6 +1008,7 @@ function kort(j){
     '<span class="dagar">'+dagtext+'</span></div>'+
     '<div class="knapprad">'+
       '<button class="mini" onclick="oppnaAnsokan(\''+encodeURI(lank)+'\')">Skriv ansökan</button>'+
+      '<button class="mini" onclick="delaJobb(\''+encodeURI(lank)+'\')">Dela</button>'+
       statusknappar(j.lank) +'</div></div>';
 }
 
@@ -1527,6 +1558,45 @@ function agSkicka(){
           agMejla(d);
         });
     });
+}
+
+// ── dela ────────────────────────────────────────────────
+var CHANSEN_URL = "https://chansen-app.github.io/Chansen/";
+
+function delaText(titel, text, url){
+  if (navigator.share) {
+    navigator.share({ title: titel, text: text, url: url }).catch(function(){});
+    return;
+  }
+  var allt = text + " " + url;
+  var kopierad = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(allt);
+      kopierad = true;
+    }
+  } catch(e){ kopierad = false; }
+
+  if (kopierad) { beromDelning("Länken är kopierad. Klistra in den där du vill dela."); }
+  else { window.prompt("Kopiera länken:", allt); }
+}
+
+function beromDelning(text){
+  var el = document.getElementById("delabesked");
+  if (!el) return;
+  el.textContent = text;
+  el.className = "ruta";
+  setTimeout(function(){ el.className = "dold"; }, 4000);
+}
+
+function delaChansen(){
+  delaText("Chansen", "Chansen visar jobb du faktiskt kan söka, utan krav på erfarenhet. Gratis.", CHANSEN_URL);
+}
+
+function delaJobb(lank){
+  var j = hittaJobb(decodeURI(lank));
+  if (!j) { delaChansen(); return; }
+  delaText(j.titel, j.titel + " hos " + j.arbetsgivare + (j.ort ? " i " + j.ort : "") + ". Hittat via Chansen: " + CHANSEN_URL, sakerLank(j.lank) || CHANSEN_URL);
 }
 
 // ══════════════ CV ══════════════
