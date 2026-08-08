@@ -718,7 +718,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 18</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 19</footer>
 </div>
 
 <div id="cv-utskrift"></div>
@@ -1022,9 +1022,9 @@ function nollstall(){
 
 // ══════════════ jobb från kalkylbladet ══════════════
 // Klistra in din publicerade CSV-adress här. Lämnas den tom hoppas det över.
-var BLAD_CSV = "";
+var BLAD_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTxWHsaNVsNy4cHw2E5ko259S8lpK-W2UukkOxbuPqwxENjO60dCXJm0aclAcLO-UG5TJ6vzEqIQ5U1/pub?gid=0&single=true&output=csv";
 // Adressen till skriptet som tar emot annonser. Lämnas den tom öppnas mejlen i stället.
-var SKICKA_URL = "";
+var SKICKA_URL = "https://script.google.com/macros/s/AKfycbxkQPEXo4qu04JP9kHBziLLCLXy-sQc_vgK86UtY29GnohJNR1yjfOdQuISwXZmlYSK/exec";
 
 function csvRader(text){
   var rader = [], falt = [], varde = "", inne = false;
