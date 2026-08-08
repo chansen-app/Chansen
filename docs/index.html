@@ -734,7 +734,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 21</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 22<br><span id="bladstatus">bladet: läser...</span></footer>
 </div>
 
 <div id="cv-utskrift"></div>
@@ -1141,12 +1141,20 @@ function bladTillJobb(csv){
   return ut;
 }
 
+function bladStatus(text){
+  var el = document.getElementById("bladstatus");
+  if (el) el.textContent = "bladet: " + text;
+}
+
 function hamtaBladjobb(){
-  if (!BLAD_CSV) return;
+  if (!BLAD_CSV) { bladStatus("ingen adress inlagd"); return; }
+  bladStatus("hämtar...");
   fetch(BLAD_CSV)
-    .then(function(r){ if (!r.ok) throw new Error("kunde inte hämta"); return r.text(); })
+    .then(function(r){ if (!r.ok) throw new Error("svarade " + r.status); return r.text(); })
     .then(function(txt){
+      var rader = csvRader(txt).length;
       var nya = bladTillJobb(txt);
+      bladStatus(rader + " rader, " + nya.length + " godkända");
       if (!nya.length) return;
       for (var i = 0; i < nya.length; i++){
         var finns = false;
@@ -1155,7 +1163,7 @@ function hamtaBladjobb(){
       }
       visa(aktivtFilter);
     })
-    .catch(function(){ /* tyst, appen fungerar utan */ });
+    .catch(function(fel){ bladStatus("gick inte att läsa (" + (fel && fel.message ? fel.message : "okänt fel") + ")"); });
 }
 
 // egna, manuellt granskade jobb läggs samman med Platsbanken
