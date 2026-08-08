@@ -69,6 +69,12 @@ nav button.on{background:var(--accent);color:var(--bg)}
 .mini{min-height:38px;padding:8px 14px;border-radius:999px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800)}
 .mini.on{background:var(--sage-100);border-color:var(--sage-800);color:var(--sage-800)}
 nav button{font-size:11px;padding:0 4px}
+.cvstapel{height:8px;background:var(--n-300);border-radius:4px;overflow:hidden;margin-bottom:12px}
+.cvstapel-fyll{height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width .3s ease}
+.cvsteg-nr{font-size:13px;color:var(--n-600);margin-bottom:26px}
+.cvfraga{font-family:var(--heading);font-weight:400;font-size:28px;line-height:1.2;margin:0 0 14px}
+.cvsteg{min-height:260px}
+.cvknappar{margin-top:10px;margin-bottom:30px}
 .cvflik{display:flex;gap:8px;margin-bottom:22px}
 .cvflik button{flex:1;min-height:48px;border-radius:999px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800)}
 .cvflik button.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
@@ -240,59 +246,81 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div id="cv-bygg" class="dold">
-    <div class="rakning" id="cv-status"></div>
+    <div class="cvstapel"><div class="cvstapel-fyll" id="cv-fyll"></div></div>
+    <div class="cvsteg-nr" id="cv-nr"></div>
 
-    <div class="field">
-      <label class="fraga">Namn</label>
+    <div class="cvsteg dold" data-falt="namn">
+      <h2 class="cvfraga">Vad heter du?</h2>
       <input class="txt cvf" id="cv-namn" placeholder="För- och efternamn">
     </div>
-    <div class="field">
-      <label class="fraga">Ort</label>
+
+    <div class="cvsteg dold" data-falt="ort">
+      <h2 class="cvfraga">Var bor du?</h2>
       <input class="txt cvf" id="cv-ort" placeholder="Malmö">
+      <div class="hint">Bara orten. Skriv aldrig din fullständiga adress i ett CV.</div>
     </div>
-    <div class="field">
-      <label class="fraga">Telefon</label>
+
+    <div class="cvsteg dold" data-falt="tel">
+      <h2 class="cvfraga">Ditt telefonnummer</h2>
       <input class="txt cvf" id="cv-tel" placeholder="07...">
+      <div class="hint">Det här är hur de når dig. Dubbelkolla siffrorna.</div>
     </div>
-    <div class="field">
-      <label class="fraga">Mejl</label>
+
+    <div class="cvsteg dold" data-falt="mejl">
+      <h2 class="cvfraga">Din mejladress</h2>
       <input class="txt cvf" id="cv-mejl" placeholder="fornamn.efternamn@...">
+      <div class="hint">Har du en med smeknamn i, skaffa en med ditt namn. Det tar två minuter.</div>
     </div>
 
-    <div class="field">
-      <label class="fraga">Kort om dig, tre rader</label>
-      <textarea class="cvf" id="cv-om" placeholder="Skriv fritt, eller tryck på ett förslag nedan"></textarea>
-      <div class="hint">Förslag att trycka på:</div>
-      <div class="chips" id="cv-omforslag"></div>
+    <div class="cvsteg dold" data-falt="om">
+      <h2 class="cvfraga">Kort om dig</h2>
+      <div class="hint" style="margin-top:0;margin-bottom:12px">Tryck på det som stämmer, ändra sen texten till ditt eget.</div>
+      <div class="chips" id="cv-omforslag" style="margin-bottom:14px"></div>
+      <textarea class="cvf" id="cv-om" placeholder="Tre rader om vem du är och vad du söker"></textarea>
     </div>
 
-    <div class="field">
-      <label class="fraga">Skola</label>
+    <div class="cvsteg dold" data-falt="skola">
+      <h2 class="cvfraga">Vilken skola går du på, eller gick du på?</h2>
       <input class="txt cvf" id="cv-skola" placeholder="Skolans namn och program">
-      <input class="txt cvf" id="cv-skolaar" placeholder="År, t.ex. 2023 till 2026" style="margin-top:10px">
+      <input class="txt cvf" id="cv-skolaar" placeholder="År, t.ex. 2023 till 2026" style="margin-top:12px">
     </div>
 
-    <div class="field">
-      <label class="fraga">Erfarenhet</label>
-      <div class="hint" style="margin-top:0;margin-bottom:10px">Tryck på det som stämmer, så fylls en färdig rad i. Ändra den sen till ditt eget.</div>
-      <div class="chips" id="cv-erfforslag"></div>
-      <textarea class="cvf" id="cv-erf" placeholder="En rad per sak du gjort" style="min-height:150px;margin-top:12px"></textarea>
+    <div class="cvsteg dold" data-falt="erf">
+      <h2 class="cvfraga">Vad har du gjort?</h2>
+      <div class="hint" style="margin-top:0;margin-bottom:12px">Har du aldrig jobbat har du ändå erfarenhet. Tryck på allt som stämmer, raderna skrivs färdiga åt dig.</div>
+      <div class="chips" id="cv-erfforslag" style="margin-bottom:14px"></div>
+      <textarea class="cvf" id="cv-erf" placeholder="En rad per sak du gjort" style="min-height:170px"></textarea>
     </div>
 
-    <div class="field">
-      <label class="fraga">Språk</label>
+    <div class="cvsteg dold" data-falt="sprak">
+      <h2 class="cvfraga">Vilka språk kan du?</h2>
       <input class="txt cvf" id="cv-sprak" placeholder="Svenska, engelska, ...">
-    </div>
-    <div class="field">
-      <label class="fraga">Övrigt</label>
-      <input class="txt cvf" id="cv-ovrigt" placeholder="Körkort, program du kan, certifikat">
+      <div class="hint">Skriv inte flytande om du inte är flytande. Det märks direkt.</div>
     </div>
 
-    <h2 style="font-family:var(--heading);font-weight:400;font-size:21px;margin:30px 0 12px">Ditt CV</h2>
-    <textarea id="cv-resultat" style="width:100%;min-height:460px;padding:20px;font:inherit;font-size:14px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical"></textarea>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 30px">
-      <button class="btn" onclick="kopieraCV()">Kopiera CV</button>
-      <button class="mini" onclick="cvVisa('guide')">Tillbaka till guiden</button>
+    <div class="cvsteg dold" data-falt="ovrigt">
+      <h2 class="cvfraga">Något mer värt att nämna?</h2>
+      <input class="txt cvf" id="cv-ovrigt" placeholder="Körkort, program du kan, certifikat">
+      <div class="hint">Hoppa över om du inte har något. Det är helt normalt.</div>
+    </div>
+
+    <div class="cvknappar">
+      <button class="btn block" id="cv-nasta" onclick="cvNasta()">Nästa</button>
+      <div style="display:flex;gap:14px;justify-content:center;margin-top:14px">
+        <button class="lank" id="cv-tillbaka" onclick="cvTillbaka()">Tillbaka</button>
+        <button class="lank" onclick="cvHoppa()">Hoppa över</button>
+      </div>
+    </div>
+
+    <div id="cv-klar" class="dold">
+      <h2 class="cvfraga" style="margin-bottom:6px">Ditt CV är klart</h2>
+      <div class="rakning" id="cv-status"></div>
+      <textarea id="cv-resultat" style="width:100%;min-height:440px;padding:20px;font:inherit;font-size:14px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical"></textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 30px">
+        <button class="btn" onclick="kopieraCV()">Kopiera CV</button>
+        <button class="mini" onclick="cvOm()">Ändra något</button>
+        <button class="mini" onclick="cvVisa('guide')">Till guiden</button>
+      </div>
     </div>
   </div>
 </div>
@@ -404,7 +432,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 8</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 9</footer>
 </div>
 
 <nav>
@@ -729,14 +757,55 @@ var ERF_FORSLAG = [
   ["Extrajobb butik", "Extrajobb i butik. Kassa, påfyllning av varor och kundfrågor."]
 ];
 
+var cvSteg = 0;
+var CV_STEG = ["namn","ort","tel","mejl","om","skola","erf","sprak","ovrigt"];
+
 function cvVisa(del){
   document.getElementById("cv-guide").className = del === "guide" ? "info" : "dold";
   document.getElementById("cv-bygg").className = del === "bygg" ? "" : "dold";
   document.getElementById("c-guide").className = del === "guide" ? "on" : "";
   document.getElementById("c-bygg").className = del === "bygg" ? "on" : "";
-  if (del === "bygg") byggCV();
+  if (del === "bygg") { cvSteg = forstaOfyllda(); ritaSteg(); }
   window.scrollTo(0,0);
 }
+
+function forstaOfyllda(){
+  for (var i = 0; i < CV_STEG.length; i++){
+    var v = cv[CV_STEG[i]];
+    if (!v || !String(v).trim()) return i;
+  }
+  return CV_STEG.length;
+}
+
+function ritaSteg(){
+  var alla = document.querySelectorAll(".cvsteg");
+  for (var i = 0; i < alla.length; i++){
+    alla[i].className = (i === cvSteg) ? "cvsteg" : "cvsteg dold";
+  }
+  var klar = cvSteg >= CV_STEG.length;
+  document.getElementById("cv-klar").className = klar ? "" : "dold";
+  document.getElementById("cv-knappar") && 0;
+  var kn = document.querySelector(".cvknappar");
+  if (kn) kn.className = klar ? "cvknappar dold" : "cvknappar";
+
+  var andel = Math.round((Math.min(cvSteg, CV_STEG.length) / CV_STEG.length) * 100);
+  document.getElementById("cv-fyll").style.width = andel + "%";
+  document.getElementById("cv-nr").textContent = klar
+    ? "Alla steg klara"
+    : "Steg " + (cvSteg + 1) + " av " + CV_STEG.length + ". Allt går att hoppa över.";
+
+  var tb = document.getElementById("cv-tillbaka");
+  if (tb) tb.style.visibility = cvSteg === 0 ? "hidden" : "visible";
+  var na = document.getElementById("cv-nasta");
+  if (na) na.textContent = (cvSteg === CV_STEG.length - 1) ? "Visa mitt CV" : "Nästa";
+
+  if (klar) byggCV();
+}
+
+function cvNasta(){ cvSpara(); cvSteg = Math.min(cvSteg + 1, CV_STEG.length); ritaSteg(); window.scrollTo(0,0); }
+function cvHoppa(){ cvSteg = Math.min(cvSteg + 1, CV_STEG.length); ritaSteg(); window.scrollTo(0,0); }
+function cvTillbaka(){ cvSteg = Math.max(cvSteg - 1, 0); ritaSteg(); window.scrollTo(0,0); }
+function cvOm(){ cvSteg = 0; ritaSteg(); window.scrollTo(0,0); }
 
 function cvSpara(){
   for (var i = 0; i < CV_FALT.length; i++){
@@ -761,7 +830,6 @@ function sattOm(text){
 }
 
 function oppnaCV(){
-  // förifyll från det appen redan vet
   if (!cv.namn && svar.namn) cv.namn = svar.namn;
   if (!cv.ort && svar.ort) cv.ort = svar.ort;
   if (!cv.sprak) cv.sprak = "Svenska, engelska";
@@ -769,10 +837,7 @@ function oppnaCV(){
 
   for (var i = 0; i < CV_FALT.length; i++){
     var el = document.getElementById("cv-" + CV_FALT[i]);
-    if (el) {
-      el.value = cv[CV_FALT[i]] || "";
-      el.oninput = cvSpara;
-    }
+    if (el) { el.value = cv[CV_FALT[i]] || ""; el.oninput = cvSpara; }
   }
 
   var of = document.getElementById("cv-omforslag");
@@ -798,12 +863,12 @@ function byggCV(){
   if (cv.ort) kontakt.push(cv.ort);
   if (cv.tel) kontakt.push(cv.tel);
   if (cv.mejl) kontakt.push(cv.mejl);
-  rader.push(kontakt.length ? kontakt.join("  ·  ") : "[ort]  ·  [telefon]  ·  [mejl]");
+  rader.push(kontakt.length ? kontakt.join("  &middot;  ").replace(/&middot;/g, "·") : "[ort]  ·  [telefon]  ·  [mejl]");
   rader.push("");
 
-  if (cv.om) { rader.push("OM MIG"); rader.push(cv.om.trim()); rader.push(""); }
+  if (cv.om && cv.om.trim()) { rader.push("OM MIG"); rader.push(cv.om.trim()); rader.push(""); }
 
-  if (cv.skola || cv.skolaar) {
+  if ((cv.skola && cv.skola.trim()) || (cv.skolaar && cv.skolaar.trim())) {
     rader.push("UTBILDNING");
     rader.push((cv.skola || "[skola]") + (cv.skolaar ? "   " + cv.skolaar : ""));
     rader.push("");
@@ -815,8 +880,8 @@ function byggCV(){
     rader.push("");
   }
 
-  if (cv.sprak) { rader.push("SPRÅK"); rader.push(cv.sprak); rader.push(""); }
-  if (cv.ovrigt) { rader.push("ÖVRIGT"); rader.push(cv.ovrigt); rader.push(""); }
+  if (cv.sprak && cv.sprak.trim()) { rader.push("SPRÅK"); rader.push(cv.sprak); rader.push(""); }
+  if (cv.ovrigt && cv.ovrigt.trim()) { rader.push("ÖVRIGT"); rader.push(cv.ovrigt); rader.push(""); }
 
   rader.push("REFERENSER");
   rader.push("Lämnas på begäran.");
@@ -824,14 +889,13 @@ function byggCV(){
   var ut = document.getElementById("cv-resultat");
   if (ut) ut.value = rader.join("\n");
 
-  // status: hur långt användaren kommit
   var klara = 0, viktiga = ["namn","tel","mejl","om","skola","erf"];
-  for (var i = 0; i < viktiga.length; i++){ if (cv[viktiga[i]] && cv[viktiga[i]].trim()) klara++; }
+  for (var i = 0; i < viktiga.length; i++){ if (cv[viktiga[i]] && String(cv[viktiga[i]]).trim()) klara++; }
   var st = document.getElementById("cv-status");
   if (st) {
     st.textContent = klara === viktiga.length
-      ? "Klart. Kopiera ditt CV längst ned."
-      : klara + " av " + viktiga.length + " ifyllt. Allt är frivilligt, hoppa över det du inte har.";
+      ? "Allt viktigt är ifyllt. Kopiera och klistra in där du söker."
+      : klara + " av " + viktiga.length + " viktiga delar ifyllda. Du kan lämna in det så här, eller trycka Ändra något.";
   }
 }
 
