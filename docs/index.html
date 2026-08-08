@@ -489,6 +489,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div class="field">
       <label class="fraga">Omfattning</label>
       <div class="seg" id="ag-omfattning"></div>
+      <div class="hint">Välj ett eller flera. Gäller annonsen både helg och kväll, kryssa i båda.</div>
     </div>
 
     <div class="field">
@@ -506,8 +507,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
     <div class="field">
       <label class="fraga">Lön</label>
-      <input class="txt agf" id="ag-lon" placeholder="Timlön, månadslön eller kollektivavtal">
-      <div class="hint">Obligatoriskt. Vi publicerar inte jobb utan lön.</div>
+      <div class="seg" id="ag-lonform"></div>
+      <div id="ag-belopp-ruta" class="dold" style="margin-top:12px">
+        <input class="txt agf" id="ag-belopp" placeholder="Belopp i kronor, t.ex. 145" inputmode="numeric">
+      </div>
+      <div class="hint" id="ag-lon-svar">Obligatoriskt. Vi publicerar inte jobb utan lön, och inte provision utan grundlön.</div>
     </div>
 
     <div class="field">
@@ -730,7 +734,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 20</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 21</footer>
 </div>
 
 <div id="cv-utskrift"></div>
@@ -861,12 +865,14 @@ function justeradPoang(j){
   if (j.korkortKravs === true && svar.korkort === "Ja") p += 2;
   if (svar.erfarenhet === "Aldrig jobbat" && j.erfarenhetKravs === false) p += 1;
 
-  if (svar.omfattning === "Heltid" && j.omfattning === "Heltid") p += 3;
-  if (svar.omfattning === "Deltid" && j.omfattning === "Deltid") p += 3;
+  if (svar.omfattning === "Heltid" && (j.omfattning||"").indexOf("Heltid") > -1) p += 3;
+  if (svar.omfattning === "Deltid" && (j.omfattning||"").indexOf("Deltid") > -1) p += 3;
 
   var nar = svar.nar || [];
   if (nar.indexOf("Lov och sommar") > -1 && (j.anstallningsform || "").toLowerCase().indexOf("behov") > -1) p += 1;
-  if (nar.indexOf("Helger") > -1 && (j.omfattning || "") === "Deltid") p += 1;
+  if (nar.indexOf("Helger") > -1 && (j.omfattning||"").indexOf("Deltid") > -1) p += 1;
+  if (nar.indexOf("Helger") > -1 && (j.omfattning||"").indexOf("Helger") > -1) p += 2;
+  if (nar.indexOf("Kvällar") > -1 && (j.omfattning||"").indexOf("Kvällar") > -1) p += 2;
   return p;
 }
 
@@ -1187,7 +1193,7 @@ function hjalpVisa(del){
 function agNyAnnons(){
   var falt = document.querySelectorAll(".agf");
   for (var i = 0; i < falt.length; i++){ falt[i].value = ""; }
-  ag = { omfattning:null, form:null, kategori:null, utdrag:null, minder:null };
+  ag = { omfattning:[], form:null, kategori:null, lonform:null, utdrag:null, minder:null };
   var f = document.getElementById("ag-formular"); if (f) f.className = "";
   var k = document.getElementById("ag-tack"); if (k) k.className = "dold";
   var kn = document.getElementById("ag-skicka");
@@ -1209,15 +1215,17 @@ function oppnaHjalp(del){
 
 
 // ══════════════ arbetsgivarformulär ══════════════
+var AG_FLERVAL = { omfattning: true };
 var AG_VAL = {
-  omfattning: ["Heltid","Deltid"],
+  omfattning: ["Heltid","Deltid","Helger","Kvällar","Sommar","Vid behov"],
   form: ["Tillsvidare","Behovsanställning","Sommar","Vikariat"],
   kategori: ["Sälj","Kundtjänst","Butik","Lager och logistik","Restaurang och café",
              "Städ","Vård och omsorg","Barn och skola","Industri och produktion","Kontor","Annat"],
+  lonform: ["Timlön","Månadslön","Enligt kollektivavtal"],
   utdrag: ["Ja","Nej"],
   minder: ["Ja","Nej"]
 };
-var ag = { omfattning:null, form:null, kategori:null, utdrag:null, minder:null };
+var ag = { omfattning:[], form:null, kategori:null, lonform:null, utdrag:null, minder:null };
 
 function orgnrOk(nr){
   var t = String(nr || "").replace(/\D/g,"");
@@ -1246,17 +1254,28 @@ function agRita(){
     var el = document.getElementById("ag-" + f);
     if (!el) continue;
     el.innerHTML = AG_VAL[f].map(function(v){
-      return '<button class="' + (ag[f] === v ? "on" : "") + '" onclick="agValj(\'' + f + '\',\'' + v.replace(/'/g,"") + '\')">' + v + '</button>';
+      var pa = AG_FLERVAL[f] ? ((ag[f] || []).indexOf(v) > -1) : (ag[f] === v);
+      return '<button class="' + (pa ? "on" : "") + '" onclick="agValj(\'' + f + '\',\'' + v.replace(/'/g,"") + '\')">' + v + '</button>';
     }).join("");
   }
   agKolla();
 }
 
 function agValj(f, v){
-  ag[f] = v;
+  if (AG_FLERVAL[f]){
+    if (!Array.isArray(ag[f])) ag[f] = [];
+    var i = ag[f].indexOf(v);
+    if (i > -1) ag[f].splice(i,1); else ag[f].push(v);
+  } else {
+    ag[f] = v;
+  }
   if (f === "kategori"){
     var r = document.getElementById("ag-annat-ruta");
     if (r) r.className = (v === "Annat") ? "" : "dold";
+  }
+  if (f === "lonform"){
+    var b = document.getElementById("ag-belopp-ruta");
+    if (b) b.className = (v === "Enligt kollektivavtal") ? "dold" : "";
   }
   agRita();
 }
@@ -1293,11 +1312,44 @@ function agKolla(){
     problem.push("domänerna stämmer inte");
   } else { if (ms) { ms.textContent = ""; } }
 
+  // lönen: belopp krävs om det inte är kollektivavtal, och det ska vara rimligt
+  var lonSvar = document.getElementById("ag-lon-svar");
+  var belopp = agFalt("belopp").replace(/\s/g,"").replace(/kr.*$/i,"");
+  if (ag.lonform && ag.lonform !== "Enligt kollektivavtal"){
+    if (!belopp){
+      if (lonSvar){ lonSvar.textContent = "Skriv beloppet i kronor. Ett jobb utan siffra publiceras inte."; lonSvar.style.color = "var(--accent-700)"; }
+      problem.push("lönebelopp");
+    } else if (!/^\d+$/.test(belopp)){
+      if (lonSvar){ lonSvar.textContent = "Skriv bara siffror, till exempel 145."; lonSvar.style.color = "var(--accent-700)"; }
+      problem.push("lönebelopp");
+    } else {
+      var n = parseInt(belopp,10);
+      var lag = ag.lonform === "Timlön" ? 80 : 15000;
+      var hog = ag.lonform === "Timlön" ? 500 : 90000;
+      if (n < lag){
+        if (lonSvar){ lonSvar.textContent = "Det ser lågt ut för " + ag.lonform.toLowerCase() + ". Kolla siffran."; lonSvar.style.color = "var(--accent-700)"; }
+        problem.push("lönebelopp");
+      } else if (n > hog){
+        if (lonSvar){ lonSvar.textContent = "Det ser högt ut för " + ag.lonform.toLowerCase() + ". Kolla siffran."; lonSvar.style.color = "var(--accent-700)"; }
+        problem.push("lönebelopp");
+      } else {
+        if (lonSvar){ lonSvar.textContent = "Lönen ser rimlig ut."; lonSvar.style.color = "var(--sage-800)"; }
+      }
+    }
+  } else if (lonSvar && ag.lonform === "Enligt kollektivavtal"){
+    lonSvar.textContent = "Bra. Skriv gärna vilket avtal i beskrivningen.";
+    lonSvar.style.color = "var(--n-600)";
+  }
+
   var kravda = [["foretag","företagets namn"],["orgnr","organisationsnummer"],["titel","jobbets namn"],
-                ["ort","ort"],["lon","lön"],["lank","länk"],["mejl","mejladress"],["kontakt","kontaktuppgifter"]];
+                ["ort","ort"],["lank","länk"],["mejl","mejladress"],["kontakt","kontaktuppgifter"]];
   var saknas = [];
   for (var i = 0; i < kravda.length; i++){ if (!agFalt(kravda[i][0])) saknas.push(kravda[i][1]); }
-  for (var f in AG_VAL){ if (!ag[f]) saknas.push(f === "minder" ? "om under 18 får jobba" : f); }
+  for (var f in AG_VAL){
+    var v = ag[f];
+    var tomt = AG_FLERVAL[f] ? !(v && v.length) : !v;
+    if (tomt) saknas.push(f === "minder" ? "om under 18 får jobba" : (f === "lonform" ? "lön" : f));
+  }
   if (ag.kategori === "Annat" && !agFalt("annat")) saknas.push("vilken bransch");
 
   var st = document.getElementById("ag-status");
@@ -1319,10 +1371,12 @@ function agData(){
     titel: agFalt("titel"),
     beskrivning: agFalt("beskrivning"),
     ort: agFalt("ort"),
-    omfattning: ag.omfattning || "",
+    omfattning: (ag.omfattning || []).join(", "),
     form: ag.form || "",
     kategori: ag.kategori || "",
-    lon: agFalt("lon"),
+    lon: (ag.lonform === "Enligt kollektivavtal")
+      ? "Enligt kollektivavtal"
+      : (ag.lonform || "") + " " + agFalt("belopp").replace(/\s/g,"").replace(/kr.*$/i,"") + " kr",
     utdrag: ag.utdrag || "",
     minder: ag.minder || "",
     annat: agFalt("annat"),
@@ -2031,8 +2085,8 @@ function visa(filter){
 
   var valda = JOBB.filter(matcharAlder).filter(matcharOrt).filter(matcharOmrade);
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
-  if(filter === "deltid") valda = valda.filter(function(j){ return j.omfattning === "Deltid"; });
-  if(filter === "heltid") valda = valda.filter(function(j){ return j.omfattning === "Heltid"; });
+  if(filter === "deltid") valda = valda.filter(function(j){ return (j.omfattning||"").indexOf("Deltid") > -1; });
+  if(filter === "heltid") valda = valda.filter(function(j){ return (j.omfattning||"").indexOf("Heltid") > -1; });
   if(filter === "utdrag") valda = valda.filter(function(j){ return j.utdrag !== "kravs"; });
 
   valda = valda.slice().sort(function(a,b){ return justeradPoang(b) - justeradPoang(a); });
