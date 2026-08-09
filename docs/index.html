@@ -803,7 +803,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 28</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 29</footer>
 </div>
 
 <div id="delabesked" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:6;font-size:14px"></div>
@@ -960,7 +960,7 @@ function justeradPoang(j){
   return p;
 }
 
-function niva(p){ return p >= 9 ? "hog" : (p >= 6 ? "medel" : "lag"); }
+function niva(p){ return p >= 8 ? "hog" : (p >= 5 ? "medel" : "lag"); }
 
 var minaJobb = {};
 try {
@@ -2208,6 +2208,30 @@ function kopiera(){
 }
 
 var aktivtFilter = "alla";
+var aktuellLista = [];
+var visatAntal = 0;
+var SIDSTORLEK = 20;
+
+function ritaBit(nollstall){
+  var el = document.getElementById("lista");
+  if (!el) return;
+  if (nollstall){ el.innerHTML = ""; visatAntal = 0; }
+
+  var till = Math.min(visatAntal + SIDSTORLEK, aktuellLista.length);
+  var bit = "";
+  for (var i = visatAntal; i < till; i++){ bit += kort(aktuellLista[i]); }
+  if (bit) el.insertAdjacentHTML("beforeend", bit);
+  visatAntal = till;
+
+  var knapp = document.getElementById("visa-fler");
+  if (knapp) knapp.parentNode.removeChild(knapp);
+  if (visatAntal < aktuellLista.length){
+    el.insertAdjacentHTML("beforeend",
+      '<div id="visa-fler" style="text-align:center;margin:10px 0 30px">' +
+      '<button class="mini" onclick="ritaBit(false)">Visa fler jobb (' +
+      (aktuellLista.length - visatAntal) + ' kvar)</button></div>');
+  }
+}
 
 function visa(filter){
   aktivtFilter = filter;
@@ -2234,9 +2258,14 @@ function visa(filter){
       : "");
   }
   document.getElementById("rakning").textContent = valda.length + " jobb i " + (svar.ort ? svar.ort : "hela Sverige");
-  document.getElementById("lista").innerHTML = valda.length
-    ? valda.map(kort).join("")
-    : tomtLage(filter);
+
+  if (!valda.length){
+    aktuellLista = [];
+    document.getElementById("lista").innerHTML = tomtLage(filter);
+    return;
+  }
+  aktuellLista = valda;
+  ritaBit(true);
 }
 
 ritaFragor();
@@ -2246,6 +2275,11 @@ if (svar.alder) { startaLista(); } else { visaVy("start"); }
 window.addEventListener("scroll", function(){
   var k = document.getElementById("upp");
   if (k) k.className = (window.scrollY > 600) ? "syns" : "";
+
+  if (aktuellLista.length && visatAntal < aktuellLista.length){
+    var kvar = document.body.scrollHeight - (window.scrollY + window.innerHeight);
+    if (kvar < 1200) ritaBit(false);
+  }
 });
 
 hamtaBladjobb();
