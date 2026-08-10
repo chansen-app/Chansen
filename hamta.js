@@ -97,6 +97,37 @@ const EJ_MINDERARIG = [
   "skogsbruk","gruv","chaufför","chauffor","montör","montor","maskinoperatör","maskinoperator"
 ];
 
+// ── provision utan grundlön ──────────────────────────────────────────
+// Provision är inte fel i sig. Grundlön plus provision är vanligt och tryggt.
+// Det farliga är annonser där provisionen är hela lönen, för då kan man
+// jobba en månad och få noll kronor. Dem sållar vi bort.
+const PROVISION_ORD = [
+  "provision","provisionsbaserad","provisionslon","provisionslön",
+  "provisionsbaserat","commission"
+];
+const GRUNDLON_ORD = [
+  "grundlon","grundlön","fast lon","fast lön","fast manadslon","fast månadslön",
+  "manadslon","månadslön","timlon","timlön","kollektivavtal","garantilon","garantilön",
+  "fast del","fast grund","fastlon","fastlön","enligt avtal","avtalsenlig"
+];
+const REN_PROVISION = [
+  "endast provision","ren provision","enbart provision","100% provision",
+  "100 % provision","helt provisionsbaserad","provision only","ingen grundlon",
+  "ingen grundlön","utan grundlon","utan grundlön","fri provision","obegransad provision",
+  "obegränsad provision","du styr din egen lon","du styr din egen lön"
+];
+
+function provisionUtanGrundlon(text) {
+  // uttalat ren provision, alltid bort
+  for (const ord of REN_PROVISION) { if (text.indexOf(ord) > -1) return true; }
+  // nämner provision men inte ett ord om fast lön
+  let harProvision = false;
+  for (const ord of PROVISION_ORD) { if (text.indexOf(ord) > -1) { harProvision = true; break; } }
+  if (!harProvision) return false;
+  for (const ord of GRUNDLON_ORD) { if (text.indexOf(ord) > -1) return false; }
+  return true;
+}
+
 function harNagot(text, lista) {
   for (const ord of lista) { if (text.indexOf(ord) > -1) return true; }
   return false;
@@ -119,6 +150,7 @@ function poang(a) {
 
   if (harNagot(titel, YRKESSTOPP)) return -20;
   if (harNagot(text, TEXTSTOPP)) return -20;
+  if (provisionUtanGrundlon(text)) return -20;
 
   const positiv = harNagot(text, POSITIV_TEXT);
 
@@ -151,6 +183,11 @@ function kortBeskrivning(a) {
   return t;
 }
 
+function harProvision(text) {
+  for (const ord of PROVISION_ORD) { if (text.indexOf(ord) > -1) return true; }
+  return false;
+}
+
 function utdragskrav(a) {
   const t = (a.description ? a.description.text : "").toLowerCase();
   if (t.indexOf("belastningsregister") > -1 || t.indexOf("registerutdrag") > -1) return "kravs";
@@ -169,7 +206,7 @@ async function hamtaJobb() {
   const sedda = {};
   const jobb = [];
   const nu = new Date();
-  let hamtade = 0, bortsorterade = 0;
+  let hamtade = 0, bortsorterade = 0, provisionsbort = 0;
 
   for (const term of SOKNINGAR) {
     for (let sida = 0; sida < SIDOR_PER_SOKNING; sida++) {
@@ -193,6 +230,9 @@ async function hamtaJobb() {
           if (!isNaN(slut) && slut < nu) { bortsorterade++; continue; }
         }
 
+        const brodtext = ((a.description ? a.description.text : "") + " " + (a.headline || "")).toLowerCase();
+        if (provisionUtanGrundlon(brodtext)) provisionsbort++;
+
         const p = poang(a);
         if (p < 3) { bortsorterade++; continue; }
 
@@ -207,6 +247,7 @@ async function hamtaJobb() {
           erfarenhetKravs: a.experience_required,
           korkortKravs: a.driving_license_required,
           utdrag: utdragskrav(a),
+        provision: harProvision(brodtext),
           minderarigOk: okForMinderarig(a),
           poang: p,
           chansniva: p >= 8 ? "hog" : (p >= 5 ? "medel" : "lag"),
@@ -235,6 +276,7 @@ async function hamtaJobb() {
   console.log("Omfattning:", omf);
   console.log("Kategorier:", kat);
   console.log("Hämtade annonser totalt: " + hamtade + ", bortsorterade: " + bortsorterade);
+  console.log("Varav provision utan grundlön: " + provisionsbort);
 }
 
 hamtaJobb();

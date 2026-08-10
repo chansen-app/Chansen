@@ -107,6 +107,7 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
 .taggar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .tag{font-size:11px;padding:4px 11px;border-radius:999px;background:var(--n-100);color:var(--n-800)}
 .tag.varm{background:var(--accent-100);color:var(--accent-800)}
+.tag.varn{background:#fce9e9;color:#7a1f1f}
 .tag.sage{background:var(--sage-100);color:var(--sage-800)}
 .rad{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .dagar{font-size:12px;color:var(--n-600)}
@@ -491,6 +492,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
       <li>Har du inte jobbat förut, säg det rakt ut och säg att du lär dig snabbt. Alla vet att någon måste vara först</li>
     </ul>
 
+    <h2>Om lön och provision</h2>
+    <p>Provision betyder att en del av lönen beror på hur mycket du säljer. Det är inte fel i sig, så länge du också har en grundlön som betalas ut oavsett.</p>
+    <p>Chansen visar aldrig jobb där provisionen är hela lönen, alltså där du kan jobba en månad och få noll kronor. Annonser som nämner provision utöver en fast lön märks med <b>Provision ingår i lönen</b>, så att du ser det innan du söker.</p>
+    <p>Fråga alltid vad grundlönen är innan du tackar ja. Får du inget rakt svar, tacka nej.</p>
+
     <h2>Sånt du ska undvika</h2>
     <ul>
       <li>Skicka samma brev till femtio ställen. Byt ut de tre första raderna varje gång</li>
@@ -815,7 +821,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
 </div>
 
-<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 30</footer>
+<footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center">Källa för jobben: Platsbanken, Arbetsförmedlingen<br>version 31</footer>
 </div>
 
 <div id="delabesked" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:6;font-size:14px"></div>
@@ -1024,6 +1030,7 @@ function kort(j){
   if(j.anstallningsform) taggar += '<span class="tag sage">'+fly(j.anstallningsform)+'</span>';
   if(j.korkortKravs === true && svar.korkort !== "Ja") taggar += '<span class="tag">Kräver körkort</span>';
   if(j.utdrag === "kravs") taggar += '<span class="tag">Kräver registerutdrag</span>';
+  if(j.provision) taggar += '<span class="tag varn">Provision ingår i lönen</span>';
 
   var d = dagarKvar(j.sistaAnsokningsdag), dagtext = "";
   if(d !== null && d >= 0 && d <= 7){
