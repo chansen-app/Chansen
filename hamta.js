@@ -51,6 +51,13 @@ const YRKESSTOPP = [
   "forskare","doktorand","adjunkt","lektor","professor","veterinar","veterinär",
   "arbetsterapeut","fysioterapeut","sjukgymnast","logoped","dietist","optiker",
   "farmaceut","apotekare","elektriker","rormokare","rörmokare",
+  "tandskoterska","tandsköterska","skotare","skötare","behandlingsassistent",
+  "boendestodjare","boendestödjare","habiliteringsassistent","undersköt",
+  "ambulans","akutsjukv","biomedicinsk","laboratorieing","audionom",
+  "ortopedtekniker","kiropraktor","naprapat","massor","massör","fotvard","fotvård",
+  "frisor","frisör","barberare","hudterapeut","nagelterapeut","florist",
+  "svetsare","plattsattare","plattsättare","malare","målare","murare",
+  "anlaggning","anläggning","besiktning","installator","installatör",
   "snickare","svetsare","pilot","polis","brandman","officer","maklare","mäklare",
   "art director","copywriter","journalist","redaktor","redaktör","undersköterska",
   "underskoterska","barnskötare","barnskotare","tandhygienist","key account"
@@ -61,7 +68,18 @@ const TEXTSTOPP = [
   "universitetsutbildning","akademisk utbildning","eftergymnasial","yrkeshogskola",
   "yrkeshögskola","flera ars erfarenhet","flera års erfarenhet",
   "gedigen erfarenhet","minst 3 ars","minst 3 års","minst 5 ars","minst 5 års",
-  "minst tre ars","minst tre års","minst fem ars","minst fem års"
+  "minst tre ars","minst tre års","minst fem ars","minst fem års",
+  "myndigheten for yrkeshogskolan","myndigheten för yrkeshögskolan",
+  " myh ","utbildning av myh","utbildad tandskoterska","utbildad tandsköterska",
+  "utbildad underskoterska","utbildad undersköterska","utbildad barnskotare",
+  "utbildad barnskötare","genomgangen utbildning","genomgången utbildning",
+  "formell utbildning","adekvat utbildning","relevant yrkesutbildning",
+  "yrkesutbildning inom","vardutbildning","vårdutbildning",
+  "omvardnadsprogram","omvårdnadsprogram","behorighetsbevis","behörighetsbevis",
+  "yrkesbevis","gesallbrev","gesällbrev",
+  "djurvardare niva","djurvårdare nivå","niva 2 eller 3","nivå 2 eller 3",
+  "steg 2","steg 3","c-kort","ce-kort","d-kort","truckkort","heta arbeten",
+  "liftkort","fallskydd","esa-utbildning","bas-p","bas-u"
 ];
 
 const POSITIV_TEXT = [
