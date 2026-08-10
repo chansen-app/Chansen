@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com;
+  script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://gc.zgo.at;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src https://fonts.gstatic.com data:;
-  img-src 'self' data:;
-  connect-src 'self' https://docs.google.com https://script.google.com https://*.googleusercontent.com https://cloudflareinsights.com https://static.cloudflareinsights.com;
+  img-src 'self' data: https://chansenapp.goatcounter.com;
+  connect-src 'self' https://docs.google.com https://script.google.com https://*.googleusercontent.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://chansenapp.goatcounter.com;
   form-action 'none';
   base-uri 'none';
   object-src 'none';
@@ -847,7 +847,7 @@ Jobbannonserna kommer från Arbetsförmedlingens öppna API JobSearch.<br>
 Data från Platsbanken, Arbetsförmedlingen, tillgängliggjord under
 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.sv" target="_blank" rel="noopener">CC BY-SA</a>.
 Bearbetad data i Chansen delas under samma licens.<br>
-version 34</footer>
+version 35</footer>
 </div>
 
 <div id="delabesked" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:6;font-size:14px"></div>
@@ -958,6 +958,11 @@ function profilrad(){
 
 function startaLista(){
   spara();
+  handelse("visade-jobb");
+  if (svar.alder) handelse("alder-" + slug(svar.alder));
+  if (svar.omfattning && svar.omfattning.length) handelse("soker-" + slug(svar.omfattning[0]));
+  if (svar.omrade && svar.omrade.length) handelse("omrade-" + slug(svar.omrade[0]));
+  if (svar.ort) handelse("ort-ifylld"); else handelse("ort-tom");
   document.getElementById("profil").textContent = profilrad();
   visaVy("jobb");
   visa("alla");
@@ -1020,6 +1025,7 @@ function sparaStatus(){
 }
 
 function settStatus(lank, lage){
+  if (lage !== "bort") handelse("jobb-" + lage);
   if (lage === "bort") { delete minaJobb[lank]; }
   else {
     var gammal = minaJobb[lank] || {};
@@ -1071,7 +1077,7 @@ function kort(j){
     (j.kontaktSokande ? '<div class="ag" style="margin-top:-8px">Kontakt: '+fly(j.kontaktSokande)+'</div>' : '')+
     (j.beskrivning ? '<div class="beskrivning">'+fly(j.beskrivning)+'</div>' : '')+
     '<div class="taggar">'+taggar+'</div>'+
-    '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow">Se annonsen</a>'+
+    '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow" onclick="handelse(\'klick-annons\')">Se annonsen</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
     '<div class="knapprad">'+
       '<button class="mini" onclick="oppnaAnsokan(\''+encodeURI(lank)+'\')">Skriv ansökan</button>'+
@@ -1338,6 +1344,7 @@ try {
 var hjalpDel = "soka";
 
 function hjalpVisa(del){
+  if (hjalpDel !== del) handelse("hjalp-" + del);
   hjalpDel = del;
   var delar = ["soka","tider","utdrag","arbetsgivare"];
   for (var i = 0; i < delar.length; i++){
@@ -1609,6 +1616,7 @@ function agMejla(d){
 }
 
 function agKlart(){
+  handelse("arbetsgivare-skickade");
   var f = document.getElementById("ag-formular");
   if (f) f.className = "dold";
   var k = document.getElementById("ag-tack");
@@ -1647,6 +1655,24 @@ function agSkicka(){
     });
 }
 
+// ── mätning ─────────────────────────────────────────────
+// Räknar vad folk gör, inte vilka de är. Ingen personuppgift skickas.
+function handelse(namn){
+  try {
+    if (window.goatcounter && window.goatcounter.count) {
+      window.goatcounter.count({ path: "handelse/" + namn, title: namn, event: true });
+    }
+  } catch(e){}
+}
+
+function slug(t){
+  return String(t || "")
+    .toLowerCase()
+    .replace(/[åä]/g,"a").replace(/ö/g,"o")
+    .replace(/[^a-z0-9]+/g,"-")
+    .replace(/^-|-$/g,"");
+}
+
 // ── dela ────────────────────────────────────────────────
 var CHANSEN_URL = "https://chansen-app.github.io/Chansen/";
 
@@ -1677,6 +1703,7 @@ function beromDelning(text){
 }
 
 function delaChansen(){
+  handelse("delade-appen");
   delaText("Chansen", "Chansen visar jobb du faktiskt kan söka, utan krav på erfarenhet. Gratis.", CHANSEN_URL);
 }
 
@@ -2029,11 +2056,13 @@ function ritaForhandsvisning(){
 }
 
 function skrivUtCV(){
+  handelse("cv-till-pdf");
   ritaForhandsvisning();
   window.print();
 }
 
 function kopieraCV(){
+  handelse("kopierade-cv");
   var f = document.getElementById("cv-resultat");
   f.select();
   try {
@@ -2204,6 +2233,7 @@ function oppnaAnsokan(lank){
 }
 
 function oppnaAnsokanInre(lank){
+  handelse("oppnade-ansokan");
   var j = hittaJobb(lank);
   if (!j) { throw new Error("Hittade inte jobbet i listan"); }
   aktuelltJobb = j;
@@ -2260,6 +2290,7 @@ function skrivOm(){
 }
 
 function kopiera(){
+  handelse("kopierade-ansokan");
   var f = document.getElementById("a-text");
   f.select();
   try {
@@ -2300,6 +2331,7 @@ function ritaBit(nollstall){
 }
 
 function visa(filter){
+  if (aktivtFilter !== filter) handelse("filter-" + filter);
   aktivtFilter = filter;
   var ids = ["alla","hog","deltid","heltid","utdrag"];
   for(var i=0;i<ids.length;i++){
@@ -2351,6 +2383,7 @@ window.addEventListener("scroll", function(){
 
 hamtaBladjobb();
 </script>
+<script data-goatcounter="https://chansenapp.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ba6ba77531354915b4838cee296406a5"}'></script>
 </body>
 </html>
