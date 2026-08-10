@@ -1,3 +1,14 @@
+/*  Chansen — hämtar och rangordnar jobbannonser
+ *
+ *  Datakälla: Arbetsförmedlingens öppna API JobSearch, annonser från Platsbanken.
+ *  Licens:    Creative Commons Erkännande-DelaLika (CC BY-SA).
+ *             Källan ska anges, och bearbetad data måste delas under samma licens.
+ *             https://creativecommons.org/licenses/by-sa/4.0/deed.sv
+ *
+ *  Filerna docs/jobb.js och docs/jobb.json som skapas här är en bearbetning
+ *  av den datan och omfattas därför av samma licens.
+ */
+
 const fs = require("fs");
 
 // ── sökningar: yrkesområden med låga ingångskrav ──────────────────────
