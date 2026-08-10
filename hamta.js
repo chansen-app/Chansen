@@ -66,23 +66,37 @@ const POSITIV_TEXT = [
 // ── kategorier: nyckelord i titeln ────────────────────────────────────
 const KATEGORIER = {
   "Butik": ["butik","kassa","expedit","store","shop","varuhus","varupafyllare","varupåfyllare",
-            "ica ","coop","willys","lidl","dollarstore","rusta","åhléns","ahlens"],
+            "ica ","coop","willys","lidl","dollarstore","rusta","åhléns","ahlens",
+            "kiosk","narlivs","närlivs","blomster","apotekstekniker","uthyr","second hand"],
   "Sälj": ["saljare","säljare","salj","sälj","account manager","innesaljare","innesäljare",
            "utesaljare","utesäljare","telefonforsaljare","telefonförsäljare","telemarketing"],
   "Kundtjänst": ["kundtjanst","kundtjänst","kundservice","kundsupport","customer support",
                  "kundvard","kundvärd","reception","receptionist","vaxel","växel","kundmottagare"],
   "Lager och logistik": ["lager","terminal","plock","truck","gods","paket","distribution",
-                         "logistik","bud","chauffor","chaufför","transport","akeri","åkeri"],
+                         "logistik","bud","chauffor","chaufför","transport","akeri","åkeri",
+                         "brevbarare","brevbärare","postiljon","utdelare","utkorning","utkörning",
+                         "lastare","lossning","emballering","packning","truckforare","truckförare"],
   "Restaurang och café": ["restaurang","kock","servit","cafe","café","barista","kok","kök",
-                          "diskare","pizza","sushi","bar ","hotell","runner","host"],
-  "Städ": ["stad","städ","lokalvard","lokalvård","cleaner","cleaning","fonsterputs","fönsterputs"],
+                          "diskare","pizza","sushi","bar ","hotell","runner","host","krog",
+                          "catering","bufe","buffé","frukost","kallskanka","kallskänka","bagare",
+                          "konditor","glass","food","burgare","sibylla","max ","kiosk och grill",
+                          "matsal","kost","bartender","barpersonal","servering"],
+  "Städ": ["stad","städ","lokalvard","lokalvård","cleaner","cleaning","fonsterputs","fönsterputs",
+           "tvatt","tvätt","textilservice","hygien","sanering","skursk"],
   "Vård och omsorg": ["assistent","vard","vård","omsorg","hemtjanst","hemtjänst","boende",
                       "ledsagare","avlosare","avlösare"],
   "Barn och skola": ["barn","fritids","forskola","förskola","elevassistent","skolmaltid","skolmåltid"],
   "Industri och produktion": ["montor","montör","produktion","maskinoperator","maskinoperatör",
-                              "fabrik","tillverkning","packare","operator","operatör"],
+                              "fabrik","tillverkning","packare","operator","operatör","industri",
+                              "verkstad","svarv","kvalitetskontroll","monterare","sortering",
+                              "atervinning","återvinning","miljoarbetare","miljöarbetare","sagverk","sågverk"],
   "Kontor": ["administrator","administratör","kontorsassistent","assistent till","backoffice",
-             "orderadministrator","orderadministratör","registrator","kontor","arkiv","kansli"]
+             "orderadministrator","orderadministratör","registrator","kontor","arkiv","kansli"],
+  "Event och kultur": ["event","konferens","festival","biljett","garderob","bingo","mässa","massa ",
+                       "publikvard","publikvärd","arena","museum","bio ","teater","fritidsgård",
+                       "camping","badhus","simhall","skiduthyr","turism"],
+  "Djur och natur": ["djur","hund","hast","häst","stall","tradgard","trädgård","park","skog",
+                     "lantbruk","vaxthus","växthus","gron","grön","zoo"]
 };
 
 const BRATITEL = [
