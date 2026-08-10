@@ -46,11 +46,30 @@ Filtret lovar ingenting. En arbetsgivare kan begära utdrag även om annonsen in
 
 Tjänsten frågar aldrig användaren om hens bakgrund och lagrar ingenting om den. Filtret finns för att ingen ska behöva lägga tid på en ansökan som ändå stoppas, och det används utan att någon behöver berätta något.
 
-## Data
+## Data och licens
 
 Jobbannonserna hämtas från Arbetsförmedlingens öppna API JobSearch, via JobTech Dev. Ett skript hämtar och rangordnar annonserna en gång per dygn.
 
-Källa: Platsbanken, Arbetsförmedlingen.
+**Källa:** Platsbanken, Arbetsförmedlingen.
+
+**Licens för datan:** Creative Commons Erkännande-DelaLika, CC BY-SA. Villkoren
+innebär att källan ska anges, och att den som bearbetar och sprider datan vidare
+måste göra det under samma licens.
+
+Chansen sorterar och rangordnar annonserna, vilket räknas som en bearbetning.
+Filerna `docs/jobb.js` och `docs/jobb.json` delas därför under samma licens,
+CC BY-SA. Se https://creativecommons.org/licenses/by-sa/4.0/deed.sv
+
+Villkoren i sin helhet finns hos https://jobtechdev.se
+
+**Licens för koden:** ingen licens är vald än. Det betyder att vanlig
+upphovsrätt gäller och att koden inte får återanvändas utan tillstånd.
+Väljs en licens senare påverkar det inte datan ovan, som styrs av
+Arbetsförmedlingens villkor.
+
+**Ansvar:** innehållet i varje annons ansvarar arbetsgivaren för. Chansen
+skapar inga egna annonser och kontrollerar inte uppgifterna i dem, förutom
+de annonser arbetsgivare skickat in direkt till tjänsten.
 
 ## Status
 
