@@ -286,8 +286,12 @@ async function hamtaJobb() {
 
   jobb.sort(function (x, y) { return y.poang - x.poang; });
 
+  const hamtadTid = new Date().toISOString();
+
   fs.writeFileSync("docs/jobb.json", JSON.stringify(jobb, null, 2));
-  fs.writeFileSync("docs/jobb.js", "const JOBB = " + JSON.stringify(jobb) + ";");
+  fs.writeFileSync("docs/jobb.js",
+    "const JOBB_HAMTAD = \"" + hamtadTid + "\";\n" +
+    "const JOBB = " + JSON.stringify(jobb) + ";");
 
   const orter = {}, kat = {}, omf = {};
   for (const j of jobb) {

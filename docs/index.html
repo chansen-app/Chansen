@@ -265,6 +265,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button class="lank" onclick="delaChansen()">Tipsa någon om Chansen</button>
     <a class="lank" style="text-decoration:underline" href="mailto:chansen.jobb@gmail.com?subject=Fel%20i%20Chansen&body=Beskriv%20vad%20som%20är%20fel,%20och%20klistra%20gärna%20in%20jobbtiteln%20om%20det%20gäller%20en%20annons.">Hittade du något fel?</a>
   </div>
+  <div id="gammaldata" class="dold"></div>
   <div id="notis"></div>
   <div id="lista"></div>
 </div>
@@ -801,6 +802,19 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <h2>Tipsa någon</h2>
   <p>Känner du någon som söker jobb? <button class="lank" onclick="delaChansen()">Dela Chansen</button></p>
 
+  <h2>Villkor</h2>
+  <p>Chansen är gratis att använda och kräver inget konto. Genom att använda tjänsten godtar du det som står här.</p>
+  <p><b>Vi garanterar inte att uppgifterna stämmer.</b> Annonserna kommer från Arbetsförmedlingen och från arbetsgivare som skickat in dem. Vi granskar det vi kan, men vi kan inte kontrollera varje uppgift. Läs alltid annonsen hos arbetsgivaren innan du söker.</p>
+  <p><b>Vi är inte part i något som händer sedan.</b> Vad som sker mellan dig och en arbetsgivare, före eller efter en anställning, har Chansen inget med att göra och inget ansvar för.</p>
+  <p><b>Poängen är ingen bedömning av dig.</b> Den mäter hur många formella hinder som finns i annonsen och säger ingenting om dina chanser att få jobbet.</p>
+  <p><b>Vi kan ta bort annonser</b> som visar sig vara felaktiga, vilseledande eller bryta mot våra regler, utan att förklara varför.</p>
+  <p><b>Tjänsten kan ändras eller läggas ned.</b> Chansen drivs av en privatperson på fritiden. Vi lovar inte att den finns kvar i framtiden, men om den läggs ned kommer det synas i appen.</p>
+  <p>Hittar du något fel, mejla <a href="mailto:chansen.jobb@gmail.com?subject=Fel%20i%20Chansen">chansen.jobb@gmail.com</a>. Vi tar bort dåliga annonser så fort vi får veta.</p>
+
+  <h2>Cookies</h2>
+  <p>Chansen använder inga cookies alls, varken egna eller från andra. Därför finns ingen cookieruta att klicka bort.</p>
+  <p>Det som sparas ligger i din egen webbläsare, alltså dina svar, dina sparade jobb och ditt CV. Det skickas aldrig till oss. Besöksstatistiken vi använder räknar antal besök utan cookies och utan att kunna koppla något till dig.</p>
+
   <h2>Licens och källa</h2>
   <p>Jobbannonserna hämtas från Arbetsförmedlingens öppna API JobSearch, som innehåller annonser publicerade i Platsbanken.</p>
   <p>Datan tillhandahålls under licensen <b>Creative Commons Erkännande-DelaLika</b>, förkortat CC BY-SA. Det innebär att källan ska anges, och att den som bearbetar och sprider datan vidare måste göra det under samma licens.</p>
@@ -833,7 +847,7 @@ Jobbannonserna kommer från Arbetsförmedlingens öppna API JobSearch.<br>
 Data från Platsbanken, Arbetsförmedlingen, tillgängliggjord under
 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.sv" target="_blank" rel="noopener">CC BY-SA</a>.
 Bearbetad data i Chansen delas under samma licens.<br>
-version 33</footer>
+version 34</footer>
 </div>
 
 <div id="delabesked" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:6;font-size:14px"></div>
@@ -1126,6 +1140,25 @@ function ritaMina(){
     for (var i = 0; i < lankar.length; i++){ ut += minirad(lankar[i], grupper[g][2]); }
   }
   el.innerHTML = totalt ? ut : '<div class="tomt">Inget sparat än. Tryck Spara på ett jobb i listan, så hamnar det här.</div>';
+}
+
+function kollaAlder(){
+  var el = document.getElementById("gammaldata");
+  if (!el) return;
+  if (typeof JOBB_HAMTAD === "undefined") { el.className = "dold"; return; }
+
+  var hamtad = new Date(JOBB_HAMTAD);
+  if (isNaN(hamtad)) { el.className = "dold"; return; }
+
+  var dagar = Math.floor((new Date() - hamtad) / 86400000);
+  if (dagar < 7) { el.className = "dold"; return; }
+
+  var text = dagar < 30
+    ? "Jobben uppdaterades senast för " + dagar + " dagar sedan. En del kan vara borta. Kolla alltid annonsen hos arbetsgivaren."
+    : "Jobben uppdaterades senast för " + Math.floor(dagar/30) + " månader sedan. Tjänsten kan ha slutat uppdateras, och många annonser är troligen inte längre aktuella. Sök hellre direkt i Platsbanken.";
+
+  el.innerHTML = '<div class="ruta" style="font-size:14px;background:var(--accent-100);color:var(--accent-800)">' + text + '</div>';
+  el.className = "";
 }
 
 function tomtLage(filter){
@@ -2304,6 +2337,7 @@ function visa(filter){
 ritaFragor();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
 ritaMina();
+kollaAlder();
 if (svar.alder) { startaLista(); } else { visaVy("start"); }
 window.addEventListener("scroll", function(){
   var k = document.getElementById("upp");
