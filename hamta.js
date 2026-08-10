@@ -14,9 +14,18 @@ const SOKNINGAR = [
   "butik","kassa","expedit","varuhus","butikssäljare helg",
   "kontor","administration","orderadministratör","vaktmästare",
   "hotell","frukostvärd","diskare","cafépersonal","serveringspersonal",
-  "elevassistent","fritidsledare","ledsagare","avlösare"
+  "elevassistent","fritidsledare","ledsagare","avlösare",
+  "trädgårdsarbetare","parkarbetare","lantbruk","djurskötare","växthus",
+  "tvätteri","textilservice","sortering","återvinning","miljöarbetare",
+  "eventpersonal","biljettvärd","garderobiär","vaktmästeri","parkeringsvärd",
+  "cykelbud","matbud","hemleverans","varuplockare","påfyllare",
+  "telefonist","växeltelefonist","enklare kontorsarbete","postsortering",
+  "hotellstädning","frukostbuffé","konferensvärd","kioskbiträde",
+  "bageri","charkuteri","fiskdisk","delikatess","sommarvikarie",
+  "feriearbete","behovsanställning utan erfarenhet","vi lär dig",
+  "inga förkunskaper","introduktion ges","upplärning på plats"
 ];
-const SIDOR_PER_SOKNING = 5;   // 100 annonser per sida
+const SIDOR_PER_SOKNING = 10;   // 100 annonser per sida
 
 // ── titlar som aldrig visas ───────────────────────────────────────────
 const YRKESSTOPP = [
@@ -24,6 +33,8 @@ const YRKESSTOPP = [
   "tandlakare","tandläkare","socionom","jurist","advokat","ingenjor","ingenjör",
   "utvecklare","arkitekt","revisor","larare","lärare","forskollarare","förskollärare",
   "chef","controller","specialist","konsult","analytiker","projektledare",
+  "manager","arbetsledare","teamleader","team leader","supervisor","ledare",
+  "ansvarig","forestandare","föreståndare","gruppledare","platsansvarig",
   "intendent","antikvarie","bibliotekarie","kurator","handlaggare","handläggare",
   "samordnare","koordinator","ekonom","redovisningsass","rekryterare",
   "forskare","doktorand","adjunkt","lektor","professor","veterinar","veterinär",
@@ -58,8 +69,8 @@ const KATEGORIER = {
             "ica ","coop","willys","lidl","dollarstore","rusta","åhléns","ahlens"],
   "Sälj": ["saljare","säljare","salj","sälj","account manager","innesaljare","innesäljare",
            "utesaljare","utesäljare","telefonforsaljare","telefonförsäljare","telemarketing"],
-  "Kundtjänst": ["kundtjanst","kundtjänst","kundservice","kundsupport","support","customer",
-                 "kundvard","kundvärd","reception","receptionist","vaxel","växel"],
+  "Kundtjänst": ["kundtjanst","kundtjänst","kundservice","kundsupport","customer support",
+                 "kundvard","kundvärd","reception","receptionist","vaxel","växel","kundmottagare"],
   "Lager och logistik": ["lager","terminal","plock","truck","gods","paket","distribution",
                          "logistik","bud","chauffor","chaufför","transport","akeri","åkeri"],
   "Restaurang och café": ["restaurang","kock","servit","cafe","café","barista","kok","kök",
