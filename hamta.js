@@ -226,6 +226,27 @@ function kortBeskrivning(a) {
   return t;
 }
 
+const NATT_ORD = [
+  "nattarbete","nattskift","nattpass","nattetid","natten","nattjobb",
+  "skiftarbete","tvaskift","tvåskift","treskift","2-skift","3-skift",
+  "rullande schema","ob-tillagg for natt","ob-tillägg för natt","kvall och natt","kväll och natt"
+];
+
+function harNattarbete(a) {
+  const titel = (a.headline || "").toLowerCase();
+  const text = ((a.description ? a.description.text : "") + " " + titel).toLowerCase();
+  return harNagot(text, NATT_ORD);
+}
+
+// Alla jobb i Chansen har låga krav, annars hade de sållats bort.
+// Märkningen "Erfarenhet krävs inte" sparar vi därför till de annonser
+// där arbetsgivaren SJÄLV kryssat i det. Annars vore taggen meningslös,
+// för då sitter den på varenda kort.
+function nyborjarSkal(a) {
+  if (a.experience_required === false) return "arbetsgivaren har själv angett att erfarenhet inte krävs";
+  return "";
+}
+
 function harProvision(text) {
   for (const ord of PROVISION_ORD) { if (text.indexOf(ord) > -1) return true; }
   return false;
@@ -250,6 +271,7 @@ async function hamtaJobb() {
   const jobb = [];
   const nu = new Date();
   let hamtade = 0, bortsorterade = 0, provisionsbort = 0;
+  const kommunLan = {};
 
   for (const term of SOKNINGAR) {
     for (let sida = 0; sida < SIDOR_PER_SOKNING; sida++) {
@@ -265,6 +287,10 @@ async function hamtaJobb() {
 
       for (const a of data.hits) {
         hamtade++;
+        // uppslagslistan byggs av alla annonser, så den täcker även
+        // kommuner som inte har något jobb som klarar våra krav i dag
+        const adr = a.workplace_address;
+        if (adr && adr.municipality && adr.region) kommunLan[adr.municipality] = adr.region;
         if (sedda[a.id]) continue;
         sedda[a.id] = true;
 
@@ -289,8 +315,12 @@ async function hamtaJobb() {
           kategori: kategori(a),
           erfarenhetKravs: a.experience_required,
           korkortKravs: a.driving_license_required,
-          utdrag: utdragskrav(a),
+          lan: a.workplace_address && a.workplace_address.region ? a.workplace_address.region : "",
+        utdrag: utdragskrav(a),
         provision: harProvision(brodtext),
+        nattarbete: harNattarbete(a),
+        nyborjarvanlig: nyborjarSkal(a) !== "",
+        nyborjarskal: nyborjarSkal(a),
           minderarigOk: okForMinderarig(a),
           poang: p,
           chansniva: p >= 8 ? "hog" : (p >= 5 ? "medel" : "lag"),
@@ -308,7 +338,9 @@ async function hamtaJobb() {
 
   fs.writeFileSync("docs/jobb.json", JSON.stringify(jobb, null, 2));
   fs.writeFileSync("docs/jobb.js",
-    "const JOBB_HAMTAD = \"" + hamtadTid + "\";\n" +
+    "const UPPDATERAD = \"" + hamtadTid + "\";\n" +
+    "const JOBB_HAMTAD = UPPDATERAD;\n" +
+    "const KOMMUNLAN = " + JSON.stringify(kommunLan) + ";\n" +
     "const JOBB = " + JSON.stringify(jobb) + ";");
 
   const orter = {}, kat = {}, omf = {};
@@ -324,6 +356,11 @@ async function hamtaJobb() {
   console.log("Kategorier:", kat);
   console.log("Hämtade annonser totalt: " + hamtade + ", bortsorterade: " + bortsorterade);
   console.log("Varav provision utan grundlön: " + provisionsbort);
+  let natt = 0, nyb = 0;
+  for (const j of jobb) { if (j.nattarbete) natt++; if (j.nyborjarvanlig) nyb++; }
+  console.log("Nattarbete, göms för under 18: " + natt);
+  console.log("Nybörjarvänliga: " + nyb);
+  console.log("Kommuner i uppslagslistan: " + Object.keys(kommunLan).length);
 }
 
 hamtaJobb();
