@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
+  worker-src 'self';
   script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://gc.zgo.at;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src https://fonts.gstatic.com data:;
@@ -818,10 +819,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <h2>Licens och källa</h2>
   <p>Jobbannonserna hämtas från Arbetsförmedlingens öppna API JobSearch, som innehåller annonser publicerade i Platsbanken.</p>
-  <p>Datan tillhandahålls under licensen <b>Creative Commons Erkännande-DelaLika</b>, förkortat CC BY-SA. Det innebär att källan ska anges, och att den som bearbetar och sprider datan vidare måste göra det under samma licens.</p>
-  <p>Chansen sorterar och rangordnar annonserna, vilket räknas som en bearbetning. Den bearbetade jobbdatan i tjänsten, alltså filerna jobb.js och jobb.json, delas därför under samma licens: <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.sv" target="_blank" rel="noopener">CC BY-SA</a>.</p>
+  <p>Annonserna är Arbetsförmedlingens öppna data, hämtade via API:et JobSearch i deras datakatalog på <a href="https://data.arbetsformedlingen.se" target="_blank" rel="noopener">data.arbetsformedlingen.se</a>.</p>
+  <p>Datan är släppt under <b>CC0</b>, vilket betyder att den är helt fri att använda, bearbeta och sprida vidare. Någon källhänvisning krävs alltså inte. Vi anger den ändå, eftersom det är rimligt att du får veta var jobben kommer ifrån.</p>
+  <p>Chansen sorterar och rangordnar annonserna men ändrar inte innehållet i dem. Ansvaret för vad som står i en annons ligger hos arbetsgivaren som skrivit den.</p>
   <p>Ansvaret för innehållet i varje annons ligger hos den arbetsgivare som skrivit den. Chansen skapar inga egna annonser och kontrollerar inte uppgifterna i dem, förutom de som arbetsgivare skickat in direkt till oss.</p>
-  <p>Villkoren i sin helhet finns hos <a href="https://jobtechdev.se" target="_blank" rel="noopener">jobtechdev.se</a>.</p>
+  <p>Villkoren i sin helhet finns hos <a href="https://data.arbetsformedlingen.se" target="_blank" rel="noopener">data.arbetsformedlingen.se</a>.</p>
 
   <h2>Personuppgifter</h2>
   <p>Chansen drivs av en privatperson, som är personuppgiftsansvarig för de uppgifter som beskrivs här.</p>
@@ -845,11 +847,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 </div>
 
 <footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center;line-height:1.6">
-Jobbannonserna kommer från Arbetsförmedlingens öppna API JobSearch.<br>
-Data från Platsbanken, Arbetsförmedlingen, tillgängliggjord under
-<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.sv" target="_blank" rel="noopener">CC BY-SA</a>.
-Bearbetad data i Chansen delas under samma licens.<br>
-<span id="uppdaterad"></span><br>version 36</footer>
+Jobbannonserna kommer från Arbetsförmedlingens öppna data, API:et JobSearch.<br>
+Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.sv" target="_blank" rel="noopener">CC0</a>, alltså helt fri att använda.
+Vi anger källan för din skull, inte för att vi måste.<br>
+<span id="uppdaterad"></span><br>version 38</footer>
+</div>
+
+<div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
+  <div class="ruta" style="font-size:14px;display:flex;align-items:center;gap:14px;justify-content:space-between">
+    <span>En ny version av Chansen finns.</span>
+    <button class="mini" onclick="location.reload()">Uppdatera</button>
+  </div>
 </div>
 
 <div id="delabesked" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:6;font-size:14px"></div>
@@ -2448,6 +2456,25 @@ if (svar.ort) document.getElementById("ort").value = svar.ort;
 ritaMina();
 kollaAlder();
 visaUppdaterad();
+
+// Håller den installerade appen uppdaterad. Utan den kan någon som lagt
+// Chansen på hemskärmen sitta kvar på en gammal version i dagar.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").then(function (reg) {
+      reg.addEventListener("updatefound", function () {
+        var ny = reg.installing;
+        if (!ny) return;
+        ny.addEventListener("statechange", function () {
+          if (ny.state === "installed" && navigator.serviceWorker.controller) {
+            var el = document.getElementById("nyversion");
+            if (el) el.className = "";
+          }
+        });
+      });
+    }).catch(function () { /* fungerar ändå, bara utan offlinestöd */ });
+  });
+}
 if (svar.alder) { startaLista(); } else { visaVy("start"); }
 window.addEventListener("scroll", function(){
   var k = document.getElementById("upp");
