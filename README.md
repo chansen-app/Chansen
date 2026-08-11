@@ -52,15 +52,11 @@ Jobbannonserna hämtas från Arbetsförmedlingens öppna API JobSearch, via JobT
 
 **Källa:** Platsbanken, Arbetsförmedlingen.
 
-**Licens för datan:** Creative Commons Erkännande-DelaLika, CC BY-SA. Villkoren
-innebär att källan ska anges, och att den som bearbetar och sprider datan vidare
-måste göra det under samma licens.
+**Licens för datan:** CC0. Datan är helt öppen och kräver ingen källhänvisning.
+Bekräftat av Arbetsförmedlingen i mejl, augusti 2026. Källan anges ändå i
+tjänsten, eftersom det skapar tydlighet för användaren.
 
-Chansen sorterar och rangordnar annonserna, vilket räknas som en bearbetning.
-Filerna `docs/jobb.js` och `docs/jobb.json` delas därför under samma licens,
-CC BY-SA. Se https://creativecommons.org/licenses/by-sa/4.0/deed.sv
-
-Villkoren i sin helhet finns hos https://jobtechdev.se
+Villkoren i sin helhet finns hos https://data.arbetsformedlingen.se
 
 **Licens för koden:** ingen licens är vald än. Det betyder att vanlig
 upphovsrätt gäller och att koden inte får återanvändas utan tillstånd.
