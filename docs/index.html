@@ -255,6 +255,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div class="chips">
     <button id="f-alla" class="on" onclick="visa('alla')">Alla</button>
     <button id="f-hog" onclick="visa('hog')">Bäst chans</button>
+    <button id="f-nyborjare" onclick="visa('nyborjare')">Ingen erfarenhet</button>
     <button id="f-deltid" onclick="visa('deltid')">Deltid</button>
     <button id="f-heltid" onclick="visa('heltid')">Heltid</button>
     <button id="f-utdrag" onclick="visa('utdrag')">Nämner inte utdrag</button>
@@ -828,6 +829,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p><b>Du som söker jobb.</b> Dina svar på frågorna, dina sparade jobb och ditt CV lagras i din egen webbläsare och skickas aldrig till oss. Vi kan inte se dem. Rensar du webbläsarens data försvinner de. Vi har inga konton och samlar inte in namn, mejladress eller något annat om dig.</p>
 
   <p><b>Besöksstatistik.</b> Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies, spårar inte enskilda besökare och sparar inga uppgifter som kan kopplas till dig.</p>
+  <p>Vi räknar också hur många som klickar sig vidare till en annons, med tjänsten GoatCounter. Den använder inga kakor och sparar ingenting om vem du är.</p>
 
   <p><b>Du som är arbetsgivare.</b> Skickar du in en annons sparar vi det du fyllt i: företagets namn och organisationsnummer, uppgifter om jobbet, samt ditt namn, din mejladress och ditt telefonnummer. Det sparas i ett kalkylblad hos Google som bara vi har tillgång till.</p>
   <p>Vi använder uppgifterna för att kontrollera att företaget finns, för att kunna kontakta dig om annonsen, och för att publicera jobbet. Den rättsliga grunden är berättigat intresse. Kontaktuppgifter du själv angett som kontakt för sökande publiceras i annonsen, resten publiceras inte.</p>
@@ -847,7 +849,7 @@ Jobbannonserna kommer från Arbetsförmedlingens öppna API JobSearch.<br>
 Data från Platsbanken, Arbetsförmedlingen, tillgängliggjord under
 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.sv" target="_blank" rel="noopener">CC BY-SA</a>.
 Bearbetad data i Chansen delas under samma licens.<br>
-version 35</footer>
+<span id="uppdaterad"></span><br>version 36</footer>
 </div>
 
 <div id="delabesked" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:6;font-size:14px"></div>
@@ -973,10 +975,43 @@ function matcharAlder(j){
   return j.minderarigOk !== false;
 }
 
+function slat(v){
+  return String(v == null ? "" : v).toLowerCase()
+    .replace(/å/g,"a").replace(/ä/g,"a").replace(/ö/g,"o")
+    .replace(/é/g,"e").replace(/ü/g,"u").trim();
+}
+
+var smeknamn = {
+  "gbg":"goteborg", "sthlm":"stockholm", "sthml":"stockholm",
+  "mmx":"malmo", "mlm":"malmo", "uppsalla":"uppsala", "lkpg":"linkoping",
+  "nkpg":"norrkoping", "hbg":"helsingborg", "vaxjo":"vaxjo"
+};
+
+function sokordOrt(){
+  var v = slat(svar.ort);
+  return smeknamn[v] || v;
+}
+
 function matcharOrt(j){
   if (!svar.ort) return true;
-  return (j.ort || "").toLowerCase().indexOf(svar.ort.toLowerCase()) > -1;
+  return slat(j.ort).indexOf(sokordOrt()) > -1;
 }
+
+// Vilket län ligger den skrivna kommunen i? Uppslagslistan byggs av alla
+// annonser vid hämtningen, så den fungerar även för kommuner utan jobb i dag.
+function lanForOrt(){
+  var v = sokordOrt();
+  if (!v || typeof KOMMUNLAN === "undefined") return "";
+  for (var kommun in KOMMUNLAN){
+    if (slat(kommun).indexOf(v) > -1) return KOMMUNLAN[kommun];
+  }
+  return "";
+}
+
+// Har man inte svarat på åldersfrågan behandlas man som yngst.
+// Hellre för försiktig än att visa ett jobb någon inte får ta.
+function underSexton(){ return svar.alder !== "16 till 17" && svar.alder !== "18 eller äldre"; }
+function underArton(){ return svar.alder !== "18 eller äldre"; }
 
 function matcharOmrade(j){
   if (!svar.omrade || !svar.omrade.length) return true;
@@ -1064,6 +1099,8 @@ function kort(j){
   if(j.korkortKravs === true && svar.korkort !== "Ja") taggar += '<span class="tag">Kräver körkort</span>';
   if(j.utdrag === "kravs") taggar += '<span class="tag">Kräver registerutdrag</span>';
   if(j.provision) taggar += '<span class="tag varn">Provision ingår i lönen</span>';
+  if(j.nattarbete) taggar += '<span class="tag varn">Natt- eller skiftarbete</span>';
+  if(j.nyborjarvanlig) taggar += '<span class="tag sage">Erfarenhet krävs inte</span>';
 
   var d = dagarKvar(j.sistaAnsokningsdag), dagtext = "";
   if(d !== null && d >= 0 && d <= 7){
@@ -1146,6 +1183,18 @@ function ritaMina(){
     for (var i = 0; i < lankar.length; i++){ ut += minirad(lankar[i], grupper[g][2]); }
   }
   el.innerHTML = totalt ? ut : '<div class="tomt">Inget sparat än. Tryck Spara på ett jobb i listan, så hamnar det här.</div>';
+}
+
+function visaUppdaterad(){
+  var el = document.getElementById("uppdaterad");
+  if (!el) return;
+  var kalla = (typeof UPPDATERAD !== "undefined") ? UPPDATERAD
+            : (typeof JOBB_HAMTAD !== "undefined") ? JOBB_HAMTAD : null;
+  if (!kalla) return;
+  var d = new Date(kalla);
+  if (isNaN(d)) return;
+  var man = ["januari","februari","mars","april","maj","juni","juli","augusti","september","oktober","november","december"];
+  el.textContent = "Jobben hämtades senast " + d.getDate() + " " + man[d.getMonth()] + ".";
 }
 
 function kollaAlder(){
@@ -2333,13 +2382,31 @@ function ritaBit(nollstall){
 function visa(filter){
   if (aktivtFilter !== filter) handelse("filter-" + filter);
   aktivtFilter = filter;
-  var ids = ["alla","hog","deltid","heltid","utdrag"];
+  if (underSexton() && filter === "heltid") filter = "alla";
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag"];
   for(var i=0;i<ids.length;i++){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
 
-  var valda = JOBB.filter(matcharAlder).filter(matcharOrt).filter(matcharOmrade);
+  var hkn = document.getElementById("f-heltid");
+  if (hkn) hkn.className = underSexton() ? "dold" : (filter === "heltid" ? "on" : "");
+
+  // hittas inga jobb i kommunen, visa länet i stället
+  var lanfall = "";
+  var iOmradet = JOBB.filter(matcharOrt);
+  if (svar.ort && iOmradet.length === 0){
+    var lan = lanForOrt();
+    if (lan){
+      var iLanet = JOBB.filter(function(j){ return j.lan === lan; });
+      if (iLanet.length){ iOmradet = iLanet; lanfall = lan; }
+    }
+  }
+
+  var valda = iOmradet.filter(matcharAlder).filter(matcharOmrade);
+  if (underSexton()) valda = valda.filter(function(j){ return j.omfattning !== "Heltid"; });
+  if (underArton()) valda = valda.filter(function(j){ return j.nattarbete !== true; });
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
+  if(filter === "nyborjare") valda = valda.filter(function(j){ return j.nyborjarvanlig === true; });
   if(filter === "deltid") valda = valda.filter(function(j){ return (j.omfattning||"").indexOf("Deltid") > -1; });
   if(filter === "heltid") valda = valda.filter(function(j){ return (j.omfattning||"").indexOf("Heltid") > -1; });
   if(filter === "utdrag") valda = valda.filter(function(j){ return j.utdrag !== "kravs"; });
@@ -2347,15 +2414,25 @@ function visa(filter){
   valda = valda.slice().sort(function(a,b){ return justeradPoang(b) - justeradPoang(a); });
 
   var notis = document.getElementById("notis");
-  var aldersnotis = (svar.alder === "Under 16" || svar.alder === "16 till 17")
-    ? '<div class="ruta" style="font-size:14px">Jobb som minderåriga inte får utföra är bortsorterade. Kolla ändå Arbetstider innan du tackar ja.</div>'
-    : "";
+  var aldersnotis = "";
+  if (underSexton()) {
+    aldersnotis = '<div class="ruta" style="font-size:14px">Heltidsjobb och nattarbete visas inte för dig. Är du under 16 får du jobba högst 12 timmar i veckan under skolveckor och 7 timmar om dagen under lov, aldrig efter klockan 20. <button class="lank" onclick="oppnaHjalp(\'tider\')">Läs mer om arbetstider</button></div>';
+  } else if (underArton()) {
+    aldersnotis = '<div class="ruta" style="font-size:14px">Jobb med natt- eller skiftarbete visas inte för dig. Är du under 18 får du inte jobba mellan 22 och 06. <button class="lank" onclick="oppnaHjalp(\'tider\')">Läs mer om arbetstider</button></div>';
+  }
+  if (lanfall) {
+    aldersnotis += '<div class="ruta" style="font-size:14px">Inga jobb i ' + fly(svar.ort) + ' just nu. Här är jobben i ' + fly(lanfall) + ' i stället.</div>';
+  }
+  if (filter === "nyborjare") {
+    aldersnotis += '<div class="ruta" style="font-size:14px">Här är jobben där arbetsgivaren själv kryssat i att erfarenhet inte krävs. Alla jobb i Chansen har låga krav, men de här är uttalade. Det är arbetsgivarens ord, inte ett löfte från oss.</div>';
+  }
   if (notis) {
     notis.innerHTML = aldersnotis + ((filter === "utdrag")
       ? '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte nämner registerutdrag. Arbetsgivaren kan ändå begära ett. Fråga innan du lägger tid på ansökan.</div>'
       : "");
   }
-  document.getElementById("rakning").textContent = valda.length + " jobb i " + (svar.ort ? svar.ort : "hela Sverige");
+  document.getElementById("rakning").textContent =
+    valda.length + " jobb i " + (lanfall ? lanfall : (svar.ort ? svar.ort : "hela Sverige"));
 
   if (!valda.length){
     aktuellLista = [];
@@ -2370,6 +2447,7 @@ ritaFragor();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
 ritaMina();
 kollaAlder();
+visaUppdaterad();
 if (svar.alder) { startaLista(); } else { visaVy("start"); }
 window.addEventListener("scroll", function(){
   var k = document.getElementById("upp");
