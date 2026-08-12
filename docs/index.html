@@ -850,7 +850,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 Jobbannonserna kommer från Arbetsförmedlingens öppna data, API:et JobSearch.<br>
 Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.sv" target="_blank" rel="noopener">CC0</a>, alltså helt fri att använda.
 Vi anger källan för din skull, inte för att vi måste.<br>
-<span id="uppdaterad"></span><br>version 39</footer>
+<span id="uppdaterad"></span><br>version 40</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1845,12 +1845,30 @@ function ritaSteg(){
   if (klar) byggCV();
 }
 
-function cvNasta(){ cvSpara(); cvSteg = Math.min(cvSteg + 1, CV_STEG.length); ritaSteg(); window.scrollTo(0,0); }
+function cvNasta(){ cvSparaNu(); cvSteg = Math.min(cvSteg + 1, CV_STEG.length); ritaSteg(); window.scrollTo(0,0); }
 function cvHoppa(){ cvSteg = Math.min(cvSteg + 1, CV_STEG.length); ritaSteg(); window.scrollTo(0,0); }
 function cvTillbaka(){ cvSteg = Math.max(cvSteg - 1, 0); ritaSteg(); window.scrollTo(0,0); }
 function cvOm(){ cvSteg = 0; ritaSteg(); window.scrollTo(0,0); }
 
+// Samma sak här: att rita om hela CV:t vid varje tangenttryck
+// gjorde skrivandet trögt på mobil.
+var cvTimer = null;
+
 function cvSpara(){
+  for (var i = 0; i < CV_FALT.length; i++){
+    var el = document.getElementById("cv-" + CV_FALT[i]);
+    if (el) cv[CV_FALT[i]] = el.value;
+  }
+  if (cvTimer) clearTimeout(cvTimer);
+  cvTimer = setTimeout(function(){
+    try { localStorage.setItem("chansen-cv", JSON.stringify(cv)); } catch(e){}
+    byggCV();
+  }, 300);
+}
+
+// När något måste ske direkt, till exempel när man trycker på ett förslag
+function cvSparaNu(){
+  if (cvTimer) clearTimeout(cvTimer);
   for (var i = 0; i < CV_FALT.length; i++){
     var el = document.getElementById("cv-" + CV_FALT[i]);
     if (el) cv[CV_FALT[i]] = el.value;
@@ -1864,12 +1882,12 @@ function laggTill(faltId, text){
   if (!el) return;
   var nu = el.value.trim();
   el.value = nu ? (nu + "\n" + text) : text;
-  cvSpara();
+  cvSparaNu();
 }
 
 function sattOm(text){
   var el = document.getElementById("cv-om");
-  if (el) { el.value = text; cvSpara(); }
+  if (el) { el.value = text; cvSparaNu(); }
 }
 
 function oppnaCV(){
@@ -2326,17 +2344,23 @@ function oppnaAnsokanInre(lank){
   visaVy("ansokan");
 }
 
+// Varje tangenttryck skrev tidigare om hela brevet och sparade till
+// telefonens minne. Det gjorde att tangentbordet kändes trögt.
+// Nu väntar vi tills användaren slutat skriva.
+var namnTimer = null;
+
 function namnAndrat(){
   var n = document.getElementById("namn");
   svar.namn = n ? n.value.trim() : "";
-  try { localStorage.setItem("chansen", JSON.stringify(svar)); } catch(e){}
-  if (aktuelltJobb) {
-    var f = document.getElementById("a-text");
-    var gammalt = f.value;
-    var nytt = byggBrev(aktuelltJobb);
-    // skriv bara om användaren inte redan ändrat texten själv
-    if (!f.dataset || !f.dataset.andrad) f.value = nytt;
-  }
+
+  if (namnTimer) clearTimeout(namnTimer);
+  namnTimer = setTimeout(function(){
+    try { localStorage.setItem("chansen", JSON.stringify(svar)); } catch(e){}
+    if (aktuelltJobb) {
+      var f = document.getElementById("a-text");
+      if (f && (!f.dataset || !f.dataset.andrad)) f.value = byggBrev(aktuelltJobb);
+    }
+  }, 350);
 }
 
 function skrivOm(){
