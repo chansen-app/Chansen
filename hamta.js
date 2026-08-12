@@ -78,8 +78,7 @@ const TEXTSTOPP = [
   "omvardnadsprogram","omvårdnadsprogram","behorighetsbevis","behörighetsbevis",
   "yrkesbevis","gesallbrev","gesällbrev",
   "djurvardare niva","djurvårdare nivå","niva 2 eller 3","nivå 2 eller 3",
-  "steg 2","steg 3","c-kort","ce-kort","d-kort","truckkort","heta arbeten",
-  "liftkort","fallskydd","esa-utbildning","bas-p","bas-u"
+  "steg 2","steg 3"
 ];
 
 const POSITIV_TEXT = [
@@ -171,6 +170,40 @@ function provisionUtanGrundlon(text) {
   return true;
 }
 
+// Ett behörighetskort är bara ett hinder om det KRÄVS. Väldigt många
+// lagerannonser skriver "truckkort är meriterande", alltså en fördel,
+// och de jobben går utmärkt att söka utan kort. Vi tittar därför på
+// orden runt omkring i stället för att stoppa alla som nämner kortet.
+const KORT_ORD = [
+  "truckkort","c-kort","ce-kort","d-kort","heta arbeten","liftkort",
+  "fallskydd","esa-utbildning","bas-p","bas-u","travers","lyftkort"
+];
+const KRAV_NARA = [
+  "krav","kravs","krävs","maste","måste","ska ha","ska du ha","skall ha",
+  "innehar","inneha","giltigt","du har","behover ha","behöver ha","forutsatter","förutsätter"
+];
+const MERIT_NARA = [
+  "meriterande","meriterade","fordel","fördel","plus","bonus","gärna","garna",
+  "vi utbildar","utbildning ges","du far ta","du får ta","bekostar","erbjuder utbildning",
+  "inte ett krav","inget krav","behovs inte","behövs inte"
+];
+
+function kortKravs(text) {
+  for (const kort of KORT_ORD) {
+    let i = text.indexOf(kort);
+    while (i > -1) {
+      // titta 90 tecken före och efter
+      const omkring = text.slice(Math.max(0, i - 90), i + kort.length + 90);
+      let merit = false, krav = false;
+      for (const o of MERIT_NARA) if (omkring.indexOf(o) > -1) { merit = true; break; }
+      if (!merit) for (const o of KRAV_NARA) if (omkring.indexOf(o) > -1) { krav = true; break; }
+      if (krav) return true;
+      i = text.indexOf(kort, i + 1);
+    }
+  }
+  return false;
+}
+
 function harNagot(text, lista) {
   for (const ord of lista) { if (text.indexOf(ord) > -1) return true; }
   return false;
@@ -194,6 +227,7 @@ function poang(a) {
   if (harNagot(titel, YRKESSTOPP)) return -20;
   if (harNagot(text, TEXTSTOPP)) return -20;
   if (provisionUtanGrundlon(text)) return -20;
+  if (kortKravs(text)) return -20;
 
   const positiv = harNagot(text, POSITIV_TEXT);
 
