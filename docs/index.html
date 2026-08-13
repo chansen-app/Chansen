@@ -862,7 +862,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 43</footer>
+version 44</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2528,6 +2528,15 @@ if (svar.ort) document.getElementById("ort").value = svar.ort;
 ritaMina();
 kollaAlder();
 visaUppdaterad();
+
+// Den långa titeln finns för att sökmotorer ska hitta sidan. I den
+// installerade appen syns den högst upp och blir bara rörig, så där
+// kortar vi ned den till namnet.
+try {
+  var installerad = window.matchMedia("(display-mode: standalone)").matches
+                 || window.navigator.standalone === true;
+  if (installerad) document.title = "Chansen";
+} catch(e){}
 
 // Egen adress till arbetsgivarsidan, chansen.nu/#arbetsgivare,
 // så att den går att skicka direkt till ett företag.
