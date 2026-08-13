@@ -279,6 +279,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button class="lank" style="text-decoration:underline;margin-right:16px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare?</button>
     <a class="lank" style="text-decoration:underline" href="mailto:chansen.jobb@gmail.com?subject=Fel%20i%20Chansen&body=Beskriv%20vad%20som%20är%20fel,%20och%20klistra%20gärna%20in%20jobbtiteln%20om%20det%20gäller%20en%20annons.">Hittade du något fel?</a>
   </div>
+  <div id="farskhet" class="hint" style="margin:-6px 0 14px"></div>
   <div id="gammaldata" class="dold"></div>
   <div id="notis"></div>
   <div id="lista"></div>
@@ -510,6 +511,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
       <li>Förbered en fråga att ställa själv, till exempel hur ett vanligt pass ser ut</li>
       <li>Har du inte jobbat förut, säg det rakt ut och säg att du lär dig snabbt. Alla vet att någon måste vara först</li>
     </ul>
+
+    <h2>Hur vet jag att jobbet finns kvar?</h2>
+    <p>Vi hämtar alla annonser från Platsbanken varje natt. Försvinner en annons därifrån försvinner den härifrån nästa morgon. Överst i listan står exakt när vi hämtade senast.</p>
+    <p>Men det finns en sak vi inte kan se: <b>ett jobb kan bli tillsatt innan sista ansökningsdag.</b> Arbetsgivaren tar inte alltid bort annonsen då. Det gäller alla jobbsajter, inte bara Chansen.</p>
+    <p>Därför visar vi två saker på varje jobb. <b>När annonsen lades upp</b>, för en färsk annons är oftast fortfarande öppen. Och <b>sista ansökningsdag</b>, som är det datum arbetsgivaren angett.</p>
+    <p>Klickar du på Se annonsen kommer du till originalet hos Arbetsförmedlingen. Är den borta där är jobbet inte längre aktuellt.</p>
+    <p>Ett tips: söker du något som lades upp för länge sedan, ring och fråga om tjänsten är kvar innan du lägger tid på en ansökan. Det är en helt vanlig fråga, och samtalet gör dessutom att de minns dig.</p>
 
     <h2>Om lön och provision</h2>
     <p>Provision betyder att en del av lönen beror på hur mycket du säljer. Det är inte fel i sig, så länge du också har en grundlön som betalas ut oavsett.</p>
@@ -869,7 +877,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 48</footer>
+version 49</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1019,6 +1027,7 @@ function profilrad(){
 
 function startaLista(){
   spara();
+  visaFarskhet();
   handelse("visade-jobb");
   // vet vi om folk går vidare direkt eller svarar på allt först?
   var extra = (svar.utbildning ? 1 : 0) + (svar.korkort ? 1 : 0)
@@ -1146,6 +1155,22 @@ function dagarSedan(iso){
   return Math.floor((new Date() - new Date(iso)) / 86400000);
 }
 
+// Hur färsk är annonsen? Det är det folk egentligen undrar när de
+// frågar om jobbet finns kvar.
+function dagarSedanPublicerad(d){
+  if(!d) return null;
+  var t = new Date(d);
+  if(isNaN(t)) return null;
+  return Math.floor((new Date() - t) / 86400000);
+}
+
+function svenskDatum(d){
+  var t = new Date(d);
+  if(isNaN(t)) return "";
+  var man = ["jan","feb","mars","april","maj","juni","juli","aug","sep","okt","nov","dec"];
+  return t.getDate() + " " + man[t.getMonth()];
+}
+
 function dagarKvar(d){ if(!d) return null; return Math.ceil((new Date(d)-new Date())/86400000); }
 
 function kort(j){
@@ -1165,10 +1190,20 @@ function kort(j){
   if(j.nattarbete) taggar += '<span class="tag varn">Natt- eller skiftarbete</span>';
   if(j.nyborjarvanlig) taggar += '<span class="tag sage">Erfarenhet krävs inte</span>';
 
+  // hur ny annonsen är
+  var pd = dagarSedanPublicerad(j.publicerad);
+  if(pd !== null){
+    if(pd <= 0) taggar += '<span class="tag varm">Ny i dag</span>';
+    else if(pd === 1) taggar += '<span class="tag varm">Lades upp i går</span>';
+    else if(pd <= 7) taggar += '<span class="tag varm">Lades upp för '+pd+' dagar sedan</span>';
+  }
+
   var d = dagarKvar(j.sistaAnsokningsdag), dagtext = "";
   if(d !== null && d >= 0 && d <= 7){
-    taggar += '<span class="tag varm">'+(d === 0 ? "Sista dagen" : d+" dagar kvar")+'</span>';
-  } else if(d !== null && d > 7){ dagtext = d+" dagar kvar"; }
+    taggar += '<span class="tag varn">'+(d === 0 ? "Sista ansökningsdag i dag" : "Sök inom "+d+" dagar")+'</span>';
+  } else if(d !== null && d > 7 && d <= 60){
+    dagtext = "Sök senast " + svenskDatum(j.sistaAnsokningsdag);
+  }
 
   return '<div class="card">'+
     '<div class="kicker'+(top ? "" : " medel")+'">'+etikett+'</div>'+
@@ -1258,6 +1293,23 @@ function visaUppdaterad(){
   if (isNaN(d)) return;
   var man = ["januari","februari","mars","april","maj","juni","juli","augusti","september","oktober","november","december"];
   el.textContent = "Jobben hämtades senast " + d.getDate() + " " + man[d.getMonth()] + ".";
+}
+
+// Folk undrar om jobben fortfarande finns. Det här svarar på det.
+function visaFarskhet(){
+  var el = document.getElementById("farskhet");
+  if (!el) return;
+  var kalla = (typeof UPPDATERAD !== "undefined") ? UPPDATERAD
+            : (typeof JOBB_HAMTAD !== "undefined") ? JOBB_HAMTAD : null;
+  if (!kalla) { el.textContent = ""; return; }
+  var d = new Date(kalla);
+  if (isNaN(d)) { el.textContent = ""; return; }
+
+  var timmar = Math.floor((new Date() - d) / 3600000);
+  var nar = timmar < 20 ? "i morse" : (timmar < 44 ? "i går" : "för " + Math.floor(timmar/24) + " dagar sedan");
+
+  el.innerHTML = "Alla annonser fanns i Platsbanken " + nar + ". "
+    + '<button class="lank" onclick="visaVy(\'hjalp\'); hjalpVisa(\'soka\');" style="font-size:13px">Hur vet jag att jobbet finns kvar?</button>';
 }
 
 function kollaAlder(){
@@ -2548,6 +2600,7 @@ ritaFragor();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
 ritaMina();
 kollaAlder();
+visaFarskhet();
 visaUppdaterad();
 
 // Den långa titeln finns för att sökmotorer ska hitta sidan. I den
