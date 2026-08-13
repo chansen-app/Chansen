@@ -159,6 +159,22 @@ const REN_PROVISION = [
   "obegränsad provision","du styr din egen lon","du styr din egen lön"
 ];
 
+// Arbetsförmedlingen har ett eget fält för löneform, och det är mycket
+// mer tillförlitligt än att leta i texten. Många annonser nämner aldrig
+// provision i brödtexten men har det angett här.
+//   "Fast månads- vecko- eller timlön"     → trygg lön
+//   "Fast och rörlig lön"                  → grundlön plus provision, okej men märks
+//   "Rörlig ackords- eller provisionslön"  → ingen fast lön alls, visas inte
+function renRorligLon(a) {
+  const l = ((a.salary_type && a.salary_type.label) || "").toLowerCase();
+  return l.indexOf("rorlig ackords") > -1 || l.indexOf("rörlig ackords") > -1;
+}
+
+function harRorligDel(a) {
+  const l = ((a.salary_type && a.salary_type.label) || "").toLowerCase();
+  return l.indexOf("rorlig") > -1 || l.indexOf("rörlig") > -1;
+}
+
 function provisionUtanGrundlon(text) {
   // uttalat ren provision, alltid bort
   for (const ord of REN_PROVISION) { if (text.indexOf(ord) > -1) return true; }
@@ -228,6 +244,7 @@ function poang(a) {
   if (harNagot(text, TEXTSTOPP)) return -20;
   if (provisionUtanGrundlon(text)) return -20;
   if (kortKravs(text)) return -20;
+  if (renRorligLon(a)) return -20;
 
   const positiv = harNagot(text, POSITIV_TEXT);
 
@@ -334,7 +351,7 @@ async function hamtaJobb() {
         }
 
         const brodtext = ((a.description ? a.description.text : "") + " " + (a.headline || "")).toLowerCase();
-        if (provisionUtanGrundlon(brodtext)) provisionsbort++;
+        if (provisionUtanGrundlon(brodtext) || renRorligLon(a)) provisionsbort++;
 
         const p = poang(a);
         if (p < 3) { bortsorterade++; continue; }
@@ -351,7 +368,8 @@ async function hamtaJobb() {
           korkortKravs: a.driving_license_required,
           lan: a.workplace_address && a.workplace_address.region ? a.workplace_address.region : "",
         utdrag: utdragskrav(a),
-        provision: harProvision(brodtext),
+        provision: harProvision(brodtext) || harRorligDel(a),
+        lonform: (a.salary_type && a.salary_type.label) || "",
         nattarbete: harNattarbete(a),
         nyborjarvanlig: nyborjarSkal(a) !== "",
         nyborjarskal: nyborjarSkal(a),
