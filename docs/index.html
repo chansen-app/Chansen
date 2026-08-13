@@ -268,6 +268,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div class="rakning" id="rakning"></div>
   <div style="margin:-6px 0 16px;display:flex;gap:16px;flex-wrap:wrap">
     <button class="lank" onclick="delaChansen()">Tipsa någon om Chansen</button>
+    <button class="lank" style="text-decoration:underline;margin-right:16px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare?</button>
     <a class="lank" style="text-decoration:underline" href="mailto:chansen.jobb@gmail.com?subject=Fel%20i%20Chansen&body=Beskriv%20vad%20som%20är%20fel,%20och%20klistra%20gärna%20in%20jobbtiteln%20om%20det%20gäller%20en%20annons.">Hittade du något fel?</a>
   </div>
   <div id="gammaldata" class="dold"></div>
@@ -292,6 +293,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <textarea id="a-text" style="width:100%;min-height:420px;padding:20px;font:inherit;font-size:15px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical"></textarea>
+
+  <div class="ruta" style="font-size:14px;margin-top:16px">
+    Många arbetsgivare vill ha ett CV också.
+    <button class="lank" onclick="visaVy('cv')">Bygg ett här</button>, det tar ungefär tio minuter.
+  </div>
 
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 26px">
     <button class="btn" onclick="kopiera()">Kopiera texten</button>
@@ -456,13 +462,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
 <div id="v-hjalp" class="dold">
   <h1>Hjälp</h1>
-  <p class="sub">Så söker du jobb, vad du får jobba under 18, och hur registerutdrag fungerar. Är du arbetsgivare kan du lägga upp ett jobb gratis under sista fliken.</p>
+  <p class="sub">Så söker du jobb, vad du får jobba under 18, och hur registerutdrag fungerar.</p>
 
   <div class="cvflik" style="margin-bottom:24px">
     <button id="h-soka" class="on" onclick="hjalpVisa('soka')">Söka jobb</button>
     <button id="h-tider" onclick="hjalpVisa('tider')">Arbetstider</button>
     <button id="h-utdrag" onclick="hjalpVisa('utdrag')">Registret</button>
-    <button id="h-arbetsgivare" onclick="hjalpVisa('arbetsgivare')">Arbetsgivare</button>
   </div>
 
 <div id="hjalp-soka" class="info">
@@ -517,9 +522,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     </div>
   </div>
 
-<div id="hjalp-arbetsgivare" class="dold info">
+<div id="v-arbetsgivare" class="dold info">
     <div class="rakning" id="bladstatus" style="margin-bottom:14px">bladet: läser...</div>
     <h1 style="font-size:28px;margin-bottom:6px">Lägg upp ett jobb</h1>
+    <p class="sub">Gratis. Din annons visas för alla som söker jobb i din kommun.</p>
     <p class="sub">Gratis. För dig som söker personal och inte kräver erfarenhet.</p>
 
     <p>Chansen används av personer som söker jobb. Fyll i formuläret nedan, så skickas annonsen till oss från din egen mejl. Varje annons granskas av en människa innan den publiceras, oftast inom ett dygn.</p>
@@ -771,6 +777,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 </div>
 </div>
 
+
 <div id="v-om" class="dold info">
   <h1>Om Chansen</h1>
   <p class="sub">Vad tjänsten gör, vad den inte gör, och vad som sparas.</p>
@@ -853,7 +860,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 Jobbannonserna kommer från Arbetsförmedlingens öppna data, API:et JobSearch.<br>
 Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.sv" target="_blank" rel="noopener">CC0</a>, alltså helt fri att använda.
 Vi anger källan för din skull, inte för att vi måste.<br>
-<span id="uppdaterad"></span><br>version 42</footer>
+<span id="uppdaterad"></span><br>
+<button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
+version 43</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -975,7 +984,7 @@ function spara(){
 }
 
 function visaVy(vy){
-  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om"];
+  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare"];
   for (var i = 0; i < vyer.length; i++){
     var el = document.getElementById("v-" + vyer[i]);
     var bas = (vyer[i] === "om") ? "info" : "";
@@ -987,7 +996,8 @@ function visaVy(vy){
   }
   if (vy === "mina") ritaMina();
   if (vy === "cv") oppnaCV();
-  if (vy === "hjalp") { hjalpVisa(hjalpDel); agStarta(); }
+  if (vy === "hjalp") hjalpVisa(hjalpDel);
+  if (vy === "arbetsgivare") agStarta();
   window.scrollTo(0,0);
 }
 
@@ -1437,7 +1447,7 @@ var hjalpDel = "soka";
 function hjalpVisa(del){
   if (hjalpDel !== del) handelse("hjalp-" + del);
   hjalpDel = del;
-  var delar = ["soka","tider","utdrag","arbetsgivare"];
+  var delar = ["soka","tider","utdrag"];
   for (var i = 0; i < delar.length; i++){
     var d = delar[i];
     var el = document.getElementById("hjalp-" + d);
@@ -2519,6 +2529,14 @@ ritaMina();
 kollaAlder();
 visaUppdaterad();
 
+// Egen adress till arbetsgivarsidan, chansen.nu/#arbetsgivare,
+// så att den går att skicka direkt till ett företag.
+function kollaAdress(){
+  if (location.hash === "#arbetsgivare") { visaVy("arbetsgivare"); return true; }
+  return false;
+}
+window.addEventListener("hashchange", kollaAdress);
+
 // Håller den installerade appen uppdaterad. Utan den kan någon som lagt
 // Chansen på hemskärmen sitta kvar på en gammal version i dagar.
 if ("serviceWorker" in navigator) {
@@ -2537,7 +2555,9 @@ if ("serviceWorker" in navigator) {
     }).catch(function () { /* fungerar ändå, bara utan offlinestöd */ });
   });
 }
-if (svar.alder) { startaLista(); } else { visaVy("start"); }
+if (kollaAdress()) {
+  // arbetsgivare kom via direktlänk
+} else if (svar.alder) { startaLista(); } else { visaVy("start"); }
 window.addEventListener("scroll", function(){
   var k = document.getElementById("upp");
   if (k) k.className = (window.scrollY > 600) ? "syns" : "";
