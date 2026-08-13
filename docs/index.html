@@ -84,7 +84,8 @@ h3{font-family:var(--heading);font-weight:400;font-size:17px;margin:0 0 6px}
 label.fraga{display:block;font-size:12px;color:var(--n-700);margin:0 0 7px}
 .field{margin-bottom:22px}
 .avsnitt{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-600);margin:30px 0 14px;padding-top:18px;border-top:1.5px solid var(--n-300)}
-.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg{display:flex;flex-wrap:wrap;gap:8px;min-height:44px}
+.chips{min-height:40px}
 .seg button{min-height:44px;padding:10px 16px;border-radius:999px;font-family:var(--body);font-size:13.5px;font-weight:700;cursor:pointer;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800)}
 .seg button.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15px;background:var(--surface);border:1.5px solid var(--n-300);border-radius:999px;color:var(--text)}
@@ -850,7 +851,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 Jobbannonserna kommer från Arbetsförmedlingens öppna data, API:et JobSearch.<br>
 Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.sv" target="_blank" rel="noopener">CC0</a>, alltså helt fri att använda.
 Vi anger källan för din skull, inte för att vi måste.<br>
-<span id="uppdaterad"></span><br>version 40</footer>
+<span id="uppdaterad"></span><br>version 41</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1714,12 +1715,16 @@ function agSkicka(){
 
 // ── mätning ─────────────────────────────────────────────
 // Räknar vad folk gör, inte vilka de är. Ingen personuppgift skickas.
+// Mätningen körs efter att webbläsaren hunnit reagera på klicket.
+// Annars fick användaren vänta på oss innan något hände.
 function handelse(namn){
-  try {
-    if (window.goatcounter && window.goatcounter.count) {
-      window.goatcounter.count({ path: "handelse/" + namn, title: namn, event: true });
-    }
-  } catch(e){}
+  setTimeout(function(){
+    try {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({ path: "handelse/" + namn, title: namn, event: true });
+      }
+    } catch(e){}
+  }, 0);
 }
 
 function slug(t){
