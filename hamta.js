@@ -377,7 +377,8 @@ async function hamtaJobb() {
           poang: p,
           chansniva: p >= 8 ? "hog" : (p >= 5 ? "medel" : "lag"),
           lank: a.webpage_url,
-          sistaAnsokningsdag: a.application_deadline
+          sistaAnsokningsdag: a.application_deadline,
+          publicerad: a.publication_date || null
         });
       }
     }
