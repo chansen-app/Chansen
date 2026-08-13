@@ -862,7 +862,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 44</footer>
+version 45</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2495,7 +2495,17 @@ function visa(filter){
 
   var notis = document.getElementById("notis");
   var aldersnotis = "";
-  if (underSexton()) {
+  if (!svar.alder) {
+    // Har man hoppat över åldersfrågan behandlas man som yngst, vilket
+    // halverar listan. Utan den här rutan förstår ingen varför.
+    var dolda = JOBB.length - valda.length;
+    aldersnotis = '<div class="ruta" style="font-size:14px;background:var(--accent-100);color:var(--accent-800)">'
+      + '<b>Du har inte svarat på hur gammal du är.</b><br>'
+      + 'Därför visar vi bara jobb som alla får ta, oavsett ålder. '
+      + 'Heltidsjobb och nattarbete är dolda, eftersom de inte är tillåtna för alla under 18. '
+      + '<button class="lank" onclick="visaVy(\'start\')">Svara på frågan för att se fler jobb</button>'
+      + '</div>';
+  } else if (underSexton()) {
     aldersnotis = '<div class="ruta" style="font-size:14px">Heltidsjobb och nattarbete visas inte för dig. Är du under 16 får du jobba högst 12 timmar i veckan under skolveckor och 7 timmar om dagen under lov, aldrig efter klockan 20. <button class="lank" onclick="oppnaHjalp(\'tider\')">Läs mer om arbetstider</button></div>';
   } else if (underArton()) {
     aldersnotis = '<div class="ruta" style="font-size:14px">Jobb med natt- eller skiftarbete visas inte för dig. Är du under 18 får du inte jobba mellan 22 och 06. <button class="lank" onclick="oppnaHjalp(\'tider\')">Läs mer om arbetstider</button></div>';
