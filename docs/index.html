@@ -88,6 +88,8 @@ label.fraga{display:block;font-size:12px;color:var(--n-700);margin:0 0 7px}
 .chips{min-height:40px}
 .seg button{min-height:44px;padding:10px 16px;border-radius:999px;font-family:var(--body);font-size:13.5px;font-weight:700;cursor:pointer;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800)}
 .seg button.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.antal{display:inline-block;margin-left:6px;font-size:12px;font-weight:700;opacity:.65}
+.seg button.on .antal{opacity:.85}
 input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15px;background:var(--surface);border:1.5px solid var(--n-300);border-radius:999px;color:var(--text)}
 .hint{font-size:13px;color:var(--n-600);margin-top:7px}
 .btn{display:inline-flex;align-items:center;justify-content:center;font-family:var(--heading);font-weight:400;font-size:15px;text-decoration:none;padding:14px 24px;border-radius:999px;background:var(--accent);color:var(--bg);border:none;cursor:pointer}
@@ -202,7 +204,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <div class="field">
     <label class="fraga">Var bor du?</label>
-    <input class="txt" id="ort" placeholder="Skriv din kommun" value="">
+    <input class="txt" id="ort" placeholder="Skriv din kommun" value="" oninput="ortAndrad()">
     <div class="hint">Lämna tomt om du vill se jobb i hela Sverige.</div>
   </div>
 
@@ -239,7 +241,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div class="field">
     <label class="fraga">Vad vill du helst jobba med?</label>
     <div class="seg" id="q-omrade"></div>
-    <div class="hint">Välj ett eller flera. Väljer du inget visas alla sorters jobb. Övrigt är sådant som inte passar i någon av de andra.</div>
+    <div class="hint">Siffran visar hur många jobb som finns just nu på den ort du skrivit. Väljer du inget visas alla sorters jobb.</div>
   </div>
 
   <button class="btn block" onclick="startaLista()">Visa jobben</button>
@@ -851,7 +853,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 Jobbannonserna kommer från Arbetsförmedlingens öppna data, API:et JobSearch.<br>
 Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.sv" target="_blank" rel="noopener">CC0</a>, alltså helt fri att använda.
 Vi anger källan för din skull, inte för att vi måste.<br>
-<span id="uppdaterad"></span><br>version 41</footer>
+<span id="uppdaterad"></span><br>version 42</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -912,15 +914,46 @@ try {
   }
 } catch(e){}
 
+// Hur många jobb finns det egentligen inom ett område, på den ort
+// användaren skrivit in? Utan den siffran kan man svara på alla frågor
+// och ändå landa i en tom lista, vilket är det värsta appen kan göra.
+function antalIOmrade(omrade){
+  if (typeof JOBB === "undefined" || !JOBB.length) return null;
+  var ort = document.getElementById("ort");
+  var sokord = ort ? slat(ort.value.trim()) : "";
+  sokord = smeknamn[sokord] || sokord;
+
+  var n = 0;
+  for (var i = 0; i < JOBB.length; i++){
+    var j = JOBB[i];
+    if (sokord && slat(j.ort).indexOf(sokord) === -1) continue;
+    if (underSexton() && j.omfattning === "Heltid") continue;
+    if (underArton() && j.nattarbete === true) continue;
+    if (j.kategori === omrade) n++;
+  }
+  return n;
+}
+
 function ritaFragor(){
   for (var falt in fragor){
     var el = document.getElementById("q-" + falt);
     if (!el) continue;
     el.innerHTML = fragor[falt].map(function(v){
       var pa = flerval[falt] ? (svar[falt] || []).indexOf(v) > -1 : svar[falt] === v;
-      return '<button class="'+(pa ? "on" : "")+'" onclick="valj(\''+falt+'\',\''+v.replace(/'/g,"")+'\')">'+v+'</button>';
+      var etikett = v;
+      if (falt === "omrade"){
+        var n = antalIOmrade(v);
+        if (n !== null) etikett = v + ' <span class="antal">' + n + '</span>';
+      }
+      return '<button class="'+(pa ? "on" : "")+'" onclick="valj(\''+falt+'\',\''+v.replace(/'/g,"")+'\')">'+etikett+'</button>';
     }).join("");
   }
+}
+
+var ortTimer = null;
+function ortAndrad(){
+  if (ortTimer) clearTimeout(ortTimer);
+  ortTimer = setTimeout(ritaFragor, 350);
 }
 
 function valj(falt, varde){
