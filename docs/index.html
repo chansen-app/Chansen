@@ -228,7 +228,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div class="field">
-    <label class="fraga">Vad har du gått klart?</label>
+    <label class="fraga">Vad har du för utbildning?</label>
     <div class="seg" id="q-utbildning"></div>
   </div>
 
@@ -239,7 +239,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div class="field">
-    <label class="fraga">Har du jobbat förut?</label>
+    <label class="fraga">Hur mycket har du jobbat tidigare?</label>
     <div class="seg" id="q-erfarenhet"></div>
   </div>
 
@@ -877,7 +877,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 49</footer>
+version 50</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -907,9 +907,9 @@ version 49</footer>
 var fragor = {
   alder:      ["Under 16","16 till 17","18 eller äldre"],
   nar:        ["Helger","Kvällar","Lov och sommar","När som helst"],
-  utbildning: ["Går i grundskolan","Går på gymnasiet","Gymnasieexamen"],
+  utbildning: ["Går i grundskolan","Går på gymnasiet","Gymnasieexamen","Yrkesutbildning","Högskola eller universitet","Ingen avslutad utbildning"],
   korkort:    ["Ja","Nej"],
-  erfarenhet: ["Aldrig jobbat","Lite","En del"],
+  erfarenhet: ["Aldrig jobbat","Lite","En del","Flera år","Lång erfarenhet"],
   omfattning: ["Heltid","Deltid","Helger","Kvällar","Sommarjobb","Vid behov","Praktik"],
   omrade:     ["Sälj","Kundtjänst","Butik","Lager och logistik","Restaurang och café",
                "Städ","Vård och omsorg","Barn och skola","Industri och produktion","Kontor",
@@ -2345,6 +2345,10 @@ function erfarenhetsrad(){
     return "Jag har jobbat lite tidigare och vet hur det är att passa tider och göra det man blivit tillsagd att göra.";
   if (svar.erfarenhet === "En del")
     return "Jag har jobbat en del tidigare och behöver ingen lång upplärning för att komma in i rutinerna.";
+  if (svar.erfarenhet === "Flera år")
+    return "Jag har flera års arbetslivserfarenhet och kommer snabbt in i nya arbetsuppgifter.";
+  if (svar.erfarenhet === "Lång erfarenhet")
+    return "Jag har lång arbetslivserfarenhet och tar med mig både rutin och ett lugn som märks när det är mycket att göra.";
   return "";
 }
 
@@ -2352,6 +2356,9 @@ function utbildningsrad(){
   if (svar.utbildning === "Går i grundskolan") return "Jag går i grundskolan just nu.";
   if (svar.utbildning === "Går på gymnasiet") return "Jag går på gymnasiet just nu.";
   if (svar.utbildning === "Gymnasieexamen") return "Jag har gymnasieexamen.";
+  if (svar.utbildning === "Yrkesutbildning") return "Jag har en yrkesutbildning bakom mig.";
+  if (svar.utbildning === "Högskola eller universitet") return "Jag har läst på högskola eller universitet.";
+  if (svar.utbildning === "Ingen avslutad utbildning") return "";
   return "";
 }
 
