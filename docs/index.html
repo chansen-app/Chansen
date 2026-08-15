@@ -94,6 +94,8 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
 .hint{font-size:13px;color:var(--n-600);margin-top:7px}
 .btn{display:inline-flex;align-items:center;justify-content:center;font-family:var(--heading);font-weight:400;font-size:15px;text-decoration:none;padding:14px 24px;border-radius:999px;background:var(--accent);color:var(--bg);border:none;cursor:pointer}
 .btn:hover{background:var(--accent-700)}
+.btn:disabled{background:var(--n-300);color:var(--n-600);cursor:not-allowed}
+.btn:disabled:hover{background:var(--n-300)}
 .btn.block{width:100%;min-height:52px;margin-top:10px}
 .btn.liten{font-size:14px;padding:11px 20px}
 .lank{background:none;border:none;font:inherit;font-size:14px;color:var(--accent-700);cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
@@ -199,7 +201,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div class="field">
     <label class="fraga">Hur gammal är du?</label>
     <div class="seg" id="q-alder"></div>
-    <div class="hint">Är du under 18 finns det jobb och tider du inte får ta enligt lag.</div>
+    <div class="hint">Är du under 18 finns det jobb och tider du inte får ta enligt lag. Därför behöver vi ditt svar här, resten av frågorna är frivilliga.</div>
   </div>
 
   <div class="field">
@@ -214,7 +216,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div class="hint">Välj ett eller flera.</div>
   </div>
 
-  <button class="btn block" onclick="startaLista()">Visa jobben</button>
+  <button class="btn block" id="knapp-visa-1" onclick="startaLista()">Visa jobben</button>
   <div class="hint" style="text-align:center;margin-top:10px">
     Det räcker så. Vill du finslipa, svara på fler frågor nedan.
   </div>
@@ -251,7 +253,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div class="hint">Siffran visar hur många jobb som finns just nu på den ort du skrivit. Väljer du inget visas alla sorters jobb.</div>
   </div>
 
-  <button class="btn block" onclick="startaLista()">Visa jobben</button>
+  <button class="btn block" id="knapp-visa-2" onclick="startaLista()">Visa jobben</button>
   <div class="hint" style="text-align:center;margin-top:10px">
     Du kan alltid ändra svaren sedan.
   </div>
@@ -883,7 +885,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 51</footer>
+version 52</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -964,6 +966,19 @@ function antalIOmrade(omrade){
   return n;
 }
 
+// Åldern är den enda frågan som styr vad som är LAGLIGT att jobba med,
+// och därför den enda som måste besvaras. Utan den kan man annars gå
+// vidare och få halva listan utan att förstå varför.
+function kollaKnappar(){
+  var klar = !!svar.alder;
+  ["knapp-visa-1","knapp-visa-2"].forEach(function(id){
+    var k = document.getElementById(id);
+    if (!k) return;
+    k.disabled = !klar;
+    k.textContent = klar ? "Visa jobben" : "Välj din ålder först";
+  });
+}
+
 function ritaFragor(){
   for (var falt in fragor){
     var el = document.getElementById("q-" + falt);
@@ -995,6 +1010,7 @@ function valj(falt, varde){
     svar[falt] = varde;
   }
   ritaFragor();
+  kollaKnappar();
 }
 
 function spara(){
@@ -2610,6 +2626,7 @@ function visa(filter){
 }
 
 ritaFragor();
+kollaKnappar();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
 ritaMina();
 kollaAlder();
