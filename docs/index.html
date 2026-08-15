@@ -885,7 +885,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 52</footer>
+version 53</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1061,7 +1061,10 @@ function startaLista(){
   if (svar.ort) handelse("ort-ifylld"); else handelse("ort-tom");
   document.getElementById("profil").textContent = profilrad();
   visaVy("jobb");
-  visa("alla");
+  // Vyn byts direkt så det känns snabbt. Jobbkorten ritas i nästa
+  // bildruta, annars måste webbläsaren göra allt innan den hinner
+  // reagera på knapptrycket.
+  requestAnimationFrame(function(){ visa("alla"); });
 }
 
 function matcharAlder(j){
@@ -2530,12 +2533,17 @@ var aktuellLista = [];
 var visatAntal = 0;
 var SIDSTORLEK = 20;
 
+// Första biten görs mindre. Webbläsaren hinner då rita klart snabbt,
+// och resten fylls på i nästa bildruta utan att det syns.
+var FORSTA_BITEN = 6;
+
 function ritaBit(nollstall){
   var el = document.getElementById("lista");
   if (!el) return;
   if (nollstall){ el.innerHTML = ""; visatAntal = 0; }
 
-  var till = Math.min(visatAntal + SIDSTORLEK, aktuellLista.length);
+  var steg = (nollstall ? FORSTA_BITEN : SIDSTORLEK);
+  var till = Math.min(visatAntal + steg, aktuellLista.length);
   var bit = "";
   for (var i = visatAntal; i < till; i++){ bit += kort(aktuellLista[i]); }
   if (bit) el.insertAdjacentHTML("beforeend", bit);
@@ -2623,6 +2631,10 @@ function visa(filter){
   }
   aktuellLista = valda;
   ritaBit(true);
+  // fyll på upp till full sidstorlek när webbläsaren ritat klart
+  if (visatAntal < Math.min(SIDSTORLEK, aktuellLista.length)){
+    requestAnimationFrame(function(){ ritaBit(false); });
+  }
 }
 
 ritaFragor();
