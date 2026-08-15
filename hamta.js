@@ -246,17 +246,48 @@ function poang(a) {
   if (kortKravs(text)) return -20;
   if (renRorligLon(a)) return -20;
 
-  const positiv = harNagot(text, POSITIV_TEXT);
+  // Räkna HUR MÅNGA positiva tecken annonsen har, inte bara om den har något.
+  // Tidigare fick nästan alla jobb samma poäng, vilket gjorde sorteringen
+  // meningslös för de flesta.
+  let positivaOrd = 0;
+  for (const o of POSITIV_TEXT) { if (text.indexOf(o) > -1) positivaOrd++; }
+  const positiv = positivaOrd > 0;
 
-  if (a.experience_required === false) p += 4;
-  if (positiv) p += 4;
+  // arbetsgivaren har själv sagt att erfarenhet inte krävs
+  if (a.experience_required === false) p += 5;
+
+  // varje formulering som säger att de lär upp väger något
+  p += Math.min(positivaOrd * 2, 6);
+
   if (harNagot(titel, BRATITEL)) p += 2;
-  if (kategori(a) !== "Övrigt") p += 2;
+  if (kategori(a) !== "Övrigt") p += 1;
 
-  if (a.experience_required === true && !positiv) p -= 2;
+  // anställningsformer med låg tröskel
+  const form = ((a.employment_type && a.employment_type.label) || "").toLowerCase();
+  if (form.indexOf("behov") > -1 || form.indexOf("sommar") > -1
+      || form.indexOf("feriejobb") > -1 || form.indexOf("tidsbegr") > -1
+      || form.indexOf("vikariat") > -1) p += 2;
+
+  // deltid är oftare en väg in än heltid
+  const omf = ((a.working_hours_type && a.working_hours_type.label) || "").toLowerCase();
+  if (omf.indexOf("del") > -1) p += 1;
+
+  // en färsk annons är mer sannolikt fortfarande öppen
+  if (a.publication_date) {
+    const dagar = Math.floor((Date.now() - new Date(a.publication_date)) / 86400000);
+    if (dagar <= 7) p += 3;
+    else if (dagar <= 30) p += 1;
+    else if (dagar > 120) p -= 2;
+  }
+
+  // hinder
+  if (a.experience_required === true && !positiv) p -= 3;
   if (a.driving_license_required === true) p -= 2;
+  if (utdragskrav(a) === "kravs") p -= 2;
+  if (harProvision(text)) p -= 1;
+  if (harNattarbete(a)) p -= 1;
   if (harNagot(text, ["minst 2 ars","minst 2 års","minst tva ars","minst två års",
-                      "nagra ars erfarenhet","några års erfarenhet"])) p -= 3;
+                      "nagra ars erfarenhet","några års erfarenhet"])) p -= 4;
 
   return p;
 }
@@ -375,7 +406,7 @@ async function hamtaJobb() {
         nyborjarskal: nyborjarSkal(a),
           minderarigOk: okForMinderarig(a),
           poang: p,
-          chansniva: p >= 8 ? "hog" : (p >= 5 ? "medel" : "lag"),
+          chansniva: p >= 7 ? "hog" : (p >= 4 ? "medel" : "lag"),
           lank: a.webpage_url,
           sistaAnsokningsdag: a.application_deadline,
           publicerad: a.publication_date || null
