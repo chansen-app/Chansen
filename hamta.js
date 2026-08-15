@@ -262,24 +262,6 @@ function poang(a) {
   if (harNagot(titel, BRATITEL)) p += 2;
   if (kategori(a) !== "Övrigt") p += 1;
 
-  // anställningsformer med låg tröskel
-  const form = ((a.employment_type && a.employment_type.label) || "").toLowerCase();
-  if (form.indexOf("behov") > -1 || form.indexOf("sommar") > -1
-      || form.indexOf("feriejobb") > -1 || form.indexOf("tidsbegr") > -1
-      || form.indexOf("vikariat") > -1) p += 2;
-
-  // deltid är oftare en väg in än heltid
-  const omf = ((a.working_hours_type && a.working_hours_type.label) || "").toLowerCase();
-  if (omf.indexOf("del") > -1) p += 1;
-
-  // en färsk annons är mer sannolikt fortfarande öppen
-  if (a.publication_date) {
-    const dagar = Math.floor((Date.now() - new Date(a.publication_date)) / 86400000);
-    if (dagar <= 7) p += 3;
-    else if (dagar <= 30) p += 1;
-    else if (dagar > 120) p -= 2;
-  }
-
   // hinder
   if (a.experience_required === true && !positiv) p -= 3;
   if (a.driving_license_required === true) p -= 2;
@@ -327,6 +309,29 @@ function harNattarbete(a) {
 function nyborjarSkal(a) {
   if (a.experience_required === false) return "arbetsgivaren har själv angett att erfarenhet inte krävs";
   return "";
+}
+
+// Poängen ovan avgör OM ett jobb ska visas, och bygger bara på hur höga
+// kraven är. Ordningen får däremot ta hänsyn till sånt som gör ett jobb
+// lättare att faktiskt få, utan att släppa in jobb med höga krav.
+function sorteringspoang(a, kravpoang) {
+  let s = kravpoang * 10;
+
+  const form = ((a.employment_type && a.employment_type.label) || "").toLowerCase();
+  if (form.indexOf("behov") > -1 || form.indexOf("sommar") > -1
+      || form.indexOf("feriejobb") > -1 || form.indexOf("tidsbegr") > -1
+      || form.indexOf("vikariat") > -1) s += 4;
+
+  const omf = ((a.working_hours_type && a.working_hours_type.label) || "").toLowerCase();
+  if (omf.indexOf("del") > -1) s += 2;
+
+  if (a.publication_date) {
+    const dagar = Math.floor((Date.now() - new Date(a.publication_date)) / 86400000);
+    if (dagar <= 7) s += 6;
+    else if (dagar <= 30) s += 2;
+    else if (dagar > 120) s -= 4;
+  }
+  return s;
 }
 
 function harProvision(text) {
@@ -406,7 +411,8 @@ async function hamtaJobb() {
         nyborjarskal: nyborjarSkal(a),
           minderarigOk: okForMinderarig(a),
           poang: p,
-          chansniva: p >= 7 ? "hog" : (p >= 4 ? "medel" : "lag"),
+          sortpoang: sorteringspoang(a, p),
+          chansniva: p >= 5 ? "hog" : (p >= 3 ? "medel" : "lag"),
           lank: a.webpage_url,
           sistaAnsokningsdag: a.application_deadline,
           publicerad: a.publication_date || null
@@ -416,7 +422,7 @@ async function hamtaJobb() {
     console.log("Sökt: " + term + "  (" + jobb.length + " jobb hittills)");
   }
 
-  jobb.sort(function (x, y) { return y.poang - x.poang; });
+  jobb.sort(function (x, y) { return (y.sortpoang || y.poang) - (x.sortpoang || x.poang); });
 
   const hamtadTid = new Date().toISOString();
 
