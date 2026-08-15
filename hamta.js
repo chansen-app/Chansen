@@ -453,8 +453,8 @@ async function hamtaJobb() {
   // Ingen arbetsgivare ska få fylla listan. Tolv företag stod tidigare för
   // en tredjedel av alla jobb, och då blir det tröttsamt att bläddra.
   // Bäst rankade behålls, resten faller bort.
-  const MAX_PER_ORT = 2;      // samma företag, samma kommun
-  const MAX_TOTALT  = 8;      // samma företag i hela landet
+  const MAX_PER_ORT = 3;      // samma företag, samma kommun
+  const MAX_TOTALT  = 20;     // samma företag i hela landet
   const perOrt = {}, perAg = {};
   const kvar = [], bortTak = [];
   for (const j of jobb) {
