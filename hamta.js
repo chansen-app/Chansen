@@ -360,10 +360,31 @@ async function hamtaJobb() {
   let hamtade = 0, bortsorterade = 0, provisionsbort = 0;
   const kommunLan = {};
 
+  // Heltidsjobb hittas dåligt av våra sökord, som är inriktade på extrajobb
+  // och deltid. Därför sveper vi också igenom heltidsannonserna direkt.
+  const HELTID = "6YE1_gAC_R2G";
+  const SVEP = [];
+  for (let o = 0; o <= 1900; o += 100) {
+    SVEP.push({ term: "heltidssvep", url:
+      "https://jobsearch.api.jobtechdev.se/search?q=&worktime-extent=" + HELTID +
+      "&limit=100&offset=" + o });
+  }
+
+  const OMGANGAR = [];
   for (const term of SOKNINGAR) {
     for (let sida = 0; sida < SIDOR_PER_SOKNING; sida++) {
-      const url = "https://jobsearch.api.jobtechdev.se/search?q=" +
-                  encodeURIComponent(term) + "&limit=100&offset=" + (sida * 100);
+      OMGANGAR.push({ term: term, url:
+        "https://jobsearch.api.jobtechdev.se/search?q=" +
+        encodeURIComponent(term) + "&limit=100&offset=" + (sida * 100) });
+    }
+  }
+  for (const s of SVEP) OMGANGAR.push(s);
+
+  let forraTerm = "";
+  for (const omgang of OMGANGAR) {
+    {
+      const term = omgang.term;
+      const url = omgang.url;
       let data;
       try {
         const svar = await fetch(url);
@@ -418,11 +439,33 @@ async function hamtaJobb() {
           publicerad: a.publication_date || null
         });
       }
+      if (term !== forraTerm) {
+        console.log("Sökt: " + term + "  (" + jobb.length + " jobb hittills)");
+        forraTerm = term;
+      }
     }
-    console.log("Sökt: " + term + "  (" + jobb.length + " jobb hittills)");
   }
 
   jobb.sort(function (x, y) { return (y.sortpoang || y.poang) - (x.sortpoang || x.poang); });
+
+  // Ingen arbetsgivare ska få fylla listan. Tolv företag stod tidigare för
+  // en tredjedel av alla jobb, och då blir det tröttsamt att bläddra.
+  // Bäst rankade behålls, resten faller bort.
+  const MAX_PER_ORT = 2;      // samma företag, samma kommun
+  const MAX_TOTALT  = 8;      // samma företag i hela landet
+  const perOrt = {}, perAg = {};
+  const kvar = [], bortTak = [];
+  for (const j of jobb) {
+    const ag = (j.arbetsgivare || "").trim();
+    const nyckelOrt = ag + "|" + (j.ort || "");
+    perOrt[nyckelOrt] = (perOrt[nyckelOrt] || 0) + 1;
+    perAg[ag] = (perAg[ag] || 0) + 1;
+    if (perOrt[nyckelOrt] > MAX_PER_ORT || perAg[ag] > MAX_TOTALT) { bortTak.push(j); continue; }
+    kvar.push(j);
+  }
+  console.log("Bortsorterade för att en arbetsgivare tog för stor plats: " + bortTak.length);
+  jobb.length = 0;
+  for (const j of kvar) jobb.push(j);
 
   const hamtadTid = new Date().toISOString();
 
