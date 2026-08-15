@@ -388,10 +388,12 @@ async function hamtaJobb() {
       let data;
       try {
         const svar = await fetch(url);
-        if (!svar.ok) break;
+        // continue, inte break: ett misslyckat anrop ska hoppa över den
+        // sidan, inte avbryta hela hämtningen.
+        if (!svar.ok) continue;
         data = await svar.json();
-      } catch (e) { break; }
-      if (!data.hits || data.hits.length === 0) break;
+      } catch (e) { continue; }
+      if (!data.hits || data.hits.length === 0) continue;
 
       for (const a of data.hits) {
         hamtade++;
