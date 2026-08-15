@@ -363,11 +363,40 @@ async function hamtaJobb() {
   // Heltidsjobb hittas dåligt av våra sökord, som är inriktade på extrajobb
   // och deltid. Därför sveper vi också igenom heltidsannonserna direkt.
   const HELTID = "6YE1_gAC_R2G";
+  const DELTID = "947z_JGS_Uk2";
   const SVEP = [];
   for (let o = 0; o <= 1900; o += 100) {
     SVEP.push({ term: "heltidssvep", url:
       "https://jobsearch.api.jobtechdev.se/search?q=&worktime-extent=" + HELTID +
       "&limit=100&offset=" + o });
+  }
+
+  // Sökorden hittar bara det de råkar innehålla. Ett svep län för län går
+  // igenom hela Platsbanken i stället, så vi missar inga jobb som klarar
+  // kraven bara för att annonsen är formulerad på ett ovanligt sätt.
+  const LAN = [
+    ["Stockholm","CifL_Rzy_Mku",1], ["Västra Götaland","zdoY_6u5_Krt",1],
+    ["Skåne","CaRE_1nn_cSU",1],     ["Östergötland","oLT3_Q9p_3nn",1],
+    ["Jönköping","MtbE_xWT_eMi",0], ["Norrbotten","9hXe_F4g_eTG",0],
+    ["Uppsala","zBon_eET_fFU",0],   ["Västerbotten","g5Tt_CAV_zBd",0],
+    ["Dalarna","oDpK_oZ2_WYt",0],   ["Örebro","xTCk_nT5_Zjm",0],
+    ["Södermanland","s93u_BEb_sx2",0], ["Halland","wjee_qH2_yb6",0],
+    ["Västmanland","G6DV_fKE_Viz",0],  ["Västernorrland","NvUF_SP1_1zo",0],
+    ["Värmland","EVVp_h6U_GSZ",0],  ["Gävleborg","zupA_8Nt_xcD",0],
+    ["Kronoberg","tF3y_MF9_h5G",0], ["Kalmar","9QUH_2bb_6Np",0],
+    ["Jämtland","65Ms_7r1_RTG",0],  ["Blekinge","DQZd_uYs_oKb",0],
+    ["Gotland","K8iD_VQv_2BA",0]
+  ];
+  for (const [namn, id, stort] of LAN) {
+    // små län ryms i ett svep, stora delas upp så vi kommer djupare
+    const delar = stort ? ["", "&worktime-extent=" + HELTID, "&worktime-extent=" + DELTID] : [""];
+    for (const del of delar) {
+      for (let o = 0; o <= 1900; o += 100) {
+        SVEP.push({ term: "svep " + namn, url:
+          "https://jobsearch.api.jobtechdev.se/search?q=&region=" + id + del +
+          "&limit=100&offset=" + o });
+      }
+    }
   }
 
   const OMGANGAR = [];
