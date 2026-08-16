@@ -885,7 +885,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 55</footer>
+version 56</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2571,14 +2571,23 @@ function visa(filter){
   var hkn = document.getElementById("f-heltid");
   if (hkn) hkn.className = underSexton() ? "dold" : (filter === "heltid" ? "on" : "");
 
-  // hittas inga jobb i kommunen, visa länet i stället
-  var lanfall = "";
+  // Många kommuner har bara ett eller två jobb. Då är en nästan tom lista
+  // sämre än att visa hela länet, så vi fyller på när det är för tunt.
+  var lanfall = "", ortsnamn = "";
   var iOmradet = JOBB.filter(matcharOrt);
-  if (svar.ort && iOmradet.length === 0){
+
+  // visa kommunens riktiga namn, inte det användaren råkade skriva
+  if (svar.ort && iOmradet.length) ortsnamn = iOmradet[0].ort || svar.ort;
+  else ortsnamn = svar.ort;
+
+  if (svar.ort && iOmradet.length < 3){
     var lan = lanForOrt();
     if (lan){
       var iLanet = JOBB.filter(function(j){ return j.lan === lan; });
-      if (iLanet.length){ iOmradet = iLanet; lanfall = lan; }
+      if (iLanet.length > iOmradet.length){
+        lanfall = lan;
+        iOmradet = iLanet;
+      }
     }
   }
 
@@ -2611,7 +2620,13 @@ function visa(filter){
     aldersnotis = '<div class="ruta" style="font-size:14px">Jobb med natt- eller skiftarbete visas inte för dig. Är du under 18 får du inte jobba mellan 22 och 06. <button class="lank" onclick="oppnaHjalp(\'tider\')">Läs mer om arbetstider</button></div>';
   }
   if (lanfall) {
-    aldersnotis += '<div class="ruta" style="font-size:14px">Inga jobb i ' + fly(svar.ort) + ' just nu. Här är jobben i ' + fly(lanfall) + ' i stället.</div>';
+    var antalIOrten = JOBB.filter(matcharOrt).length;
+    aldersnotis += '<div class="ruta" style="font-size:14px">'
+      + (antalIOrten === 0
+          ? 'Inga jobb i ' + fly(ortsnamn) + ' just nu. Här är jobben i ' + fly(lanfall) + ' i stället.'
+          : 'Bara ' + antalIOrten + (antalIOrten === 1 ? ' jobb' : ' jobb') + ' i ' + fly(ortsnamn)
+            + ' just nu, så vi visar hela ' + fly(lanfall) + '. Jobben i din kommun ligger överst.')
+      + '</div>';
   }
   if (filter === "nyborjare") {
     aldersnotis += '<div class="ruta" style="font-size:14px">Här är jobben där arbetsgivaren själv kryssat i att erfarenhet inte krävs. Alla jobb i Chansen har låga krav, men de här är uttalade. Det är arbetsgivarens ord, inte ett löfte från oss.</div>';
@@ -2622,13 +2637,22 @@ function visa(filter){
       : "");
   }
   document.getElementById("rakning").textContent =
-    valda.length + " jobb i " + (lanfall ? lanfall : (svar.ort ? svar.ort : "hela Sverige"));
+    valda.length + " jobb i " + (lanfall ? lanfall : (ortsnamn ? ortsnamn : "hela Sverige"));
 
   if (!valda.length){
     aktuellLista = [];
     document.getElementById("lista").innerHTML = tomtLage(filter);
     return;
   }
+  if (lanfall && svar.ort){
+    var sok = sokordOrt();
+    valda.sort(function(a, b){
+      var ia = slat(a.ort).indexOf(sok) > -1 ? 0 : 1;
+      var ib = slat(b.ort).indexOf(sok) > -1 ? 0 : 1;
+      return ia - ib;
+    });
+  }
+
   aktuellLista = valda;
   ritaBit(true);
   // fyll på upp till full sidstorlek när webbläsaren ritat klart
