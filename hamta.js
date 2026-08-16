@@ -93,7 +93,10 @@ const POSITIV_TEXT = [
 
 // ── kategorier: nyckelord i titeln ────────────────────────────────────
 const KATEGORIER = {
-  "Butik": ["butik","kassa","expedit","store","shop","varuhus","varupafyllare","varupåfyllare",
+  "Städ": ["stad","städ","lokalvard","lokalvård","cleaner","cleaning","fonsterputs","fönsterputs",
+           "tvatt","tvätt","textilservice","hygien","sanering","skursk","hotellstad","hotellstäd",
+           "rumsstad","rumsstäd","trappstad","trappstäd"],
+  "Butik": ["butik","kassa","expedit","store","varuhus","varupafyllare","varupåfyllare",
             "ica ","coop","willys","lidl","dollarstore","rusta","åhléns","ahlens",
             "kiosk","narlivs","närlivs","blomster","apotekstekniker","uthyr","second hand"],
   "Sälj": ["saljare","säljare","salj","sälj","account manager","innesaljare","innesäljare",
@@ -109,8 +112,6 @@ const KATEGORIER = {
                           "catering","bufe","buffé","frukost","kallskanka","kallskänka","bagare",
                           "konditor","glass","food","burgare","sibylla","max ","kiosk och grill",
                           "matsal","kost","bartender","barpersonal","servering"],
-  "Städ": ["stad","städ","lokalvard","lokalvård","cleaner","cleaning","fonsterputs","fönsterputs",
-           "tvatt","tvätt","textilservice","hygien","sanering","skursk"],
   "Vård och omsorg": ["assistent","vard","vård","omsorg","hemtjanst","hemtjänst","boende",
                       "ledsagare","avlosare","avlösare"],
   "Barn och skola": ["barn","fritids","forskola","förskola","elevassistent","skolmaltid","skolmåltid"],
