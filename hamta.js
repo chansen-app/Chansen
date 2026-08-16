@@ -130,7 +130,14 @@ const KATEGORIER = {
 
 const BRATITEL = [
   "extrajobb","sommarjobb","helgjobb","ferie","extra personal","extrahjalp","extrahjälp",
-  "timanstalld","timanställd","studerande","student","feriearbete","sasongsjobb","säsongsjobb"
+  "timanstalld","timanställd","studerande","student","feriearbete","sasongsjobb","säsongsjobb",
+  // vanliga ingångsjobb som annars faller mellan stolarna
+  "medarbetare","bitrade","biträde","barback","runner","diskare","kioskbitrade","kioskbiträde",
+  "mcdonald","burger king","max hamburgare","subway","espresso house","waynes","pressbyran",
+  "pressbyrån","7-eleven","seven eleven","o'learys","olearys","sibylla","bistro",
+  "vaktmastare","vaktmästare","badvard","badvärd","instruktor","instruktör","ledare pa",
+  "ledare på","assistent till","varupafyllare","varupåfyllare","plockare","packare",
+  "hemstad","hemstäd","flyttstad","flyttstäd","glassbar","kiosk"
 ];
 
 const EJ_MINDERARIG = [
@@ -257,6 +264,10 @@ function poang(a) {
   // arbetsgivaren har själv sagt att erfarenhet inte krävs
   if (a.experience_required === false) p += 5;
 
+  // Står det redan i rubriken att erfarenhet inte behövs är det det
+  // starkaste tecken som finns. Sånt får inte falla under tröskeln.
+  if (harNagot(titel, POSITIV_TEXT)) p += 4;
+
   // varje formulering som säger att de lär upp väger något
   p += Math.min(positivaOrd * 2, 6);
 
@@ -265,7 +276,7 @@ function poang(a) {
 
   // hinder
   if (a.experience_required === true && !positiv) p -= 3;
-  if (a.driving_license_required === true) p -= 2;
+  if (a.driving_license_required === true) p -= 1;
   if (utdragskrav(a) === "kravs") p -= 2;
   if (harProvision(text)) p -= 1;
   if (harNattarbete(a)) p -= 1;
