@@ -253,6 +253,7 @@ function poang(a) {
   if (provisionUtanGrundlon(text)) return -20;
   if (kortKravs(text)) return -20;
   if (renRorligLon(a)) return -20;
+  if (rorligUtanForklaring(a, text)) return -20;
 
   // Räkna HUR MÅNGA positiva tecken annonsen har, inte bara om den har något.
   // Tidigare fick nästan alla jobb samma poäng, vilket gjorde sorteringen
@@ -344,6 +345,22 @@ function sorteringspoang(a, kravpoang) {
     else if (dagar > 120) s -= 4;
   }
   return s;
+}
+
+// Har jobbet en rörlig del i lönen ska annonsen också förklara hur lönen
+// fungerar. Gör den inte det vet den sökande inte vad hen tackar ja till.
+const FORKLARAR_LON = [
+  "grundlon","grundlön","fast lon","fast lön","manadslon","månadslön",
+  "timlon","timlön","kollektivavtal","fast del","garantilon","garantilön",
+  "lon enligt","lön enligt","fast ersattning","fast ersättning","avtalsenlig"
+];
+
+function rorligUtanForklaring(a, text) {
+  const l = ((a.salary_type && a.salary_type.label) || "").toLowerCase();
+  const harRorlig = l.indexOf("rorlig") > -1 || l.indexOf("rörlig") > -1;
+  if (!harRorlig) return false;
+  for (const o of FORKLARAR_LON) { if (text.indexOf(o) > -1) return false; }
+  return true;
 }
 
 function harProvision(text) {
@@ -451,7 +468,8 @@ async function hamtaJobb() {
         }
 
         const brodtext = ((a.description ? a.description.text : "") + " " + (a.headline || "")).toLowerCase();
-        if (provisionUtanGrundlon(brodtext) || renRorligLon(a)) provisionsbort++;
+        if (provisionUtanGrundlon(brodtext) || renRorligLon(a)
+          || rorligUtanForklaring(a, brodtext)) provisionsbort++;
 
         const p = poang(a);
         if (p < 3) { bortsorterade++; continue; }
