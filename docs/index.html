@@ -903,7 +903,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 61</footer>
+version 62</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2554,7 +2554,12 @@ function oppnaAnsokanInre(lank){
   var ta = document.getElementById("a-text");
   ta.value = byggBrev(j);
   if (ta.dataset) ta.dataset.andrad = "";
-  ta.oninput = function(){ if (this.dataset) this.dataset.andrad = "1"; };
+  // Skriv flaggan bara första gången. Att sätta den vid varje tangenttryck
+  // tvingade webbläsaren att räkna om hela textrutan, vilket gjorde
+  // skrivandet trögt på mobil.
+  ta.oninput = function(){
+    if (this.dataset && this.dataset.andrad !== "1") this.dataset.andrad = "1";
+  };
 
   var kat = KATEGORITEXT[j.kategori] || KATEGORITEXT["Övrigt"];
   var tips = kat.tips.slice();
@@ -2650,7 +2655,18 @@ function ritaBit(nollstall){
   }
 }
 
+// Markera knappen direkt och rita om listan i nästa bildruta. Annars
+// måste webbläsaren rita om hela listan innan den hinner reagera på klicket.
 function visa(filter){
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag"];
+  for (var i = 0; i < ids.length; i++){
+    var k = document.getElementById("f-" + ids[i]);
+    if (k && k.className !== "dold") k.className = (ids[i] === filter) ? "on" : "";
+  }
+  requestAnimationFrame(function(){ visaInre(filter); });
+}
+
+function visaInre(filter){
   if (aktivtFilter !== filter) handelse("filter-" + filter);
   aktivtFilter = filter;
   if (underSexton() && filter === "heltid") filter = "alla";
