@@ -702,6 +702,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div class="field">
       <label class="fraga">Vad ska man göra? Tre rader räcker</label>
       <textarea class="cvf agf" id="ag-beskrivning" placeholder="Kassa, påfyllning av varor och kundfrågor."></textarea>
+      <div class="hint" id="ag-beskrivning-svar"></div>
     </div>
 
     <div class="field">
@@ -745,6 +746,21 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div class="field">
       <label class="fraga">Får någon under 18 utföra jobbet?</label>
       <div class="seg" id="ag-minder"></div>
+    </div>
+
+    <div class="avsnitt">Kraven för jobbet</div>
+    <p class="hint" style="margin-top:-8px">Chansen visar bara jobb med låga ingångskrav. Det är hela poängen med sidan, så vi publicerar inte annonser som kräver erfarenhet eller utbildning.</p>
+
+    <div class="field">
+      <label class="fraga">Krävs tidigare erfarenhet av liknande arbete?</label>
+      <div class="seg" id="ag-erfarenhet"></div>
+      <div class="hint" id="ag-erfarenhet-svar"></div>
+    </div>
+
+    <div class="field">
+      <label class="fraga">Krävs utbildning, yrkesbevis eller behörighet?</label>
+      <div class="seg" id="ag-behorighet"></div>
+      <div class="hint" id="ag-behorighet-svar"></div>
     </div>
 
     <div class="field">
@@ -885,7 +901,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 56</footer>
+version 57</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1579,7 +1595,9 @@ var AG_VAL = {
              "Städ","Vård och omsorg","Barn och skola","Industri och produktion","Kontor","Annat"],
   lonform: ["Timlön","Månadslön","Enligt kollektivavtal"],
   utdrag: ["Ja","Nej"],
-  minder: ["Ja","Nej"]
+  minder: ["Ja","Nej"],
+  erfarenhet: ["Ja","Nej"],
+  behorighet: ["Ja","Nej"]
 };
 var ag = { omfattning:[], form:null, kategori:null, lonform:null, utdrag:null, minder:null };
 
@@ -1641,8 +1659,43 @@ function agFalt(id){
   return el ? el.value.trim() : "";
 }
 
+// Samma standard som den automatiska filtreringen. Annars kan en annons
+// med höga krav komma in bakvägen genom formuläret.
+var AG_STOPPORD = [
+  "flera års erfarenhet","flera ars erfarenhet","minst 2 års","minst 2 ars",
+  "minst två års","minst tva ars","minst 3 års","minst 3 ars","minst tre års",
+  "gedigen erfarenhet","dokumenterad erfarenhet","examen","legitimation",
+  "eftergymnasial","yrkesbevis","gesällbrev","gesallbrev","behörighetsbevis",
+  "krav på erfarenhet","krav pa erfarenhet","erfarenhet är ett krav","erfarenhet ar ett krav"
+];
+
 function agKolla(){
   var problem = [];
+
+  // kraven för jobbet
+  var es = document.getElementById("ag-erfarenhet-svar");
+  if (ag.erfarenhet === "Ja"){
+    if (es){ es.textContent = "Chansen visar bara jobb som går att söka utan tidigare erfarenhet. Den här annonsen passar bättre i Platsbanken."; es.style.color = "var(--accent-700)"; }
+    problem.push("kravet på erfarenhet");
+  } else if (es){ es.textContent = ""; }
+
+  var bs = document.getElementById("ag-behorighet-svar");
+  if (ag.behorighet === "Ja"){
+    if (bs){ bs.textContent = "Jobb som kräver utbildning eller behörighet visas inte på Chansen. Kostar behörigheten pengar att skaffa är det ett hinder för den som söker sitt första jobb."; bs.style.color = "var(--accent-700)"; }
+    problem.push("kravet på utbildning eller behörighet");
+  } else if (bs){ bs.textContent = ""; }
+
+  // läs av annonstexten mot samma ord som den automatiska filtreringen
+  var besk = agFalt("beskrivning").toLowerCase();
+  var hittade = [];
+  for (var i = 0; i < AG_STOPPORD.length; i++){
+    if (besk.indexOf(AG_STOPPORD[i]) > -1) hittade.push(AG_STOPPORD[i]);
+  }
+  var bes = document.getElementById("ag-beskrivning-svar");
+  if (hittade.length){
+    if (bes){ bes.textContent = 'Beskrivningen innehåller "' + hittade[0] + '". Sånt sållar vi bort automatiskt, så skriv om den delen eller lägg upp jobbet i Platsbanken i stället.'; bes.style.color = "var(--accent-700)"; }
+    problem.push("formuleringar om krav i beskrivningen");
+  } else if (bes){ bes.textContent = ""; }
 
   var orgnr = agFalt("orgnr");
   var os = document.getElementById("ag-orgnr-svar");
@@ -1716,7 +1769,10 @@ function agKolla(){
     else if (saknas.length) st.textContent = "Kvar att fylla i: " + saknas.slice(0,4).join(", ") + (saknas.length > 4 ? " med flera" : "") + ".";
     else st.textContent = "Allt ifyllt. Tryck skicka, din mejl öppnas.";
   }
-  if (kn) kn.style.opacity = klart ? "1" : "0.5";
+  if (kn){
+    kn.style.opacity = klart ? "1" : "0.5";
+    kn.disabled = !klart;
+  }
   return klart;
 }
 
