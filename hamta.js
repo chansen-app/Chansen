@@ -494,7 +494,7 @@ async function hamtaJobb() {
           minderarigOk: okForMinderarig(a),
           poang: p,
           sortpoang: sorteringspoang(a, p),
-          chansniva: p >= 5 ? "hog" : (p >= 3 ? "medel" : "lag"),
+          chansniva: p >= 6 ? "hog" : (p >= 3 ? "medel" : "lag"),
           lank: a.webpage_url,
           sistaAnsokningsdag: a.application_deadline,
           publicerad: a.publication_date || null
