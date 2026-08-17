@@ -902,7 +902,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 59</footer>
+version 60</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -966,21 +966,36 @@ try {
 // Hur många jobb finns det egentligen inom ett område, på den ort
 // användaren skrivit in? Utan den siffran kan man svara på alla frågor
 // och ändå landa i en tom lista, vilket är det värsta appen kan göra.
-function antalIOmrade(omrade){
+// Räkna alla områden i EN genomgång i stället för en per område.
+// Förut gick appen igenom alla jobb tretton gånger varje gång någon
+// skrev en bokstav i ortsrutan, vilket tog nästan två sekunder på mobil.
+var antalCache = null, antalNyckel = "";
+
+function raknaOmraden(){
   if (typeof JOBB === "undefined" || !JOBB.length) return null;
   var ort = document.getElementById("ort");
   var sokord = ort ? slat(ort.value.trim()) : "";
   sokord = smeknamn[sokord] || sokord;
 
-  var n = 0;
+  var nyckel = sokord + "|" + (svar.alder || "");
+  if (antalCache && antalNyckel === nyckel) return antalCache;
+
+  var us = underSexton(), ua = underArton();
+  var n = {};
   for (var i = 0; i < JOBB.length; i++){
     var j = JOBB[i];
     if (sokord && slat(j.ort).indexOf(sokord) === -1) continue;
-    if (underSexton() && j.omfattning === "Heltid") continue;
-    if (underArton() && j.nattarbete === true) continue;
-    if (j.kategori === omrade) n++;
+    if (us && j.omfattning === "Heltid") continue;
+    if (ua && j.nattarbete === true) continue;
+    n[j.kategori] = (n[j.kategori] || 0) + 1;
   }
+  antalCache = n; antalNyckel = nyckel;
   return n;
+}
+
+function antalIOmrade(omrade){
+  var n = raknaOmraden();
+  return n ? (n[omrade] || 0) : null;
 }
 
 // Åldern är den enda frågan som styr vad som är LAGLIGT att jobba med,
@@ -1015,7 +1030,22 @@ function ritaFragor(){
 var ortTimer = null;
 function ortAndrad(){
   if (ortTimer) clearTimeout(ortTimer);
-  ortTimer = setTimeout(ritaFragor, 350);
+  ortTimer = setTimeout(function(){
+    antalCache = null;      // orten har ändrats, räkna om
+    ritaOmraden();
+  }, 400);
+}
+
+// Ritar bara om områdesknapparna, inte alla frågor.
+function ritaOmraden(){
+  var el = document.getElementById("q-omrade");
+  if (!el) return;
+  el.innerHTML = fragor.omrade.map(function(v){
+    var pa = (svar.omrade || []).indexOf(v) > -1;
+    var n = antalIOmrade(v);
+    var etikett = (n === null) ? v : v + ' <span class="antal">' + n + '</span>';
+    return '<button class="'+(pa ? "on" : "")+'" onclick="valj(\'omrade\',\''+v.replace(/'/g,"")+'\')">'+etikett+'</button>';
+  }).join("");
 }
 
 function valj(falt, varde){
@@ -1026,6 +1056,7 @@ function valj(falt, varde){
   } else {
     svar[falt] = varde;
   }
+  antalCache = null;
   ritaFragor();
   kollaKnappar();
 }
