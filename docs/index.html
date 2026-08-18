@@ -195,6 +195,19 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 <body>
 <div class="wrap">
 
+<div id="sprak" class="dold" style="margin-bottom:18px">
+  <div class="ruta" style="font-size:14px">
+    <div style="margin-bottom:6px"><b>Chansen is in Swedish</b></div>
+    <div style="line-height:1.7">
+      You can translate this page with your browser. In Safari, tap <b>aA</b> in the address bar and choose Translate. In Chrome, tap the three dots and choose Translate.<br>
+      <span dir="rtl">يمكنك ترجمة هذه الصفحة من متصفحك.</span><br>
+      Waxaad bogga ku turjumi kartaa browserkaaga.<br>
+      Kannst du diese Seite im Browser übersetzen.
+    </div>
+    <button class="lank" style="margin-top:8px" onclick="doljSprak()">OK, dölj det här</button>
+  </div>
+</div>
+
 <div id="v-start">
   <h1>Jobb som är värda att söka.</h1>
   <p class="sub">Några snabba frågor. Inget konto, inget sparas någon annanstans än i din telefon.</p>
@@ -276,6 +289,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button id="f-deltid" onclick="visa('deltid')">Deltid</button>
     <button id="f-heltid" onclick="visa('heltid')">Heltid</button>
     <button id="f-utdrag" onclick="visa('utdrag')">Nämner inte utdrag</button>
+    <button id="f-direkt" onclick="visa('direkt')">Direkt hos arbetsgivaren</button>
   </div>
 
   <div class="rakning" id="rakning"></div>
@@ -903,7 +917,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 62</footer>
+version 63</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1263,6 +1277,7 @@ function kort(j){
   if(j.provision) taggar += '<span class="tag varn">Provision ingår i lönen</span>';
   if(j.nattarbete) taggar += '<span class="tag varn">Natt- eller skiftarbete</span>';
   if(j.nyborjarvanlig) taggar += '<span class="tag sage">Erfarenhet krävs inte</span>';
+  if(j.bemanning) taggar += '<span class="tag">Via bemanningsföretag</span>';
 
   // hur ny annonsen är
   var pd = dagarSedanPublicerad(j.publicerad);
@@ -2658,7 +2673,7 @@ function ritaBit(nollstall){
 // Markera knappen direkt och rita om listan i nästa bildruta. Annars
 // måste webbläsaren rita om hela listan innan den hinner reagera på klicket.
 function visa(filter){
-  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag"];
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt"];
   for (var i = 0; i < ids.length; i++){
     var k = document.getElementById("f-" + ids[i]);
     if (k && k.className !== "dold") k.className = (ids[i] === filter) ? "on" : "";
@@ -2670,7 +2685,7 @@ function visaInre(filter){
   if (aktivtFilter !== filter) handelse("filter-" + filter);
   aktivtFilter = filter;
   if (underSexton() && filter === "heltid") filter = "alla";
-  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag"];
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt"];
   for(var i=0;i<ids.length;i++){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
@@ -2703,6 +2718,7 @@ function visaInre(filter){
   if (underArton()) valda = valda.filter(function(j){ return j.nattarbete !== true; });
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
   if(filter === "nyborjare") valda = valda.filter(function(j){ return j.nyborjarvanlig === true; });
+  if(filter === "direkt") valda = valda.filter(function(j){ return j.bemanning !== true; });
   if(filter === "deltid") valda = valda.filter(function(j){ return (j.omfattning||"").indexOf("Deltid") > -1; });
   if(filter === "heltid") valda = valda.filter(function(j){ return (j.omfattning||"").indexOf("Heltid") > -1; });
   if(filter === "utdrag") valda = valda.filter(function(j){ return j.utdrag !== "kravs"; });
@@ -2734,6 +2750,9 @@ function visaInre(filter){
           : 'Bara ' + antalIOrten + (antalIOrten === 1 ? ' jobb' : ' jobb') + ' i ' + fly(ortsnamn)
             + ' just nu, så vi visar hela ' + fly(lanfall) + '. Jobben i din kommun ligger överst.')
       + '</div>';
+  }
+  if (filter === "direkt") {
+    aldersnotis += '<div class="ruta" style="font-size:14px">Här är jobben där du anställs direkt av arbetsplatsen. Bemanningsjobb är ofta en bra väg in, men då anställs du av bemanningsföretaget och uppdragen kan vara korta.</div>';
   }
   if (filter === "nyborjare") {
     aldersnotis += '<div class="ruta" style="font-size:14px">Här är jobben där arbetsgivaren själv kryssat i att erfarenhet inte krävs. Alla jobb i Chansen har låga krav, men de här är uttalade. Det är arbetsgivarens ord, inte ett löfte från oss.</div>';
@@ -2771,7 +2790,28 @@ function visaInre(filter){
 ritaFragor();
 kollaKnappar();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
+// Visa språkhjälpen bara för den som inte har svenska i telefonen,
+// och bara tills den klickats bort.
+function kollaSprak(){
+  var el = document.getElementById("sprak");
+  if (!el) return;
+  try {
+    if (localStorage.getItem("chansen-sprak-dolt") === "1") return;
+  } catch(e){}
+  var sprak = (navigator.language || "").toLowerCase();
+  var alla = (navigator.languages || []).join(" ").toLowerCase();
+  if (sprak.indexOf("sv") === 0 || alla.indexOf("sv") > -1) return;
+  el.className = "";
+}
+
+function doljSprak(){
+  var el = document.getElementById("sprak");
+  if (el) el.className = "dold";
+  try { localStorage.setItem("chansen-sprak-dolt", "1"); } catch(e){}
+}
+
 ritaMina();
+kollaSprak();
 kollaAlder();
 visaFarskhet();
 visaUppdaterad();
