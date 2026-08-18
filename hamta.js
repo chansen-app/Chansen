@@ -363,6 +363,28 @@ function rorligUtanForklaring(a, text) {
   return true;
 }
 
+// Bemannings- och rekryteringsföretag. Jobben är ofta bra ingångar, men
+// man anställs av bemanningsföretaget och inte av arbetsplatsen, och
+// uppdragen kan vara korta. Därför märker vi dem så att den som vill
+// kan välja bort dem själv.
+const BEMANNING = [
+  "bemanning","rekryter","konsult","staffing","personalpartner","poolia",
+  "student consulting","studentconsulting","academic work","uniflex","adecco",
+  "randstad","manpower","jefferson","bravura","wise professionals","clockwork",
+  "jobbusters","perido","dfind","lernia","storesupport","framtiden i sverige",
+  "professionals nord","logent","simplex","jurek","ework","maxkompetens",
+  "talent","workz","jobandtalent","barona","veterankraft","amendo","sjr in",
+  "arena personal","inhouse","middlepoint","nikita","releasy","wrkfrc","fram bemanning",
+  "hero ","first reserve","academicwork","teamvikarie","vikariepoolen"
+];
+
+function arBemanning(a) {
+  const ag = ((a.employer && a.employer.name) || "").toLowerCase();
+  if (!ag) return false;
+  for (const o of BEMANNING) { if (ag.indexOf(o) > -1) return true; }
+  return false;
+}
+
 function harProvision(text) {
   for (const ord of PROVISION_ORD) { if (text.indexOf(ord) > -1) return true; }
   return false;
@@ -497,7 +519,8 @@ async function hamtaJobb() {
           chansniva: p >= 6 ? "hog" : (p >= 3 ? "medel" : "lag"),
           lank: a.webpage_url,
           sistaAnsokningsdag: a.application_deadline,
-          publicerad: a.publication_date || null
+          publicerad: a.publication_date || null,
+          bemanning: arBemanning(a)
         });
       }
       if (term !== forraTerm) {
@@ -554,6 +577,9 @@ async function hamtaJobb() {
   for (const j of jobb) { if (j.nattarbete) natt++; if (j.nyborjarvanlig) nyb++; }
   console.log("Nattarbete, göms för under 18: " + natt);
   console.log("Nybörjarvänliga: " + nyb);
+  let bem = 0;
+  for (const j of jobb) { if (j.bemanning) bem++; }
+  console.log("Via bemanning eller rekrytering: " + bem);
   console.log("Kommuner i uppslagslistan: " + Object.keys(kommunLan).length);
 }
 
