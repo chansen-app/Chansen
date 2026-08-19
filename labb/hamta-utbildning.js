@@ -100,15 +100,19 @@ const UTBILDNINGAR = [
     stoppord: ["juristassistent"]
   },
   {
-    namn: "Vård- och omsorgsexamen, gymnasial",
-    niva: "Gymnasial utbildning, 3 år",
+    namn: "Undersköterskeexamen",
+    niva: "Gymnasial eller eftergymnasial utbildning",
     omrade: "Omvårdnad",
     sok: ["undersköterska", "vårdbiträde", "stödassistent"],
     kravord: ["underskoterskeutbildning", "undersköterskeutbildning",
               "utbildad underskoterska", "utbildad undersköterska",
               "vard- och omsorgsprogrammet", "vård- och omsorgsprogrammet",
               "vardutbildning", "vårdutbildning", "skyddad yrkestitel underskoterska",
-              "skyddad yrkestitel undersköterska"],
+              "skyddad yrkestitel undersköterska", "underskoterskeexamen",
+              "undersköterskeexamen", "yrkeshogskoleutbildning till underskoterska",
+              "yrkeshögskoleutbildning till undersköterska", "komvux vard och omsorg",
+              "komvux vård och omsorg", "vuxenutbildning inom vard",
+              "vuxenutbildning inom vård"],
     stoppord: ["sjuksköterska", "sjukskoterska"]
   },
   {
@@ -453,7 +457,7 @@ const UTBILDNINGAR = [
     stoppord: []
   },
   {
-    namn: "Vård- och omsorgscollege, undersköterska med specialisering",
+    namn: "Specialistundersköterska",
     niva: "Eftergymnasial utbildning, kortare än 2 år",
     omrade: "Omvårdnad",
     sok: ["specialistundersköterska", "undersköterska demens", "undersköterska palliativ"],
