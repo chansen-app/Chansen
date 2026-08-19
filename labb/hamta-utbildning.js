@@ -515,6 +515,25 @@ function kravNara(text, ord) {
   return false;
 }
 
+// Samma regel som i Chansen: ett jobb utan fast lön visas aldrig. Har
+// lönen en rörlig del måste annonsen också förklara hur den fungerar.
+const FORKLARAR_LON = [
+  "grundlon", "grundlön", "fast lon", "fast lön", "manadslon", "månadslön",
+  "timlon", "timlön", "kollektivavtal", "fast del", "garantilon", "garantilön",
+  "lon enligt", "lön enligt", "fast ersattning", "fast ersättning", "avtalsenlig"
+];
+
+function lonProblem(a, text) {
+  const l = ((a.salary_type && a.salary_type.label) || "").toLowerCase();
+  // ren provision eller ackord, alltså ingen fast del alls
+  if (l.indexOf("rorlig ackords") > -1 || l.indexOf("rörlig ackords") > -1) return true;
+  // rörlig del som inte förklaras
+  const harRorlig = l.indexOf("rorlig") > -1 || l.indexOf("rörlig") > -1;
+  if (!harRorlig) return false;
+  for (const o of FORKLARAR_LON) { if (text.indexOf(o) > -1) return false; }
+  return true;
+}
+
 function slat(v) {
   return String(v == null ? "" : v).toLowerCase()
     .replace(/å/g, "a").replace(/ä/g, "a").replace(/ö/g, "o");
@@ -533,7 +552,7 @@ async function hamta() {
   const sedda = {};
   const jobb = [];
   let granskade = 0;
-  let svagaBort = 0;
+  let svagaBort = 0, lonBort = 0, gamlaBort = 0, takBort = 0;
 
   for (const u of UTBILDNINGAR) {
     let hittade = 0;
@@ -558,6 +577,14 @@ async function hamta() {
 
           const text = ((a.description ? a.description.text : "") + " " +
                         (a.headline || "")).toLowerCase();
+
+          if (lonProblem(a, text)) { lonBort++; continue; }
+
+          // Gamla annonser är oftast redan tillsatta.
+          if (a.publication_date) {
+            const dagar = Math.floor((Date.now() - new Date(a.publication_date)) / 86400000);
+            if (dagar > 90) { gamlaBort++; continue; }
+          }
 
           const krav = finns(text, u.kravord);
           if (!krav) continue;
@@ -614,6 +641,21 @@ async function hamta() {
     return String(b.publicerad || "").localeCompare(String(a.publicerad || ""));
   });
 
+  // Ingen arbetsgivare ska fylla en utbildnings lista. Samma tanke som
+  // taket i Chansen, men räknat per utbildning eftersom en region kan ha
+  // många olika sorters jobb.
+  const MAX_PER_ARBETSGIVARE = 12;
+  const raknare = {};
+  const kvar = [];
+  for (const j of unika) {
+    const n = j.utbildning + "|" + (j.arbetsgivare || "").trim();
+    raknare[n] = (raknare[n] || 0) + 1;
+    if (raknare[n] > MAX_PER_ARBETSGIVARE) { takBort++; continue; }
+    kvar.push(j);
+  }
+  unika.length = 0;
+  for (const j of kvar) unika.push(j);
+
   fs.writeFileSync("labb/utbildningsjobb.json", JSON.stringify(unika, null, 2));
 
   // Filen som sidan läser. Samma mönster som jobb.js i Chansen.
@@ -633,6 +675,9 @@ async function hamta() {
   console.log("Granskade annonser: " + granskade);
   console.log("Jobb med identifierat utbildningskrav: " + unika.length);
   console.log("Stoppade för att ordet bara nämndes i förbifarten: " + svagaBort);
+  console.log("Stoppade för lönen: " + lonBort);
+  console.log("Stoppade för att annonsen var äldre än 90 dagar: " + gamlaBort);
+  console.log("Stoppade för att en arbetsgivare tog för stor plats: " + takBort);
 
   const orter = {};
   for (const j of unika) if (j.ort) orter[j.ort] = (orter[j.ort] || 0) + 1;
