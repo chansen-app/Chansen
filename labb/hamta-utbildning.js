@@ -123,6 +123,223 @@ const UTBILDNINGAR = [
     stoppord: []
   },
   {
+    namn: "Specialistsjuksköterskeexamen",
+    niva: "Eftergymnasial utbildning, 4 år",
+    omrade: "Omvårdnad",
+    sok: ["specialistsjuksköterska", "anestesisjuksköterska", "operationssjuksköterska"],
+    kravord: ["specialistsjukskoterskeexamen", "specialistsjuksköterskeexamen",
+              "specialistutbildad sjukskoterska", "specialistutbildad sjuksköterska",
+              "specialistsjukskoterska", "specialistsjuksköterska"],
+    stoppord: ["undersköterska", "underskoterska"]
+  },
+  {
+    namn: "Barnmorskeexamen",
+    niva: "Eftergymnasial utbildning, 4 år",
+    omrade: "Omvårdnad",
+    sok: ["barnmorska"],
+    kravord: ["barnmorskeexamen", "legitimerad barnmorska", "barnmorskelegitimation"],
+    stoppord: []
+  },
+  {
+    namn: "Fysioterapeutexamen",
+    niva: "Eftergymnasial utbildning, 3 år",
+    omrade: "Terapi, rehabilitering och kostbehandling",
+    sok: ["fysioterapeut", "sjukgymnast"],
+    kravord: ["fysioterapeutexamen", "legitimerad fysioterapeut", "legitimerad sjukgymnast",
+              "sjukgymnastexamen"],
+    stoppord: []
+  },
+  {
+    namn: "Arbetsterapeutexamen",
+    niva: "Eftergymnasial utbildning, 3 år",
+    omrade: "Terapi, rehabilitering och kostbehandling",
+    sok: ["arbetsterapeut"],
+    kravord: ["arbetsterapeutexamen", "legitimerad arbetsterapeut"],
+    stoppord: []
+  },
+  {
+    namn: "Psykologexamen",
+    niva: "Eftergymnasial utbildning, 5 år eller längre",
+    omrade: "Psykologi",
+    sok: ["psykolog", "PTP-psykolog"],
+    kravord: ["psykologexamen", "legitimerad psykolog", "psykologlegitimation"],
+    stoppord: ["psykologistudent"]
+  },
+  {
+    namn: "Läkarexamen",
+    niva: "Eftergymnasial utbildning, 5 år eller längre",
+    omrade: "Medicin",
+    sok: ["läkare", "specialistläkare", "ST-läkare"],
+    kravord: ["lakarexamen", "läkarexamen", "legitimerad lakare", "legitimerad läkare",
+              "lakarlegitimation", "läkarlegitimation"],
+    stoppord: ["läkarsekreterare", "lakarsekreterare"]
+  },
+  {
+    namn: "Tandläkarexamen",
+    niva: "Eftergymnasial utbildning, 5 år eller längre",
+    omrade: "Odontologi",
+    sok: ["tandläkare"],
+    kravord: ["tandlakarexamen", "tandläkarexamen", "legitimerad tandlakare",
+              "legitimerad tandläkare"],
+    stoppord: ["tandsköterska", "tandskoterska", "tandhygienist"]
+  },
+  {
+    namn: "Tandhygienistexamen",
+    niva: "Eftergymnasial utbildning, 3 år",
+    omrade: "Odontologi",
+    sok: ["tandhygienist"],
+    kravord: ["tandhygienistexamen", "legitimerad tandhygienist"],
+    stoppord: []
+  },
+  {
+    namn: "Högskoleingenjörsexamen",
+    niva: "Eftergymnasial utbildning, 3 år",
+    omrade: "Maskinteknik och verkstadsteknik",
+    sok: ["högskoleingenjör", "produktionsingenjör", "kvalitetsingenjör"],
+    kravord: ["hogskoleingenjorsexamen", "högskoleingenjörsexamen",
+              "hogskoleingenjor", "högskoleingenjör", "ingenjorsexamen", "ingenjörsexamen"],
+    stoppord: ["civilingenjör", "civilingenjor"]
+  },
+  {
+    namn: "Byggingenjörsexamen",
+    niva: "Eftergymnasial utbildning, 3 år",
+    omrade: "Byggnadsteknik och anläggningsteknik",
+    sok: ["byggingenjör", "arbetsledare bygg", "projektledare bygg"],
+    kravord: ["byggingenjor", "byggingenjör", "byggnadsingenjor", "byggnadsingenjör",
+              "utbildning inom bygg", "hogskoleutbildning inom bygg",
+              "högskoleutbildning inom bygg"],
+    stoppord: []
+  },
+  {
+    namn: "Gymnasielärarexamen",
+    niva: "Eftergymnasial utbildning, 5 år eller längre",
+    omrade: "Lärarutbildning för gymnasiet",
+    sok: ["gymnasielärare", "lärare gymnasiet", "yrkeslärare"],
+    kravord: ["amneslararexamen", "ämneslärarexamen", "gymnasielararexamen",
+              "gymnasielärarexamen", "yrkeslararexamen", "yrkeslärarexamen",
+              "behorig gymnasielarare", "behörig gymnasielärare"],
+    stoppord: ["elevassistent"]
+  },
+  {
+    namn: "Fritidspedagogexamen",
+    niva: "Eftergymnasial utbildning, 3 år",
+    omrade: "Barn och ungdom",
+    sok: ["fritidspedagog", "lärare fritidshem"],
+    kravord: ["fritidspedagogexamen", "grundlararexamen med inriktning mot arbete i fritidshem",
+              "grundlärarexamen med inriktning mot arbete i fritidshem",
+              "legitimerad fritidspedagog", "utbildad fritidspedagog"],
+    stoppord: ["fritidsledare"]
+  },
+  {
+    namn: "Specialpedagogexamen",
+    niva: "Eftergymnasial utbildning, 5 år eller längre",
+    omrade: "Specialpedagogik",
+    sok: ["specialpedagog", "speciallärare"],
+    kravord: ["specialpedagogexamen", "speciallararexamen", "speciallärarexamen",
+              "utbildad specialpedagog"],
+    stoppord: ["elevassistent"]
+  },
+  {
+    namn: "Beteendevetenskaplig examen",
+    niva: "Eftergymnasial utbildning, 3 år",
+    omrade: "Sociologi och beteendevetenskap",
+    sok: ["beteendevetare", "HR-specialist", "personalvetare"],
+    kravord: ["beteendevetenskaplig examen", "beteendevetare", "personalvetarprogrammet",
+              "kandidatexamen i beteendevetenskap", "personalvetare"],
+    stoppord: []
+  },
+  {
+    namn: "Civilekonomexamen",
+    niva: "Eftergymnasial utbildning, 4 år",
+    omrade: "Företagsekonomi, handel och administration",
+    sok: ["business controller", "finansanalytiker", "civilekonom"],
+    kravord: ["civilekonomexamen", "civilekonom"],
+    stoppord: []
+  },
+  {
+    namn: "Revisorsexamen",
+    niva: "Eftergymnasial utbildning, 4 år",
+    omrade: "Företagsekonomi, handel och administration",
+    sok: ["revisor", "auktoriserad revisor"],
+    kravord: ["revisorsexamen", "auktoriserad revisor", "godkand revisor", "godkänd revisor"],
+    stoppord: ["revisorsassistent"]
+  },
+  {
+    namn: "Dataingenjörsexamen",
+    niva: "Eftergymnasial utbildning, 3 år",
+    omrade: "Datateknik och automation",
+    sok: ["dataingenjör", "mjukvaruingenjör", "embedded"],
+    kravord: ["dataingenjor", "dataingenjör", "mjukvaruingenjor", "mjukvaruingenjör",
+              "hogskoleingenjor inom data", "högskoleingenjör inom data"],
+    stoppord: []
+  },
+  {
+    namn: "Yrkeshögskoleexamen inom IT",
+    niva: "Eftergymnasial utbildning, 2 år",
+    omrade: "Systemvetenskap och informatik",
+    sok: ["frontendutvecklare", "testare IT", "IT-tekniker"],
+    kravord: ["yrkeshogskoleutbildning inom it", "yrkeshögskoleutbildning inom it",
+              "yh-utbildning inom it", "yrkeshogskoleexamen inom it",
+              "yrkeshögskoleexamen inom it"],
+    stoppord: []
+  },
+  {
+    namn: "Bibliotekarieexamen",
+    niva: "Eftergymnasial utbildning, 3 år",
+    omrade: "Biblioteks- och dokumentationsvetenskap",
+    sok: ["bibliotekarie"],
+    kravord: ["bibliotekarieexamen", "biblioteks- och informationsvetenskap",
+              "utbildad bibliotekarie"],
+    stoppord: ["biblioteksassistent"]
+  },
+  {
+    namn: "Veterinärexamen",
+    niva: "Eftergymnasial utbildning, 5 år eller längre",
+    omrade: "Veterinärmedicin",
+    sok: ["veterinär", "djursjukskötare"],
+    kravord: ["veterinarexamen", "veterinärexamen", "legitimerad veterinar",
+              "legitimerad veterinär", "djursjukskotarexamen", "djursjukskötarexamen",
+              "legitimerad djursjukskotare", "legitimerad djursjukskötare"],
+    stoppord: ["djurvårdare", "djurvardare"]
+  },
+  {
+    namn: "Apotekarexamen",
+    niva: "Eftergymnasial utbildning, 5 år eller längre",
+    omrade: "Farmaci",
+    sok: ["apotekare", "receptarie", "farmaceut"],
+    kravord: ["apotekarexamen", "receptarieexamen", "legitimerad apotekare",
+              "legitimerad receptarie", "farmaceutisk examen"],
+    stoppord: ["apotekstekniker"]
+  },
+  {
+    namn: "Elektrikerexamen med behörighet",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Elektronik, datateknik och automation",
+    sok: ["elektriker", "installationselektriker", "servicetekniker el"],
+    kravord: ["elbehorighet", "elbehörighet", "auktorisation for elinstallation",
+              "auktorisation för elinstallation", "el- och energiprogrammet",
+              "certifierad elektriker", "yrkesbevis elektriker"],
+    stoppord: []
+  },
+  {
+    namn: "Barn- och fritidsexamen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Barn och ungdom",
+    sok: ["barnskötare", "elevassistent", "fritidsledare"],
+    kravord: ["barn- och fritidsprogrammet", "barnskotarutbildning", "barnskötarutbildning",
+              "utbildad barnskotare", "utbildad barnskötare"],
+    stoppord: ["förskollärare", "forskollarare"]
+  },
+  {
+    namn: "Restaurang- och livsmedelsexamen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Hotell, restaurang och storhushåll",
+    sok: ["kock", "kallskänka", "bagare"],
+    kravord: ["restaurang- och livsmedelsprogrammet", "kockutbildning",
+              "utbildad kock", "yrkesbevis kock", "bagarutbildning"],
+    stoppord: ["diskare", "restaurangbiträde"]
+  },
+  {
     namn: "Medicinsk sekreterare, yrkeshögskola",
     niva: "Eftergymnasial utbildning, 2 år",
     omrade: "Kontorsservice och sekreterartjänster",
@@ -141,7 +358,12 @@ const UTBILDNINGAR = [
 const SVAGA_ORD = [
   "socionom", "civilingenjor", "civilingenjör", "systemvetenskap", "systemvetare",
   "medicinsk sekreterare", "vardadministrator", "vårdadministratör",
-  "lakarsekreterare", "läkarsekreterare", "vardutbildning", "vårdutbildning"
+  "lakarsekreterare", "läkarsekreterare", "vardutbildning", "vårdutbildning",
+  "beteendevetare", "personalvetare", "civilekonom", "specialistsjukskoterska",
+  "specialistsjuksköterska", "hogskoleingenjor", "högskoleingenjör",
+  "byggingenjor", "byggingenjör", "byggnadsingenjor", "byggnadsingenjör",
+  "dataingenjor", "dataingenjör", "mjukvaruingenjor", "mjukvaruingenjör",
+  "auktoriserad revisor", "utbildad bibliotekarie", "utbildad kock"
 ];
 
 const KRAVSIGNAL = [
@@ -251,7 +473,26 @@ async function hamta() {
     unika.push(j);
   }
 
+  // sortera så färska jobb hamnar först inom varje utbildning
+  unika.sort(function (a, b) {
+    if (a.utbildning !== b.utbildning) return a.utbildning < b.utbildning ? -1 : 1;
+    return String(b.publicerad || "").localeCompare(String(a.publicerad || ""));
+  });
+
   fs.writeFileSync("labb/utbildningsjobb.json", JSON.stringify(unika, null, 2));
+
+  // Filen som sidan läser. Samma mönster som jobb.js i Chansen.
+  const lista = UTBILDNINGAR.map(function (u) {
+    return { namn: u.namn, niva: u.niva, omrade: u.omrade };
+  });
+  const kommunlan = {};
+  for (const j of unika) if (j.ort && j.lan) kommunlan[j.ort] = j.lan;
+
+  fs.writeFileSync("labb/utbildningsjobb.js",
+    "var UTB_UPPDATERAD = " + JSON.stringify(new Date().toISOString()) + ";\n" +
+    "var UTBILDNINGAR_LISTA = " + JSON.stringify(lista) + ";\n" +
+    "var UTB_KOMMUNLAN = " + JSON.stringify(kommunlan) + ";\n" +
+    "var UTB_JOBB = " + JSON.stringify(unika) + ";\n");
 
   console.log("");
   console.log("Granskade annonser: " + granskade);
@@ -262,7 +503,10 @@ async function hamta() {
   for (const j of unika) if (j.ort) orter[j.ort] = (orter[j.ort] || 0) + 1;
   console.log("Kommuner: " + Object.keys(orter).length);
   console.log("");
-  console.log("Sparat i labb/utbildningsjobb.json. Ingenting av det publiceras.");
+  console.log("");
+  console.log("Sparat i labb/utbildningsjobb.json och labb/utbildningsjobb.js");
+  console.log("Öppna labb/utbildning.html i webbläsaren för att prova.");
+  console.log("Ingenting av det här publiceras.");
 }
 
 hamta();

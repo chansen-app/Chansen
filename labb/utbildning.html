@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Chansen — jobb för din examen</title>
+
+<!--  LABB. Publiceras inte.
+      GitHub Pages tar bara det som ligger i mappen docs.
+
+      Öppna den här filen genom att dubbelklicka på den. Den läser
+      utbildningsjobb.js som ligger i samma mapp.
+
+      Utseendet följer designguiden, så den går att flytta in i Chansen
+      utan att göras om.                                              -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=optional" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#f5ead8; --surface:#ebddc5; --text:#201e1d;
+  --accent:#c67139; --accent-100:#fff2eb; --accent-700:#8c491a; --accent-800:#643312;
+  --sage-100:#f0fae1; --sage-800:#3d472b;
+  --n-100:#f9f4ed; --n-300:#dcd3c4; --n-600:#82796a; --n-700:#645c50; --n-800:#474238;
+  --heading:"Caprasimo",system-ui,sans-serif; --body:"Figtree",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);
+     font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:520px;margin:0 auto;padding:26px 18px 60px}
+h1{font-family:var(--heading);font-weight:400;font-size:30px;line-height:1.15;margin:0 0 6px}
+h2{font-family:var(--heading);font-weight:400;font-size:20px;margin:26px 0 8px}
+.sub{color:var(--n-700);font-size:15px;margin:0 0 22px}
+.hint{font-size:13px;color:var(--n-700);margin-top:8px;line-height:1.5}
+.fraga{display:block;font-weight:600;font-size:15px;margin-bottom:10px}
+.field{margin-bottom:22px}
+
+.txt{width:100%;padding:13px 16px;font:inherit;font-size:15px;background:var(--surface);
+     border:1.5px solid var(--n-300);border-radius:999px;color:var(--text)}
+select.txt{border-radius:22px;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%23645c50' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 18px center}
+
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{font:inherit;font-size:14px;padding:10px 16px;border-radius:999px;
+  border:1.5px solid var(--n-300);background:transparent;color:var(--text);cursor:pointer}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+
+.btn{display:inline-block;font-family:var(--heading);font-weight:400;font-size:17px;
+  padding:15px 26px;border-radius:999px;border:none;background:var(--accent);
+  color:var(--bg);cursor:pointer}
+.btn.block{display:block;width:100%}
+.btn:disabled{background:var(--n-300);color:var(--n-600);cursor:not-allowed}
+.lank{background:none;border:none;padding:0;font:inherit;font-size:14px;
+  color:var(--accent-700);cursor:pointer;text-decoration:underline}
+
+.rakning{font-size:14px;color:var(--n-700);margin-bottom:16px}
+.ruta{background:var(--accent-100);border-radius:22px;padding:14px 18px;margin-bottom:16px;
+      font-size:14px;line-height:1.6}
+
+.card{background:var(--surface);border-radius:32px;padding:20px;margin-bottom:14px;
+      box-shadow:0 1px 2px rgba(46,43,37,.14);overflow-wrap:break-word;min-width:0}
+.kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-700);
+        margin-bottom:6px}
+.titel{font-family:var(--heading);font-weight:400;font-size:20px;line-height:1.2;
+       margin-bottom:4px;overflow-wrap:break-word;word-break:break-word;hyphens:auto}
+.ag{font-size:14px;color:var(--n-700);margin-bottom:10px}
+.tag{display:inline-block;font-size:12px;padding:5px 11px;border-radius:999px;
+     background:var(--n-100);color:var(--n-800);margin:0 6px 6px 0}
+.tag.sage{background:var(--sage-100);color:var(--sage-800)}
+.rad{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.dagar{font-size:13px;color:var(--n-700)}
+.dold{display:none}
+footer{margin-top:34px;font-size:12px;color:var(--n-600);text-align:center;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Jobb för din examen</h1>
+  <p class="sub">Välj vad du läst, så visas jobben som faktiskt kräver den utbildningen.</p>
+
+  <div class="ruta">
+    <b>Det här är en labbversion.</b> Den ligger inte på chansen.nu och kan innehålla fel.
+  </div>
+
+  <div class="field">
+    <label class="fraga" for="utb">Vilken examen har du?</label>
+    <select class="txt" id="utb"></select>
+    <div class="hint" id="utb-info"></div>
+  </div>
+
+  <div class="field">
+    <label class="fraga" for="ort">Var vill du jobba?</label>
+    <input class="txt" id="ort" placeholder="Skriv din kommun">
+    <div class="hint">Lämna tomt om du vill se jobb i hela Sverige.</div>
+  </div>
+
+  <button class="btn block" id="visa">Visa jobben</button>
+
+  <div id="resultat" class="dold">
+    <h2 id="rubrik">Jobb för dig</h2>
+    <div class="rakning" id="rakning"></div>
+    <div id="notis"></div>
+    <div id="lista"></div>
+    <button class="btn block dold" id="mer" style="margin-top:8px">Visa fler</button>
+  </div>
+
+  <footer>
+    Labbversion, publiceras inte.<br>
+    <span id="uppdaterad"></span>
+  </footer>
+</div>
+
+<script src="utbildningsjobb.js"></script>
+<script>
+var SIDSTORLEK = 12;
+var aktuell = [], visat = 0;
+
+function fly(t){
+  return String(t == null ? "" : t)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function slat(v){
+  return String(v == null ? "" : v).toLowerCase()
+    .replace(/å/g,"a").replace(/ä/g,"a").replace(/ö/g,"o").trim();
+}
+var smeknamn = { gbg:"goteborg", sthlm:"stockholm", mmx:"malmo", sundsvall:"sundsvall" };
+
+function sokordOrt(){
+  var v = slat((document.getElementById("ort").value || ""));
+  return smeknamn[v] || v;
+}
+
+function svenskDatum(d){
+  var t = new Date(d);
+  if (isNaN(t)) return "";
+  var m = ["jan","feb","mars","april","maj","juni","juli","aug","sep","okt","nov","dec"];
+  return t.getDate() + " " + m[t.getMonth()];
+}
+function dagarSedan(d){
+  if (!d) return null;
+  var t = new Date(d);
+  if (isNaN(t)) return null;
+  return Math.floor((new Date() - t) / 86400000);
+}
+
+function fyllUtbildningar(){
+  var el = document.getElementById("utb");
+  var antal = {};
+  for (var i = 0; i < UTB_JOBB.length; i++){
+    antal[UTB_JOBB[i].utbildning] = (antal[UTB_JOBB[i].utbildning] || 0) + 1;
+  }
+  var lista = UTBILDNINGAR_LISTA.slice().sort(function(a,b){
+    return a.namn.localeCompare(b.namn, "sv");
+  });
+  el.innerHTML = '<option value="">Välj i listan</option>' + lista.map(function(u){
+    var n = antal[u.namn] || 0;
+    return '<option value="' + fly(u.namn) + '">' + fly(u.namn) + " (" + n + ")</option>";
+  }).join("");
+}
+
+function visaInfo(){
+  var namn = document.getElementById("utb").value;
+  var el = document.getElementById("utb-info");
+  if (!namn){ el.textContent = "Siffran visar hur många jobb som finns just nu."; return; }
+  var u = null;
+  for (var i = 0; i < UTBILDNINGAR_LISTA.length; i++){
+    if (UTBILDNINGAR_LISTA[i].namn === namn) u = UTBILDNINGAR_LISTA[i];
+  }
+  el.textContent = u ? (u.niva + " · " + u.omrade) : "";
+  document.getElementById("visa").disabled = false;
+}
+
+function kort(j){
+  var taggar = "";
+  if (j.omfattning) taggar += '<span class="tag">' + fly(j.omfattning) + "</span>";
+  if (j.anstallningsform) taggar += '<span class="tag sage">' + fly(j.anstallningsform) + "</span>";
+  if (j.ort) taggar += '<span class="tag">' + fly(j.ort) + "</span>";
+
+  var pd = dagarSedan(j.publicerad);
+  if (pd !== null){
+    if (pd <= 0) taggar += '<span class="tag sage">Ny i dag</span>';
+    else if (pd === 1) taggar += '<span class="tag sage">Lades upp i går</span>';
+    else if (pd <= 7) taggar += '<span class="tag sage">Lades upp för ' + pd + " dagar sedan</span>";
+  }
+
+  var dagtext = "";
+  if (j.sista){
+    var kvar = dagarSedan(j.sista);
+    if (kvar !== null && kvar <= 0 && kvar > -60) dagtext = "Sök senast " + svenskDatum(j.sista);
+  }
+
+  return '<div class="card">' +
+    '<div class="kicker">' + fly(j.utbildning) + "</div>" +
+    '<div class="titel">' + fly(j.titel) + "</div>" +
+    '<div class="ag">' + fly(j.arbetsgivare) + (j.ort ? " · " + fly(j.ort) : "") + "</div>" +
+    taggar +
+    '<div class="rad">' +
+      '<a class="btn" style="font-size:15px;padding:12px 22px;text-decoration:none" href="' +
+        fly(j.lank) + '" target="_blank" rel="noopener">Se annonsen</a>' +
+      '<span class="dagar">' + fly(dagtext) + "</span>" +
+    "</div></div>";
+}
+
+function ritaBit(nollstall){
+  var el = document.getElementById("lista");
+  if (nollstall){ el.innerHTML = ""; visat = 0; }
+  var till = Math.min(visat + SIDSTORLEK, aktuell.length);
+  var bit = "";
+  for (var i = visat; i < till; i++) bit += kort(aktuell[i]);
+  el.insertAdjacentHTML("beforeend", bit);
+  visat = till;
+  var mer = document.getElementById("mer");
+  mer.className = (visat < aktuell.length) ? "btn block" : "btn block dold";
+  mer.textContent = "Visa fler (" + (aktuell.length - visat) + " kvar)";
+}
+
+function visaJobb(){
+  var namn = document.getElementById("utb").value;
+  if (!namn) return;
+
+  var valda = UTB_JOBB.filter(function(j){ return j.utbildning === namn; });
+  var sok = sokordOrt();
+  var notis = "", visatOmrade = "";
+
+  if (sok){
+    var iOrten = valda.filter(function(j){ return slat(j.ort).indexOf(sok) > -1; });
+    if (iOrten.length >= 3){
+      valda = iOrten;
+    } else {
+      // för få i kommunen, visa hela länet i stället
+      var lan = null;
+      for (var k in UTB_KOMMUNLAN){ if (slat(k).indexOf(sok) > -1){ lan = UTB_KOMMUNLAN[k]; break; } }
+      if (lan){
+        var iLanet = valda.filter(function(j){ return j.lan === lan; });
+        if (iLanet.length > iOrten.length){
+          notis = (iOrten.length === 0)
+            ? "Inga jobb i den kommunen just nu. Här är jobben i " + lan + " i stället."
+            : "Bara " + iOrten.length + " jobb i den kommunen, så vi visar hela " + lan + ".";
+          visatOmrade = lan;
+          valda = iLanet;
+        } else { valda = iOrten; }
+      } else { valda = iOrten; }
+    }
+  }
+
+  document.getElementById("rubrik").textContent = namn;
+  var var_ = visatOmrade ? visatOmrade
+           : (sok ? document.getElementById("ort").value.trim() : "hela Sverige");
+  document.getElementById("rakning").textContent = valda.length + " jobb i " + var_;
+  document.getElementById("notis").innerHTML =
+    notis ? '<div class="ruta">' + fly(notis) + "</div>" : "";
+
+  aktuell = valda;
+  document.getElementById("resultat").className = "";
+  ritaBit(true);
+  document.getElementById("resultat").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.getElementById("utb").onchange = visaInfo;
+document.getElementById("visa").onclick = visaJobb;
+document.getElementById("mer").onclick = function(){ ritaBit(false); };
+document.getElementById("ort").addEventListener("keydown", function(e){
+  if (e.key === "Enter") visaJobb();
+});
+
+fyllUtbildningar();
+visaInfo();
+document.getElementById("visa").disabled = true;
+
+if (typeof UTB_UPPDATERAD !== "undefined"){
+  var d = new Date(UTB_UPPDATERAD);
+  if (!isNaN(d)) document.getElementById("uppdaterad").textContent =
+    "Jobben hämtades " + svenskDatum(UTB_UPPDATERAD);
+}
+</script>
+</body>
+</html>
