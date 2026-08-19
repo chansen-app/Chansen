@@ -1,0 +1,46 @@
+name: Hämta jobb per examen
+
+# Kör varje natt, en timme efter den vanliga hämtningen, så att de två
+# körningarna inte krockar med varandra.
+#
+# Skriver labb/utbildningsjobb.js och labb/utbildningsjobb.json.
+# Ingenting av det publiceras, eftersom GitHub Pages bara tar mappen docs.
+#
+# Du kan också starta den för hand under fliken Actions på GitHub.
+
+on:
+  schedule:
+    - cron: "0 5 * * *"     # 05:00 UTC, alltså 07:00 svensk sommartid
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  hamta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hämta repot
+        uses: actions/checkout@v4
+
+      - name: Installera Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Kör hämtningen
+        run: node labb/hamta-utbildning.js
+
+      - name: Spara resultatet
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add labb/utbildningsjobb.js labb/utbildningsjobb.json
+          if git diff --staged --quiet; then
+            echo "Inget nytt att spara."
+          else
+            git commit -m "Nattlig hämtning: jobb per examen"
+            # hämta hem eventuella ändringar innan vi skickar upp
+            git pull --rebase --autostash origin main || git pull --no-rebase -X ours --no-edit origin main
+            git push
+          fi
