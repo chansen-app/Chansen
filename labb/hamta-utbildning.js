@@ -134,6 +134,36 @@ const UTBILDNINGAR = [
   }
 ];
 
+// Vissa ord är svaga. Ordet "socionom" förekommer i massor av annonser
+// som inte kräver socionomexamen, till exempel "du samarbetar med
+// socionomer". För de orden kollar vi vad som står runt omkring, precis
+// som Chansen gör med truckkort.
+const SVAGA_ORD = [
+  "socionom", "civilingenjor", "civilingenjör", "systemvetenskap", "systemvetare",
+  "medicinsk sekreterare", "vardadministrator", "vårdadministratör",
+  "lakarsekreterare", "läkarsekreterare", "vardutbildning", "vårdutbildning"
+];
+
+const KRAVSIGNAL = [
+  "krav", "kravs", "krävs", "maste", "måste", "ska ha", "ska du ha", "skall ha",
+  "vi soker dig som har", "vi söker dig som har", "du har", "du ar", "du är",
+  "examen", "utbildning", "utbildad", "behorig", "behörig", "legitimerad",
+  "legitimation", "meriterande", "kvalifikation", "vi krav", "erfordras",
+  "forutsatter", "förutsätter", "innehar"
+];
+
+function kravNara(text, ord) {
+  let i = text.indexOf(ord);
+  while (i > -1) {
+    const omkring = text.slice(Math.max(0, i - 120), i + ord.length + 120);
+    for (const sig of KRAVSIGNAL) {
+      if (omkring.indexOf(sig) > -1) return true;
+    }
+    i = text.indexOf(ord, i + 1);
+  }
+  return false;
+}
+
 function slat(v) {
   return String(v == null ? "" : v).toLowerCase()
     .replace(/å/g, "a").replace(/ä/g, "a").replace(/ö/g, "o");
@@ -152,6 +182,7 @@ async function hamta() {
   const sedda = {};
   const jobb = [];
   let granskade = 0;
+  let svagaBort = 0;
 
   for (const u of UTBILDNINGAR) {
     let hittade = 0;
@@ -179,6 +210,10 @@ async function hamta() {
 
           const krav = finns(text, u.kravord);
           if (!krav) continue;
+
+          // Är ordet svagt måste det också stå i ett sammanhang som visar
+          // att det är ett krav, inte bara omnämnt i förbifarten.
+          if (SVAGA_ORD.indexOf(krav) > -1 && !kravNara(text, krav)) { svagaBort++; continue; }
           if (u.stoppord.length &&
               finns((a.headline || "").toLowerCase(), u.stoppord)) continue;
 
@@ -221,6 +256,7 @@ async function hamta() {
   console.log("");
   console.log("Granskade annonser: " + granskade);
   console.log("Jobb med identifierat utbildningskrav: " + unika.length);
+  console.log("Stoppade för att ordet bara nämndes i förbifarten: " + svagaBort);
 
   const orter = {};
   for (const j of unika) if (j.ort) orter[j.ort] = (orter[j.ort] || 0) + 1;
