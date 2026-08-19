@@ -346,6 +346,123 @@ const UTBILDNINGAR = [
     stoppord: ["diskare", "restaurangbiträde"]
   },
   {
+    namn: "Frisörexamen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Frisör- och skönhetsvård",
+    sok: ["frisör", "barberare", "hårstylist"],
+    kravord: ["frisorutbildning", "frisörutbildning", "utbildad frisor", "utbildad frisör",
+              "hantverksprogrammet", "gesallbrev frisor", "gesällbrev frisör",
+              "frisorexamen", "frisörexamen", "barberarutbildning"],
+    stoppord: ["frisörassistent", "elev"]
+  },
+  {
+    namn: "Hud- och skönhetsvård, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Frisör- och skönhetsvård",
+    sok: ["hudterapeut", "makeupartist", "nagelterapeut"],
+    kravord: ["hudterapeututbildning", "utbildad hudterapeut", "diplomerad hudterapeut",
+              "hantverksprogrammet", "stylistutbildning", "utbildad stylist",
+              "certifierad nagelterapeut"],
+    stoppord: []
+  },
+  {
+    namn: "Hotell- och turismexamen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Hotell, restaurang och storhushåll",
+    sok: ["receptionist hotell", "hotellvärd", "konferensvärd"],
+    kravord: ["hotell- och turismprogrammet", "utbildning inom hotell",
+              "hotellutbildning", "turismutbildning", "receptionistutbildning"],
+    stoppord: []
+  },
+  {
+    namn: "Bygg- och anläggningsexamen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Byggnadsteknik och anläggningsteknik",
+    sok: ["snickare", "murare", "betongarbetare", "plattsättare"],
+    kravord: ["bygg- och anlaggningsprogrammet", "bygg- och anläggningsprogrammet",
+              "yrkesbevis snickare", "yrkesbevis murare", "utbildad snickare",
+              "byggutbildning", "yrkesbevis inom bygg"],
+    stoppord: ["byggnadsingenjör", "byggingenjör"]
+  },
+  {
+    namn: "Fordons- och transportexamen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Fordons- och transportteknik",
+    sok: ["fordonstekniker", "bilmekaniker", "lastbilsmekaniker"],
+    kravord: ["fordons- och transportprogrammet", "fordonsutbildning",
+              "utbildad fordonstekniker", "utbildad bilmekaniker",
+              "yrkesbevis fordon", "mekanikerutbildning"],
+    stoppord: []
+  },
+  {
+    namn: "VVS- och fastighetsexamen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Byggnadsteknik och anläggningsteknik",
+    sok: ["VVS-montör", "rörmokare", "fastighetsskötare", "kylmontör"],
+    kravord: ["vvs- och fastighetsprogrammet", "vvs-utbildning", "utbildad vvs-montor",
+              "utbildad vvs-montör", "yrkesbevis vvs", "kylcertifikat",
+              "fastighetsskotarutbildning", "fastighetsskötarutbildning"],
+    stoppord: []
+  },
+  {
+    namn: "Industritekniska examen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Maskinteknik och verkstadsteknik",
+    sok: ["CNC-operatör", "svetsare", "industrimekaniker", "maskinoperatör"],
+    kravord: ["industritekniska programmet", "svetslicens", "svetscertifikat",
+              "utbildad svetsare", "cnc-utbildning", "yrkesbevis svets",
+              "industriutbildning"],
+    stoppord: []
+  },
+  {
+    namn: "Naturbruksexamen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Lantbruk, trädgård, skog och fiske",
+    sok: ["djurvårdare", "trädgårdsarbetare", "lantbruksarbetare", "hästskötare"],
+    kravord: ["naturbruksprogrammet", "naturbruksgymnasium", "utbildad djurvardare",
+              "utbildad djurvårdare", "djurvardarutbildning", "djurvårdarutbildning",
+              "tradgardsutbildning", "trädgårdsutbildning", "hastskotarutbildning",
+              "hästskötarutbildning"],
+    stoppord: []
+  },
+  {
+    namn: "Handels- och administrationsexamen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Företagsekonomi, handel och administration",
+    sok: ["butikschef", "säljare butik", "administratör"],
+    kravord: ["handels- och administrationsprogrammet", "handelsprogrammet",
+              "utbildning inom handel", "handelsutbildning"],
+    stoppord: []
+  },
+  {
+    namn: "El- och energiexamen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Elektronik, datateknik och automation",
+    sok: ["automationstekniker", "larmtekniker", "nätverkstekniker"],
+    kravord: ["el- och energiprogrammet", "elutbildning", "automationsutbildning",
+              "utbildad automationstekniker"],
+    stoppord: []
+  },
+  {
+    namn: "Estetisk examen, gymnasial",
+    niva: "Gymnasial utbildning, 3 år",
+    omrade: "Musik, dans och dramatik",
+    sok: ["musiklärare", "danspedagog", "scentekniker"],
+    kravord: ["estetiska programmet", "estetisk utbildning", "musikutbildning",
+              "dansutbildning", "scenteknisk utbildning"],
+    stoppord: []
+  },
+  {
+    namn: "Vård- och omsorgscollege, undersköterska med specialisering",
+    niva: "Eftergymnasial utbildning, kortare än 2 år",
+    omrade: "Omvårdnad",
+    sok: ["specialistundersköterska", "undersköterska demens", "undersköterska palliativ"],
+    kravord: ["specialistunderskoterska", "specialistundersköterska",
+              "vidareutbildning inom demens", "vidareutbildning inom palliativ",
+              "yrkeshogskoleutbildning inom vard", "yrkeshögskoleutbildning inom vård"],
+    stoppord: []
+  },
+  {
     namn: "Medicinsk sekreterare, yrkeshögskola",
     niva: "Eftergymnasial utbildning, 2 år",
     omrade: "Kontorsservice och sekreterartjänster",
