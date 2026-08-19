@@ -408,7 +408,7 @@ async function hamtaJobb() {
   const sedda = {};
   const jobb = [];
   const nu = new Date();
-  let hamtade = 0, bortsorterade = 0, provisionsbort = 0;
+  let hamtade = 0, bortsorterade = 0, provisionsbort = 0, gamlaBort = 0;
   const kommunLan = {};
 
   // Heltidsjobb hittas dåligt av våra sökord, som är inriktade på extrajobb
@@ -493,6 +493,13 @@ async function hamtaJobb() {
         if (provisionUtanGrundlon(brodtext) || renRorligLon(a)
           || rorligUtanForklaring(a, brodtext)) provisionsbort++;
 
+        // En annons från i vintras är i praktiken tillsatt. Sommarjobb som
+        // lades upp i februari hör inte hemma i listan i augusti.
+        if (a.publication_date) {
+          const dagar = Math.floor((Date.now() - new Date(a.publication_date)) / 86400000);
+          if (dagar > 90) { gamlaBort++; continue; }
+        }
+
         const p = poang(a);
         if (p < 3) { bortsorterade++; continue; }
 
@@ -575,6 +582,7 @@ async function hamtaJobb() {
   console.log("Varav provision utan grundlön: " + provisionsbort);
   let natt = 0, nyb = 0;
   for (const j of jobb) { if (j.nattarbete) natt++; if (j.nyborjarvanlig) nyb++; }
+  console.log("Annonser äldre än 90 dagar, bortsorterade: " + gamlaBort);
   console.log("Nattarbete, göms för under 18: " + natt);
   console.log("Nybörjarvänliga: " + nyb);
   let bem = 0;
