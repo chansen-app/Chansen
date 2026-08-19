@@ -369,6 +369,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div id="gammaldata" class="dold"></div>
   <div id="notis"></div>
   <div id="lista"></div>
+
+  <!-- Syns i slutet av listan, alltså när någon läst igenom jobben och
+       är som mest benägen att tipsa vidare. -->
+  <div class="card" id="delakort" style="text-align:center;padding:26px 20px">
+    <div class="titel" style="margin-bottom:8px">Känner du någon som söker jobb?</div>
+    <div style="font-size:14px;color:var(--n-700);margin-bottom:16px;line-height:1.6">
+      Chansen är gratis och kräver inget konto. Skicka den vidare till någon som
+      behöver den.
+    </div>
+    <button class="btn" onclick="delaChansen()">Skicka vidare</button>
+  </div>
 </div>
 
 <div id="v-mina" class="dold">
@@ -984,7 +995,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 69</footer>
+version 70</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
