@@ -260,7 +260,7 @@ const UTBILDNINGAR = [
     namn: "Revisorsexamen",
     niva: "Eftergymnasial utbildning, 4 år",
     omrade: "Företagsekonomi, handel och administration",
-    sok: ["revisor", "auktoriserad revisor"],
+    sok: ["revisor", "auktoriserad revisor", "revisionsbyrå", "redovisningskonsult"],
     kravord: ["revisorsexamen", "auktoriserad revisor", "godkand revisor", "godkänd revisor"],
     stoppord: ["revisorsassistent"]
   },
@@ -268,19 +268,25 @@ const UTBILDNINGAR = [
     namn: "Dataingenjörsexamen",
     niva: "Eftergymnasial utbildning, 3 år",
     omrade: "Datateknik och automation",
-    sok: ["dataingenjör", "mjukvaruingenjör", "embedded"],
-    kravord: ["dataingenjor", "dataingenjör", "mjukvaruingenjor", "mjukvaruingenjör",
-              "hogskoleingenjor inom data", "högskoleingenjör inom data"],
+    sok: ["dataingenjör", "mjukvaruingenjör", "inbyggda system", "elektronikingenjör"],
+    kravord: ["dataingenjorsexamen", "dataingenjörsexamen", "dataingenjor", "dataingenjör",
+              "mjukvaruingenjor", "mjukvaruingenjör", "datateknik",
+              "hogskoleingenjor inom datateknik", "högskoleingenjör inom datateknik",
+              "civilingenjor inom datateknik", "civilingenjör inom datateknik",
+              "utbildning inom datateknik", "elektroteknik eller datateknik"],
     stoppord: []
   },
   {
     namn: "Yrkeshögskoleexamen inom IT",
     niva: "Eftergymnasial utbildning, 2 år",
     omrade: "Systemvetenskap och informatik",
-    sok: ["frontendutvecklare", "testare IT", "IT-tekniker"],
+    sok: ["webbutvecklare", "IT-tekniker", "systemtekniker", "frontendutvecklare"],
     kravord: ["yrkeshogskoleutbildning inom it", "yrkeshögskoleutbildning inom it",
               "yh-utbildning inom it", "yrkeshogskoleexamen inom it",
-              "yrkeshögskoleexamen inom it"],
+              "yrkeshögskoleexamen inom it", "yrkeshogskoleutbildning inom systemutveckling",
+              "yrkeshögskoleutbildning inom systemutveckling", "yh-utbildning",
+              "yrkeshogskoleutbildning inom data", "yrkeshögskoleutbildning inom data",
+              "eftergymnasial utbildning inom it", "utbildning inom it"],
     stoppord: []
   },
   {
@@ -362,7 +368,6 @@ const SVAGA_ORD = [
   "beteendevetare", "personalvetare", "civilekonom", "specialistsjukskoterska",
   "specialistsjuksköterska", "hogskoleingenjor", "högskoleingenjör",
   "byggingenjor", "byggingenjör", "byggnadsingenjor", "byggnadsingenjör",
-  "dataingenjor", "dataingenjör", "mjukvaruingenjor", "mjukvaruingenjör",
   "auktoriserad revisor", "utbildad bibliotekarie", "utbildad kock"
 ];
 
@@ -371,13 +376,16 @@ const KRAVSIGNAL = [
   "vi soker dig som har", "vi söker dig som har", "du har", "du ar", "du är",
   "examen", "utbildning", "utbildad", "behorig", "behörig", "legitimerad",
   "legitimation", "meriterande", "kvalifikation", "vi krav", "erfordras",
-  "forutsatter", "förutsätter", "innehar"
+  "forutsatter", "förutsätter", "innehar", "vi soker dig", "vi söker dig",
+  "vi soker en", "vi söker en", "soker vi", "söker vi", "din profil",
+  "kvalifikationer", "bakgrund", "sokande", "sökande", "tjansten kraver",
+  "tjänsten kräver", "vi vill att du", "det kravs", "det krävs"
 ];
 
 function kravNara(text, ord) {
   let i = text.indexOf(ord);
   while (i > -1) {
-    const omkring = text.slice(Math.max(0, i - 120), i + ord.length + 120);
+    const omkring = text.slice(Math.max(0, i - 200), i + ord.length + 200);
     for (const sig of KRAVSIGNAL) {
       if (omkring.indexOf(sig) > -1) return true;
     }
@@ -435,7 +443,13 @@ async function hamta() {
 
           // Är ordet svagt måste det också stå i ett sammanhang som visar
           // att det är ett krav, inte bara omnämnt i förbifarten.
-          if (SVAGA_ORD.indexOf(krav) > -1 && !kravNara(text, krav)) { svagaBort++; continue; }
+          // Undantag: står yrket i rubriken är examen underförstådd. Ett jobb
+          // som heter "Specialistsjuksköterska" kräver den utbildningen.
+          if (SVAGA_ORD.indexOf(krav) > -1) {
+            const rubrik = (a.headline || "").toLowerCase();
+            const iRubriken = rubrik.indexOf(krav) > -1 || slat(rubrik).indexOf(slat(krav)) > -1;
+            if (!iRubriken && !kravNara(text, krav)) { svagaBort++; continue; }
+          }
           if (u.stoppord.length &&
               finns((a.headline || "").toLowerCase(), u.stoppord)) continue;
 
