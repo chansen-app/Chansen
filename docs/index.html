@@ -65,8 +65,20 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Chansen">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Hämta hem typsnitten direkt. Kommer de fram först efter att sidan
+     ritats byter texten radbrytning och hela sidan hoppar till. -->
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="https://fonts.gstatic.com/s/caprasimo/v6/esDT31JQOPuXIUGBp72Ukp8DOJKuGA.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2">
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=optional" rel="stylesheet">
 <style>
+@font-face{
+  font-family:"Fig reserv"; src:local("Helvetica Neue"),local("Arial"),local(sans-serif);
+  size-adjust:104%; ascent-override:95%; descent-override:24%; line-gap-override:0%;
+}
 :root{
   --bg:#f5ead8; --surface:#ebddc5; --text:#201e1d;
   --accent:#c67139; --accent-100:#fff2eb; --accent-700:#8c491a; --accent-800:#643312;
@@ -86,6 +98,20 @@ label.fraga{display:block;font-size:12px;color:var(--n-700);margin:0 0 7px}
 .field{margin-bottom:22px}
 .avsnitt{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-600);margin:30px 0 14px;padding-top:18px;border-top:1.5px solid var(--n-300)}
 .seg{display:flex;flex-wrap:wrap;gap:8px;min-height:44px}
+/* Hjälptexterna byter antal rader när typsnittet laddas, och då hoppar
+   hela sidan. Genom att reservera plats i förväg står den still. */
+#v-start .hint{min-height:20px}
+#v-start .field:nth-of-type(1) .hint{min-height:60px}
+#v-start .hint.tva{min-height:40px}
+/* höjderna motsvarar hur många rader knapparna tar på en mobilskärm */
+#q-nar,#q-omfattning,#q-erfarenhet{min-height:96px}
+#q-utbildning{min-height:200px}
+#q-omrade{min-height:304px}
+@media (min-width:520px){
+  #q-nar,#q-omfattning,#q-erfarenhet{min-height:44px}
+  #q-utbildning{min-height:96px}
+  #q-omrade{min-height:200px}
+}
 .chips{min-height:40px}
 .seg button{min-height:44px;padding:10px 16px;border-radius:999px;font-family:var(--body);font-size:13.5px;font-weight:700;cursor:pointer;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800)}
 .seg button.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
@@ -208,6 +234,21 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 </div>
 
+<script>
+// Avgör direkt om språkrutan ska visas, innan webbläsaren ritat klart.
+// Görs det senare skjuts hela sidan nedåt och det ser ut som ett hopp.
+(function(){
+  try {
+    if (localStorage.getItem("chansen-sprak-dolt") === "1") return;
+  } catch(e){}
+  var sprak = (navigator.language || "").toLowerCase();
+  var alla = (navigator.languages || []).join(" ").toLowerCase();
+  if (sprak.indexOf("sv") === 0 || alla.indexOf("sv") > -1) return;
+  var el = document.getElementById("sprak");
+  if (el) el.className = "";
+})();
+</script>
+
 <div id="v-start">
   <h1>Jobb som är värda att söka.</h1>
   <p class="sub">Några snabba frågor. Inget konto, inget sparas någon annanstans än i din telefon.</p>
@@ -246,7 +287,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div class="field">
     <label class="fraga">Vad har du för utbildning?</label>
     <div class="seg" id="q-utbildning"></div>
-    <div class="hint">Chansen visar bara jobb med låga ingångskrav, oavsett vad du svarar här. Svaret används för att skriva din ansökan.</div>
+    <div class="hint tva">Chansen visar bara jobb med låga ingångskrav, oavsett vad du svarar här. Svaret används för att skriva din ansökan.</div>
   </div>
 
   <div class="field">
@@ -258,13 +299,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div class="field">
     <label class="fraga">Hur mycket har du jobbat tidigare?</label>
     <div class="seg" id="q-erfarenhet"></div>
-    <div class="hint">Även det här används i ansökan. Har du lång erfarenhet syns det i brevet.</div>
+    <div class="hint tva">Även det här används i ansökan. Har du lång erfarenhet syns det i brevet.</div>
   </div>
 
   <div class="field">
     <label class="fraga">Vad vill du helst jobba med?</label>
     <div class="seg" id="q-omrade"></div>
-    <div class="hint">Siffran visar hur många jobb som finns just nu på den ort du skrivit. Väljer du inget visas alla sorters jobb.</div>
+    <div class="hint tva">Siffran visar hur många jobb som finns just nu på den ort du skrivit. Väljer du inget visas alla sorters jobb.</div>
   </div>
 
   <button class="btn block" id="knapp-visa-2" onclick="startaLista()">Visa jobben</button>
@@ -917,7 +958,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 63</footer>
+version 65</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2790,20 +2831,6 @@ function visaInre(filter){
 ritaFragor();
 kollaKnappar();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
-// Visa språkhjälpen bara för den som inte har svenska i telefonen,
-// och bara tills den klickats bort.
-function kollaSprak(){
-  var el = document.getElementById("sprak");
-  if (!el) return;
-  try {
-    if (localStorage.getItem("chansen-sprak-dolt") === "1") return;
-  } catch(e){}
-  var sprak = (navigator.language || "").toLowerCase();
-  var alla = (navigator.languages || []).join(" ").toLowerCase();
-  if (sprak.indexOf("sv") === 0 || alla.indexOf("sv") > -1) return;
-  el.className = "";
-}
-
 function doljSprak(){
   var el = document.getElementById("sprak");
   if (el) el.className = "dold";
@@ -2811,7 +2838,6 @@ function doljSprak(){
 }
 
 ritaMina();
-kollaSprak();
 kollaAlder();
 visaFarskhet();
 visaUppdaterad();
