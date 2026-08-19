@@ -19,6 +19,9 @@
 <title>Chansen — jobb som är värda att söka | extrajobb, sommarjobb och deltid utan erfarenhet</title>
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
+<!-- Bevisar för Google Search Console att sidan är vår. Ta inte bort,
+     då tappas verifieringen. -->
+<meta name="google-site-verification" content="2uGKln4_5OyOJfgkYghs510Rq54bR8Xj5DuutNktpV0">
 <meta name="description" content="Chansen visar jobb med låga ingångskrav i hela Sverige, sorterade efter hur få hinder som finns. Hjälp med ansökan och CV. Gratis, inget konto.">
 
 <meta property="og:type" content="website">
@@ -74,6 +77,29 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin
       href="https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2">
 <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=optional" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "sv-SE",
+  "mainEntity": [
+    { "@type": "Question", "name": "Hur hittar man jobb utan erfarenhet?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Chansen går igenom hela Platsbanken varje natt och visar bara annonser där ingångskraven är låga. Allt som kräver utbildning, yrkesbevis eller flera års erfarenhet sorteras bort. Du svarar på tre frågor och får jobben i din egen kommun. Sidan är gratis och kräver inget konto." } },
+    { "@type": "Question", "name": "Hur mycket får man jobba när man är under 18?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Det beror på ålder och om du går i skolan. Är du under 16 gäller kortare arbetstider och du får inte arbeta sent på kvällen. Är du under 18 får du inte arbeta natt. Chansen döljer automatiskt de jobb du inte får ta, och förklarar reglerna på sidan om arbetstider." } },
+    { "@type": "Question", "name": "Kan man få jobb om man finns i belastningsregistret?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Ja, de flesta jobb kräver inget utdrag ur belastningsregistret. Uppgifter gallras dessutom efter en tid. Chansen har en sida som förklarar hur registret fungerar, vilka jobb som kräver utdrag, och vilka vägar in som finns for den som har en dom." } },
+    { "@type": "Question", "name": "Vad betyder provision utan grundlön?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Det betyder att hela lönen bygger på vad du säljer. Säljer du inget får du ingenting, även om du arbetat en hel månad. Chansen visar aldrig jobb utan fast lön, och inte heller jobb med rörlig lön där annonsen inte förklarar hur lönen fungerar." } },
+    { "@type": "Question", "name": "Hur skriver man ett CV när man aldrig jobbat?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Räkna med sådant som inte är lönearbete: praktik, föreningsuppdrag, barnvakt, ideellt arbete och skolprojekt. Chansen har en CV-byggare med tre mallar som hjälper dig steg för steg." } },
+    { "@type": "Question", "name": "Kostar Chansen något?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Nej. Sidan är gratis, har ingen reklam, kräver inget konto och sparar ingenting om dig. Den drivs av en privatperson och bygger på Arbetsförmedlingens öppna data. Arbetsförmedlingen står inte bakom sidan." } },
+    { "@type": "Question", "name": "Var kommer jobben ifrån?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Från Arbetsförmedlingens öppna data, alltså samma annonser som finns i Platsbanken. Skillnaden ar att Chansen går igenom alla och bara visar de med laga ingangskrav. Annonserna hämtas varje natt." } }
+  ]
+}
+</script>
 <style>
 @font-face{
   font-family:"Fig reserv"; src:local("Helvetica Neue"),local("Arial"),local(sans-serif);
@@ -958,7 +984,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 65</footer>
+version 68</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1032,6 +1058,7 @@ function raknaOmraden(){
   var ort = document.getElementById("ort");
   var sokord = ort ? slat(ort.value.trim()) : "";
   sokord = smeknamn[sokord] || sokord;
+  if (sokord.length < 2) sokord = "";
 
   var nyckel = sokord + "|" + (svar.alder || "");
   if (antalCache && antalNyckel === nyckel) return antalCache;
@@ -1188,9 +1215,12 @@ var smeknamn = {
   "nkpg":"norrkoping", "hbg":"helsingborg", "vaxjo":"vaxjo"
 };
 
+// Minst två tecken, annars matchar en enda bokstav en slumpmässig kommun.
 function sokordOrt(){
   var v = slat(svar.ort);
-  return smeknamn[v] || v;
+  v = smeknamn[v] || v;
+  // En enda bokstav matchar en slumpmässig kommun, så det räknas som tomt.
+  return v.length < 2 ? "" : v;
 }
 
 function matcharOrt(j){
@@ -1751,7 +1781,7 @@ function agFalt(id){
 // Samma standard som den automatiska filtreringen. Annars kan en annons
 // med höga krav komma in bakvägen genom formuläret.
 var AG_STOPPORD = [
-  "flera års erfarenhet","flera ars erfarenhet","minst 2 års","minst 2 ars",
+  "flera års erfarenhet","flera års erfarenhet","minst 2 års","minst 2 ars",
   "minst två års","minst tva ars","minst 3 års","minst 3 ars","minst tre års",
   "gedigen erfarenhet","dokumenterad erfarenhet","examen","legitimation",
   "eftergymnasial","yrkesbevis","gesällbrev","gesallbrev","behörighetsbevis",
@@ -2689,12 +2719,13 @@ var SIDSTORLEK = 20;
 // och resten fylls på i nästa bildruta utan att det syns.
 var FORSTA_BITEN = 6;
 
-function ritaBit(nollstall){
+function ritaBit(nollstall, fyllUpp){
   var el = document.getElementById("lista");
   if (!el) return;
   if (nollstall){ el.innerHTML = ""; visatAntal = 0; }
 
   var steg = (nollstall ? FORSTA_BITEN : SIDSTORLEK);
+  if (fyllUpp) steg = Math.max(0, SIDSTORLEK - visatAntal);
   var till = Math.min(visatAntal + steg, aktuellLista.length);
   var bit = "";
   for (var i = visatAntal; i < till; i++){ bit += kort(aktuellLista[i]); }
@@ -2719,8 +2750,16 @@ function visa(filter){
     var k = document.getElementById("f-" + ids[i]);
     if (k && k.className !== "dold") k.className = (ids[i] === filter) ? "on" : "";
   }
-  requestAnimationFrame(function(){ visaInre(filter); });
+  // Avbryt en väntande ritning först. Utan det staplas korten på
+  // varandra om man trycker snabbt på flera filter.
+  if (vantandeRitning) cancelAnimationFrame(vantandeRitning);
+  vantandeRitning = requestAnimationFrame(function(){
+    vantandeRitning = 0;
+    visaInre(filter);
+  });
 }
+
+var vantandeRitning = 0;
 
 function visaInre(filter){
   if (aktivtFilter !== filter) handelse("filter-" + filter);
@@ -2740,8 +2779,17 @@ function visaInre(filter){
   var iOmradet = JOBB.filter(matcharOrt);
 
   // visa kommunens riktiga namn, inte det användaren råkade skriva
-  if (svar.ort && iOmradet.length) ortsnamn = iOmradet[0].ort || svar.ort;
-  else ortsnamn = svar.ort;
+  if (sokordOrt() && iOmradet.length) ortsnamn = iOmradet[0].ort || svar.ort;
+  else if (sokordOrt()) ortsnamn = svar.ort;
+  else ortsnamn = "";
+
+  var kandOrt = false;
+  if (svar.ort){
+    var s2 = sokordOrt();
+    if (s2){
+      for (var kk in KOMMUNLAN){ if (slat(kk).indexOf(s2) > -1){ kandOrt = true; break; } }
+    }
+  }
 
   if (svar.ort && iOmradet.length < 5){
     var lan = lanForOrt();
@@ -2783,6 +2831,10 @@ function visaInre(filter){
   } else if (underArton()) {
     aldersnotis = '<div class="ruta" style="font-size:14px">Jobb med natt- eller skiftarbete visas inte för dig. Är du under 18 får du inte jobba mellan 22 och 06. <button class="lank" onclick="oppnaHjalp(\'tider\')">Läs mer om arbetstider</button></div>';
   }
+  if (svar.ort && !kandOrt && iOmradet.length === 0) {
+    aldersnotis += '<div class="ruta" style="font-size:14px">Vi hittar ingen kommun som stavas så. Kontrollera stavningen, eller lämna rutan tom för att se jobb i hela Sverige.</div>';
+  }
+
   if (lanfall) {
     var antalIOrten = JOBB.filter(matcharOrt).length;
     aldersnotis += '<div class="ruta" style="font-size:14px">'
@@ -2824,7 +2876,7 @@ function visaInre(filter){
   ritaBit(true);
   // fyll på upp till full sidstorlek när webbläsaren ritat klart
   if (visatAntal < Math.min(SIDSTORLEK, aktuellLista.length)){
-    requestAnimationFrame(function(){ ritaBit(false); });
+    requestAnimationFrame(function(){ ritaBit(false, true); });
   }
 }
 
