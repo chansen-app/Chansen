@@ -94,14 +94,22 @@ function inlagg(ort, jobb) {
   };
 }
 
+// Korta versionen måste säga samma sak som den långa, annars ser det
+// slarvigt ut om båda postas samma dag.
 function kort(ort, jobb) {
   const iOrten = ort
     ? jobb.filter(function (j) { return slat(j.ort).indexOf(slat(ort)) > -1; })
     : jobb;
   if (!iOrten.length) return null;
+
   const idag = nya(iOrten, 1).length;
+  const veckan = nya(iOrten, 7).length;
+
   if (idag >= 3) {
     return idag + " nya jobb i " + ort + " i dag utan krav på erfarenhet 👀 chansen.nu";
+  }
+  if (veckan >= 5) {
+    return veckan + " nya jobb i " + ort + " den här veckan utan krav på erfarenhet 👀 chansen.nu";
   }
   return iOrten.length + " jobb i " + ort + " utan krav på erfarenhet just nu 👀 chansen.nu";
 }
