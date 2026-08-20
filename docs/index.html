@@ -775,11 +775,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
 
 <div id="v-arbetsgivare" class="dold info">
-    <div class="rakning" id="bladstatus" style="margin-bottom:14px">bladet: läser...</div>
+    <!-- Bara till för dig själv. Visas med chansen.nu/#arbetsgivare?blad=1 -->
+    <div class="rakning dold" id="bladstatus" style="margin-bottom:14px"></div>
     <h1 style="font-size:28px;margin-bottom:6px">Lägg upp ett jobb</h1>
     <p class="sub">Gratis. För dig som söker personal och inte kräver erfarenhet. Din annons visas för alla som söker jobb i din kommun.</p>
 
-    <p>Chansen används av personer som söker jobb. Fyll i formuläret nedan, så skickas annonsen till oss från din egen mejl. Varje annons granskas av en människa innan den publiceras, oftast inom ett dygn.</p>
+    <p>Fyll i formuläret nedan och tryck skicka. Annonsen kommer direkt till oss, du behöver inte mejla något själv.</p>
+    <p>Varje annons granskas av en människa innan den publiceras, oftast inom ett dygn. Vi hör av oss om något behöver kompletteras.</p>
 
     <div id="ag-tack" class="dold">
       <div class="ruta">
@@ -823,6 +825,18 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
       <label class="fraga">Omfattning</label>
       <div class="seg" id="ag-omfattning"></div>
       <div class="hint">Välj ett eller flera. Gäller annonsen både helg och kväll, kryssa i båda.</div>
+    </div>
+
+    <div class="field">
+      <label class="fraga" for="ag-timmar">Ungefär hur många timmar?</label>
+      <input class="cvf agf" id="ag-timmar" placeholder="Till exempel 10 timmar i veckan, eller 20 timmar totalt">
+      <div class="hint">Skriv om det gäller per vecka eller totalt för hela uppdraget. Är det ett engångsjobb är det viktigt att det framgår.</div>
+    </div>
+
+    <div class="field">
+      <label class="fraga">Finns kollektivavtal?</label>
+      <div class="seg" id="ag-avtal"></div>
+      <div class="hint">Inget krav, men bra för den som söker att veta.</div>
     </div>
 
     <div class="field">
@@ -902,7 +916,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
     <div id="ag-status" class="rakning"></div>
     <button class="btn block" id="ag-skicka" onclick="agSkicka()">Skicka annonsen</button>
-    <div class="hint" style="text-align:center">Din egen mejl öppnas med allt ifyllt. Inget skickas härifrån.</div>
+    <div class="hint" style="text-align:center">Annonsen skickas direkt till oss. Vi hör av oss på mejladressen du angett.</div>
 
     </div>
 
@@ -1010,7 +1024,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 71</footer>
+version 72</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1651,7 +1665,10 @@ function bladTillJobb(csv){
 
 function bladStatus(text){
   var el = document.getElementById("bladstatus");
-  if (el) el.textContent = "bladet: " + text;
+  if (!el) return;
+  el.textContent = "bladet: " + text;
+  // Visas bara om du själv lagt till ?blad=1 i adressen.
+  if (location.search.indexOf("blad=1") > -1) el.className = "rakning";
 }
 
 function hamtaBladjobb(){
@@ -1741,6 +1758,7 @@ var AG_VAL = {
   lonform: ["Timlön","Månadslön","Enligt kollektivavtal"],
   utdrag: ["Ja","Nej"],
   minder: ["Ja","Nej"],
+  avtal: ["Ja","Nej","Vet inte"],
   erfarenhet: ["Ja","Nej"],
   behorighet: ["Ja","Nej"]
 };
@@ -1912,7 +1930,7 @@ function agKolla(){
   if (st){
     if (problem.length) st.textContent = "Rätta först: " + problem.join(", ") + ".";
     else if (saknas.length) st.textContent = "Kvar att fylla i: " + saknas.slice(0,4).join(", ") + (saknas.length > 4 ? " med flera" : "") + ".";
-    else st.textContent = "Allt ifyllt. Tryck skicka, din mejl öppnas.";
+    else st.textContent = "Allt ifyllt. Tryck skicka så kommer annonsen till oss.";
   }
   if (kn){
     kn.style.opacity = klart ? "1" : "0.5";
@@ -1943,7 +1961,9 @@ function agData(){
     mejl: agFalt("mejl"),
     kontakt: agFalt("kontakt"),
     erfarenhet: ag.erfarenhet || "",
-    behorighet: ag.behorighet || ""
+    behorighet: ag.behorighet || "",
+    timmar: agFalt("timmar"),
+    avtal: ag.avtal || ""
   };
 }
 
