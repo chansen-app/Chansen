@@ -76,7 +76,7 @@
       href="https://fonts.gstatic.com/s/caprasimo/v6/esDT31JQOPuXIUGBp72Ukp8DOJKuGA.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin
       href="https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2">
-<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600;700&display=optional" rel="stylesheet">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -124,8 +124,23 @@ label.fraga{display:block;font-size:12px;color:var(--n-700);margin:0 0 7px}
 .field{margin-bottom:22px}
 .avsnitt{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-600);margin:30px 0 14px;padding-top:18px;border-top:1.5px solid var(--n-300)}
 .seg{display:flex;flex-wrap:wrap;gap:8px;min-height:44px}
-/* Hjälptexterna byter antal rader när typsnittet laddas, och då hoppar
-   hela sidan. Genom att reservera plats i förväg står den still. */
+/* Sidan ritas först med systemets typsnitt och sedan om med Caprasimo
+   och Figtree. Texten byter då antal rader och allt hoppar. Genom att
+   reservera plats i förväg står sidan still, oavsett när typsnittet
+   kommer fram. Höjderna är uppmätta på en mobilskärm. */
+#v-start h1{min-height:70px}
+#v-start .sub{min-height:48px}
+#v-start .field:nth-of-type(1){min-height:137px}
+#v-start .field:nth-of-type(2){min-height:101px}
+#v-start .field:nth-of-type(3){min-height:149px}
+#v-start .field:nth-of-type(4){min-height:149px}
+footer{min-height:134px}
+@media (min-width:520px){
+  #v-start h1,#v-start .sub,
+  #v-start .field:nth-of-type(1),#v-start .field:nth-of-type(2),
+  #v-start .field:nth-of-type(3),#v-start .field:nth-of-type(4),
+  footer{min-height:0}
+}
 #v-start .hint{min-height:20px}
 #v-start .field:nth-of-type(1) .hint{min-height:60px}
 #v-start .hint.tva{min-height:40px}
@@ -995,7 +1010,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 70</footer>
+version 71</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
