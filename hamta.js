@@ -39,6 +39,14 @@ const SOKNINGAR = [
 const SIDOR_PER_SOKNING = 10;   // 100 annonser per sida
 
 // ── titlar som aldrig visas ───────────────────────────────────────────
+// Ord i TITELN som betyder att jobbet kräver erfarenhet, även om
+// annonstexten inte säger det rakt ut.
+const ERFAREN_TITEL = [
+  "senior", "seniora", "erfaren", "erfarna", "rutinerad", "van ",
+  "specialist", "expert", "ledande", "arbetsledare", "teamledare",
+  "gruppledare", "chef", "ansvarig for", "ansvarig för"
+];
+
 const YRKESSTOPP = [
   "lakare","läkare","sjukskoterska","sjuksköterska","barnmorska","psykolog",
   "tandlakare","tandläkare","socionom","jurist","advokat","ingenjor","ingenjör",
@@ -249,6 +257,7 @@ function poang(a) {
   let p = 0;
 
   if (harNagot(titel, YRKESSTOPP)) return -20;
+  if (harNagot(titel, ERFAREN_TITEL)) return -20;
   if (harNagot(text, TEXTSTOPP)) return -20;
   if (provisionUtanGrundlon(text)) return -20;
   if (kortKravs(text)) return -20;
@@ -283,6 +292,14 @@ function poang(a) {
   if (harNattarbete(a)) p -= 1;
   if (harNagot(text, ["minst 2 ars","minst 2 års","minst tva ars","minst två års",
                       "nagra ars erfarenhet","några års erfarenhet"])) p -= 4;
+
+  // Formuleringar som betyder att de vill ha någon som redan kan jobbet.
+  if (harNagot(text, [
+      "gedigen erfarenhet", "dokumenterad erfarenhet", "flerarig erfarenhet",
+      "flerårig erfarenhet", "lang erfarenhet", "lång erfarenhet",
+      "gedigen kunskap", "van vid att", "erfaren montor", "erfaren montör",
+      "du ar erfaren", "du är erfaren", "senior roll", "vi soker en senior",
+      "vi söker en senior"])) p -= 5;
 
   return p;
 }
@@ -497,7 +514,10 @@ async function hamtaJobb() {
         // lades upp i februari hör inte hemma i listan i augusti.
         if (a.publication_date) {
           const dagar = Math.floor((Date.now() - new Date(a.publication_date)) / 86400000);
-          if (dagar > 90) { gamlaBort++; continue; }
+          // 180 dagar, inte 90. Just de jobb som säger att erfarenhet inte
+          // krävs ligger uppe längst, eftersom de är svåra att tillsätta.
+          // En hårdare gräns träffade precis de jobb sidan finns för.
+          if (dagar > 180) { gamlaBort++; continue; }
         }
 
         const p = poang(a);
@@ -582,7 +602,7 @@ async function hamtaJobb() {
   console.log("Varav provision utan grundlön: " + provisionsbort);
   let natt = 0, nyb = 0;
   for (const j of jobb) { if (j.nattarbete) natt++; if (j.nyborjarvanlig) nyb++; }
-  console.log("Annonser äldre än 90 dagar, bortsorterade: " + gamlaBort);
+  console.log("Annonser äldre än 180 dagar, bortsorterade: " + gamlaBort);
   console.log("Nattarbete, göms för under 18: " + natt);
   console.log("Nybörjarvänliga: " + nyb);
   let bem = 0;
