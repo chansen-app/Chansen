@@ -407,9 +407,26 @@ function harProvision(text) {
   return false;
 }
 
+// En bakgrundskontroll är i praktiken samma sak som ett registerutdrag
+// för den som har en dom. Tidigare letade vi bara efter två ord, så allt
+// som var formulerat annorlunda slank igenom.
+const UTDRAG_ORD = [
+  "belastningsregister", "registerutdrag", "utdrag ur polisens register",
+  "utdrag ur polisregistret", "polisens belastningsregister",
+  "bakgrundskontroll", "bakgrundskontroller", "background check",
+  "sakerhetsprovning", "säkerhetsprövning", "sakerhetsklassad",
+  "säkerhetsklassad", "registerkontroll", "utdrag fran polisen",
+  "utdrag från polisen", "brottsregister", "vandelsprovning",
+  "vandelsprövning", "lampligshetsprovning", "lämplighetsprövning"
+];
+
 function utdragskrav(a) {
-  const t = (a.description ? a.description.text : "").toLowerCase();
-  if (t.indexOf("belastningsregister") > -1 || t.indexOf("registerutdrag") > -1) return "kravs";
+  const rå = (a.description ? a.description.text : "").toLowerCase();
+  const platt = rå.replace(/å/g, "a").replace(/ä/g, "a").replace(/ö/g, "o");
+  for (const o of UTDRAG_ORD) {
+    const p = o.replace(/å/g, "a").replace(/ä/g, "a").replace(/ö/g, "o");
+    if (rå.indexOf(o) > -1 || platt.indexOf(p) > -1) return "kravs";
+  }
   return "framgar inte";
 }
 
