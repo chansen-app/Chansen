@@ -1024,7 +1024,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 72</footer>
+version 73</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1155,7 +1155,13 @@ function ortAndrad(){
   if (ortTimer) clearTimeout(ortTimer);
   ortTimer = setTimeout(function(){
     antalCache = null;      // orten har ändrats, räkna om
-    ritaOmraden();
+    // Vänta tills webbläsaren är ledig. Annars landar omräkningen precis
+    // efter ett tangenttryck, och då mäts det trycket som långsamt.
+    if (window.requestIdleCallback) {
+      requestIdleCallback(ritaOmraden, { timeout: 600 });
+    } else {
+      requestAnimationFrame(ritaOmraden);
+    }
   }, 400);
 }
 
@@ -1219,23 +1225,31 @@ function profilrad(){
 }
 
 function startaLista(){
-  spara();
-  visaFarskhet();
-  handelse("visade-jobb");
-  // vet vi om folk går vidare direkt eller svarar på allt först?
-  var extra = (svar.utbildning ? 1 : 0) + (svar.korkort ? 1 : 0)
-            + (svar.erfarenhet ? 1 : 0) + ((svar.omrade && svar.omrade.length) ? 1 : 0);
-  handelse(extra === 0 ? "start-snabb" : (extra >= 3 ? "start-alla-fragor" : "start-nagra-fragor"));
-  if (svar.alder) handelse("alder-" + slug(svar.alder));
-  if (svar.omfattning && svar.omfattning.length) handelse("soker-" + slug(svar.omfattning[0]));
-  if (svar.omrade && svar.omrade.length) handelse("omrade-" + slug(svar.omrade[0]));
-  if (svar.ort) handelse("ort-ifylld"); else handelse("ort-tom");
+  // Bara det som måste ske innan sidan ritas om.
   document.getElementById("profil").textContent = profilrad();
   visaVy("jobb");
-  // Vyn byts direkt så det känns snabbt. Jobbkorten ritas i nästa
-  // bildruta, annars måste webbläsaren göra allt innan den hinner
-  // reagera på knapptrycket.
+
+  // Jobbkorten ritas i nästa bildruta, annars måste webbläsaren göra
+  // allt innan den hinner reagera på knapptrycket.
   requestAnimationFrame(function(){ visa("alla"); });
+
+  // Sparande, mätning och färskhetsraden behöver inte ske direkt.
+  // Ligger de kvar i klicket blir knappen trög på mobil.
+  var efterat = function(){
+    spara();
+    visaFarskhet();
+    handelse("visade-jobb");
+    // vet vi om folk går vidare direkt eller svarar på allt först?
+    var extra = (svar.utbildning ? 1 : 0) + (svar.korkort ? 1 : 0)
+              + (svar.erfarenhet ? 1 : 0) + ((svar.omrade && svar.omrade.length) ? 1 : 0);
+    handelse(extra === 0 ? "start-snabb" : (extra >= 3 ? "start-alla-fragor" : "start-nagra-fragor"));
+    if (svar.alder) handelse("alder-" + slug(svar.alder));
+    if (svar.omfattning && svar.omfattning.length) handelse("soker-" + slug(svar.omfattning[0]));
+    if (svar.omrade && svar.omrade.length) handelse("omrade-" + slug(svar.omrade[0]));
+    if (svar.ort) handelse("ort-ifylld"); else handelse("ort-tom");
+  };
+  if (window.requestIdleCallback) requestIdleCallback(efterat, { timeout: 1200 });
+  else setTimeout(efterat, 60);
 }
 
 function matcharAlder(j){
