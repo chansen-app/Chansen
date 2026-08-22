@@ -516,13 +516,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     </div>
 
     <div class="cvsteg dold" data-falt="skola">
-      <h2 class="cvfraga">Vilken skola går du på, eller gick du på?</h2>
-      <input class="txt cvf" id="cv-skola" placeholder="Skolans namn och program">
-      <input class="txt cvf" id="cv-skolaar" placeholder="År, t.ex. 2023 till 2026" style="margin-top:12px">
+      <h2 class="cvfraga">Vad har du för utbildning?</h2>
+      <div class="hint" style="margin-bottom:12px">Gymnasium, yrkesutbildning, folkhögskola, högskola eller universitet. Skriv det du senast gick klart, eller det du går nu.</div>
+      <input class="txt cvf" id="cv-skola" placeholder="Skola och inriktning, eller examen">
+      <input class="txt cvf" id="cv-skolaar" placeholder="År, till exempel 2019 till 2022" style="margin-top:12px">
     </div>
 
     <div class="cvsteg dold" data-falt="erf">
-      <h2 class="cvfraga">Vad har du gjort?</h2>
+      <h2 class="cvfraga">Vad har du jobbat med, eller gjort?</h2>
       <div class="hint" style="margin-top:0;margin-bottom:12px">Har du aldrig jobbat har du ändå erfarenhet. Tryck på allt som stämmer, raderna skrivs färdiga åt dig.</div>
       <div class="chips" id="cv-erfforslag" style="margin-bottom:14px"></div>
       <textarea class="cvf" id="cv-erf" placeholder="En rad per sak du gjort" style="min-height:170px"></textarea>
@@ -1024,7 +1025,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 73</footer>
+version 74</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1053,7 +1054,7 @@ version 73</footer>
 <script>
 var fragor = {
   alder:      ["Under 16","16 till 17","18 eller äldre"],
-  nar:        ["Helger","Kvällar","Lov och sommar","När som helst"],
+  nar:        ["Dagtid","Vardagar","Helger","Kvällar","Lov och sommar","När som helst"],
   utbildning: ["Går i grundskolan","Går på gymnasiet","Gymnasieexamen","Yrkesutbildning","Högskola eller universitet","Ingen avslutad utbildning"],
   korkort:    ["Ja","Nej"],
   erfarenhet: ["Aldrig jobbat","Lite","En del","Flera år","Lång erfarenhet"],
@@ -1327,6 +1328,15 @@ function justeradPoang(j){
   if (nar.indexOf("Helger") > -1 && (j.omfattning||"").indexOf("Deltid") > -1) p += 1;
   if (nar.indexOf("Helger") > -1 && (j.omfattning||"").indexOf("Helger") > -1) p += 2;
   if (nar.indexOf("Kvällar") > -1 && (j.omfattning||"").indexOf("Kvällar") > -1) p += 2;
+  // Dagtid och vardagar betyder vanliga arbetstider, alltså heltid eller
+  // deltid snarare än helg- och kvällspass.
+  if (nar.indexOf("Dagtid") > -1 || nar.indexOf("Vardagar") > -1){
+    var o = (j.omfattning || "");
+    if (o.indexOf("Heltid") > -1) p += 2;
+    else if (o.indexOf("Deltid") > -1) p += 1;
+    var t = ((j.titel || "") + " " + (j.beskrivning || "")).toLowerCase();
+    if (t.indexOf("natt") > -1 || t.indexOf("kväll") > -1 || t.indexOf("kvall") > -1) p -= 2;
+  }
   return p;
 }
 
@@ -2594,6 +2604,8 @@ function tillganglighet(){
   if (!n.length) return "";
   if (n.indexOf("När som helst") > -1) return "Jag kan jobba när som helst";
   var d = [];
+  if (n.indexOf("Dagtid") > -1) d.push("dagtid");
+  if (n.indexOf("Vardagar") > -1) d.push("vardagar");
   if (n.indexOf("Helger") > -1) d.push("helger");
   if (n.indexOf("Kvällar") > -1) d.push("kvällar");
   if (n.indexOf("Lov och sommar") > -1) d.push("lov och sommar");
