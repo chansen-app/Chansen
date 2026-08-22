@@ -142,6 +142,9 @@ footer{min-height:134px}
   footer{min-height:0}
 }
 #v-start .hint{min-height:20px}
+/* Färskhetsraden fylls i av JavaScript. Utan reserverad plats trycks
+   hela listan nedåt när texten dyker upp. */
+#farskhet{min-height:44px}
 #v-start .field:nth-of-type(1) .hint{min-height:60px}
 #v-start .hint.tva{min-height:40px}
 /* höjderna motsvarar hur många rader knapparna tar på en mobilskärm */
@@ -387,7 +390,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <!-- Syns i slutet av listan, alltså när någon läst igenom jobben och
        är som mest benägen att tipsa vidare. -->
-  <div class="card" id="delakort" style="text-align:center;padding:26px 20px">
+  <div class="card dold" id="delakort" style="text-align:center;padding:26px 20px">
     <div class="titel" style="margin-bottom:8px">Känner du någon som söker jobb?</div>
     <div style="font-size:14px;color:var(--n-700);margin-bottom:16px;line-height:1.6">
       Chansen är gratis och kräver inget konto. Skicka den vidare till någon som
@@ -1025,7 +1028,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 76</footer>
+version 77</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1232,13 +1235,15 @@ function startaLista(){
 
   // Jobbkorten ritas i nästa bildruta, annars måste webbläsaren göra
   // allt innan den hinner reagera på knapptrycket.
-  requestAnimationFrame(function(){ visa("alla"); });
+  requestAnimationFrame(function(){
+    visaFarskhet();   // måste ske med listan, annars hoppar sidan senare
+    visa("alla");
+  });
 
-  // Sparande, mätning och färskhetsraden behöver inte ske direkt.
-  // Ligger de kvar i klicket blir knappen trög på mobil.
+  // Sparande och mätning behöver inte ske direkt. Ligger de kvar i
+  // klicket blir knappen trög på mobil.
   var efterat = function(){
     spara();
-    visaFarskhet();
     handelse("visade-jobb");
     // vet vi om folk går vidare direkt eller svarar på allt först?
     var extra = (svar.utbildning ? 1 : 0) + (svar.korkort ? 1 : 0)
@@ -2803,6 +2808,13 @@ function ritaBit(nollstall, fyllUpp){
   for (var i = visatAntal; i < till; i++){ bit += kort(aktuellLista[i]); }
   if (bit) el.insertAdjacentHTML("beforeend", bit);
   visatAntal = till;
+
+  // Visa delningskortet först när listan ritats klart. Ligger det där
+  // medan korten fylls på trycks det nedåt, och det räknas som att
+  // sidan hoppar.
+  var dk = document.getElementById("delakort");
+  if (dk) dk.className = (visatAntal >= Math.min(SIDSTORLEK, aktuellLista.length))
+    ? "card" : "card dold";
 
   var knapp = document.getElementById("visa-fler");
   if (knapp) knapp.parentNode.removeChild(knapp);
