@@ -260,12 +260,26 @@ textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15p
 .dold{display:none}
 a{color:var(--accent-700)}
 a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#sprak{display:none}
+.visa-sprak #sprak{display:block}
 </style>
+<script>
+// Avgörs här uppe, innan webbläsaren ritat något alls. Görs det längre
+// ned hinner sidan ritas först, och då trycks allt nedåt när rutan dyker
+// upp. Det syntes som ett stort layouthopp i mätningarna.
+(function(){
+  try { if (localStorage.getItem("chansen-sprak-dolt") === "1") return; } catch(e){}
+  var sprak = (navigator.language || "").toLowerCase();
+  var alla = (navigator.languages || []).join(" ").toLowerCase();
+  if (sprak.indexOf("sv") === 0 || alla.indexOf("sv") > -1) return;
+  document.documentElement.className += " visa-sprak";
+})();
+</script>
 </head>
 <body>
 <div class="wrap">
 
-<div id="sprak" class="dold" style="margin-bottom:18px">
+<div id="sprak" style="margin-bottom:18px">
   <div class="ruta" style="font-size:14px">
     <div style="margin-bottom:6px"><b>Chansen is in Swedish</b></div>
     <div style="line-height:1.7">
@@ -277,21 +291,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button class="lank" style="margin-top:8px" onclick="doljSprak()">OK, dölj det här</button>
   </div>
 </div>
-
-<script>
-// Avgör direkt om språkrutan ska visas, innan webbläsaren ritat klart.
-// Görs det senare skjuts hela sidan nedåt och det ser ut som ett hopp.
-(function(){
-  try {
-    if (localStorage.getItem("chansen-sprak-dolt") === "1") return;
-  } catch(e){}
-  var sprak = (navigator.language || "").toLowerCase();
-  var alla = (navigator.languages || []).join(" ").toLowerCase();
-  if (sprak.indexOf("sv") === 0 || alla.indexOf("sv") > -1) return;
-  var el = document.getElementById("sprak");
-  if (el) el.className = "";
-})();
-</script>
 
 <div id="v-start">
   <h1>Jobb som är värda att söka.</h1>
@@ -1028,7 +1027,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 77</footer>
+version 78</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2968,8 +2967,8 @@ ritaFragor();
 kollaKnappar();
 if (svar.ort) document.getElementById("ort").value = svar.ort;
 function doljSprak(){
-  var el = document.getElementById("sprak");
-  if (el) el.className = "dold";
+  document.documentElement.className =
+    document.documentElement.className.replace(" visa-sprak", "");
   try { localStorage.setItem("chansen-sprak-dolt", "1"); } catch(e){}
 }
 
