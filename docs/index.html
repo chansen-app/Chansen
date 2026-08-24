@@ -199,7 +199,8 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
 .kicker.medel{color:var(--n-600)}
 .titel{font-family:var(--heading);font-weight:400;font-size:20px;line-height:1.2;margin-bottom:4px;overflow-wrap:break-word;word-break:break-word;hyphens:auto}
 .ag{font-size:14px;color:var(--n-700);margin-bottom:14px}
-.beskrivning{font-size:14.5px;line-height:1.5;color:var(--n-700);margin:0 0 14px}
+.beskrivning{font-size:14.5px;line-height:1.5;color:var(--n-700);margin:0 0 12px;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .taggar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .tag{font-size:11px;padding:4px 11px;border-radius:999px;background:var(--n-100);color:var(--n-800)}
 .tag.varm{background:var(--accent-100);color:var(--accent-800)}
@@ -281,6 +282,11 @@ textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15p
 
 /* Mindre viktiga taggar, dämpade så kortet går att skanna snabbt. */
 .taggar.extra{margin-top:-2px;opacity:.62}
+/* Kortet var 567 px högt, alltså ett och ett halvt jobb per skärm.
+   Lite tightare luft ger fler jobb utan att något tas bort. */
+.card .rad{margin-top:10px}
+.knapprad{margin-top:10px;gap:8px}
+.knapprad .mini{min-height:34px;padding:6px 12px;font-size:12.5px}
 .taggar.extra .tag{font-size:11px;padding:3px 9px}
 
 /* ── Stora talet överst i jobblistan ── */
@@ -293,7 +299,7 @@ textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15p
 .hero-rad{display:flex;gap:16px;font-size:13px;opacity:.92;flex-wrap:wrap}
 
 /* Mjukare kort och tydligare knappar, utan att något flyttas om. */
-.card{box-shadow:0 2px 10px rgba(46,43,37,.09)}
+.card{box-shadow:0 2px 10px rgba(46,43,37,.09);border-radius:30px}
 .chips button{transition:background .12s,border-color .12s}
 .chips button.on{box-shadow:0 1px 6px rgba(140,73,26,.28)}
 
@@ -1079,7 +1085,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 85</footer>
+version 86</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
