@@ -279,14 +279,17 @@ textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15p
 /* Antalet i filterknapparna, så man ser vad som är värt att trycka på. */
 .chips button i{font-style:normal;font-size:12px;opacity:.62;margin-left:6px}
 
+/* Mindre viktiga taggar, dämpade så kortet går att skanna snabbt. */
+.taggar.extra{margin-top:-2px;opacity:.62}
+.taggar.extra .tag{font-size:11px;padding:3px 9px}
+
 /* ── Stora talet överst i jobblistan ── */
 #hero{
   background:linear-gradient(135deg,var(--accent) 0%,var(--accent-800) 100%);
   border-radius:30px;padding:20px 24px;color:#fff6ee;margin:2px 0 18px;
   box-shadow:0 2px 12px rgba(100,51,18,.22)
 }
-.hero-liten{font-size:13px;opacity:.9}
-.hero-tal{font-family:var(--heading);font-size:44px;line-height:1;margin:3px 0 5px}
+.hero-tal{font-family:var(--heading);font-size:44px;line-height:1;margin:0 0 5px}
 .hero-rad{display:flex;gap:16px;font-size:13px;opacity:.92;flex-wrap:wrap}
 
 /* Mjukare kort och tydligare knappar, utan att något flyttas om. */
@@ -406,11 +409,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <!-- Stora talet överst. Samma uttryck som affischerna, utan att lägga
        till några extra sidor eller steg. -->
   <div id="hero">
-    <div class="hero-liten">Jobb du kan söka just nu</div>
     <div class="hero-tal" id="hero-tal">–</div>
     <div class="hero-rad">
       <span id="hero-var">–</span>
-      <span>Uppdaterat varje natt</span>
+      <span>Uppdateras varje natt</span>
     </div>
   </div>
 
@@ -425,12 +427,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div class="rakning dold" id="rakning"></div>
-  <div style="margin:-6px 0 16px;display:flex;gap:16px;flex-wrap:wrap">
-    <button class="lank" onclick="delaChansen()">Tipsa någon om Chansen</button>
-    <button class="lank" style="text-decoration:underline;margin-right:16px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare?</button>
-    <a class="lank" style="text-decoration:underline" href="mailto:chansen.jobb@gmail.com?subject=Fel%20i%20Chansen&body=Beskriv%20vad%20som%20är%20fel,%20och%20klistra%20gärna%20in%20jobbtiteln%20om%20det%20gäller%20en%20annons.">Hittade du något fel?</a>
-  </div>
-  <div id="farskhet" class="hint" style="margin:-6px 0 14px"></div>
   <div id="gammaldata" class="dold"></div>
   <div id="notis"></div>
   <div id="lista"></div>
@@ -444,6 +440,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
       behöver den.
     </div>
     <button class="btn" onclick="delaChansen()">Skicka vidare</button>
+  </div>
+
+  <!-- Ligger under listan. Stod de ovanför tog de två tredjedelar av
+       första skärmen, så man såg inget jobb utan att scrolla. -->
+  <div id="farskhet" class="hint" style="margin:18px 0 12px"></div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px">
+    <button class="lank" style="text-decoration:underline" onclick="visaVy('arbetsgivare')">Är du arbetsgivare?</button>
+    <a class="lank" style="text-decoration:underline" href="mailto:chansen.jobb@gmail.com?subject=Fel%20i%20Chansen&body=Beskriv%20vad%20som%20är%20fel,%20och%20klistra%20gärna%20in%20jobbtiteln%20om%20det%20gäller%20en%20annons.">Hittade du något fel?</a>
   </div>
 </div>
 
@@ -1075,7 +1079,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 84</footer>
+version 85</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1455,23 +1459,26 @@ function kort(j){
   var n = niva(p);
   var top = n === "hog";
   var etikett = n === "hog" ? "Bäst chans" : (n === "medel" ? "Värd att söka" : "Högre krav");
-  var taggar = "";
+  // De tre viktigaste taggarna först. Resten hamnar i en dämpad rad under,
+  // så kortet går att skanna med ögat utan att man tappar information.
+  var taggar = "", extra = "";
   if(j.omfattning) taggar += '<span class="tag">'+fly(j.omfattning)+'</span>';
   if(j.kategori && j.kategori !== "Övrigt") taggar += '<span class="tag">'+fly(j.kategori)+'</span>';
-  if(j.anstallningsform) taggar += '<span class="tag sage">'+fly(j.anstallningsform)+'</span>';
+  if(j.anstallningsform) extra += '<span class="tag">'+fly(j.anstallningsform)+'</span>';
   if(j.korkortKravs === true && svar.korkort !== "Ja") taggar += '<span class="tag">Kräver körkort</span>';
   if(j.utdrag === "kravs") taggar += '<span class="tag">Kräver registerutdrag</span>';
   if(j.provision) taggar += '<span class="tag varn">Provision ingår i lönen</span>';
   if(j.nattarbete) taggar += '<span class="tag varn">Natt- eller skiftarbete</span>';
   if(j.nyborjarvanlig) taggar += '<span class="tag sage">Erfarenhet krävs inte</span>';
-  if(j.bemanning) taggar += '<span class="tag">Via bemanningsföretag</span>';
+  if(j.egen) taggar += '<span class="tag sage">Lagd upp här</span>';
+  if(j.bemanning) extra += '<span class="tag">Via bemanningsföretag</span>';
 
   // hur ny annonsen är
   var pd = dagarSedanPublicerad(j.publicerad);
   if(pd !== null){
     if(pd <= 0) taggar += '<span class="tag varm">Ny i dag</span>';
     else if(pd === 1) taggar += '<span class="tag varm">Lades upp i går</span>';
-    else if(pd <= 7) taggar += '<span class="tag varm">Lades upp för '+pd+' dagar sedan</span>';
+    else if(pd <= 7) extra += '<span class="tag">Lades upp för '+pd+' dagar sedan</span>';
   }
 
   var d = dagarKvar(j.sistaAnsokningsdag), dagtext = "";
@@ -1488,6 +1495,7 @@ function kort(j){
     (j.kontaktSokande ? '<div class="ag" style="margin-top:-8px">Kontakt: '+fly(j.kontaktSokande)+'</div>' : '')+
     (j.beskrivning ? '<div class="beskrivning">'+fly(j.beskrivning)+'</div>' : '')+
     '<div class="taggar">'+taggar+'</div>'+
+    (extra ? '<div class="taggar extra">'+extra+'</div>' : '')+
     '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow" onclick="handelse(\'klick-annons\')">Se annonsen</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
     '<div class="knapprad">'+
@@ -3014,7 +3022,8 @@ function visaInre(filter){
   var ht = document.getElementById("hero-tal");
   if (ht) ht.textContent = valda.length;
   var hv = document.getElementById("hero-var");
-  if (hv) hv.textContent = platsnamn;
+  if (hv) hv.textContent = valda.length === 1 ? ("1 jobb i " + platsnamn)
+                                              : ("jobb i " + platsnamn);
 
   if (!valda.length){
     aktuellLista = [];
