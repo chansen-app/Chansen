@@ -55,23 +55,29 @@ function inlagg(ort, jobb) {
 
   const idag = nya(iOrten, 1).length;
   const veckan = nya(iOrten, 7).length;
-  const utanKrav = iOrten.filter(function (j) { return j.nyborjarvanlig === true; }).length;
-
-  // vilka kategorier finns mest av
-  const kat = {};
-  iOrten.forEach(function (j) { kat[j.kategori] = (kat[j.kategori] || 0) + 1; });
-  const topp = Object.keys(kat).sort(function (a, b) { return kat[b] - kat[a]; }).slice(0, 3);
-
   const plats = ort ? ort : "hela Sverige";
   const rader = [];
 
+  // Vilken grupp jobb pratar vi om? Alla siffror nedan måste räknas över
+  // samma grupp, annars kan "av dem" bli fler än totalen.
+  var grupp;
   if (idag >= 3) {
+    grupp = nya(iOrten, 1);
     rader.push(idag + " nya jobb i " + plats + " i dag, alla med låga ingångskrav.");
   } else if (veckan >= 5) {
+    grupp = nya(iOrten, 7);
     rader.push(veckan + " nya jobb i " + plats + " den här veckan, alla med låga ingångskrav.");
   } else {
+    grupp = iOrten;
     rader.push(iOrten.length + " jobb i " + plats + " just nu, alla med låga ingångskrav.");
   }
+
+  const utanKrav = grupp.filter(function (j) { return j.nyborjarvanlig === true; }).length;
+
+  // vilka kategorier finns mest av, i samma grupp
+  const kat = {};
+  grupp.forEach(function (j) { kat[j.kategori] = (kat[j.kategori] || 0) + 1; });
+  const topp = Object.keys(kat).sort(function (a, b) { return kat[b] - kat[a]; }).slice(0, 3);
 
   rader.push("");
   rader.push("Mest just nu: " + topp.join(", ") + ".");
