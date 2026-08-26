@@ -283,6 +283,8 @@ textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15p
 
 /* Mindre viktiga taggar, dämpade så kortet går att skanna snabbt. */
 .taggar.extra{margin-top:-2px;opacity:.62}
+/* Osynlig men tar fortfarande plats, till skillnad från dold. */
+.osynlig{visibility:hidden}
 /* Kortet var 567 px högt, alltså ett och ett halvt jobb per skärm.
    Lite tightare luft ger fler jobb utan att något tas bort. */
 .card .rad{margin-top:10px}
@@ -1086,7 +1088,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 87</footer>
+version 88</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2858,6 +2860,44 @@ var SIDSTORLEK = 20;
 // och resten fylls på i nästa bildruta utan att det syns.
 var FORSTA_BITEN = 6;
 
+function raknaFilter(iOmradet){
+  var kor = function(){
+    var bas = iOmradet.filter(matcharAlder).filter(matcharOmrade);
+    if (underSexton()) bas = bas.filter(function(j){ return j.omfattning !== "Heltid"; });
+    if (underArton()) bas = bas.filter(function(j){ return j.nattarbete !== true; });
+    var antalPer = {
+      alla: bas.length,
+      hog: bas.filter(function(j){ return niva(justeradPoang(j)) === "hog"; }).length,
+      nyborjare: bas.filter(function(j){ return j.nyborjarvanlig === true; }).length,
+      deltid: bas.filter(function(j){ return (j.omfattning||"").indexOf("Deltid") > -1; }).length,
+      heltid: bas.filter(function(j){ return (j.omfattning||"").indexOf("Heltid") > -1; }).length,
+      utdrag: bas.filter(function(j){ return j.utdrag !== "kravs"; }).length,
+      direkt: bas.filter(function(j){ return j.bemanning !== true; }).length
+    };
+    for (var ai in antalPer){
+      var kn = document.getElementById("f-" + ai);
+      if (kn){
+        var i_ = kn.querySelector("i");
+        if (i_) i_.textContent = antalPer[ai];
+      }
+    }
+  };
+
+  if (raknaTimer) {
+    if (window.cancelIdleCallback) cancelIdleCallback(raknaTimer);
+    else clearTimeout(raknaTimer);
+  }
+  raknaTimer = window.requestIdleCallback
+    ? requestIdleCallback(kor, { timeout: 900 })
+    : setTimeout(kor, 80);
+}
+
+var raknaTimer = 0;
+
+
+
+var raknaTimer = 0;
+
 function ritaBit(nollstall, fyllUpp){
   var el = document.getElementById("lista");
   if (!el) return;
@@ -2871,12 +2911,12 @@ function ritaBit(nollstall, fyllUpp){
   if (bit) el.insertAdjacentHTML("beforeend", bit);
   visatAntal = till;
 
-  // Visa delningskortet först när listan ritats klart. Ligger det där
-  // medan korten fylls på trycks det nedåt, och det räknas som att
-  // sidan hoppar.
+  // Delningskortet göms medan listan fylls på, men behåller sin plats.
+  // Tas platsen bort trycks foten nedåt när kortet dyker upp, och det
+  // räknas som att sidan hoppar.
   var dk = document.getElementById("delakort");
   if (dk) dk.className = (visatAntal >= Math.min(SIDSTORLEK, aktuellLista.length))
-    ? "card" : "card dold";
+    ? "card" : "card osynlig";
 
   var knapp = document.getElementById("visa-fler");
   if (knapp) knapp.parentNode.removeChild(knapp);
@@ -3002,25 +3042,9 @@ function visaInre(filter){
       : "");
   }
   // Räkna hur många varje filter skulle ge, så talen kan stå i knapparna.
-  var bas = iOmradet.filter(matcharAlder).filter(matcharOmrade);
-  if (underSexton()) bas = bas.filter(function(j){ return j.omfattning !== "Heltid"; });
-  if (underArton()) bas = bas.filter(function(j){ return j.nattarbete !== true; });
-  var antalPer = {
-    alla: bas.length,
-    hog: bas.filter(function(j){ return niva(justeradPoang(j)) === "hog"; }).length,
-    nyborjare: bas.filter(function(j){ return j.nyborjarvanlig === true; }).length,
-    deltid: bas.filter(function(j){ return (j.omfattning||"").indexOf("Deltid") > -1; }).length,
-    heltid: bas.filter(function(j){ return (j.omfattning||"").indexOf("Heltid") > -1; }).length,
-    utdrag: bas.filter(function(j){ return j.utdrag !== "kravs"; }).length,
-    direkt: bas.filter(function(j){ return j.bemanning !== true; }).length
-  };
-  for (var ai in antalPer){
-    var kn = document.getElementById("f-" + ai);
-    if (kn){
-      var i_ = kn.querySelector("i");
-      if (i_) i_.textContent = antalPer[ai];
-    }
-  }
+  // Räkningen går igenom alla jobb sju gånger och är för tung för att
+  // ligga i klickets väg. Den körs därför när webbläsaren är ledig.
+  raknaFilter(iOmradet);
 
   var platsnamn = lanfall ? lanfall : (ortsnamn ? ortsnamn : "hela Sverige");
   document.getElementById("rakning").textContent = valda.length + " jobb i " + platsnamn;
@@ -3029,10 +3053,10 @@ function visaInre(filter){
   var ht = document.getElementById("hero-tal");
   if (ht) ht.textContent = valda.length;
   var hv = document.getElementById("hero-var");
-  if (hv) hv.textContent = valda.length === 1 ? ("1 jobb i " + platsnamn)
-                                              : ("jobb i " + platsnamn);
+  if (hv) hv.textContent = platsnamn;
 
-  if (!valda.length){
+
+if (!valda.length){
     aktuellLista = [];
     document.getElementById("lista").innerHTML = tomtLage(filter);
     return;
