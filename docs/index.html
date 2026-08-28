@@ -1088,7 +1088,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 88</footer>
+version 89</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1783,6 +1783,19 @@ function hamtaBladjobb(){
     })
     .catch(function(fel){ bladStatus("gick inte att läsa (" + (fel && fel.message ? fel.message : "okänt fel") + ")"); });
 }
+
+// Sålla bort annonser vars ansökningstid gått ut. Hämtningen sker på
+// natten, så mellan midnatt och nästa körning kan utgångna annonser
+// annars ligga kvar och visas.
+(function(){
+  var nu = new Date();
+  for (var i = JOBB.length - 1; i >= 0; i--){
+    var sista = JOBB[i].sistaAnsokningsdag;
+    if (!sista) continue;
+    var d = new Date(sista);
+    if (!isNaN(d) && d < nu) JOBB.splice(i, 1);
+  }
+})();
 
 // egna, manuellt granskade jobb läggs samman med Platsbanken
 try {
