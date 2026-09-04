@@ -97,29 +97,37 @@
 }
 </script>
 <style>
+/* Reservtypsnitt med samma proportioner som de riktiga. Utan dem blir
+   texten olika bred före och efter laddning, knapparna bryter till en extra
+   rad, och allt under trycks ned. 98,4 % är uppmätt som den genomsnittliga
+   skillnaden mellan Figtree och Arial. */
 @font-face{
   font-family:"Fig reserv"; src:local("Helvetica Neue"),local("Arial"),local(sans-serif);
-  size-adjust:104%; ascent-override:95%; descent-override:24%; line-gap-override:0%;
+  size-adjust:98.4%; ascent-override:95%; descent-override:24%; line-gap-override:0%;
 }
 @font-face{
-  font-family:"Caprasimo"; font-style:normal; font-weight:400; font-display:swap;
+  font-family:"Cap reserv"; src:local("Georgia"),local("Times New Roman"),local(serif);
+  size-adjust:104%; ascent-override:90%; descent-override:22%; line-gap-override:0%;
+}
+@font-face{
+  font-family:"Caprasimo"; font-style:normal; font-weight:400; font-display:optional;
   src:url("caprasimo.woff2") format("woff2");
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,
     U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 @font-face{
-  font-family:"Caprasimo"; font-style:normal; font-weight:400; font-display:swap;
+  font-family:"Caprasimo"; font-style:normal; font-weight:400; font-display:optional;
   src:url("caprasimo-ext.woff2") format("woff2");
   unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF;
 }
 @font-face{
-  font-family:"Figtree"; font-style:normal; font-weight:400 700; font-display:swap;
+  font-family:"Figtree"; font-style:normal; font-weight:400 700; font-display:optional;
   src:url("figtree.woff2") format("woff2");
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,
     U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 @font-face{
-  font-family:"Figtree"; font-style:normal; font-weight:400 700; font-display:swap;
+  font-family:"Figtree"; font-style:normal; font-weight:400 700; font-display:optional;
   src:url("figtree-ext.woff2") format("woff2");
   unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF;
 }
@@ -129,7 +137,8 @@
   --accent:#c67139; --accent-100:#fff2eb; --accent-700:#8c491a; --accent-800:#643312;
   --sage-100:#f0fae1; --sage-800:#3d472b;
   --n-100:#f9f4ed; --n-300:#dcd3c4; --n-600:#82796a; --n-700:#645c50; --n-800:#474238;
-  --heading:"Caprasimo",system-ui,sans-serif; --body:"Figtree",system-ui,sans-serif;
+  --heading:"Caprasimo","Cap reserv",system-ui,sans-serif;
+  --body:"Figtree","Fig reserv",system-ui,sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.55;padding-bottom:78px}
@@ -149,16 +158,42 @@ label.fraga{display:block;font-size:12px;color:var(--n-700);margin:0 0 7px}
    kommer fram. Höjderna är uppmätta på en mobilskärm. */
 #v-start h1{min-height:70px}
 #v-start .sub{min-height:48px}
-#v-start .field:nth-of-type(1){min-height:137px}
+/* Knapparna på startsidan ligger i ett rutnät i stället för att flyta.
+   Med flyt avgör textens bredd var raden bryts, och eftersom reservtypsnittet
+   är bredare än Figtree bryts den olika före och efter laddning. Rutan ändrar
+   då höjd och allt under hoppar. Med rutnät avgör skärmbredden i stället,
+   och den ändras inte. */
+#v-start .field:nth-of-type(1) .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#v-start .field:nth-of-type(1) .seg button{width:100%;padding-left:6px;padding-right:6px}
+
+/* Rutorna reserverar plats så de aldrig ändrar höjd. Knapparnas bredd
+   beror på vilket typsnitt som hunnit laddas, och utan reserverad höjd
+   ändras radbrytningen mitt i, rutan krymper och allt under hoppar.
+   Värdena är uppmätta per skärmbredd. */
+#v-start .field:nth-of-type(1){min-height:147px}
 #v-start .field:nth-of-type(2){min-height:101px}
-#v-start .field:nth-of-type(3){min-height:149px}
-#v-start .field:nth-of-type(4){min-height:149px}
-footer{min-height:134px}
-@media (min-width:520px){
-  #v-start h1,#v-start .sub,
-  #v-start .field:nth-of-type(1),#v-start .field:nth-of-type(2),
-  #v-start .field:nth-of-type(3),#v-start .field:nth-of-type(4),
-  footer{min-height:0}
+#v-start .field:nth-of-type(3){min-height:201px}
+#v-start .field:nth-of-type(4){min-height:201px}
+#v-start .field:nth-of-type(5){min-height:293px}
+#v-start .field:nth-of-type(6){min-height:117px}
+#v-start .field:nth-of-type(7){min-height:169px}
+
+/* Smala telefoner bryter texten oftare och behöver mer plats. */
+@media (max-width:345px){
+  #v-start .field:nth-of-type(1){min-height:157px}
+  #v-start .field:nth-of-type(3){min-height:253px}
+  #v-start .field:nth-of-type(4){min-height:253px}
+  #v-start .field:nth-of-type(5){min-height:397px}
+  #v-start .field:nth-of-type(7){min-height:221px}
+}
+@media (min-width:401px){
+  #v-start .field:nth-of-type(1){min-height:137px}
+  #v-start .field:nth-of-type(4){min-height:149px}
+  #v-start .field:nth-of-type(5){min-height:273px}
+  #v-start .field:nth-of-type(6){min-height:97px}
+}
+@media (min-width:415px){
+  #v-start .field:nth-of-type(3){min-height:149px}
 }
 #v-start .hint{min-height:20px}
 /* Färskhetsraden fylls i av JavaScript. Utan reserverad plats trycks
@@ -1091,7 +1126,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 90</footer>
+version 91</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
