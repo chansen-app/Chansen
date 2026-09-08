@@ -1132,7 +1132,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 96</footer>
+version 97</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2305,16 +2305,19 @@ function delaText(titel, text, url){
     return;
   }
   var allt = text + " " + url;
-  var kopierad = false;
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(allt);
-      kopierad = true;
-    }
-  } catch(e){ kopierad = false; }
 
-  if (kopierad) { beromDelning("Länken är kopierad. Klistra in den där du vill dela."); }
-  else { window.prompt("Kopiera länken:", allt); }
+  // writeText lämnar ett löfte. Går kopieringen fel sker det efteråt, så
+  // ett vanligt try fångar det inte. Utan .then och .catch sa appen att
+  // länken var kopierad även när ingenting hänt.
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(allt).then(function(){
+      beromDelning("Länken är kopierad. Klistra in den där du vill dela.");
+    }).catch(function(){
+      window.prompt("Kopiera länken:", allt);
+    });
+    return;
+  }
+  window.prompt("Kopiera länken:", allt);
 }
 
 function beromDelning(text){

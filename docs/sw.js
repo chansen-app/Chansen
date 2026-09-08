@@ -49,9 +49,12 @@ self.addEventListener("fetch", function (e) {
   e.respondWith(
     fetch(e.request)
       .then(function (svar) {
-        // spara en färsk kopia för nästa gång nätet saknas
-        const kopia = svar.clone();
-        caches.open(CACHE).then(function (c) { c.put(e.request, kopia); });
+        // Spara bara lyckade svar. Utan kontrollen hamnar ett tillfälligt
+        // serverfel i cachen och visas sedan varje gång nätet saknas.
+        if (svar && svar.ok && svar.status === 200 && svar.type === "basic") {
+          const kopia = svar.clone();
+          caches.open(CACHE).then(function (c) { c.put(e.request, kopia); });
+        }
         return svar;
       })
       .catch(function () {
