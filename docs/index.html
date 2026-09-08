@@ -110,24 +110,24 @@
   size-adjust:104%; ascent-override:90%; descent-override:22%; line-gap-override:0%;
 }
 @font-face{
-  font-family:"Caprasimo"; font-style:normal; font-weight:400; font-display:optional;
+  font-family:"Caprasimo"; font-style:normal; font-weight:400; font-display:swap;
   src:url("caprasimo.woff2") format("woff2");
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,
     U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 @font-face{
-  font-family:"Caprasimo"; font-style:normal; font-weight:400; font-display:optional;
+  font-family:"Caprasimo"; font-style:normal; font-weight:400; font-display:swap;
   src:url("caprasimo-ext.woff2") format("woff2");
   unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF;
 }
 @font-face{
-  font-family:"Figtree"; font-style:normal; font-weight:400 700; font-display:optional;
+  font-family:"Figtree"; font-style:normal; font-weight:400 700; font-display:swap;
   src:url("figtree.woff2") format("woff2");
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,
     U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 @font-face{
-  font-family:"Figtree"; font-style:normal; font-weight:400 700; font-display:optional;
+  font-family:"Figtree"; font-style:normal; font-weight:400 700; font-display:swap;
   src:url("figtree-ext.woff2") format("woff2");
   unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF;
 }
@@ -1126,7 +1126,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 91</footer>
+version 92</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1356,9 +1356,29 @@ function startaLista(){
   else setTimeout(efterat, 60);
 }
 
+/* Kategorier som inte räknas som lätt arbete enligt Arbetsmiljöverkets
+   regler för 13 till 15-åringar. Vård av människor, maskiner, kemikalier
+   och tunga lyft är inte tillåtet i den åldern. */
+var EJ_LATT_ARBETE = ["Vård och omsorg", "Industri och produktion",
+                      "Lager och logistik", "Städ"];
+
 function matcharAlder(j){
   if (svar.alder !== "Under 16" && svar.alder !== "16 till 17") return true;
-  return j.minderarigOk !== false;
+  if (j.minderarigOk === false) return false;
+
+  // B-körkort får man tidigast vid 18, så jobb som kräver körkort visas
+  // bara om personen själv svarat att hon har ett. Då kan det vara moped
+  // eller lätt motorcykel, och det får hon avgöra själv.
+  if (j.korkortKravs === true && svar.korkort !== "Ja") return false;
+
+  if (svar.alder === "Under 16"){
+    // Bara lätt arbete är tillåtet i den åldern.
+    if (EJ_LATT_ARBETE.indexOf(j.kategori) > -1) return false;
+    // Står det ingen omfattning går det inte att avgöra om tiderna är
+    // lagliga. Då visas jobbet hellre inte alls.
+    if (!j.omfattning) return false;
+  }
+  return true;
 }
 
 function slat(v){
