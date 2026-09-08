@@ -269,6 +269,51 @@ function kategori(a) {
 
 // Poängen mäter BARA hur få hinder som finns. Inget om heltid eller deltid,
 // den preferensen hör hemma i användarens egna svar.
+/* Vissa krav går inte att fånga med enkla ordlistor, eftersom samma ord
+   används både som krav och som beröm av företaget självt:
+
+     "Har minst 4 års erfarenhet av arbete som assistent"   = krav
+     "Med över 70 års erfarenhet ser vi till att..."        = företagets ålder
+     "Ingen tidigare erfarenhet krävs"                      = tvärtom
+
+   Därför tittar vi på orden runt träffen innan vi bestämmer oss. */
+const KRAV_MONSTER = [
+  // några års erfarenhet av eller som ett yrke
+  /(minst\s+|krav\s+på\s+|kräver\s+|har\s+)?\b(ett|två|tre|fyra|fem|sex|[1-9])\s*[–-]?\s*\d*\s*års?\s+(dokumenterad\s+|relevant\s+|tidigare\s+)?(arbetslivs)?erfarenhet\s+(av|som|inom|från|i)\b/,
+  // behörighetskort listat som något du ska ha
+  /\b(har|innehar|med)\s+(giltigt\s+)?(truckkort|traverskort|liftkort|c-kort|ce-kort)\b/
+];
+
+// Ord som visar att träffen INTE är ett krav på den sökande.
+const INTE_KRAV = [
+  "ingen","inga","utan","inte","behover inte","behöver inte","kravs inte","krävs inte",
+  "ej ","inget krav","inte ett krav","meriterande","meriterade","fordel","fördel",
+  "ar ett plus","är ett plus","garna","gärna","vi utbildar","utbildning ges",
+  "du far ta","du får ta","vi bekostar","erbjuder utbildning"
+];
+// Ord som visar att det handlar om företagets egen erfarenhet, inte din.
+const OM_FORETAGET = [
+  "med over","med över","med mer an","med mer än","har over","har över",
+  "har mer an","har mer än","snart 8","branschen","vi har","foretaget har","företaget har",
+  "koncernen","ar ett familjeforetag","är ett familjeföretag","sedan 19","sedan 20",
+  "i branschen","av branschen","ledande","etablerat","stiftelseagt","stiftelseägt",
+  "en av landets","en av nordens","ett team med","en grupp med","arbetsgivare med"
+];
+
+function kravIText(text) {
+  for (const monster of KRAV_MONSTER) {
+    let sok = new RegExp(monster.source, "g");
+    let m;
+    while ((m = sok.exec(text)) !== null) {
+      const runt = text.slice(Math.max(0, m.index - 150), m.index + m[0].length + 90);
+      if (harNagot(runt, INTE_KRAV)) continue;
+      if (harNagot(runt, OM_FORETAGET)) continue;
+      return true;
+    }
+  }
+  return false;
+}
+
 function poang(a) {
   const titel = (a.headline || "").toLowerCase();
   const text = ((a.description ? a.description.text : "") + " " + titel).toLowerCase();
@@ -279,6 +324,7 @@ function poang(a) {
   if (harNagot(text, TEXTSTOPP)) return -20;
   if (provisionUtanGrundlon(text)) return -20;
   if (kortKravs(text)) return -20;
+  if (kravIText(text)) return -20;
   if (renRorligLon(a)) return -20;
   if (rorligUtanForklaring(a, text)) return -20;
 
