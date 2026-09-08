@@ -1126,7 +1126,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 92</footer>
+version 93</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1299,7 +1299,21 @@ function spara(){
   try { localStorage.setItem("chansen", JSON.stringify(svar)); } catch(e){}
 }
 
-function visaVy(vy){
+/* Mobilanvändare sveper bakåt hela tiden. Utan det här lämnar man hela
+   sidan i stället för att komma tillbaka till jobblistan. */
+var vyHistorik = [];
+var hopparBakat = false;
+
+function visaVy(vy, franBakat){
+  if (!franBakat && !hopparBakat){
+    var nuvarande = synligVy();
+    if (nuvarande && nuvarande !== vy){
+      vyHistorik.push(nuvarande);
+      if (vyHistorik.length > 30) vyHistorik.shift();
+      try { history.pushState({ vy: vy }, "", location.pathname + location.search); }
+      catch (e) { /* vissa lägen tillåter inte pushState, då fungerar allt som förut */ }
+    }
+  }
   var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare"];
   for (var i = 0; i < vyer.length; i++){
     var el = document.getElementById("v-" + vyer[i]);
@@ -1316,6 +1330,26 @@ function visaVy(vy){
   if (vy === "arbetsgivare") agStarta();
   window.scrollTo(0,0);
 }
+
+// Vilken vy syns just nu?
+function synligVy(){
+  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare"];
+  for (var i = 0; i < vyer.length; i++){
+    var el = document.getElementById("v-" + vyer[i]);
+    if (el && el.className.indexOf("dold") === -1) return vyer[i];
+  }
+  return null;
+}
+
+window.addEventListener("popstate", function(){
+  if (!vyHistorik.length) return;   // inget att gå tillbaka till, lämna sidan
+  hopparBakat = true;
+  visaVy(vyHistorik.pop(), true);
+  hopparBakat = false;
+  // Lägg tillbaka en post, annars tar nästa bakåttryck oss ur sidan direkt.
+  try { history.pushState({ vy: "bak" }, "", location.pathname + location.search); }
+  catch (e) {}
+});
 
 function profilrad(){
   var delar = [svar.ort ? svar.ort : "Hela Sverige"];
