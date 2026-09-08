@@ -323,6 +323,12 @@ textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15p
 .taggar.extra{margin-top:-2px;opacity:.62}
 /* Osynlig men tar fortfarande plats, till skillnad från dold. */
 .osynlig{visibility:hidden}
+/* Små länkar är svåra att träffa med tummen. Rekommendationen är
+   minst 44 punkter, men det räcker med en generös klickyta runt
+   texten, den behöver inte synas. */
+footer a, footer button.lank, .lank.liten, a.cc0,
+button.lank[onclick*="arbetsgivare"], a.lank[href^="mailto"]{
+  display:inline-block;padding:11px 4px;margin:-11px -4px}
 /* Kortet var 567 px högt, alltså ett och ett halvt jobb per skärm.
    Lite tightare luft ger fler jobb utan att något tas bort. */
 .card .rad{margin-top:10px}
@@ -514,7 +520,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <input class="txt" id="namn" placeholder="För- och efternamn" value="" oninput="namnAndrat()">
   </div>
 
-  <textarea id="a-text" style="width:100%;min-height:420px;padding:20px;font:inherit;font-size:15px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical"></textarea>
+  <textarea id="a-text" style="width:100%;min-height:420px;padding:20px;font:inherit;font-size:15px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical" aria-label="Din ansökningstext"></textarea>
 
   <div class="ruta" style="font-size:14px;margin-top:16px">
     Många arbetsgivare vill ha ett CV också.
@@ -633,7 +639,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div class="cvsteg dold" data-falt="foto">
       <h2 class="cvfraga">Vill du ha ett foto på ditt CV?</h2>
       <div class="hint" style="margin-top:0;margin-bottom:14px">Helt valfritt. Välj en bild där man ser ditt ansikte tydligt, med neutral bakgrund. Bilden sparas bara i din telefon och skickas ingenstans.</div>
-      <input type="file" id="cv-fotofil" accept="image/*" style="display:none" onchange="fotoValt(this)">
+      <input type="file" id="cv-fotofil" accept="image/*" style="display:none" onchange="fotoValt(this)" aria-label="Välj ett foto till ditt CV">
       <button class="btn" onclick="document.getElementById('cv-fotofil').click()">Välj bild</button>
       <div id="cv-fotoyta" style="margin-top:18px"></div>
     </div>
@@ -667,7 +673,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
       <details style="margin:20px 0">
         <summary style="cursor:pointer;font-size:15px;color:var(--accent-700)">Visa som ren text, för att klistra in i formulär</summary>
-      <textarea id="cv-resultat" style="width:100%;min-height:440px;padding:20px;font:inherit;font-size:14px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical"></textarea>
+      <textarea id="cv-resultat" style="width:100%;min-height:440px;padding:20px;font:inherit;font-size:14px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical" aria-label="Ditt färdiga CV"></textarea>
       </details>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 30px">
         <button class="btn" onclick="skrivUtCV()">Spara som PDF</button>
@@ -1126,7 +1132,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 93</footer>
+version 95</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1150,7 +1156,10 @@ version 93</footer>
   <button id="n-om" onclick="visaVy('om')">Om</button>
 </nav>
 
-<script src="jobb.js"></script>
+<!-- Går jobbdatan inte att hämta, till exempel på dålig uppkoppling,
+     ska sidan ändå fungera och säga vad som hänt i stället för att
+     krascha tyst. -->
+<script src="jobb.js" onerror="window.JOBB=[];window.UPPDATERAD='';window.JOBBSAKNAS=true"></script>
 <script src="egna-jobb.js" onerror="window.EGNA_JOBB=[]"></script>
 <script>
 var fragor = {
@@ -3150,6 +3159,14 @@ function visaInre(filter){
   // Räkningen går igenom alla jobb sju gånger och är för tung för att
   // ligga i klickets väg. Den körs därför när webbläsaren är ledig.
   raknaFilter(iOmradet);
+
+  if (window.JOBBSAKNAS){
+    document.getElementById("rakning").textContent = "Jobben kunde inte hämtas";
+    var n = document.getElementById("notis");
+    if (n) n.textContent = "Något gick fel när jobben skulle hämtas. "
+      + "Kontrollera uppkopplingen och ladda om sidan.";
+    return;
+  }
 
   var platsnamn = lanfall ? lanfall : (ortsnamn ? ortsnamn : "hela Sverige");
   document.getElementById("rakning").textContent = valda.length + " jobb i " + platsnamn;
