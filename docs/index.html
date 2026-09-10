@@ -326,6 +326,18 @@ textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15p
 .taggar.extra{margin-top:-2px;opacity:.62}
 /* Osynlig men tar fortfarande plats, till skillnad från dold. */
 .osynlig{visibility:hidden}
+
+/* Vissa blir yra eller illamående av rörelse på skärmen och har därför
+   valt minskad rörelse i telefonens inställningar. Då stängs övergångarna
+   av här. Allt fungerar likadant, det sker bara direkt i stället. */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    transition-duration:.01ms !important;
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    scroll-behavior:auto !important;
+  }
+}
 /* Små länkar är svåra att träffa med tummen. Rekommendationen är
    minst 44 punkter, men det räcker med en generös klickyta runt
    texten, den behöver inte synas. */
@@ -1135,7 +1147,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 99</footer>
+version 100</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
