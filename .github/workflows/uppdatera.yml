@@ -1,22 +1,51 @@
-﻿name: Uppdatera jobben
+name: Uppdatera jobben
+
+# Kör varje natt och hämtar om jobben från Platsbanken.
+# Skriver docs/jobb.js och docs/jobb.json.
+#
+# Du kan också starta den för hand under fliken Actions på GitHub,
+# knappen heter "Run workflow".
+#
+# OBS: filen måste sparas utan BOM. Ett osynligt tecken först i filen
+# gör att GitHub inte kan läsa den, och då körs ingenting.
+
 on:
   schedule:
-    - cron: "0 4 * * *"
+    - cron: "0 4 * * *"     # 04:00 UTC, alltså 06:00 svensk sommartid
   workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   uppdatera:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Hämta repot
+        uses: actions/checkout@v4
+
+      - name: Installera Node
+        uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - run: node hamta.js
-      - run: |
+
+      - name: Kör hämtningen
+        run: node hamta.js
+
+      - name: Spara resultatet
+        run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add docs/jobb.json docs/jobb.js
-          git diff --staged --quiet || git commit -m "Uppdaterade jobben"
+          if git diff --staged --quiet; then
+            echo "Inget nytt att spara."
+            exit 0
+          fi
+          git commit -m "Uppdaterade jobben"
+          # Hämtningen tar flera minuter. Hinner något annat pushas under
+          # tiden misslyckas push utan detta, och natten går förlorad.
+          git pull --rebase --autostash origin main \
+            || git pull --no-rebase -X ours --no-edit origin main
           git push
