@@ -120,10 +120,25 @@ const KATEGORIER = {
   "Butik": ["butik","kassa","expedit","store","varuhus","varupafyllare","varupåfyllare","ica ",
     "coop","willys","lidl","dollarstore","rusta","åhléns","ahlens","kiosk","narlivs","närlivs",
     "blomster","apotekstekniker","uthyr","second hand"],
-  "Sälj": ["saljare","säljare","salj","sälj","account manager","innesaljare","innesäljare",
+  "Sälj": ["saljare","säljare","motesbokare","mötesbokare","kundbokare","telemarketing","abonnemangs","forsaljare","försäljare","ambassador for","ambassadör för","promotor","salj","sälj","account manager","innesaljare","innesäljare",
     "utesaljare","utesäljare","telefonforsaljare","telefonförsäljare","telemarketing"],
   "Kundtjänst": ["kundtjanst","kundtjänst","kundservice","kundsupport","customer support",
     "kundvard","kundvärd","reception","receptionist","vaxel","växel","kundmottagare"],
+  // Egna kategorier för bygg och för transport. Tidigare hamnade de i
+  // Övrigt, som var appens största kategori.
+  "Bygg och anläggning": ["byggarbet","byggnadsarbet","byggare","byggnads","snickare","malare ","målare ",
+                          "golvlaggare","golvläggare","plattsattare","plattsättare",
+                          "anlaggningsarbet","anläggningsarbet","markarbet","betongarbet",
+                          "stallningsbygg","ställningsbygg","rivningsarbet","isolerare",
+                          "takarbet","vvs-montor","vvs-montör","elmontor","elmontör",
+                          "byggstadning","byggstädning","hantlangare","hantlangare"],
+
+  "Transport och bud": ["budbil","budforare","budförare","utkorare","utkörare",
+                        "hemleverans","matleverans","paketutlamn","paketutlämn",
+                        "bussforare","bussförare","taxiforare","taxiförare",
+                        "lastbilsforare","lastbilsförare","akeri","åkeri",
+                        "flyttarbet","flyttpersonal","tidningsbud","postutdel"],
+
   "Lager och logistik": ["lager","terminal","plock","truck","gods","paket","distribution",
     "logistik","bud","chauffor","chaufför","transport","akeri","åkeri","brevbarare",
     "brevbärare","postiljon","utdelare","utkorning","utkörning","lastare","lossning",
@@ -133,16 +148,17 @@ const KATEGORIER = {
     "diskare","pizza","sushi","bar ","hotell","runner","host","krog","catering","bufe","buffé",
     "frukost","kallskanka","kallskänka","bagare","konditor","glass","food","burgare","sibylla",
     "max ","kiosk och grill","matsal","kost","bartender","barpersonal","servering"],
-  "Vård och omsorg": ["personlig assistent","personliga assistent","assistent sokes",
+  "Vård och omsorg": ["personlig assistent","personliga assistent","personlig assistans","assistans","timvikarie till lss","vikarie inom vard","vikarie inom vård","vikarie till aldre","vikarie till äldre","lss","hemvard","hemvård","stodpedagog","stödpedagog","behandlingsassistent","serviceassistent","assistent sokes",
     "assistent sökes","assistenter sokes","assistenter sökes","vardbitrade","vårdbiträde",
     "underskoterska","undersköterska","omsorg","hemtjanst","hemtjänst","boendestod",
     "boendestöd","ledsagare","avlosare","avlösare","stodassistent","stödassistent","vardare",
     "vårdare","aldreboende","äldreboende","sjukskoterska","sjuksköterska","habilitering",
     "funktionsstod","funktionsstöd","serviceassistent"],
-  "Barn och skola": ["barn","fritids","forskola","förskola","elevassistent","skolmaltid",
+  "Barn och skola": ["barn","skolvikarie","vikarie till","vikarie pa skol","vikarie på skol","socialpedagog","specialpedagog","lararvikarie","lärarvikarie","fritidspedagog","skolassistent","skolkurator","modersmalslar","modersmålslär","fritids","forskola","förskola","elevassistent","skolmaltid",
     "skolmåltid","laxhjalp","läxhjälp","laxlas","läxläs","studiehandled","skolvard","skolvärd",
     "resurspedagog","fritidsledare","barnskotare","barnskötare","dagbarnvardare",
     "dagbarnvårdare","simskola","babysim","lovaktivitet","kollo"],
+
   "Industri och produktion": ["montor","montör","produktion","maskinoperator","maskinoperatör",
     "fabrik","tillverkning","packare","operator","operatör","industri","verkstad","svarv",
     "kvalitetskontroll","monterare","sortering","atervinning","återvinning","miljoarbetare",
@@ -259,12 +275,58 @@ function harNagot(text, lista) {
   return false;
 }
 
+/* Kategorin sätts först utifrån titeln. Många annonser heter bara
+   "Medarbetare sökes", och då säger titeln ingenting. Därför görs ett
+   andra försök mot annonstexten.
+
+   Men i löptext träffar korta ord fel. "bar" finns i "bara", "barn" i
+   "barnsligt". Därför används bara långa och entydiga ord här. */
+const KATEGORIER_TEXT = {
+  "Djur och natur": ["djurvårdare","hundpassning","trädgårdsarbete","skogsarbete",
+                     "veterinärklinik","stallarbete"],
+  "Städ": ["lokalvårdare","lokalvård","städuppdrag","hemstädning","kontorsstädning",
+           "trappstädning","fönsterputsning","städpersonal"],
+  "Butik": ["butiksmedarbetare","butiksbiträde","butikssäljare","dagligvaruhandel",
+            "varupåfyllning","kassaarbete","butiksarbete"],
+  "Sälj": ["telefonförsäljning","försäljningsarbete","mötesbokning","utesäljare",
+           "innesäljare","säljorganisation","provisionsbaserad"],
+  "Kundtjänst": ["kundtjänstmedarbetare","kundserviceärenden","kundsupport",
+                 "kundtjänstarbete","reklamationer"],
+  "Bygg och anläggning": ["byggarbetsplats","anläggningsarbete","byggnadsarbete",
+                          "markarbeten","betongarbete","rivningsarbete"],
+  "Transport och bud": ["budbilar","hemleveranser","paketleveranser","lastbilskörning",
+                        "bussförare","tidningsutdelning","distributionsbil"],
+  "Lager och logistik": ["lagerarbete","orderplockning","truckkörning","godsmottagning",
+                         "terminalarbete","lagerverksamhet","emballering"],
+  "Restaurang och café": ["restaurangkök","caféarbete","serveringsarbete","matlagning",
+                          "köksarbete","diskavdelning","restaurangbranschen","kökspersonal"],
+  "Vård och omsorg": ["personlig assistans","omsorgsarbete","hemtjänsten","äldreboende",
+                      "vårdbiträde","undersköterska","funktionsvariation","boendestöd",
+                      "gruppbostad","daglig verksamhet"],
+  "Barn och skola": ["förskoleklass","grundskolan","fritidshem","barngrupp",
+                     "elevassistent","barnskötare","skolverksamhet","läxhjälp"],
+  "Industri och produktion": ["produktionslinje","tillverkningsindustri","maskinoperatör",
+                              "verkstad","monteringsarbete","produktionsarbete"],
+  "Kontor": ["administrativa uppgifter","orderhantering","kontorsarbete","fakturering"],
+  "Event och kultur": ["evenemang","konferensanläggning","festivalområde","publikvärd"]
+};
+
+function kategoriFranText(text) {
+  const t = (text || "").toLowerCase();
+  for (const namn in KATEGORIER_TEXT) {
+    if (harNagot(t, KATEGORIER_TEXT[namn])) return namn;
+  }
+  return null;
+}
+
 function kategori(a) {
   const titel = (a.headline || "").toLowerCase();
   for (const namn in KATEGORIER) {
     if (harNagot(titel, KATEGORIER[namn])) return namn;
   }
-  return "Övrigt";
+  // Säger titeln ingenting, försök med annonstexten och de snävare orden.
+  const fran = kategoriFranText((a.description ? a.description.text : "") || "");
+  return fran || "Övrigt";
 }
 
 // Poängen mäter BARA hur få hinder som finns. Inget om heltid eller deltid,
