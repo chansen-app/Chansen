@@ -1147,7 +1147,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 101</footer>
+version 102</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1184,8 +1184,12 @@ var fragor = {
   korkort:    ["Ja","Nej"],
   erfarenhet: ["Aldrig jobbat","Lite","En del","Flera år","Lång erfarenhet"],
   omfattning: ["Heltid","Deltid","Helger","Kvällar","Sommarjobb","Vid behov","Praktik"],
-  omrade:     ["Sälj","Kundtjänst","Butik","Lager och logistik","Restaurang och café",
-               "Städ","Vård och omsorg","Barn och skola","Industri och produktion","Kontor",
+  // Listan måste innehålla exakt samma namn som kategorierna i hamta.js.
+  // Saknas ett namn här går den kategorins jobb inte att filtrera fram,
+  // och de blir osynliga för alla som väljer område.
+  omrade:     ["Sälj","Kundtjänst","Butik","Lager och logistik","Transport och bud",
+               "Restaurang och café","Städ","Vård och omsorg","Barn och skola",
+               "Bygg och anläggning","Industri och produktion","Kontor",
                "Event och kultur","Djur och natur","Övrigt"]
 };
 
@@ -2791,6 +2795,30 @@ var KATEGORITEXT = {
     tips: ["Nämn vilka program du kan, även bara Word och Excel",
            "Skriv tydligt och kort, det är ett arbetsprov i sig",
            "Nämn om du är noggrann med stavning"]
+  },
+  "Bygg och anläggning": {
+    styrka: "Jag är stark, kommer i tid och har inget emot att jobba ute oavsett väder.",
+    tips: ["Nämn om du har jobbat med händerna förut, även hemma eller åt släkten räknas",
+           "Skriv att du kan tidiga morgnar, byggen startar ofta vid sju",
+           "Har du körkort, sätt det högt upp, det är ofta avgörande"]
+  },
+  "Transport och bud": {
+    styrka: "Jag är punktlig, hittar lätt och tycker om att jobba självständigt.",
+    tips: ["Skriv vilket körkort du har och hur länge du haft det",
+           "Nämn om du är van vid att köra i stan, det är en egen sak att kunna",
+           "Många kör tidiga morgnar eller kvällar, skriv vilka tider du klarar"]
+  },
+  "Event och kultur": {
+    styrka: "Jag blir inte stressad av mycket folk och tycker om när det händer saker.",
+    tips: ["Nämn att du kan jobba helger och kvällar, det är då evenemang sker",
+           "Skriv om du varit med och ordnat något, även i skolan eller en förening",
+           "Jobben är ofta enstaka pass, så säg att du är flexibel"]
+  },
+  "Djur och natur": {
+    styrka: "Jag är lugn kring djur, noggrann med rutiner och gillar att jobba utomhus.",
+    tips: ["Nämn all erfarenhet av djur, även egna husdjur eller att du ryktat åt någon",
+           "Skriv att du klarar tidiga morgnar, djur sköts oftast först på dagen",
+           "Har du körkort, nämn det, många ställen ligger utanför stan"]
   },
   "Övrigt": {
     styrka: "Jag lär mig snabbt och är inte rädd för att fråga när jag är osäker.",
