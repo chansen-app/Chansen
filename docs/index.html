@@ -245,7 +245,10 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
 .taggar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .tag{font-size:12px;padding:4px 11px;border-radius:999px;background:var(--n-100);color:var(--n-800)}
 .tag.varm{background:var(--accent-100);color:var(--accent-800)}
-.tag.varn{background:#fce9e9;color:#7a1f1f}
+/* Brådskande, alltså "Sök inom X dagar". Var rosa förut, vilket låg
+   utanför färgskalan och stack ut på dator. Nu en varm sandton som
+   fortfarande skiljer sig från de andra taggarna. */
+.tag.varn{background:#f7e3c0;color:#6e4408}
 .tag.sage{background:var(--sage-100);color:var(--sage-800)}
 .rad{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .dagar{font-size:12px;color:var(--n-600)}
@@ -1166,7 +1169,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 106</footer>
+version 107</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
