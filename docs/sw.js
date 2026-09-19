@@ -46,8 +46,17 @@ self.addEventListener("fetch", function (e) {
   // bara vår egen sida hanteras här, resten går som vanligt
   if (e.request.method !== "GET" || url.origin !== self.location.origin) return;
 
+  // GitHub Pages säger åt webbläsaren att spara sidan i tio minuter. Det
+  // gör att en ny version inte syns direkt ens för den som laddar om.
+  // För själva sidan och koden hoppar vi därför över den lagringen och
+  // frågar servern varje gång. Är filen oförändrad svarar servern bara
+  // "oförändrad", vilket knappt kostar något.
+  const alltidFarsk = e.request.mode === "navigate"
+    || /\.(html|js|json)$/.test(url.pathname)
+    || url.pathname === "/" || url.pathname.endsWith("/");
+
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, alltidFarsk ? { cache: "no-cache" } : undefined)
       .then(function (svar) {
         // Spara bara lyckade svar. Utan kontrollen hamnar ett tillfälligt
         // serverfel i cachen och visas sedan varje gång nätet saknas.
