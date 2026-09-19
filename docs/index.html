@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- frame-src nedan öppnar BARA för Brevo, som håller mejllistan. Allt
+     annat är fortsatt blockerat. Byter du tjänst måste adressen ändras
+     här också, annars visas formuläret inte alls. -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
   worker-src 'self';
@@ -14,7 +17,7 @@
   form-action 'none';
   base-uri 'none';
   object-src 'none';
-  frame-src 'none'">
+  frame-src https://*.sibforms.com https://sibforms.com https://*.brevo.com">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Chansen — jobb som är värda att söka | jobb utan krav på erfarenhet, deltid och heltid</title>
 <link rel="icon" href="icon-192.png">
@@ -1096,6 +1099,22 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <h2>Det vi inte kan veta</h2>
   <p>Vi kan bara läsa vad som står i annonsen. Står det inget om registerutdrag betyder det inte att arbetsgivaren låter bli att begära ett. Är något viktigt för dig, fråga arbetsgivaren innan du lägger tid på ansökan.</p>
 
+  <h2>Få nya jobb till din mejl</h2>
+  <p>Vill du ha ett mejl när det kommit nya jobb? Skriv in din adress. Du får inget
+     annat än det, och du kan avsluta när du vill.</p>
+
+  <div id="mejllista">
+    <!-- Formuläret bäddas in från Brevo. Klistra in adressen till ditt
+         Brevo-formulär i BREVO_FORMULAR nedan, så visas det här.
+         Tills dess står det att funktionen inte är klar än. -->
+    <div id="mejl-plats"></div>
+    <p class="hint" style="margin-top:12px">
+      Vi sparar bara din mejladress, inget annat. Inget namn, ingen ålder, inget om
+      vilka jobb du tittat på. Du måste vara minst 13 år för att anmäla dig själv.
+      Varje mejl har en länk där du avslutar med ett klick.
+    </p>
+  </div>
+
   <h2>Tipsa någon</h2>
   <p>Känner du någon som söker jobb? <button class="lank" onclick="delaChansen()">Dela Chansen</button></p>
 
@@ -1147,7 +1166,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 103</footer>
+version 106</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1356,6 +1375,7 @@ function visaVy(vy, franBakat){
   if (vy === "cv") oppnaCV();
   if (vy === "hjalp") hjalpVisa(hjalpDel);
   if (vy === "arbetsgivare") agStarta();
+  if (vy === "om") laddaMejllista();
   window.scrollTo(0,0);
 }
 
@@ -2327,6 +2347,54 @@ function raknaBesok(){
     }
     localStorage.setItem(NYCKEL, idag);
   } catch(e){ /* privat läge eller fullt utrymme, strunt samma */ }
+}
+
+/* Mejllistan ligger hos Brevo, inte hos oss. Det betyder att adresserna
+   aldrig passerar den här sidan, att avregistreringen sköts automatiskt,
+   och att ingen prenumerant kan se någon annans adress.
+
+   Klistra in adressen till ditt Brevo-formulär här. Den ser ut ungefär så:
+   https://xxxxx.brevo.com/xxxxx eller https://sibforms.com/serve/xxxxx     */
+var BREVO_FORMULAR =
+  "https://0d8d1c93.sibforms.com/serve/MUIFALESMSdpzG-73u7et61HC_4jMmcmuv-P_rrRlBSsC1PqgrbXTT4O46u9T1m52PiJUue4bG6hHp0YNdnKPSiqAtwbrtCAFd_XWroX4YxHsoFBlX3aG3C62UkbMIya_y06CkNPy6oLi_PYUOgJ4ngeHFI5usQ5c9T6ChEvzKhTMsoAAPVkPirlGIM3-GIz9zdhNWHrolTxFY7osQ==";
+
+function laddaMejllista(){
+  var plats = document.getElementById("mejl-plats");
+  if (!plats) return;
+
+  if (!BREVO_FORMULAR){
+    plats.innerHTML = '<p class="hint">Den här funktionen är inte igång än. '
+      + 'Titta in igen om ett tag.</p>';
+    return;
+  }
+
+  // Laddas bara en gång, även om man går fram och tillbaka till Om-sidan.
+  if (plats.querySelector("iframe")) return;
+
+  var ram = document.createElement("iframe");
+  ram.src = BREVO_FORMULAR;
+  ram.title = "Anmälan till jobbtips via mejl";
+  ram.loading = "lazy";
+  ram.setAttribute("scrolling", "no");
+  ram.style.cssText =
+    "width:100%;max-width:540px;border:0;display:block;"
+    + "border-radius:16px;background:var(--bg)";
+  plats.appendChild(ram);
+  stallHojd(ram);
+  window.addEventListener("resize", function(){ stallHojd(ram); });
+}
+
+/* Formuläret ligger på Brevos sajt, så dess höjd går inte att mäta
+   härifrån. Höjden beror på bredden, eftersom texten bryts olika, och
+   den växer med omkring 130 px när ett felmeddelande visas.
+   Värdena nedan är uppmätta, med marginal för felmeddelandet. */
+function stallHojd(ram){
+  var b = ram.getBoundingClientRect().width;
+  var h = b < 380 ? 690
+        : b < 440 ? 650
+        : b < 510 ? 600
+        :           570;
+  ram.style.height = h + "px";
 }
 
 function slug(t){
