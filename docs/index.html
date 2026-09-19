@@ -1203,7 +1203,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 109</footer>
+version 110</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2409,7 +2409,12 @@ function laddaMejllista(){
   if (plats.querySelector("iframe")) return;
 
   var ram = document.createElement("iframe");
-  ram.src = BREVO_FORMULAR;
+  // Webbläsaren sparar ramen hårt, så ändringar i Brevo syntes inte förrän
+  // långt efteråt. Ett värde som byts varje timme ger färskt innehåll utan
+  // att hämta om det vid varje besök.
+  var timme = Math.floor(Date.now() / 3600000);
+  ram.src = BREVO_FORMULAR + (BREVO_FORMULAR.indexOf("?") > -1 ? "&" : "?")
+    + "t=" + timme;
   ram.title = "Anmälan till jobbtips via mejl";
   ram.loading = "lazy";
   ram.setAttribute("scrolling", "no");
