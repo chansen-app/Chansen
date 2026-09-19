@@ -490,6 +490,17 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     </div>
   </div>
 
+  <!-- Smal rad högst upp. Samma erbjudande som kortet längst ned, men
+       diskret, så den syns direkt utan att ta plats från jobben. -->
+  <div id="mejlrad" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+       background:var(--accent-100);border-radius:14px;padding:11px 15px;margin:0 0 14px">
+    <span style="font-size:14px;color:var(--n-800);flex:1 1 180px;line-height:1.5">
+      Nya jobb varje natt. Vill du ha ett mejl när det kommit fler?
+    </span>
+    <button class="mini" onclick="visaVy('om'); hoppaTillMejl()"
+            style="white-space:nowrap">Få jobbtips</button>
+  </div>
+
   <div class="chips">
     <button id="f-alla" class="on" onclick="visa('alla')">Alla<i></i></button>
     <button id="f-hog" onclick="visa('hog')">Bäst chans<i></i></button>
@@ -514,6 +525,18 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
       behöver den.
     </div>
     <button class="btn" onclick="delaChansen()">Skicka vidare</button>
+  </div>
+
+  <!-- Låg bara på Om-sidan förut, dit nästan ingen går. Här syns den när
+       någon läst igenom jobben och är som mest benägen att vilja ha
+       påminnelser. Samma villkor gäller: bara mejladressen sparas. -->
+  <div class="card dold" id="mejlkort" style="text-align:center;padding:26px 20px">
+    <div class="titel" style="margin-bottom:8px">Få nya jobb till din mejl</div>
+    <div style="font-size:14px;color:var(--n-700);margin-bottom:16px;line-height:1.6">
+      Nya jobb läggs upp varje natt. Vill du ha ett mejl när det kommit fler?
+      Vi sparar bara adressen, inget annat.
+    </div>
+    <button class="btn" onclick="visaVy('om'); hoppaTillMejl()">Anmäl dig</button>
   </div>
 
   <!-- Ligger under listan. Stod de ovanför tog de två tredjedelar av
@@ -1169,7 +1192,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 107</footer>
+version 108</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2400,6 +2423,21 @@ function stallHojd(ram){
   ram.style.height = h + "px";
 }
 
+/* Tar dig till mejlformuläret på Om-sidan. Formuläret laddas i en ram,
+   så vi väntar tills den finns innan vi rullar dit. */
+function hoppaTillMejl(){
+  var forsok = 0;
+  (function vanta(){
+    var el = document.getElementById("mejllista");
+    if (el && el.offsetHeight > 40){
+      el.scrollIntoView({ block: "start", behavior: "auto" });
+      window.scrollBy(0, -70);
+      return;
+    }
+    if (++forsok < 30) setTimeout(vanta, 120);
+  })();
+}
+
 function slug(t){
   return String(t || "")
     .toLowerCase()
@@ -3170,9 +3208,11 @@ function ritaBit(nollstall, fyllUpp){
   // Delningskortet göms medan listan fylls på, men behåller sin plats.
   // Tas platsen bort trycks foten nedåt när kortet dyker upp, och det
   // räknas som att sidan hoppar.
+  var synlig = visatAntal >= Math.min(SIDSTORLEK, aktuellLista.length);
   var dk = document.getElementById("delakort");
-  if (dk) dk.className = (visatAntal >= Math.min(SIDSTORLEK, aktuellLista.length))
-    ? "card" : "card osynlig";
+  if (dk) dk.className = synlig ? "card" : "card osynlig";
+  var mk = document.getElementById("mejlkort");
+  if (mk) mk.className = synlig ? "card" : "card osynlig";
 
   var knapp = document.getElementById("visa-fler");
   if (knapp) knapp.parentNode.removeChild(knapp);
