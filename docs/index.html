@@ -1147,7 +1147,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 102</footer>
+version 103</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2307,6 +2307,28 @@ function handelse(namn){
   }, 0);
 }
 
+/* Räknar hur många som kommer tillbaka, utan att lagra något om personen.
+   Enda som sparas är ett datum i den egna telefonen. Ingen identifierare,
+   inget som lämnar enheten, och siffran blir bara en summa i statistiken. */
+function raknaBesok(){
+  try {
+    var NYCKEL = "chansen-senast";
+    var idag = new Date().toISOString().slice(0, 10);
+    var senast = localStorage.getItem(NYCKEL);
+
+    if (!senast){
+      handelse("forsta-besoket");
+    } else if (senast !== idag){
+      var dagar = Math.round(
+        (new Date(idag) - new Date(senast)) / 86400000);
+      if (dagar <= 7)       handelse("ater-inom-veckan");
+      else if (dagar <= 30) handelse("ater-inom-manaden");
+      else                  handelse("ater-efter-lange");
+    }
+    localStorage.setItem(NYCKEL, idag);
+  } catch(e){ /* privat läge eller fullt utrymme, strunt samma */ }
+}
+
 function slug(t){
   return String(t || "")
     .toLowerCase()
@@ -3300,6 +3322,7 @@ window.addEventListener("hashchange", kollaAdress);
 // Chansen på hemskärmen sitta kvar på en gammal version i dagar.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
+  raknaBesok();
     navigator.serviceWorker.register("sw.js").then(function (reg) {
       reg.addEventListener("updatefound", function () {
         var ny = reg.installing;
