@@ -929,6 +929,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 <!-- Egen sida i stället för ett stycke på Om-sidan. Formuläret laddas
      först när någon klickar sig hit, så det syns aldrig för den som inte
      bett om det. -->
+<!-- Visas när någon öppnar en länk till ett enskilt jobb, till exempel
+     chansen.nu/#jobb-31495230. Används för att kunna dela ut ett visst
+     jobb i sociala medier och ändå landa på Chansen. -->
+<div id="v-enskilt" class="dold">
+  <div id="enskilt-innehall"></div>
+</div>
+
 <div id="v-mejl" class="dold info">
   <h1 style="font-size:28px;margin-bottom:6px">Få nya jobb till din mejl</h1>
   <p class="sub">Nya jobb läggs upp varje natt. Vill du ha ett mejl när det kommit
@@ -1203,7 +1210,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 110</footer>
+version 111</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1398,7 +1405,7 @@ function visaVy(vy, franBakat){
       catch (e) { /* vissa lägen tillåter inte pushState, då fungerar allt som förut */ }
     }
   }
-  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare","mejl"];
+  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare","mejl","enskilt"];
   for (var i = 0; i < vyer.length; i++){
     var el = document.getElementById("v-" + vyer[i]);
     var bas = (vyer[i] === "om") ? "info" : "";
@@ -1418,7 +1425,7 @@ function visaVy(vy, franBakat){
 
 // Vilken vy syns just nu?
 function synligVy(){
-  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare","mejl"];
+  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare","mejl","enskilt"];
   for (var i = 0; i < vyer.length; i++){
     var el = document.getElementById("v-" + vyer[i]);
     if (el && el.className.indexOf("dold") === -1) return vyer[i];
@@ -2454,6 +2461,53 @@ function hoppaTillMejl(){
   })();
 }
 
+/* Länk till ett enskilt jobb: chansen.nu/#jobb-31495230
+   Talet är annonsens id hos Platsbanken, alltså sista delen av länken.
+
+   Jobbet visas som vanligt, men med en rad ovanför som förklarar att man
+   tittar på ett enskilt jobb, och en knapp vidare till hela listan. Där
+   ställs åldersfrågan som vanligt, så skyddet gäller fortfarande. */
+function jobbFranAdressen(){
+  var m = (location.hash || "").match(/^#jobb-(\d+)$/);
+  if (!m) return false;
+  if (typeof JOBB === "undefined" || !JOBB.length) return false;
+
+  var id = m[1];
+  var j = null;
+  for (var i = 0; i < JOBB.length; i++){
+    if (String(JOBB[i].lank || "").indexOf("/" + id) > -1){ j = JOBB[i]; break; }
+  }
+
+  var el = document.getElementById("enskilt-innehall");
+  if (!el) return false;
+
+  if (!j){
+    el.innerHTML =
+      '<h1 style="font-size:26px;margin-bottom:8px">Jobbet finns inte kvar</h1>'
+      + '<p class="sub">Annonsen har troligen tagits bort eller gått ut. '
+      + 'Men det finns fler.</p>'
+      + '<button class="btn" onclick="location.hash=\'\'; visaVy(\'start\')">'
+      + 'Visa jobben</button>';
+    visaVy("enskilt");
+    return true;
+  }
+
+  el.innerHTML =
+    '<div class="rakning" style="margin-bottom:14px">Ett jobb från Chansen</div>'
+    + '<div id="lista-enskilt">' + kort(j) + '</div>'
+    + '<div class="card" style="text-align:center;padding:24px 20px;margin-top:6px">'
+    + '<div class="titel" style="margin-bottom:8px">Det finns fler</div>'
+    + '<div style="font-size:14px;color:var(--n-700);margin-bottom:16px;line-height:1.6">'
+    + 'Chansen visar jobb med låga ingångskrav i hela Sverige. Svara på tre '
+    + 'frågor så får du dem som passar dig.</div>'
+    + '<button class="btn" onclick="location.hash=\'\'; visaVy(\'start\')">'
+    + 'Visa jobben</button></div>';
+
+  visaVy("enskilt");
+  handelse("enskilt-jobb");
+  return true;
+}
+
 function slug(t){
   return String(t || "")
     .toLowerCase()
@@ -3441,6 +3495,7 @@ try {
 // så att den går att skicka direkt till ett företag.
 function kollaAdress(){
   if (location.hash === "#arbetsgivare") { visaVy("arbetsgivare"); return true; }
+  if (/^#jobb-\d+$/.test(location.hash || "")) return jobbFranAdressen();
   return false;
 }
 window.addEventListener("hashchange", kollaAdress);
