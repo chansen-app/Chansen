@@ -1210,7 +1210,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 112</footer>
+version 113</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1328,6 +1328,13 @@ function kollaKnappar(){
 }
 
 function ritaFragor(){
+  try { ritaFragorInre(); }
+  catch (e) {
+    rapporteraFel("fragor: " + (e && e.message), "start");
+  }
+}
+
+function ritaFragorInre(){
   for (var falt in fragor){
     var el = document.getElementById("q-" + falt);
     if (!el) continue;
@@ -1741,6 +1748,16 @@ function minirad(lank, visaSvarsknapp){
 }
 
 function ritaMina(){
+  try { ritaMinaInre(); }
+  catch (e) {
+    rapporteraFel("mina: " + (e && e.message), "mina");
+    var el = document.getElementById("mina-lista");
+    if (el) el.innerHTML = '<p class="hint">Något gick fel när dina sparade '
+      + 'jobb skulle visas. Ladda om sidan.</p>';
+  }
+}
+
+function ritaMinaInre(){
   var el = document.getElementById("mina-innehall");
   if (!el) return;
   var grupper = [
@@ -1789,16 +1806,28 @@ function visaFarskhet(){
     + '<button class="lank" onclick="visaVy(\'hjalp\'); hjalpVisa(\'soka\');" style="font-size:13px">Hur vet jag att jobbet finns kvar?</button>';
 }
 
+/* Nattkörningen kan misslyckas tyst. Det hände i september: jobben
+   hämtades varje natt men sparades aldrig, och det märktes först
+   efter tre dagar. Därför loggas en händelse så fort datan är äldre
+   än ett dygn och ett par timmar, alltså när en körning uteblivit.
+   Användaren ser ingenting förrän det gått tre dagar. */
 function kollaAlder(){
   var el = document.getElementById("gammaldata");
+
+  if (typeof JOBB === "undefined" || !JOBB.length) handelse("larm/inga-jobb");
+
   if (!el) return;
   if (typeof JOBB_HAMTAD === "undefined") { el.className = "dold"; return; }
 
   var hamtad = new Date(JOBB_HAMTAD);
   if (isNaN(hamtad)) { el.className = "dold"; return; }
 
+  var timmar = Math.floor((new Date() - hamtad) / 3600000);
+  // Körningen går 04 varje natt, så över 30 timmar betyder utebliven körning.
+  if (timmar > 30) handelse("larm/data-gammal");
+
   var dagar = Math.floor((new Date() - hamtad) / 86400000);
-  if (dagar < 7) { el.className = "dold"; return; }
+  if (dagar < 3) { el.className = "dold"; return; }
 
   var text = dagar < 30
     ? "Jobben uppdaterades senast för " + dagar + " dagar sedan. En del kan vara borta. Kolla alltid annonsen hos arbetsgivaren."
@@ -2508,6 +2537,46 @@ function jobbFranAdressen(){
   return true;
 }
 
+/* ── Felfångare ────────────────────────────────────────────────
+   Fel hos användarna syns annars aldrig. Här skickas de som
+   händelser till GoatCounter, samma statistik som redan används.
+
+   Valt framför en särskild tjänst som Sentry, eftersom en sådan
+   kräver ett externt skript, en lucka i säkerhetspolicyn och
+   skickar data om besökarna till tredje part. Det krockar med
+   löftet att ingenting sparas om den som använder sidan.
+
+   Bara var femte fel rapporteras, och som mest tre per besök. Utan
+   den bromsen kan ett fel som upprepas i en slinga fylla hela
+   statistiken på en minut.                                       */
+var felRapporterade = 0;
+var FEL_TAK = 3;
+
+function rapporteraFel(vad, var_) {
+  try {
+    if (felRapporterade >= FEL_TAK) return;
+    if (Math.random() > 0.2) return;          // var femte
+    felRapporterade++;
+
+    // Bara filnamn och radnummer, aldrig innehåll från användaren.
+    var plats = String(var_ || "").split("/").pop().slice(0, 40);
+    var kort = String(vad || "fel").slice(0, 60)
+      .replace(/[^a-zA-ZåäöÅÄÖ0-9 ]+/g, " ")
+      .trim().replace(/\s+/g, "-").toLowerCase().slice(0, 40);
+
+    handelse("fel/" + (kort || "okant") + (plats ? "/" + plats : ""));
+  } catch (e) { /* en felrapport får aldrig orsaka nya fel */ }
+}
+
+window.addEventListener("error", function (e) {
+  rapporteraFel(e && e.message, e && e.filename);
+});
+
+window.addEventListener("unhandledrejection", function (e) {
+  var r = e && e.reason;
+  rapporteraFel(r && (r.message || r), "lofte");
+});
+
 function slug(t){
   return String(t || "")
     .toLowerCase()
@@ -2610,6 +2679,13 @@ function forstaOfyllda(){
 }
 
 function ritaSteg(){
+  try { ritaStegInre(); }
+  catch (e) {
+    rapporteraFel("cv-steg: " + (e && e.message), "cv");
+  }
+}
+
+function ritaStegInre(){
   var alla = document.querySelectorAll(".cvsteg");
   for (var i = 0; i < alla.length; i++){
     alla[i].className = (i === cvSteg) ? "cvsteg" : "cvsteg dold";
@@ -3271,7 +3347,12 @@ function ritaBit(nollstall, fyllUpp){
   if (fyllUpp) steg = Math.max(0, SIDSTORLEK - visatAntal);
   var till = Math.min(visatAntal + steg, aktuellLista.length);
   var bit = "";
-  for (var i = visatAntal; i < till; i++){ bit += kort(aktuellLista[i]); }
+  // Ett jobb med oväntad data skulle annars sänka hela listan. Nu
+  // hoppas det över och resten ritas som vanligt.
+  for (var i = visatAntal; i < till; i++){
+    try { bit += kort(aktuellLista[i]); }
+    catch (e) { rapporteraFel("kort: " + (e && e.message), "lista"); }
+  }
   if (bit) el.insertAdjacentHTML("beforeend", bit);
   visatAntal = till;
 
