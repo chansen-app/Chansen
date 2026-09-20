@@ -730,6 +730,8 @@ async function hamtaJobb() {
     "const KOMMUNLAN = " + JSON.stringify(kommunLan) + ";\n" +
     "const JOBB = " + JSON.stringify(jobb) + ";");
 
+  skrivOrtssidor(jobb, hamtadTid);
+
   const orter = {}, kat = {}, omf = {};
   for (const j of jobb) {
     if (j.ort) orter[j.ort] = true;
@@ -752,6 +754,150 @@ async function hamtaJobb() {
   for (const j of jobb) { if (j.bemanning) bem++; }
   console.log("Via bemanning eller rekrytering: " + bem);
   console.log("Kommuner i uppslagslistan: " + Object.keys(kommunLan).length);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Ortssidor för sökmotorer
+
+   Folk googlar "jobb utan erfarenhet Sundsvall". Chansen är en enda
+   sida, så Google har inget att visa för sådana sökningar. Därför
+   skrivs en enkel sida per kommun med de jobb som finns där just nu.
+
+   Bara kommuner med minst fem jobb får en sida. Färre än så blir en
+   tunn sida som Google straffar i stället för att belöna.
+
+   Sidorna skrivs om varje natt tillsammans med jobben.
+   ────────────────────────────────────────────────────────────── */
+
+const MINST_JOBB_FOR_EGEN_SIDA = 5;
+
+function ortslug(ort) {
+  return String(ort || "")
+    .toLowerCase()
+    .replace(/å/g, "a").replace(/ä/g, "a").replace(/ö/g, "o")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function fly(t) {
+  return String(t || "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function skrivOrtssidor(jobb, hamtadTid) {
+  const perOrt = {};
+  for (const j of jobb) {
+    if (!j.ort) continue;
+    (perOrt[j.ort] = perOrt[j.ort] || []).push(j);
+  }
+
+  const orter = Object.keys(perOrt)
+    .filter(o => perOrt[o].length >= MINST_JOBB_FOR_EGEN_SIDA)
+    .sort();
+
+  if (!fs.existsSync("docs/jobb")) fs.mkdirSync("docs/jobb");
+
+  // rensa gamla sidor, så borttagna kommuner inte ligger kvar
+  for (const f of fs.readdirSync("docs/jobb")) {
+    if (f.endsWith(".html")) fs.unlinkSync("docs/jobb/" + f);
+  }
+
+  const datum = hamtadTid.slice(0, 10);
+
+  for (const ort of orter) {
+    const lista = perOrt[ort].slice().sort(
+      (a, b) => (b.sortpoang || b.poang || 0) - (a.sortpoang || a.poang || 0));
+    const slug = ortslug(ort);
+    const antal = lista.length;
+
+    const kategorier = {};
+    for (const j of lista) kategorier[j.kategori] = (kategorier[j.kategori] || 0) + 1;
+    const toppkat = Object.keys(kategorier)
+      .sort((a, b) => kategorier[b] - kategorier[a]).slice(0, 4);
+
+    const titel = "Jobb med låga ingångskrav i " + ort;
+    const beskrivning = antal + " jobb i " + ort + " som inte kräver "
+      + "flera års erfarenhet. Uppdateras varje natt från Platsbanken. "
+      + "Gratis och kräver inget konto.";
+
+    let rader = "";
+    for (const j of lista.slice(0, 40)) {
+      const id = (String(j.lank).match(/\/(\d+)$/) || [])[1] || "";
+      rader += '    <li>\n'
+        + '      <a href="https://chansen.nu/#jobb-' + id + '">'
+        + fly(j.titel) + '</a>\n'
+        + '      <p>' + fly(j.arbetsgivare) + ' i ' + fly(ort)
+        + (j.omfattning ? ' · ' + fly(j.omfattning) : '')
+        + ' · ' + fly(j.kategori) + '</p>\n'
+        + (j.beskrivning ? '      <p>' + fly(j.beskrivning.slice(0, 180)) + '</p>\n' : '')
+        + '    </li>\n';
+    }
+
+    const html = '<!doctype html>\n'
+      + '<html lang="sv">\n<head>\n'
+      + '<meta charset="utf-8">\n'
+      + '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+      + '<title>' + fly(titel) + ' | Chansen</title>\n'
+      + '<meta name="description" content="' + fly(beskrivning) + '">\n'
+      + '<link rel="canonical" href="https://chansen.nu/jobb/' + slug + '.html">\n'
+      + '<meta property="og:title" content="' + fly(titel) + '">\n'
+      + '<meta property="og:description" content="' + fly(beskrivning) + '">\n'
+      + '<meta property="og:image" content="https://chansen.nu/delning.png">\n'
+      + '<meta property="og:url" content="https://chansen.nu/jobb/' + slug + '.html">\n'
+      + '<style>\n'
+      + 'body{font-family:system-ui,sans-serif;background:#f5ead8;color:#201e1d;'
+      + 'margin:0;padding:24px 18px;line-height:1.6}\n'
+      + '.inre{max-width:44em;margin:0 auto}\n'
+      + 'h1{font-size:26px;line-height:1.25;margin:0 0 10px}\n'
+      + 'h2{font-size:19px;margin:32px 0 10px}\n'
+      + 'a{color:#8c491a}\n'
+      + '.knapp{display:inline-block;background:#ac5e2b;color:#fff;text-decoration:none;'
+      + 'padding:13px 24px;border-radius:999px;margin:18px 0;font-weight:600}\n'
+      + 'ul{list-style:none;padding:0}\n'
+      + 'li{background:#ebddc5;border-radius:16px;padding:16px 18px;margin-bottom:12px}\n'
+      + 'li a{font-weight:600;font-size:17px}\n'
+      + 'li p{margin:6px 0 0;font-size:14px;color:#645c50}\n'
+      + 'footer{margin-top:40px;font-size:13px;color:#645c50}\n'
+      + '</style>\n</head>\n<body>\n<div class="inre">\n'
+      + '<h1>' + fly(titel) + '</h1>\n'
+      + '<p>Det finns ' + antal + ' jobb i ' + fly(ort) + ' just nu som inte kräver '
+      + 'flera års erfarenhet, utbildning eller yrkesbevis. '
+      + (toppkat.length ? 'Mest inom ' + toppkat.map(fly).join(', ').replace(/, ([^,]*)$/, ' och $1') + '. ' : '')
+      + 'Listan uppdateras varje natt.</p>\n'
+      + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+      + '<h2>Jobb i ' + fly(ort) + ' just nu</h2>\n'
+      + '<ul>\n' + rader + '</ul>\n'
+      + (antal > 40 ? '<p>Och ' + (antal - 40) + ' till. '
+         + '<a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
+      + '<h2>Om Chansen</h2>\n'
+      + '<p>Chansen går igenom hela Platsbanken varje natt och sorterar bort allt '
+      + 'som kräver utbildning, yrkesbevis eller flera års erfarenhet. Sidan är '
+      + 'gratis, kräver inget konto och sparar ingenting om dig.</p>\n'
+      + '<p>Jobben kommer från Arbetsförmedlingens öppna data. '
+      + 'Arbetsförmedlingen står inte bakom sidan, den drivs av en privatperson.</p>\n'
+      + '<footer>Uppdaterad ' + datum + '. '
+      + '<a href="https://chansen.nu/">chansen.nu</a></footer>\n'
+      + '</div>\n</body>\n</html>\n';
+
+    fs.writeFileSync("docs/jobb/" + slug + ".html", html);
+  }
+
+  // sitemap med startsidan och alla ortssidor
+  let karta = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + '  <url>\n    <loc>https://chansen.nu/</loc>\n'
+    + '    <lastmod>' + datum + '</lastmod>\n'
+    + '    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n';
+  for (const ort of orter) {
+    karta += '  <url>\n    <loc>https://chansen.nu/jobb/' + ortslug(ort) + '.html</loc>\n'
+      + '    <lastmod>' + datum + '</lastmod>\n'
+      + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
+  }
+  karta += '</urlset>\n';
+  fs.writeFileSync("docs/sitemap.xml", karta);
+
+  console.log("Ortssidor skrivna: " + orter.length);
 }
 
 hamtaJobb();
