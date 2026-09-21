@@ -723,6 +723,25 @@ async function hamtaJobb() {
 
   const hamtadTid = new Date().toISOString();
 
+  /* Skydd mot tom lista. Om Arbetsförmedlingens API inte svarar misslyckas
+     varje anrop tyst, och listan blir tom. Den 21 september skrevs en sådan
+     tom lista över den riktiga, och chansen.nu visade noll jobb i flera timmar.
+
+     Nu jämförs resultatet med förra listan. Är det misstänkt litet avbryts
+     körningen med ett fel. Då ligger den gamla listan kvar på sidan, och
+     körningen syns som ett rött kryss under Actions på GitHub.           */
+  let forraAntal = 0;
+  try { forraAntal = JSON.parse(fs.readFileSync("docs/jobb.json", "utf8")).length; }
+  catch (e) { /* ingen tidigare lista, till exempel första körningen */ }
+
+  const forFa = jobb.length < 100
+    || (forraAntal > 0 && jobb.length < forraAntal * 0.5);
+  if (forFa) {
+    console.error("AVBRYTER: bara " + jobb.length + " jobb, förra gången "
+      + forraAntal + ". Troligen svarade inte API:t. Den gamla listan behålls.");
+    process.exit(1);
+  }
+
   fs.writeFileSync("docs/jobb.json", JSON.stringify(jobb, null, 2));
   fs.writeFileSync("docs/jobb.js",
     "const UPPDATERAD = \"" + hamtadTid + "\";\n" +
