@@ -1140,11 +1140,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </ul>
 
   <h2>Vad som sparas</h2>
-  <p>Dina svar på frågorna och de jobb du sparat ligger i din egen webbläsare, på din telefon eller dator. De skickas ingenstans och vi kan inte se dem. Rensar du webbläsarens data försvinner de.</p>
+  <p>Dina svar på frågorna, de jobb du sparat och datumet för ditt senaste besök ligger i din egen webbläsare, på din telefon eller dator. De skickas ingenstans och vi kan inte se dem. Rensar du webbläsarens data försvinner de.</p>
   <p>Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies och spårar inte enskilda besökare.</p>
+  <p>Anmäler du dig till mejllistan sparas din mejladress hos tjänsten Sender, som sköter utskicken åt oss. Läs mer under Personuppgifter längre ned.</p>
 
   <h2>Är du arbetsgivare?</h2>
-  <p>Söker du personal och kräver ingen erfarenhet kan du lägga upp ett jobb gratis. Gå till Hjälp och fliken Arbetsgivare. Varje annons granskas av en människa innan den publiceras.</p>
+  <p>Söker du personal och kräver ingen erfarenhet kan du lägga upp ett jobb gratis. <button class="lank" onclick="visaVy('arbetsgivare')">Lägg upp ett jobb här</button>. Varje annons granskas av en människa innan den publiceras.</p>
 
   <h2>Var jobben kommer ifrån</h2>
   <p>Annonserna hämtas från Arbetsförmedlingens öppna API JobSearch och uppdateras en gång per dygn. Chansen skapar inga egna annonser och ansvarar inte för innehållet i dem. Klickar du på Se annonsen kommer du till originalet i Platsbanken.</p>
@@ -1170,23 +1171,24 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <h2>Cookies</h2>
   <p>Chansen använder inga cookies alls, varken egna eller från andra. Därför finns ingen cookieruta att klicka bort.</p>
-  <p>Det som sparas ligger i din egen webbläsare, alltså dina svar, dina sparade jobb och ditt CV. Det skickas aldrig till oss. Besöksstatistiken vi använder räknar antal besök utan cookies och utan att kunna koppla något till dig.</p>
+  <p>Det som sparas ligger i din egen webbläsare, alltså dina svar, dina sparade jobb, ditt CV och datumet för ditt senaste besök. Det skickas aldrig till oss. Besöksstatistiken vi använder räknar antal besök utan cookies och utan att kunna koppla något till dig.</p>
 
   <h2>Licens och källa</h2>
-  <p>Jobbannonserna hämtas från Arbetsförmedlingens öppna API JobSearch, som innehåller annonser publicerade i Platsbanken.</p>
   <p>Annonserna är Arbetsförmedlingens öppna data, hämtade via API:et JobSearch i deras datakatalog på <a href="https://data.arbetsformedlingen.se" target="_blank" rel="noopener">data.arbetsformedlingen.se</a>.</p>
   <p>Datan är släppt under <b>CC0</b>, vilket betyder att den är helt fri att använda, bearbeta och sprida vidare. Någon källhänvisning krävs alltså inte. Vi anger den ändå, eftersom det är rimligt att du får veta var jobben kommer ifrån.</p>
-  <p>Chansen sorterar och rangordnar annonserna men ändrar inte innehållet i dem. Ansvaret för vad som står i en annons ligger hos arbetsgivaren som skrivit den.</p>
-  <p>Ansvaret för innehållet i varje annons ligger hos den arbetsgivare som skrivit den. Chansen skapar inga egna annonser och kontrollerar inte uppgifterna i dem, förutom de som arbetsgivare skickat in direkt till oss.</p>
+  <p>Chansen sorterar och rangordnar annonserna men ändrar inte innehållet i dem. Ansvaret för innehållet i varje annons ligger hos arbetsgivaren som skrivit den. Chansen skapar inga egna annonser och kontrollerar inte uppgifterna i dem, förutom i de annonser som arbetsgivare skickat in direkt till oss.</p>
   <p>Villkoren i sin helhet finns hos <a href="https://data.arbetsformedlingen.se" target="_blank" rel="noopener">data.arbetsformedlingen.se</a>.</p>
 
   <h2>Personuppgifter</h2>
   <p>Chansen drivs av en privatperson, som är personuppgiftsansvarig för de uppgifter som beskrivs här.</p>
 
-  <p><b>Du som söker jobb.</b> Dina svar på frågorna, dina sparade jobb och ditt CV lagras i din egen webbläsare och skickas aldrig till oss. Vi kan inte se dem. Rensar du webbläsarens data försvinner de. Vi har inga konton och samlar inte in namn, mejladress eller något annat om dig.</p>
+  <p><b>Du som söker jobb.</b> Dina svar på frågorna, dina sparade jobb och ditt CV lagras i din egen webbläsare och skickas aldrig till oss. Vi kan inte se dem. Rensar du webbläsarens data försvinner de. Vi har inga konton och samlar inte in uppgifter om dig, om du inte själv väljer att anmäla dig till mejllistan.</p>
+
+  <p><b>Mejllistan.</b> Anmäler du dig sparar vi bara din mejladress. Den ligger hos tjänsten Sender, som sköter utskicken åt oss, och används bara för att skicka dig mejl om nya jobb på Chansen. Den rättsliga grunden är ditt samtycke. Du måste vara minst 13 år för att anmäla dig själv.</p>
+  <p>Sender registrerar också tekniska uppgifter vid anmälan, som tidpunkt och IP-adress, för att kunna visa att du själv har anmält dig. Du bekräftar anmälan via ett mejl, och varje utskick har en länk där du avslutar med ett klick. Vill du att din adress raderas helt, mejla oss. Vi delar aldrig adressen med någon annan.</p>
 
   <p><b>Besöksstatistik.</b> Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies, spårar inte enskilda besökare och sparar inga uppgifter som kan kopplas till dig.</p>
-  <p>Vi räknar också hur många som klickar sig vidare till en annons, med tjänsten GoatCounter. Den använder inga kakor och sparar ingenting om vem du är.</p>
+  <p>Med tjänsten GoatCounter räknar vi också hur många som klickar sig vidare till en annons, hur många som kommer tillbaka till sidan, och om det uppstår tekniska fel. Den använder inga kakor och sparar ingenting om vem du är.</p>
 
   <p><b>Du som är arbetsgivare.</b> Skickar du in en annons sparar vi det du fyllt i: företagets namn och organisationsnummer, uppgifter om jobbet, samt ditt namn, din mejladress och ditt telefonnummer. Det sparas i ett kalkylblad hos Google som bara vi har tillgång till.</p>
   <p>Vi använder uppgifterna för att kontrollera att företaget finns, för att kunna kontakta dig om annonsen, och för att publicera jobbet. Den rättsliga grunden är berättigat intresse. Kontaktuppgifter du själv angett som kontakt för sökande publiceras i annonsen, resten publiceras inte.</p>
@@ -1207,7 +1209,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 116</footer>
+version 117</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
