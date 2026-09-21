@@ -1207,7 +1207,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 115</footer>
+version 116</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2446,6 +2446,93 @@ function laddaMejllista(){
     + 'rel="noopener" onclick="handelse(\'mejllista-klick\')">Anmäl dig</a>'
     + '<p class="hint" style="margin-top:12px">Anmälan öppnas i en ny flik.</p>';
 }
+
+/* Länk till ett enskilt jobb: chansen.nu/#jobb-31495230
+   Talet är annonsens id hos Platsbanken, alltså sista delen av länken.
+
+   Jobbet visas som vanligt, men med en rad ovanför som förklarar att man
+   tittar på ett enskilt jobb, och en knapp vidare till hela listan. Där
+   ställs åldersfrågan som vanligt, så skyddet gäller fortfarande. */
+function jobbFranAdressen(){
+  var m = (location.hash || "").match(/^#jobb-(\d+)$/);
+  if (!m) return false;
+  if (typeof JOBB === "undefined" || !JOBB.length) return false;
+
+  var id = m[1];
+  var j = null;
+  for (var i = 0; i < JOBB.length; i++){
+    if (String(JOBB[i].lank || "").indexOf("/" + id) > -1){ j = JOBB[i]; break; }
+  }
+
+  var el = document.getElementById("enskilt-innehall");
+  if (!el) return false;
+
+  if (!j){
+    el.innerHTML =
+      '<h1 style="font-size:26px;margin-bottom:8px">Jobbet finns inte kvar</h1>'
+      + '<p class="sub">Annonsen har troligen tagits bort eller gått ut. '
+      + 'Men det finns fler.</p>'
+      + '<button class="btn" onclick="location.hash=\'\'; visaVy(\'start\')">'
+      + 'Visa jobben</button>';
+    visaVy("enskilt");
+    return true;
+  }
+
+  el.innerHTML =
+    '<div class="rakning" style="margin-bottom:14px">Ett jobb från Chansen</div>'
+    + '<div id="lista-enskilt">' + kort(j) + '</div>'
+    + '<div class="card" style="text-align:center;padding:24px 20px;margin-top:6px">'
+    + '<div class="titel" style="margin-bottom:8px">Det finns fler</div>'
+    + '<div style="font-size:14px;color:var(--n-700);margin-bottom:16px;line-height:1.6">'
+    + 'Chansen visar jobb med låga ingångskrav i hela Sverige. Svara på tre '
+    + 'frågor så får du dem som passar dig.</div>'
+    + '<button class="btn" onclick="location.hash=\'\'; visaVy(\'start\')">'
+    + 'Visa jobben</button></div>';
+
+  visaVy("enskilt");
+  handelse("enskilt-jobb");
+  return true;
+}
+
+/* ── Felfångare ────────────────────────────────────────────────
+   Fel hos användarna syns annars aldrig. Här skickas de som
+   händelser till GoatCounter, samma statistik som redan används.
+
+   Valt framför en särskild tjänst som Sentry, eftersom en sådan
+   kräver ett externt skript, en lucka i säkerhetspolicyn och
+   skickar data om besökarna till tredje part. Det krockar med
+   löftet att ingenting sparas om den som använder sidan.
+
+   Bara var femte fel rapporteras, och som mest tre per besök. Utan
+   den bromsen kan ett fel som upprepas i en slinga fylla hela
+   statistiken på en minut.                                       */
+var felRapporterade = 0;
+var FEL_TAK = 3;
+
+function rapporteraFel(vad, var_) {
+  try {
+    if (felRapporterade >= FEL_TAK) return;
+    if (Math.random() > 0.2) return;          // var femte
+    felRapporterade++;
+
+    // Bara filnamn och radnummer, aldrig innehåll från användaren.
+    var plats = String(var_ || "").split("/").pop().slice(0, 40);
+    var kort = String(vad || "fel").slice(0, 60)
+      .replace(/[^a-zA-ZåäöÅÄÖ0-9 ]+/g, " ")
+      .trim().replace(/\s+/g, "-").toLowerCase().slice(0, 40);
+
+    handelse("fel/" + (kort || "okant") + (plats ? "/" + plats : ""));
+  } catch (e) { /* en felrapport får aldrig orsaka nya fel */ }
+}
+
+window.addEventListener("error", function (e) {
+  rapporteraFel(e && e.message, e && e.filename);
+});
+
+window.addEventListener("unhandledrejection", function (e) {
+  var r = e && e.reason;
+  rapporteraFel(r && (r.message || r), "lofte");
+});
 
 function slug(t){
   return String(t || "")
