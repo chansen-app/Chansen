@@ -1,7 +1,8 @@
 name: Uppdatera jobben
 
 # Kör varje natt och hämtar om jobben från Platsbanken.
-# Skriver docs/jobb.js och docs/jobb.json.
+# Skriver docs/jobb.js, docs/jobb.json, en sida per ort i docs/jobb/
+# och docs/sitemap.xml.
 #
 # Du kan också starta den för hand under fliken Actions på GitHub,
 # knappen heter "Run workflow".
@@ -20,7 +21,9 @@ permissions:
 jobs:
   uppdatera:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Hämtningen har tagit upp mot 45 minuter. Med 45 som gräns avbröt
+    # GitHub ibland mitt i, och då sparades ingenting.
+    timeout-minutes: 60
 
     steps:
       - name: Hämta repot
@@ -38,7 +41,11 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add docs/jobb.json docs/jobb.js
+          # Ortssidorna och sitemap skapas också av hamta.js. De måste
+          # sparas här, annars slängs de när körningen är klar.
+          # -A tar med sidor som tagits bort, till exempel en ort som
+          # inte längre har tillräckligt många jobb.
+          git add -A docs/jobb.json docs/jobb.js docs/jobb docs/sitemap.xml
           if git diff --staged --quiet; then
             echo "Inget nytt att spara."
             exit 0
