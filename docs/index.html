@@ -1225,7 +1225,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 118</footer>
+version 119</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1477,6 +1477,14 @@ function profilrad(){
 function startaLista(){
   // Bara det som måste ske innan sidan ritas om.
   document.getElementById("profil").textContent = profilrad();
+
+  /* Reservera plats åt listan innan vyn byts. Korten ritas först i nästa
+     bildruta, och däremellan är listan tom. Utan reservationen hamnar
+     foten högt upp i en bildruta och hoppar sedan nedåt när korten
+     kommer. Det syntes i statistiken som sidans största hopp.        */
+  var listel = document.getElementById("lista");
+  if (listel && !listel.firstChild) listel.style.minHeight = window.innerHeight + "px";
+
   visaVy("jobb");
 
   // Jobbkorten ritas i nästa bildruta, annars måste webbläsaren göra
@@ -3330,6 +3338,12 @@ function ritaBit(nollstall, fyllUpp){
   }
   if (bit) el.insertAdjacentHTML("beforeend", bit);
   visatAntal = till;
+
+  // Reservationen tas bort så snart korten fyller minst lika mycket,
+  // annars skulle foten hoppa uppåt i stället.
+  if (el.style.minHeight && el.scrollHeight >= parseFloat(el.style.minHeight)) {
+    el.style.minHeight = "";
+  }
 
   // Delningskortet göms medan listan fylls på, men behåller sin plats.
   // Tas platsen bort trycks foten nedåt när kortet dyker upp, och det
