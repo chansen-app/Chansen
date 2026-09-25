@@ -122,7 +122,10 @@ const TITELPLUS = [
   "kundeservice", "kundebehandler", "produksjonsmedarbeider", "hjelpearbeider"
 ];
 
-const TROSKEL = 2;              // under detta kommer annonsen inte med
+// Tre poäng betyder att något faktiskt talar för annonsen, alltså en
+// titel med låga ingångskrav eller ett löfte om upplärning. Med två
+// räckte det att inget hinder hittades, och då kom oklara fall med.
+const TROSKEL = 3;              // under detta kommer annonsen inte med
 const BAST_CHANS = 6;           // från detta räknas den som bäst chans
 
 // ──────────────────────────────────────────────────────────────────────
