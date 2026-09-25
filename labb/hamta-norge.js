@@ -54,6 +54,9 @@ const STOPPORD = [
   /\blang\s+erfaring\b/, /\bsolid\s+erfaring\b/, /\bbred\s+erfaring\b/,
   /\bbachelor\b/, /\bmaster\b/, /\bhøyskole\b/, /\bhøgskole\b/,
   /\buniversitet\b/, /\bfullført\s+utdanning\b/, /\bfullført\s+videregående\b/,
+  // Vanligast av alla i riktiga annonser. Nynorsk stavas høgare.
+  /\bhøyere\s+utdanning\b/, /\bhøgare\s+utdanning\b/,
+  /\bgodkjent\s+utdanning\b/, /\butdanning\s+(?:fra|frå)\s+utlandet\b/,
   /\bkrav\s+om\s+utdanning\b/, /\bhelsefaglig\s+utdanning\b/,
   /\bpedagogisk\s+utdanning\b/,
 
@@ -66,8 +69,8 @@ const STOPPORD = [
 
 // ── Hinder som drar ned poängen, men inte sorterar bort ───────────────
 const MINUSORD = [
-  [/\berfaring\s+fra\b/, 3], [/\berfaring\s+med\b/, 3],
-  [/\bønskelig\s+med\s+erfaring\b/, 2], [/\bførerkort\b/, 2],
+  [/\berfaring\s+(?:fra|frå)\b/, 2], [/\berfaring\s+med\b/, 2],
+  [/\bønskelig\s+med\s+erfaring\b/, 1], [/\bførerkort\b/, 2],
   [/\bsertifikat\s+kl\b/, 2], [/\bkvalifikasjonskrav\b/, 2],
   [/\brelevant\s+utdanning\b/, 4], [/\bnattarbeid\b/, 1],
   [/\bturnus\b/, 1], [/\bhelgearbeid\b/, 1],
@@ -76,7 +79,9 @@ const MINUSORD = [
 
 // ── Tecken på att arbetsgivaren lär upp ───────────────────────────────
 const PLUSORD = [
-  [/\bopplæring\s+(?:vil\s+)?(?:bli\s+)?gis?\b/, 5],
+  [/\bopplæring\s+(?:vil\s+)?(?:bli\s+)?(?:gis|gitt|gjeve)\b/, 5],
+  [/\bnødvendig\s+opplæring\b/, 5],
+  [/\bopplæring\s+(?:både\s+)?via\b/, 3],
   [/\bvi\s+(?:gir|lærer)\s+deg\s+opp(?:læring)?\b/, 5],
   [/\bgod\s+opplæring\b/, 4], [/\bgrundig\s+opplæring\b/, 4],
   [/\bopplæring\s+på\s+(?:arbeidsplassen|stedet)\b/, 4],
@@ -145,6 +150,19 @@ function poang(titel, text) {
     const m = allt.match(r);
     if (m) return { ut: "hinder: " + m[0] };
   }
+  /* Erfarenhet nämns på två helt olika sätt i norska annonser.
+       "krever erfaring" är ett krav.
+       "erfaring er ønskelig, men ikke et krav" är ett önskemål.
+     Utan den skillnaden sorteras massor av öppna jobb bort i onödan. */
+  const ONSKAN = /(ønskelig|en fordel|gjerne|kan kompensere|meritterende|positivt om)/;
+  const KRAV = /(krever|kreves|må\s+ha|krav\s+om|forutsetter|nødvendig\s+med)/;
+  for (const m of allt.matchAll(/erfaring/g)) {
+    const nara = allt.slice(Math.max(0, m.index - 90), m.index + 90);
+    if (KRAV.test(nara) && !ONSKAN.test(nara)) {
+      return { ut: "erfarenhet krävs: " + nara.slice(60, 130).trim() };
+    }
+  }
+
   let p = 0;
   const skal = [];
 
