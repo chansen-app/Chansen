@@ -1,0 +1,54 @@
+name: Hämta norska jobb
+
+# Labb. Kör varje natt, två timmar efter den vanliga hämtningen, så att
+# körningarna inte krockar med varandra.
+#
+# Skriver labb/norgejobb.js och labb/norgejobb.json.
+# Ingenting av det publiceras, eftersom GitHub Pages bara tar mappen docs.
+#
+# Nyckeln till NAV hämtas automatiskt, den publika testnyckeln. Har du fått
+# en egen nyckel, lägg den som ett Secret med namnet NAV_TOKEN under
+# Settings, Secrets and variables, Actions. Då används den i stället.
+#
+# Du kan också starta den för hand under fliken Actions på GitHub.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"     # 06:00 UTC, alltså 08:00 svensk sommartid
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  hamta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Hämta repot
+        uses: actions/checkout@v4
+
+      - name: Installera Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Kör hämtningen
+        env:
+          NAV_TOKEN: ${{ secrets.NAV_TOKEN }}
+        run: node labb/hamta-norge.js
+
+      - name: Spara resultatet
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add labb/norgejobb.js labb/norgejobb.json
+          if git diff --staged --quiet; then
+            echo "Inget nytt att spara."
+          else
+            git commit -m "Nattlig hämtning: norska jobb"
+            # hämta hem eventuella ändringar innan vi skickar upp
+            git pull --rebase --autostash origin main || git pull --no-rebase -X ours --no-edit origin main
+            git push
+          fi
