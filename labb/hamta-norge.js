@@ -125,6 +125,62 @@ const TITELPLUS = [
 // Tre poäng betyder att något faktiskt talar för annonsen, alltså en
 // titel med låga ingångskrav eller ett löfte om upplärning. Med två
 // räckte det att inget hinder hittades, och då kom oklara fall med.
+/* ── Regler för den som är under 18 ────────────────────────────────────
+ *
+ *  Norska regler skiljer sig från de svenska, så den svenska logiken
+ *  går inte att återanvända. Enligt arbeidsmiljøloven kapitel 11:
+ *
+ *  Under 15 år eller skolpliktig
+ *    I princip inget arbete, bara lätt arbete med undantag.
+ *    Högst 2 timmar om dagen och 12 i veckan under skolveckor.
+ *    Nattförbud mellan klockan 20 och 06.
+ *    Skriftligt samtycke från vårdnadshavare krävs.
+ *
+ *  15 till 18 år, inte skolpliktig
+ *    Högst 8 timmar om dagen och 40 i veckan.
+ *    Minst 8 timmars arbetsfri period som täcker 23 till 06.
+ *    Arbete mellan 21 och 23 räknas som nattarbete och är i regel
+ *    inte tillåtet.
+ *
+ *  Under 18 år oavsett
+ *    Ingen övertid. Får inte sälja alkohol eller tobak.
+ *
+ *  Skolplikten går inte att läsa ut ur en annons, så bedömningen görs
+ *  på ålder. Är det oklart markeras jobbet som olämpligt, hellre det
+ *  än tvärtom.                                                       */
+
+const NATT = [
+  /\bnattarbeid\b/, /\bnattevakt\b/, /\bnattskift\b/, /\bnatterunde\b/,
+  /\bkveldsarbeid\b/, /\bkveldstid\b/, /\bsen\s+kveld\b/, /\bdøgnkontinuerlig\b/,
+  /\bturnus\b/, /\bskiftarbeid\b/,
+  /\bkl\.?\s*2[1-3](?:[.:]\d{2})?\s*(?:-|–|til)\s*0?[1-6]/,
+  /\b(?:22|23|00|01|02|03)[.:]\d{2}\s*(?:-|–|til)/
+];
+
+const VUXENKRAV = [
+  /\bover\s+18\s*år\b/, /\bfylt\s+18\s*år\b/, /\bminst\s+18\s*år\b/,
+  /\b18\s*års?\s*grense\b/, /\bskjenkebevilling\b/, /\balkohol\b/,
+  /\btobakk\b/, /\bsnus\b/, /\bvinmonopol/, /\bbartender\b/,
+  /\bnattklubb\b/, /\bpub\b/, /\bbar\s*&/,
+  // Taxi kräver kjøreseddel, som man tidigast får vid 20 års ålder.
+  /\bkjøreseddel\b/, /\btaxi\b/, /\bdrosje\b/
+];
+
+/* Avgör vem som kan söka jobbet.
+   Returnerar minsta lämpliga ålder: 15 eller 18.                    */
+function minstaAlder(titel, text) {
+  const allt = (titel || "").toLowerCase() + " " + text;
+  for (const r of VUXENKRAV) {
+    const m = allt.match(r);
+    if (m) return { alder: 18, skal: "18 år: " + m[0] };
+  }
+  for (const r of NATT) {
+    const m = allt.match(r);
+    if (m) return { alder: 18, skal: "18 år, natt: " + m[0] };
+  }
+  return { alder: 15, skal: "inget hinder för den som är under 18" };
+}
+
 const TROSKEL = 3;              // under detta kommer annonsen inte med
 const BAST_CHANS = 6;           // från detta räknas den som bäst chans
 
@@ -250,6 +306,7 @@ async function kor() {
       bort++; await sov(PAUS_MS); continue;
     }
 
+    const alder = minstaAlder(a.title, text);
     const plats = (a.workLocations || [])[0] || {};
     jobb.push({
       titel: a.title || "",
@@ -264,6 +321,10 @@ async function kor() {
       publicerad: a.published || "",
       poang: dom.p,
       skal: dom.skal,
+      // 15 betyder att jobbet ser lämpligt ut även för den som är under 18,
+      // 18 att annonsen nämner natt, alkohol, tobak eller en åldersgräns.
+      minstaAlder: alder.alder,
+      aldersskal: alder.skal,
       chansniva: dom.p >= BAST_CHANS ? "hog" : "medel"
       // kontaktuppgifter sparas aldrig, enligt NAV:s villkor
     });
