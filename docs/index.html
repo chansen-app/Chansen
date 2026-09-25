@@ -151,8 +151,10 @@ h2{font-family:var(--heading);font-weight:400;font-size:21px;line-height:1.2;mar
 h3{font-family:var(--heading);font-weight:400;font-size:17px;margin:0 0 6px;
    overflow-wrap:break-word;word-break:break-word;hyphens:auto}
 .sub{font-size:15.5px;color:var(--n-700);margin-bottom:24px;max-width:32ch}
-label.fraga{display:block;font-size:12px;color:var(--n-700);margin:0 0 7px}
-.field{margin-bottom:22px}
+label/* Frågorna var så små och ljusa att blicken gick direkt till
+     svarsknapparna. En användare sa till om det. */
+  .fraga{display:block;font-size:17px;font-weight:700;color:var(--text);margin:0 0 10px}
+.field{margin-bottom:28px}
 .avsnitt{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--n-600);margin:30px 0 14px;padding-top:18px;border-top:1.5px solid var(--n-300)}
 .seg{display:flex;flex-wrap:wrap;gap:8px;min-height:44px}
 /* Sidan ritas först med systemets typsnitt och sedan om med Caprasimo
@@ -1225,7 +1227,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 119</footer>
+version 120</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
