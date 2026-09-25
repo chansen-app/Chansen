@@ -55,7 +55,13 @@ const STOPPORD = [
   /\bbachelor\b/, /\bmaster\b/, /\bhøyskole\b/, /\bhøgskole\b/,
   /\buniversitet\b/, /\bfullført\s+utdanning\b/, /\bfullført\s+videregående\b/,
   /\bkrav\s+om\s+utdanning\b/, /\bhelsefaglig\s+utdanning\b/,
-  /\bpedagogisk\s+utdanning\b/, /\bprovisjonslønn\b/, /\bkun\s+provisjon\b/
+  /\bpedagogisk\s+utdanning\b/,
+
+  // Säljjobb som betalar efter resultat. Norska annonser skriver sällan
+  // ut "provisjonslønn", utan lockar med hur mycket man kan tjäna.
+  /\bprovisjon/, /\bsalgsbyrå\b/, /\bdørsalg\b/, /\bverving\b/,
+  /\bubegrenset\s+(?:inntekt|lønn|inntjening)\b/, /\btjen\w*\s+opptil\b/,
+  /\btjene\s+skikkelig\s+godt\b/, /\bbonus\s+uten\s+tak\b/
 ];
 
 // ── Hinder som drar ned poängen, men inte sorterar bort ───────────────
@@ -64,7 +70,8 @@ const MINUSORD = [
   [/\bønskelig\s+med\s+erfaring\b/, 2], [/\bførerkort\b/, 2],
   [/\bsertifikat\s+kl\b/, 2], [/\bkvalifikasjonskrav\b/, 2],
   [/\brelevant\s+utdanning\b/, 4], [/\bnattarbeid\b/, 1],
-  [/\bturnus\b/, 1], [/\bhelgearbeid\b/, 1]
+  [/\bturnus\b/, 1], [/\bhelgearbeid\b/, 1],
+  [/\bhøy\s+lønn\b/, 3], [/\bbonusordning\b/, 2], [/\bselger\b/, 1]
 ];
 
 // ── Tecken på att arbetsgivaren lär upp ───────────────────────────────
