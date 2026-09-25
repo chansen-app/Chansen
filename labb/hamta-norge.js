@@ -41,7 +41,13 @@ const YRKESSTOPP = [
   "elektriker", "rørlegger", "tømrer", "sveiser", "anleggsmaskinfører",
   "revisor", "advokat", "jurist", "ingeniør", "sivilingeniør", "arkitekt",
   "veterinær", "bioingeniør", "radiograf", "optiker", "kiropraktor",
-  "regnskapsfører", "systemutvikler", "utvikler", "arkitekt"
+  "regnskapsfører", "systemutvikler", "utvikler",
+  // Chefer och forskartjänster kräver alltid mer än ett instegsjobb.
+  "stipendiat", "avdelingsleder", "daglig leder", "butikksjef", "sjef",
+  "koordinator", "rådgiver", "konsulent", "prosjektleder", "teamleder",
+  // Hantverk med fagbrev
+  "murer", "flislegger", "mekaniker", "tekniker", "operatør", "operator",
+  "bilklargjører", "betongborrer", "betongsager", "welder", "fitter"
 ];
 
 // ── Ord i texten som gör att annonsen åker ut direkt ──────────────────
@@ -64,7 +70,20 @@ const STOPPORD = [
   // ut "provisjonslønn", utan lockar med hur mycket man kan tjäna.
   /\bprovisjon/, /\bsalgsbyrå\b/, /\bdørsalg\b/, /\bverving\b/,
   /\bubegrenset\s+(?:inntekt|lønn|inntjening)\b/, /\btjen\w*\s+opptil\b/,
-  /\btjene\s+skikkelig\s+godt\b/, /\bbonus\s+uten\s+tak\b/
+  /\btjene\s+skikkelig\s+godt\b/, /\bbonus\s+uten\s+tak\b/,
+  /\breisende\s+salgsteam\b/,
+
+  // "erfaren murer", "erfaren bilklargjører"
+  /\berfar(?:en|ne)\s+\w+/,
+
+  // Sammansatta ord som butikkerfaring hanteras inte här. De står oftast
+  // i en önskan, "har du butikkerfaring, helst innen...", och fångas av
+  // kontrollen för krav mot önskemål längre ned.
+
+  // Annonser på engelska förekommer, och de ställer samma krav
+  /\byears?\s+of\s+experience\b/, /\bexperience\s+(?:as|with|in)\b/,
+  /\bvalid\s+\w*\s*certificates?\b/, /\brequirements?:/,
+  /\bqualified\b/, /\bskilled\s+(?:and|workers|welders)\b/
 ];
 
 // ── Hinder som drar ned poängen, men inte sorterar bort ───────────────
@@ -221,6 +240,12 @@ async function kor() {
     const dom = poang(a.title, text);
     if (dom.ut) { bort++; await sov(PAUS_MS); continue; }
     if (dom.p < TROSKEL) { bort++; await sov(PAUS_MS); continue; }
+
+    // Stoppade annonser maskeras av NAV: titel, arbetsgivare och text
+    // töms. De ska inte med, och syns annars som tomma rader i listan.
+    if (!a.title || !a.title.trim() || !(a.link || a.applicationUrl)) {
+      bort++; await sov(PAUS_MS); continue;
+    }
 
     const plats = (a.workLocations || [])[0] || {};
     jobb.push({
