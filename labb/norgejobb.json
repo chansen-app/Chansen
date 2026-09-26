@@ -16,26 +16,8 @@
       "+5 \\bnødvendig\\s+opplæring\\b",
       "+2 inga hinder i texten"
     ],
-    "chansniva": "hog"
-  },
-  {
-    "titel": "Butikkmedarbeider",
-    "arbetsgivare": "ALANYA IMPORT AS",
-    "ort": "TROMSØ",
-    "fylke": "TROMS",
-    "omfattning": "Deltid",
-    "anstallningsform": "Annet",
-    "beskrivning": "vi søker etter en person som vil primært jobbe i butikk, hvor viktige arbeidsoppgaver er varepåfyll og holde orden og ivareta forefallende butikkoppgaver. stillingsprosenten kan avtales nærmere, men vil være et sted mellom 50 - 80%. arbeidstid og vaktplan vil avtales nærmere etter avtale. det er ønskelig med erfaring fra butikk, men dette er ikke et krav. vi gir all nødvendig opplæring. kvalifikas",
-    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/6e8bbe4d-caf1-4fab-828d-571b65d93120",
-    "sistaAnsokningsdag": "Snarest",
-    "publicerad": "2026-09-24T12:53:53.900745+02:00",
-    "poang": 10,
-    "skal": [
-      "+3 titel: butikk",
-      "+5 \\bnødvendig\\s+opplæring\\b",
-      "+4 \\bgrundig\\s+opplæring\\b",
-      "-2 \\berfaring\\s+(?:fra|frå)\\b"
-    ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: fylt 18 år",
     "chansniva": "hog"
   },
   {
@@ -55,6 +37,8 @@
       "+4 \\bgod\\s+opplæring\\b",
       "+2 inga hinder i texten"
     ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: fylt 18 år",
     "chansniva": "hog"
   },
   {
@@ -74,6 +58,8 @@
       "+4 \\bgod\\s+opplæring\\b",
       "+2 inga hinder i texten"
     ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: fylt 18 år",
     "chansniva": "hog"
   },
   {
@@ -93,6 +79,116 @@
       "+4 \\bgrundig\\s+opplæring\\b",
       "+2 inga hinder i texten"
     ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
+    "chansniva": "hog"
+  },
+  {
+    "titel": "Vi søker logistikkmedarbeider til Vestfoldmøllene AS i Andebu, Vestfold",
+    "arbetsgivare": "VESTFOLDMØLLENE AS",
+    "ort": "SANDEFJORD",
+    "fylke": "VESTFOLD",
+    "omfattning": "Heltid",
+    "anstallningsform": "Engasjement",
+    "beskrivning": "hei ! vår fantastiske logistikkmedarbeider slutter hos oss, og vi trenger en stabil erstatter. vi er på jakt etter en som kan jobbe tett sammen med logistikkleder, og som har stor kvalitet i sitt arbeid. hovedoppgavene er: transportplanlegging bestillinger ordremottak og innleggelse tett dialog med sjåfører kundeoppfølging søkere må ha gode datakunnskaper, vi bruker systemet infor m3. det er en fo",
+    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/27b6ccb2-2a0c-4009-9ca0-76100e93a83f",
+    "sistaAnsokningsdag": "04.10.2026",
+    "publicerad": "2026-09-23T00:00:01+02:00",
+    "poang": 9,
+    "skal": [
+      "+3 titel: medarbeider",
+      "+4 \\bgod\\s+opplæring\\b",
+      "+2 inga hinder i texten"
+    ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
+    "chansniva": "hog"
+  },
+  {
+    "titel": "Extra Tromøytunet - Butikkmedarbeider 10%",
+    "arbetsgivare": "Coop Sørvest",
+    "ort": "ARENDAL",
+    "fylke": "AGDER",
+    "omfattning": "Deltid",
+    "anstallningsform": "Annet",
+    "beskrivning": "coop sørvest skaper og deler verdier, vil du bidra til å skape de beste handleopplevelser i ett av norges største samvirkelag? alt vi gjør i våre butikker skal være til fordel for kunder og medlemmer. våre fantastiske ansatte heier på hverandre og samarbeider for å levere de beste kundemøtene. i din rolle som butikkmedarbeider vil du møte spennende og varierte arbeidsoppgaver. du bidrar med alt fr",
+    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/93512c35-8885-4ec1-872d-57d3fbcbe5fb",
+    "sistaAnsokningsdag": "2026-10-04T00:00:00",
+    "publicerad": "2026-09-25T00:00:00+02:00",
+    "poang": 9,
+    "skal": [
+      "+3 titel: butikk",
+      "+4 \\bgrundig\\s+opplæring\\b",
+      "+2 inga hinder i texten"
+    ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: fylt 18 år",
+    "chansniva": "hog"
+  },
+  {
+    "titel": "Julevikar i 20% stilling til Musti i Sandvika!",
+    "arbetsgivare": "Musti Norge AS",
+    "ort": "BÆRUM",
+    "fylke": "AKERSHUS",
+    "omfattning": "Deltid",
+    "anstallningsform": "Vikariat",
+    "beskrivning": "er du klar for en morsom og meningsfull jobb i musti? ønsker du en jobb der du kan kombinere salgstalentet ditt med lidenskap for dyr? nå har du sjansen til å bli en del av musti-familien i sandvika! som ansatt hos oss får du en sentral rolle i å hjelpe våre kunder finne de riktige produktene for deres firbente venner. vi ser etter deg som har et øye for mersalg og som elsker å skape gode kundeopp",
+    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/a206b5f5-6b7b-4bb5-8f71-6d78802c7943",
+    "sistaAnsokningsdag": "2026-10-04",
+    "publicerad": "2026-09-24T22:00:00+02:00",
+    "poang": 8,
+    "skal": [
+      "+3 titel: vikar",
+      "+3 \\bopplæring\\s+(?:både\\s+)?vi",
+      "+4 \\bgrundig\\s+opplæring\\b",
+      "-2 \\berfaring\\s+med\\b"
+    ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: over 18 år",
+    "chansniva": "hog"
+  },
+  {
+    "titel": "Butikkmedarbeider, vikariat, i 50% stilling til Musti Grimstad!",
+    "arbetsgivare": "Musti Norge AS",
+    "ort": "GRIMSTAD",
+    "fylke": "AGDER",
+    "omfattning": "Deltid",
+    "anstallningsform": "Vikariat",
+    "beskrivning": "er du klar for en morsom og meningsfull jobb i musti? ønsker du en jobb der du kan kombinere salgstalentet ditt med lidenskap for dyr? nå har du sjansen til å bli en del av musti-familien i grimstad. som ansatt hos oss får du en sentral rolle i å hjelpe våre kunder finne de riktige produktene for deres firbente venner. vi ser etter deg som har et øye for mersalg og som elsker å skape gode kundeopp",
+    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/5e15a56a-dfd9-44b7-8da0-04740ddb1c38",
+    "sistaAnsokningsdag": "2026-10-18",
+    "publicerad": "2026-09-24T22:00:00+02:00",
+    "poang": 8,
+    "skal": [
+      "+3 titel: butikk",
+      "+3 \\bopplæring\\s+(?:både\\s+)?vi",
+      "+4 \\bgrundig\\s+opplæring\\b",
+      "-2 \\berfaring\\s+med\\b"
+    ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: over 18 år",
+    "chansniva": "hog"
+  },
+  {
+    "titel": "Butikkmedarbeider i 20% stilling til Musti Bodø!",
+    "arbetsgivare": "Musti Norge AS",
+    "ort": "BODØ",
+    "fylke": "NORDLAND",
+    "omfattning": "Deltid",
+    "anstallningsform": "Fast",
+    "beskrivning": "er du klar for en morsom og meningsfull jobb i musti? ønsker du en jobb der du kan kombinere salgstalentet ditt med lidenskap for dyr? nå har du sjansen til å bli en del av musti-familien i bodø. som ansatt hos oss får du en sentral rolle i å hjelpe våre kunder finne de riktige produktene for deres firbente venner. vi ser etter deg som har et øye for mersalg og som elsker å skape gode kundeoppleve",
+    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/a292e605-8ea0-4c03-a043-473a636b9119",
+    "sistaAnsokningsdag": "2026-11-23",
+    "publicerad": "2026-09-24T22:00:00+02:00",
+    "poang": 8,
+    "skal": [
+      "+3 titel: butikk",
+      "+3 \\bopplæring\\s+(?:både\\s+)?vi",
+      "+4 \\bgrundig\\s+opplæring\\b",
+      "-2 \\berfaring\\s+med\\b"
+    ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: over 18 år",
     "chansniva": "hog"
   },
   {
@@ -111,24 +207,28 @@
       "+4 \\bgod\\s+opplæring\\b",
       "+2 inga hinder i texten"
     ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
     "chansniva": "hog"
   },
   {
-    "titel": "Tilkallingsvikar cateringmedarbeidar",
-    "arbetsgivare": "Fjord1 - Maritim Drift",
-    "ort": "HØYANGER",
-    "fylke": "VESTLAND",
-    "omfattning": "Heltid",
+    "titel": "Coop Prix Storgata søker serviceinnstilte tilkallingsvikarer!",
+    "arbetsgivare": "Coop Nordland",
+    "ort": "BODØ",
+    "fylke": "NORDLAND",
+    "omfattning": "Deltid",
     "anstallningsform": "Vikariat",
-    "beskrivning": "fjord1 har ledig stilling som tilkallingsvikar i catering i sambandet lavik-oppedal vi søkjer ein serviceinnstilt cateringmedarbeidar til arbeid om bord på ferje. arbeidet inneber sal og servering av mat og drikke, kundeservice, samarbeid med kollegaer samt vask og rydding. du må trivast med å jobbe med folk og kunne arbeide effektivt i ein travel kvardag. aktuelle kandidatar vert kontakta fortløp",
-    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/ba0b7164-bd2c-4e3a-8370-e23b190aad7c",
-    "sistaAnsokningsdag": "2026-10-07T00:00:00",
+    "beskrivning": "til vår butikk coop prix storgata søker vi nå flere smilende og serviceinnstilte butikkmedarbeidere til stillinger som tilkallingsvikar. arbeidstiden vil variere og kan omfatte både dag-, kvelds- og helgevakter. det er derfor viktig at du er fleksibel og kan stille på kort varsel ved behov. i perioder må det også påregnes økt tilkalling, for eksempel i sesong, ved ferieavvikling eller ellers når b",
+    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/2d697011-1c90-4d9a-af51-b816baa44191",
+    "sistaAnsokningsdag": "2026-10-15T00:00:00",
     "publicerad": "2026-09-24T00:00:00+02:00",
     "poang": 5,
     "skal": [
       "+3 titel: vikar",
       "+2 inga hinder i texten"
     ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: fylt 18 år",
     "chansniva": "medel"
   },
   {
@@ -148,6 +248,8 @@
       "+4 \\bgod\\s+opplæring\\b",
       "-2 \\berfaring\\s+(?:fra|frå)\\b"
     ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
     "chansniva": "medel"
   },
   {
@@ -166,42 +268,8 @@
       "+3 titel: sesonghjelp",
       "+2 inga hinder i texten"
     ],
-    "chansniva": "medel"
-  },
-  {
-    "titel": "Ringevikar/ tilkallingshjelp",
-    "arbetsgivare": "Hegglandsdalen Barnehage",
-    "ort": "BJØRNAFJORDEN",
-    "fylke": "VESTLAND",
-    "omfattning": "Heltid",
-    "anstallningsform": "Annet",
-    "beskrivning": "vi søker etter ringevikar/ tilkallingshjelp ved sykefravær og annet korttidsfravær.",
-    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/06c4d85c-6cce-43f5-a6fa-117755ab5bac",
-    "sistaAnsokningsdag": "Snarest",
-    "publicerad": "2026-09-24T13:17:57+02:00",
-    "poang": 5,
-    "skal": [
-      "+3 titel: tilkallingshjelp",
-      "+2 inga hinder i texten"
-    ],
-    "chansniva": "medel"
-  },
-  {
-    "titel": "Coop Prix Storgata søker serviceinnstilte tilkallingsvikarer!",
-    "arbetsgivare": "Coop Nordland",
-    "ort": "BODØ",
-    "fylke": "NORDLAND",
-    "omfattning": "Deltid",
-    "anstallningsform": "Vikariat",
-    "beskrivning": "til vår butikk coop prix storgata søker vi nå flere smilende og serviceinnstilte butikkmedarbeidere til stillinger som tilkallingsvikar. arbeidstiden vil variere og kan omfatte både dag-, kvelds- og helgevakter. det er derfor viktig at du er fleksibel og kan stille på kort varsel ved behov. i perioder må det også påregnes økt tilkalling, for eksempel i sesong, ved ferieavvikling eller ellers når b",
-    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/2d697011-1c90-4d9a-af51-b816baa44191",
-    "sistaAnsokningsdag": "2026-10-15T00:00:00",
-    "publicerad": "2026-09-24T00:00:00+02:00",
-    "poang": 5,
-    "skal": [
-      "+3 titel: vikar",
-      "+2 inga hinder i texten"
-    ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: over 18 år",
     "chansniva": "medel"
   },
   {
@@ -220,6 +288,28 @@
       "+3 titel: vikar",
       "+2 inga hinder i texten"
     ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
+    "chansniva": "medel"
+  },
+  {
+    "titel": "Ringevikar/ tilkallingshjelp",
+    "arbetsgivare": "Hegglandsdalen Barnehage",
+    "ort": "BJØRNAFJORDEN",
+    "fylke": "VESTLAND",
+    "omfattning": "Heltid",
+    "anstallningsform": "Annet",
+    "beskrivning": "vi søker etter ringevikar/ tilkallingshjelp ved sykefravær og annet korttidsfravær.",
+    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/06c4d85c-6cce-43f5-a6fa-117755ab5bac",
+    "sistaAnsokningsdag": "Snarest",
+    "publicerad": "2026-09-24T13:17:57+02:00",
+    "poang": 5,
+    "skal": [
+      "+3 titel: tilkallingshjelp",
+      "+2 inga hinder i texten"
+    ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
     "chansniva": "medel"
   },
   {
@@ -238,6 +328,8 @@
       "+3 titel: butikk",
       "+2 inga hinder i texten"
     ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: over 18 år",
     "chansniva": "medel"
   },
   {
@@ -256,6 +348,8 @@
       "+3 titel: medarbeider",
       "+2 inga hinder i texten"
     ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: fylt 18 år",
     "chansniva": "medel"
   },
   {
@@ -274,6 +368,70 @@
       "+3 titel: servitør",
       "+2 inga hinder i texten"
     ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
+    "chansniva": "medel"
+  },
+  {
+    "titel": "Servitør Sesong 2025/26",
+    "arbetsgivare": "Lofotstua As",
+    "ort": "OSLO",
+    "fylke": "OSLO",
+    "omfattning": "Heltid",
+    "anstallningsform": "Sesong",
+    "beskrivning": "lofotstua resturant søker servitør til og arbeide vintersesongen 2024/25. dette er sesongarbeid med fast ansettelse fra 28 oktober 2025 til 20 mars 2026. arbeidet er fra mandag til fredag ettermiddag/kveld. helgene er vi lukket,så da har du fri. du får også fastlønn 100% . juleferie med lønn jeg ser etter en engasjert person som tar jobben seriøst,flink med kunder og ansvarsfull ovenfor kolleger. ",
+    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/16a98542-641e-4b17-a257-e1d2ae91d608",
+    "sistaAnsokningsdag": "2026-10-17",
+    "publicerad": "2026-09-25T06:00:00+02:00",
+    "poang": 5,
+    "skal": [
+      "+3 titel: servitør",
+      "+2 inga hinder i texten"
+    ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
+    "chansniva": "medel"
+  },
+  {
+    "titel": "Dekkskiftere søkes til vintersesongen i Bodø",
+    "arbetsgivare": "Adecco Norge AS",
+    "ort": "BODØ",
+    "fylke": "NORDLAND",
+    "omfattning": "Deltid",
+    "anstallningsform": "Vikariat",
+    "beskrivning": "kan du starte raskt? vi trenger flere dekkskiftere til årets dekksesong! adecco søker medarbeidere til dekkskifte på personbiler, varebiler, lastebiler og tyngre kjøretøy . arbeidsoppgaver dekkskifte på lette og tunge kjøretøy montering og demontering av dekk håndtering og lagring av hjul enkle verkstedoppgaver vi ser etter deg som trives med fysisk arbeid er pålitelig og arbeidsom liker å jobbe i",
+    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/0693438f-5adc-4657-9e78-d7c292e6114e",
+    "sistaAnsokningsdag": "30.09.2026",
+    "publicerad": "2026-09-23T00:00:00+02:00",
+    "poang": 5,
+    "skal": [
+      "+5 \\bopplæring\\s+(?:vil\\s+)?(?:",
+      "+4 \\bgod\\s+opplæring\\b",
+      "-2 \\berfaring\\s+(?:fra|frå)\\b",
+      "-2 \\berfaring\\s+med\\b"
+    ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
+    "chansniva": "medel"
+  },
+  {
+    "titel": "Helsesekretær i 100% vikarstilling",
+    "arbetsgivare": "Sentrum Legekontor As",
+    "ort": "TROMSØ",
+    "fylke": "TROMS",
+    "omfattning": "Heltid",
+    "anstallningsform": "Vikariat",
+    "beskrivning": "aut. helsesekretær søkes til 18 mnd vikariat ved sentrum legekontor, 100% et evt. vikariat kan være kortere om dette passer bedre. mulighet for fast ansettelse. annet relevant aut. helsepersonell oppfordres også til å søke. gode norskkunnskaper, både skriftlig og språklig, forutsettes. oppstart etter nærmere avtale. hva vi ser etter en stabil medarbeider med godt humør. arbeidsoppgaver helsesekret",
+    "lank": "https://arbeidsplassen.nav.no/stillinger/stilling/660ad355-d8c1-41d7-b0fa-d982d67b9218",
+    "sistaAnsokningsdag": "Snarest",
+    "publicerad": "2026-09-25T08:57:26+02:00",
+    "poang": 5,
+    "skal": [
+      "+3 titel: vikar",
+      "+2 inga hinder i texten"
+    ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
     "chansniva": "medel"
   },
   {
@@ -293,6 +451,8 @@
       "+3 \\bpersonlig\\s+egnethet\\s+vek",
       "-2 \\berfaring\\s+(?:fra|frå)\\b"
     ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: fylt 18 år",
     "chansniva": "medel"
   },
   {
@@ -313,6 +473,8 @@
       "-2 \\berfaring\\s+(?:fra|frå)\\b",
       "-2 \\bkvalifikasjonskrav\\b"
     ],
+    "minstaAlder": 18,
+    "aldersskal": "18 år: fylt 18 år",
     "chansniva": "medel"
   },
   {
@@ -331,6 +493,8 @@
       "+5 \\bnødvendig\\s+opplæring\\b",
       "-2 \\berfaring\\s+med\\b"
     ],
+    "minstaAlder": 15,
+    "aldersskal": "inget hinder för den som är under 18",
     "chansniva": "medel"
   }
 ]
