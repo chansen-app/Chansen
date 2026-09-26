@@ -47,7 +47,16 @@ const YRKESSTOPP = [
   "koordinator", "rådgiver", "konsulent", "prosjektleder", "teamleder",
   // Hantverk med fagbrev
   "murer", "flislegger", "mekaniker", "tekniker", "operatør", "operator",
-  "bilklargjører", "betongborrer", "betongsager", "welder", "fitter"
+  "bilklargjører", "betongborrer", "betongsager", "welder", "fitter",
+
+  // Yrken som kräver fagbrev eller utbildning, och som slank igenom.
+  "helsesekretær", "frisør", "barber", "tannpleier", "apotektekniker",
+  "kokk", "baker", "slakter", "gartner", "elektromontør",
+
+  /* Nynorska former. Annonserna skrivs på båda målformerna, och utan
+     de här slipper till exempel en lärartjänst igenom filtret.        */
+  "lærar", "sjukepleiar", "vernepleiar", "barnehagelærar", "helsefagarbeidar",
+  "ingeniør", "ingeniar", "rådgjevar", "leiar", "koordinatar"
 ];
 
 // ── Ord i texten som gör att annonsen åker ut direkt ──────────────────
