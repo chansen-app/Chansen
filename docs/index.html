@@ -1085,7 +1085,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     </div>
 
     <div class="field">
-      <label class="fraga">Din mejladress på företagets domän</label>
+      <label class="fraga">Din mejladress</label>
       <input class="txt agf" id="ag-mejl" placeholder="namn@foretaget.se" inputmode="email">
       <div class="hint" id="ag-mejl-svar">Använder vi bara för att kontakta dig. Visas inte i appen.</div>
     </div>
@@ -1227,7 +1227,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 120</footer>
+version 121</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2221,11 +2221,13 @@ function agKolla(){
   var ms = document.getElementById("ag-mejl-svar");
   if (!mejl) { if (ms) ms.textContent = ""; }
   else if (GRATISMEJL.indexOf(mdom) > -1) {
-    if (ms) { ms.textContent = "Mejla från företagets egen domän, inte " + mdom + ". Det är så vi vet att du är den du säger."; ms.style.color = "var(--accent-700)"; }
-    problem.push("mejldomän");
+    /* Tidigare stoppades alla gratisdomäner. Men många riktiga småföretag
+       har hemsida och använder ändå gmail eller hotmail, och de blev
+       utestängda. Nu går annonsen igenom, men den märks så att den
+       granskas extra noga innan den publiceras.                      */
+    if (ms) { ms.textContent = "Du mejlar från " + mdom + " och inte företagets egen domän. Det går bra, men då kontrollerar vi annonsen extra noga innan den publiceras."; ms.style.color = "var(--n-700)"; }
   } else if (mdom && ldom && mdom.split(".").slice(-2).join(".") !== ldom.split(".").slice(-2).join(".")) {
-    if (ms) { ms.textContent = "Mejlen ligger på " + mdom + " men länken på " + ldom + ". Det behöver stämma, annars mejla oss i stället."; ms.style.color = "var(--accent-700)"; }
-    problem.push("domänerna stämmer inte");
+    if (ms) { ms.textContent = "Mejlen ligger på " + mdom + " men länken på " + ldom + ". Det går bra, men vi kontrollerar annonsen extra noga."; ms.style.color = "var(--n-700)"; }
   } else { if (ms) { ms.textContent = ""; } }
 
   // lönen: belopp krävs om det inte är kollektivavtal, och det ska vara rimligt
@@ -2304,6 +2306,17 @@ function agData(){
     sista: agFalt("sista"),
     mejl: agFalt("mejl"),
     kontakt: agFalt("kontakt"),
+    // Märks när avsändaren inte mejlar från företagets egen domän, eller
+    // när mejlet och länken ligger på olika domäner. Då granskas annonsen
+    // extra noga innan den publiceras.
+    granskaExtra: (function(){
+      var md = domanAv(agFalt("mejl")), ld = domanAv(agFalt("lank"));
+      if (!md) return "";
+      if (GRATISMEJL.indexOf(md) > -1) return "ja, gratisdomän: " + md;
+      if (md && ld && md.split(".").slice(-2).join(".") !== ld.split(".").slice(-2).join("."))
+        return "ja, mejl " + md + " men länk " + ld;
+      return "";
+    })(),
     erfarenhet: ag.erfarenhet || "",
     behorighet: ag.behorighet || "",
     timmar: agFalt("timmar"),
