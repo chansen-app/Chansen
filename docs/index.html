@@ -1227,7 +1227,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 122</footer>
+version 123</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2503,14 +2503,21 @@ function laddaMejllista(){
    tittar på ett enskilt jobb, och en knapp vidare till hela listan. Där
    ställs åldersfrågan som vanligt, så skyddet gäller fortfarande. */
 function jobbFranAdressen(){
-  var m = (location.hash || "").match(/^#jobb-(\d+)$/);
+  /* Två sorters adresser fungerar:
+       #jobb-31495230              annonsens nummer i Platsbanken
+       #jobb-hundskotare-hudiksvall   id på en annons arbetsgivaren lagt upp
+     Det andra behövs för att kunna skicka en arbetsgivare en direktlänk
+     till deras egen annons.                                          */
+  var m = (location.hash || "").match(/^#jobb-([\wåäöÅÄÖ-]+)$/);
   if (!m) return false;
   if (typeof JOBB === "undefined" || !JOBB.length) return false;
 
   var id = m[1];
+  var siffror = /^\d+$/.test(id);
   var j = null;
   for (var i = 0; i < JOBB.length; i++){
-    if (String(JOBB[i].lank || "").indexOf("/" + id) > -1){ j = JOBB[i]; break; }
+    if (JOBB[i].id && JOBB[i].id === id){ j = JOBB[i]; break; }
+    if (siffror && String(JOBB[i].lank || "").indexOf("/" + id) > -1){ j = JOBB[i]; break; }
   }
 
   var el = document.getElementById("enskilt-innehall");
@@ -3588,7 +3595,7 @@ try {
 // så att den går att skicka direkt till ett företag.
 function kollaAdress(){
   if (location.hash === "#arbetsgivare") { visaVy("arbetsgivare"); return true; }
-  if (/^#jobb-\d+$/.test(location.hash || "")) return jobbFranAdressen();
+  if (/^#jobb-[\wåäöÅÄÖ-]+$/.test(location.hash || "")) return jobbFranAdressen();
   return false;
 }
 window.addEventListener("hashchange", kollaAdress);

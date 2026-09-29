@@ -21,6 +21,8 @@ const EGNA_JOBB = [
      hemsida finns, och företaget har annonserat i Platsbanken tidigare
      med samma mejladress. Lön angiven, inget utdrag krävs.          */
   {
+    // Id:t ger annonsen en egen adress, chansen.nu/#jobb-hundskotare-hudiksvall
+    id: "hundskotare-hudiksvall",
     titel: "Hundskötare",
     arbetsgivare: "Hudiksvalls Hundcenter",
     ort: "Hudiksvall",
