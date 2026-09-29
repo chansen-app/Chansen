@@ -804,7 +804,32 @@ function fly(t) {
     .replace(/"/g, "&quot;");
 }
 
+/* Läser de annonser arbetsgivare lagt upp direkt hos oss. De ligger i
+   docs/egna-jobb.js och kommer inte från Platsbanken, så de måste
+   läsas in separat för att komma med på ortssidorna. Utgångna hoppas
+   över, precis som i appen.                                          */
+function egnaJobb() {
+  try {
+    const kod = fs.readFileSync("docs/egna-jobb.js", "utf8");
+    const lista = new Function(kod + "; return typeof EGNA_JOBB !== 'undefined' ? EGNA_JOBB : [];")();
+    const nu = new Date();
+    return (lista || []).filter(e => {
+      if (!e || !e.titel || !e.ort) return false;
+      if (!e.sistaAnsokningsdag) return true;
+      const slut = new Date(e.sistaAnsokningsdag);
+      return isNaN(slut) || slut >= nu;
+    });
+  } catch (e) {
+    console.log("Kunde inte läsa egna-jobb.js:", e.message);
+    return [];
+  }
+}
+
 function skrivOrtssidor(jobb, hamtadTid) {
+  const egna = egnaJobb();
+  if (egna.length) console.log("Egna annonser med på ortssidorna: " + egna.length);
+  jobb = jobb.concat(egna);
+
   const perOrt = {};
   for (const j of jobb) {
     if (!j.ort) continue;
@@ -842,7 +867,8 @@ function skrivOrtssidor(jobb, hamtadTid) {
 
     let rader = "";
     for (const j of lista.slice(0, 40)) {
-      const id = (String(j.lank).match(/\/(\d+)$/) || [])[1] || "";
+      // Egna annonser har ett eget id, resten har sitt nummer i Platsbanken.
+      const id = j.id || (String(j.lank).match(/\/(\d+)$/) || [])[1] || "";
       rader += '    <li>\n'
         + '      <a href="https://chansen.nu/#jobb-' + id + '">'
         + fly(j.titel) + '</a>\n'
