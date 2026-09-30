@@ -1,0 +1,54 @@
+name: Hämta brittiska jobb
+
+# Labb. Kör varje natt, efter den svenska och den norska hämtningen.
+#
+# Skriver labb/ukjobb.js och labb/ukjobb.json.
+# Ingenting av det publiceras, eftersom GitHub Pages bara tar mappen docs.
+#
+# Nyckeln kommer från Adzuna. Lägg den som Secrets under Settings,
+# Secrets and variables, Actions, med namnen ADZUNA_ID och ADZUNA_KEY.
+#
+# Körningen gör runt 28 anrop, och provkontot tål 250 om dagen.
+#
+# Du kan också starta den för hand under fliken Actions.
+
+on:
+  schedule:
+    - cron: "0 7 * * *"     # 07:00 UTC, alltså 09:00 svensk sommartid
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  hamta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Hämta repot
+        uses: actions/checkout@v4
+
+      - name: Installera Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Kör hämtningen
+        env:
+          ADZUNA_ID: ${{ secrets.ADZUNA_ID }}
+          ADZUNA_KEY: ${{ secrets.ADZUNA_KEY }}
+        run: node labb/hamta-uk.js
+
+      - name: Spara resultatet
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add labb/ukjobb.js labb/ukjobb.json
+          if git diff --staged --quiet; then
+            echo "Inget nytt att spara."
+          else
+            git commit -m "Nattlig hämtning: brittiska jobb"
+            git pull --rebase --autostash origin main || git pull --no-rebase -X ours --no-edit origin main
+            git push
+          fi
