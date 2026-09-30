@@ -196,6 +196,23 @@ const BAST_CHANS = 6;           // från detta räknas den som bäst chans
 // ──────────────────────────────────────────────────────────────────────
 function sov(ms) { return new Promise(k => setTimeout(k, ms)); }
 
+/* Grov kategori, samma sorts etiketter som den svenska sidan använder. */
+function kategori(titel, text) {
+  const t = ((titel || "") + " " + text).toLowerCase();
+  const par = [
+    [/butikk|salg|kasse|kunde/, "Butik"],
+    [/lager|logistikk|pakke|truck|sjåfør|transport/, "Lager och logistik"],
+    [/kafé|kafe|restaurant|kokk|servitør|kantine|bar\b/, "Restaurang och café"],
+    [/renhold|vask|rengjøring/, "Städ"],
+    [/barnehage|skole|elev|barn\b|sfo/, "Barn och skola"],
+    [/omsorg|pleie|helse|assistent|bruker/, "Vård och omsorg"],
+    [/produksjon|fabrikk|montering|industri/, "Industri och produktion"],
+    [/vaktmester|drift|eiendom/, "Fastighet"]
+  ];
+  for (const [r, namn] of par) if (r.test(t)) return namn;
+  return "Övrigt";
+}
+
 async function nyckel() {
   if (process.env.NAV_TOKEN) return process.env.NAV_TOKEN.trim();
   const svar = await fetch(BAS + "/api/publicToken");
@@ -317,23 +334,44 @@ async function kor() {
 
     const alder = minstaAlder(a.title, text);
     const plats = (a.workLocations || [])[0] || {};
+
+    /* Fälten heter samma sak som i den svenska datan, så att prototypsidan
+       kan läsa dem utan att koden behöver ändras. Ort skrivs med stor
+       bokstav, eftersom NAV skriver den i versaler.                    */
+    const ort = (plats.municipal || plats.city || "").toLowerCase()
+      .replace(/(^|[\s-])([a-zåäöæøéè])/g, (m, f, b) => f + b.toUpperCase());
+    const lan = (plats.county || "").toLowerCase()
+      .replace(/(^|[\s-])([a-zåäöæøéè])/g, (m, f, b) => f + b.toUpperCase());
+
     jobb.push({
       titel: a.title || "",
       arbetsgivare: (a.employer || {}).name || "",
-      ort: plats.municipal || plats.city || "",
-      fylke: plats.county || "",
+      ort: ort,
+      lan: lan,
       omfattning: a.extent || "",
       anstallningsform: a.engagementtype || "",
+      kategori: kategori(a.title, text),
       beskrivning: rensa(a.description).slice(0, 400),
       lank: a.link || a.applicationUrl || "",
       sistaAnsokningsdag: a.applicationDue || "",
       publicerad: a.published || "",
       poang: dom.p,
+      sortpoang: dom.p * 10,
       skal: dom.skal,
       // 15 betyder att jobbet ser lämpligt ut även för den som är under 18,
       // 18 att annonsen nämner natt, alkohol, tobak eller en åldersgräns.
       minstaAlder: alder.alder,
       aldersskal: alder.skal,
+      minderarigOk: alder.alder <= 15,
+      nattarbete: /natt(?:arbeid|evakt)?/i.test(text),
+      erfarenhetKravs: false,
+      nyborjarvanlig: dom.p >= BAST_CHANS,
+      nyborjarskal: (dom.skal && dom.skal.length) ? dom.skal[0] : "",
+      korkortKravs: /\bførerkort\b/i.test(text),
+      utdrag: /\bpolitiattest\b/i.test(text) ? "kravs" : "nej",
+      bemanning: /bemanning|vikarbyrå|rekrutteringsbyrå/i.test(text),
+      provision: false,
+      lonform: "",
       chansniva: dom.p >= BAST_CHANS ? "hog" : "medel"
       // kontaktuppgifter sparas aldrig, enligt NAV:s villkor
     });
@@ -348,6 +386,17 @@ async function kor() {
   fs.writeFileSync("labb/norgejobb.js",
     'const NORGE_HAMTAD = "' + tid + '";\n' +
     "const NORGEJOBB = " + JSON.stringify(jobb) + ";");
+
+  /* Samma data en gång till, men med namnen den riktiga sidan använder.
+     Den filen ligger i docs så att prototypsidan kan läsa den.        */
+  const kommunLan = {};
+  for (const j of jobb) if (j.ort && j.lan) kommunLan[j.ort] = j.lan;
+  if (!fs.existsSync("docs/labb")) fs.mkdirSync("docs/labb", { recursive: true });
+  fs.writeFileSync("docs/labb/norge-jobb.js",
+    'const UPPDATERAD = "' + tid + '";\n' +
+    "const JOBB_HAMTAD = UPPDATERAD;\n" +
+    "const KOMMUNLAN = " + JSON.stringify(kommunLan) + ";\n" +
+    "const JOBB = " + JSON.stringify(jobb) + ";");
 
   console.log("");
   console.log("Klart. " + jobb.length + " jobb kvar, " + bort +
