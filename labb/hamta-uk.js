@@ -69,6 +69,14 @@ const STOPP = [
   /\bdriving\s+licen[cs]e\s+(?:is\s+)?essential\b/i,
   /\bsia\s+licen[cs]e\b/i, /\bteaching\s+qualification\b/i,
   /\bcommission\s+only\b/i, /\buncapped\s+commission\b/i,
+
+  /* Kurser som säljs som jobb. I Storbritannien annonseras ofta
+     "placement programmes" där man betalar för en utbildning och lovas
+     praktik efteråt. Det är inte ett jobb och hör inte hemma här.   */
+  /\bplacement\s+program(?:me)?\b/i, /\bbootcamp\b/i,
+  /\btraining\s+academy\b/i, /\bcourse\s+fee\b/i,
+  /\bself[-\s]funded\b/i, /\btuition\b/i, /\benrol(?:l)?\b/i,
+  /\bqualify\s+then\s+work\b/i, /\bguaranteed\s+interview\b/i,
   /\bself[-\s]employed\b/i, /\bott?e\b/i
 ];
 
