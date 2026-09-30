@@ -333,6 +333,15 @@ kontrollera. Och "placement programmes", alltså kurser som säljs som jobb.
 **Alla brittiska jobb markeras som 18 år.** Reglerna för yngre sätts av
 varje kommun och kräver ofta arbetstillstånd från skolan.
 
+### Utbildningsjobb, det äldsta experimentet
+
+Ligger i `labb/hamta-utbildning.js` med egen nattkörning klockan 05.
+Tanken var att fånga jobb som kräver utbildning, alltså motsatsen till
+Chansen, för att se hur stor skillnaden faktiskt är. Resultatet ligger i
+`labb/utbildningsjobb.json` och används inte till något i dag, men datan
+är användbar om man vill visa hur liten andel av arbetsmarknaden som är
+öppen utan erfarenhet.
+
 ### Danmark
 
 Ingen öppen data. Jobnet drivs av Styrelsen for Arbejdsmarked og
@@ -435,7 +444,66 @@ kommentarer.
 
 ---
 
-## 16. Pending
+## 16. Framtidsplaner
+
+Det här är riktningen, inte löften. Ingenting av det ska sägas till
+utomstående som om det vore bestämt.
+
+### Det som är bestämt
+
+**Chansen ska vara gratis för alla som söker jobb.** Det står fast oavsett
+vad som händer med finansieringen.
+
+**Ingen ska kunna betala för att synas högre upp.** Ordningen styrs bara
+av hur få hinder annonsen har. Det är hela grunden för att sidan går att
+lita på, och det är därför ett företag är en svår fråga: betalda annonser
+skulle påverka vilka jobb som kommer in.
+
+**Sidan ska fortsätta fungera utan konton och utan spårning.**
+
+### Nära i tiden
+
+**Podden släpps 15 november.** Det är dagen att höra av sig till alla på
+en gång: studie- och yrkesvägledarna, Framtidshubbarna, Maria på
+Arbetsförmedlingen och grupperna.
+
+**Mötet med Meja** på Burgården, som vill veta mer och dela ut kort.
+
+**Fler arbetsgivarannonser.** Den första kom in i september. Varje ny
+annons är ett bevis på att tjänsten fungerar åt två håll.
+
+**Danmark**, om svaret från STAR blir positivt.
+
+### Längre fram, oklart
+
+**Ett sätt att mäta om lösningen hjälper.** I dag går det inte att säga hur
+många som fått jobb, och det är ett medvetet val. Frågan är om det går att
+mäta utan att spåra någon. Inget är löst, och ingenting ska lovas.
+
+**Norden och Storbritannien på riktigt.** Prototyperna visar att det går.
+Det som saknas är översättning, lokala lagregler och någon som kan
+språket.
+
+**Eventuellt företag.** Osäkert och inte genomtänkt. Skälet till tveksamhet
+är principiellt, inte praktiskt, se ovan om betalda annonser.
+
+**Samarbeten med konton som når rätt människor.** En lärarstudent med
+studentkonto har erbjudit sig att hjälpa till. Ersättning på ett par tusen
+i månaden är inte hållbart i dag, eftersom Chansen inte drar in något och
+allt skulle betalas ur egen ficka.
+
+### Vad Sami sagt
+
+Mentorn Sami vill se att man kan sätta ett mål och driva mot det, inte
+bara att siffrorna blir stora. Det som imponerar är att kunna säga: jag
+bestämde X, gjorde Y, och det gav Z, och det här fungerade inte så nu
+provar jag något annat.
+
+Kontakta honom när siffrorna är i mål, inte innan.
+
+---
+
+## 17. Pending
 
 - Ortssidor på norska och engelska saknas
 - Hela den norska och brittiska sidans text är på svenska
