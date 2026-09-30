@@ -56,6 +56,8 @@ const YRKESSTOPP = [
   /* Nynorska former. Annonserna skrivs på båda målformerna, och utan
      de här slipper till exempel en lärartjänst igenom filtret.        */
   "lærar", "sjukepleiar", "vernepleiar", "barnehagelærar", "helsefagarbeidar",
+  // Väktare kräver godkänd väktarutbildning enligt norsk lag.
+  "vekter", "vektere", "ordensvakt", "securitas",
   "ingeniør", "ingeniar", "rådgjevar", "leiar", "koordinatar"
 ];
 
