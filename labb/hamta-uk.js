@@ -82,6 +82,27 @@ const STOPP = [
 
   /* Kontorsarbete som kräver mer än annonsen låter påskina. Det syns i
      arbetsuppgifterna även när rubriken säger entry level.           */
+  /* Försvaret rekryterar med orden "no experience required", men det är
+     ingen vanlig anställning. Det kräver medicinsk prövning, fysiska
+     tester och en tjänstgöringsförbindelse.                          */
+  /\bbritish\s+army\b/i, /\bthe\s+army\b/i, /\bsoldier\b/i,
+  /\barmed\s+forces\b/i, /\broyal\s+(?:navy|air\s+force|marines)\b/i,
+  /\bmilitary\b/i, /\breservist\b/i,
+
+  /* Praktik och volontärarbete. Ofta obetalt, och det hör inte hemma
+     bland jobb.                                                      */
+  /\bintern(?:ship)?\b/i, /\bvolunteer(?:ing)?\b/i, /\bvoluntary\b/i,
+  /\bunpaid\b/i, /\bwork\s+experience\s+placement\b/i,
+
+  /* Yrkesbehörigheter för tyngre fordon. */
+  /\bclass\s*[12]\b/i, /\bcategory\s*[cd]\b/i, /\bcat\s*[cd]\b/i,
+  /\bhgv\b/i, /\blgv\b/i, /\bcpc\s+card\b/i,
+
+  /* Erfarenhet räknad i månader, som rubriken inte avslöjar. */
+  /\bminimum\s+of\s+\d+\s*(?:months?|years?)\b/i,
+  /\b\d+\s*months?\s+of\s+[\w\s]{0,24}experience\b/i,
+  /\bat\s+least\s+\d+\s*(?:months?|years?)\b/i,
+
   /\bdata\s+analysis\b/i, /\breporting\b/i, /\bcompliance\b/i,
   /\bquality\s+control\b/i, /\bstakeholders?\b/i, /\bkpis?\b/i,
   /\bspreadsheets?\b/i, /\bexcel\b/i, /\bpayroll\b/i, /\binvoicing\b/i,
@@ -129,7 +150,9 @@ const FLAGGOR = [
   [/\bdriving\s+licen[cs]e\b/i, "nämner körkort"],
   [/\bnight\s+shift\b/i, "nattarbete"],
   [/\bzero\s+hours?\b/i, "nolltimmarsavtal"],
-  [/\bweekend\b/i, "helgarbete"]
+  [/\bweekend\b/i, "helgarbete"],
+  [/\bcar\s+required\b/i, "kräver egen bil"],
+  [/\bcommission\b/i, "provision utöver lön"]
 ];
 
 /* Under 18 i Storbritannien
