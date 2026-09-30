@@ -85,8 +85,18 @@ const YRKESSTOPP = [
      "Electrical Trainer (Full Training Provided)" igenom, alltså en
      tjänst som utbildare och inte ett instegsjobb.                  */
   "trainer", "assessor", "tutor", "instructor", "coach",
-  "practitioner", "officer", "coordinator", "administrator"
+  "practitioner", "officer", "coordinator", "administrator",
+
+  /* Säljjobb utan fast lön är precis det Chansen sorterar bort i
+     Sverige. Här ser vi bara 500 tecken av annonsen och kan alltså inte
+     kontrollera lönen, så hela sorten hålls utanför tills vi vet mer. */
+  "sales", "seller", "promotions", "promoter", "fundraiser",
+  "brand ambassador", "canvasser", "door to door", "field rep",
+  "business development", "recruitment consultant"
 ];
+
+// Kategorier hos Adzuna som av samma skäl hålls utanför
+const KATEGORISTOPP = ["Sales Jobs", "PR, Advertising & Marketing Jobs"];
 
 // ── Sådant som är värt att veta men inte stoppar annonsen ────────────
 const FLAGGOR = [
@@ -146,12 +156,16 @@ async function hamta(fras, sida, n){
   return svar.json();
 }
 
-function bedom(titel, text){
+function bedom(titel, text, kategori){
   const t = (titel || "").toLowerCase();
   const allt = titel + " " + text;
 
+  if (KATEGORISTOPP.indexOf(kategori) > -1){
+    return { ut: "kategorin hålls utanför: " + kategori };
+  }
+
   for (const yrke of YRKESSTOPP){
-    if (t.includes(yrke)) return { ut: "yrket kräver mer: " + yrke.trim() };
+    if (t.includes(yrke)) return { ut: "yrket hålls utanför: " + yrke.trim() };
   }
   for (const r of STOPP){
     const m = allt.match(r);
@@ -206,7 +220,7 @@ async function kor(){
   for (const r of funna.values()){
     const titel = rensa(r.title);
     const text = rensa(r.description);
-    const dom = bedom(titel, text);
+    const dom = bedom(titel, text, (r.category || {}).label || "");
     if (dom.ut){ bort++; continue; }
 
     const plats = (r.location || {}).display_name || "";
