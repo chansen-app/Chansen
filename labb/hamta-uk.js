@@ -57,7 +57,9 @@ const POSITIVA = [
 // ── Hinder. Står något av dessa åker annonsen ut. ────────────────────
 const STOPP = [
   /\b\d+\+?\s*(?:years?|yrs?)(?:'|’)?\s+(?:of\s+)?experience\b/i,
-  /\bexperience\s+(?:is\s+)?(?:required|essential)\b/i,
+  /* Får inte träffa "no experience required", som är precis det vi
+     letar efter. Därför kontrolleras ordet före.                     */
+  /(?<!\bno\s)(?<!\bnot\s)(?<!\bnone\s)\bexperience\s+(?:is\s+)?(?:required|essential)\b/i,
   /\bmust\s+have\s+experience\b/i,
   /\bproven\s+(?:track\s+record|experience)\b/i,
   /\bdegree\b/i, /\bdegree[-\s]educated\b/i, /\bgraduate\b/i,
@@ -77,6 +79,13 @@ const STOPP = [
   /\btraining\s+academy\b/i, /\bcourse\s+fee\b/i,
   /\bself[-\s]funded\b/i, /\btuition\b/i, /\benrol(?:l)?\b/i,
   /\bqualify\s+then\s+work\b/i, /\bguaranteed\s+interview\b/i,
+
+  /* Kontorsarbete som kräver mer än annonsen låter påskina. Det syns i
+     arbetsuppgifterna även när rubriken säger entry level.           */
+  /\bdata\s+analysis\b/i, /\breporting\b/i, /\bcompliance\b/i,
+  /\bquality\s+control\b/i, /\bstakeholders?\b/i, /\bkpis?\b/i,
+  /\bspreadsheets?\b/i, /\bexcel\b/i, /\bpayroll\b/i, /\binvoicing\b/i,
+  /\bcritical\s+thinking\b/i, /\bexecuting\s+strategies\b/i,
   /\bself[-\s]employed\b/i, /\bott?e\b/i
 ];
 
@@ -104,7 +113,14 @@ const YRKESSTOPP = [
 ];
 
 // Kategorier hos Adzuna som av samma skäl hålls utanför
-const KATEGORISTOPP = ["Sales Jobs", "PR, Advertising & Marketing Jobs"];
+const KATEGORISTOPP = [
+  "Sales Jobs", "PR, Advertising & Marketing Jobs",
+  /* Kontorsjobb ser ofta öppna ut i rubriken men kräver i praktiken
+     utbildning. "Entry Level Operations Support" visade sig handla om
+     rapportering, dataanalys och regelefterlevnad.                   */
+  "Admin Jobs", "Accounting & Finance Jobs", "Consultancy Jobs",
+  "IT Jobs", "Legal Jobs", "HR & Recruitment Jobs"
+];
 
 // ── Sådant som är värt att veta men inte stoppar annonsen ────────────
 const FLAGGOR = [
