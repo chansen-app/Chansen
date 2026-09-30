@@ -37,6 +37,9 @@ const EGNA_JOBB = [
       + "krävande. Timmar vid behov. Lön cirka 125 kr i timmen. "
       + "Ansök genom att mejla hudiksvallshundcenter@hotmail.com",
     lank: "https://hudiksvallshundcenter.se",
+    // Ingen egen annonssida finns, ansökan sker via mejl.
+    ansok: "mailto:hudiksvallshundcenter@hotmail.com",
+    knapptext: "Ansök via mejl",
     lonform: "Timlön 125 kr",
     erfarenhetKravs: false,
     nyborjarvanlig: true,
