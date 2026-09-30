@@ -232,14 +232,18 @@ async function kor(){
     if (dom.ut){ bort++; continue; }
 
     const plats = (r.location || {}).display_name || "";
+    /* Fälten heter samma sak som i den svenska datan, så att
+       prototypsidan kan läsa dem utan ändringar i koden. */
     jobb.push({
       titel,
       arbetsgivare: (r.company || {}).display_name || "",
       ort: plats.split(",")[0].trim(),
+      lan: plats.split(",").slice(1).join(",").trim() || plats.trim(),
       omrade: plats,
       omfattning: r.contract_time === "part_time" ? "Part time"
                 : r.contract_time === "full_time" ? "Full time" : "",
-      anstallningsform: r.contract_type || "",
+      anstallningsform: r.contract_type === "permanent" ? "Permanent"
+                      : r.contract_type === "contract" ? "Contract" : "",
       kategori: (r.category || {}).label || "",
       beskrivning: text.slice(0, 400),
       lank: r.redirect_url || "",
@@ -247,12 +251,23 @@ async function kor(){
         ? Math.round(r.salary_min) + (r.salary_max && r.salary_max !== r.salary_min
             ? " till " + Math.round(r.salary_max) : "")
         : "",
+      lonform: "",
       lonUppskattad: !!r.salary_is_predicted,
       publicerad: r.created || "",
       poang: dom.p,
+      sortpoang: dom.p * 10,
       skal: dom.skal,
       flaggor: dom.flaggor,
       minstaAlder: MINSTA_ALDER,
+      minderarigOk: false,
+      nattarbete: (dom.flaggor || []).indexOf("nattarbete") > -1,
+      erfarenhetKravs: false,
+      nyborjarvanlig: true,
+      nyborjarskal: (dom.skal && dom.skal.length) ? dom.skal[0] : "",
+      korkortKravs: (dom.flaggor || []).indexOf("nämner körkort") > -1,
+      utdrag: (dom.flaggor || []).indexOf("kräver DBS-kontroll") > -1 ? "kravs" : "nej",
+      bemanning: false,
+      provision: false,
       chansniva: dom.p >= 6 ? "hog" : "medel"
     });
   }
@@ -265,6 +280,17 @@ async function kor(){
   fs.writeFileSync("labb/ukjobb.js",
     'const UK_HAMTAD = "' + tid + '";\n' +
     "const UKJOBB = " + JSON.stringify(jobb) + ";");
+
+  /* Samma data en gång till, med namnen den riktiga sidan använder.
+     Ligger i docs så att prototypsidan kan läsa den.                 */
+  const kommunLan = {};
+  for (const j of jobb) if (j.ort && j.lan) kommunLan[j.ort] = j.lan;
+  if (!fs.existsSync("docs/labb")) fs.mkdirSync("docs/labb", { recursive: true });
+  fs.writeFileSync("docs/labb/uk-jobb.js",
+    'const UPPDATERAD = "' + tid + '";\n' +
+    "const JOBB_HAMTAD = UPPDATERAD;\n" +
+    "const KOMMUNLAN = " + JSON.stringify(kommunLan) + ";\n" +
+    "const JOBB = " + JSON.stringify(jobb) + ";");
 
   console.log("");
   console.log("Anrop: " + anrop + ". Hittade " + funna.size
