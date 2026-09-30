@@ -615,7 +615,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <ul>
       <li><b>Samma CV till alla.</b> Byt ut de tre inledande raderna så de passar jobbet du söker</li>
       <li><b>För långt.</b> En sida. Har du inte jobbat är en halv sida helt normalt</li>
-      <li><b>Bara uppräkning av arbetsuppgifter.</b> Skriv vad du gjorde, inte vad tjänsten hette</li>
+      <li><b>Only uppräkning av arbetsuppgifter.</b> Skriv vad du gjorde, inte vad tjänsten hette</li>
       <li><b>Luckor du försöker gömma.</b> Skriv hellre vad du gjorde under tiden</li>
       <li><b>Överdrifter.</b> Skriv aldrig att du är flytande i ett språk du inte är flytande i, det märks direkt</li>
       <li><b>Stavfel.</b> Läs igenom en gång till, eller be någon annan läsa</li>
@@ -638,7 +638,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div class="cvsteg dold" data-falt="ort">
       <h2 class="cvfraga">Where do you live?</h2>
       <input class="txt cvf" id="cv-ort" placeholder="Malmö">
-      <div class="hint">Bara orten. Skriv aldrig din fullständiga adress i ett CV.</div>
+      <div class="hint">Only orten. Skriv aldrig din fullständiga adress i ett CV.</div>
     </div>
 
     <div class="cvsteg dold" data-falt="tel">
@@ -809,10 +809,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 </div>
 
 <div id="v-arbetsgivare" class="dold info">
-    <!-- Bara till för dig själv. Visas med chansen.nu/#arbetsgivare?blad=1 -->
+    <!-- Only till för dig själv. Visas med chansen.nu/#arbetsgivare?blad=1 -->
     <div class="rakning dold" id="bladstatus" style="margin-bottom:14px"></div>
     <h1 style="font-size:28px;margin-bottom:6px">Lägg upp ett jobb</h1>
-    <p class="sub">Gratis. För dig som söker personal och inte kräver erfarenhet. Din annons visas för alla som söker jobb i din kommun.</p>
+    <p class="sub">Gratis. För dig som söker personal och inte kräver erfarenhet. Din annons visas för alla som söker jobs in din kommun.</p>
 
     <p>Fyll i formuläret nedan och tryck skicka. Annonsen kommer direkt till oss, du behöver inte mejla något själv.</p>
     <p>Varje annons granskas av en människa innan den publiceras, oftast inom ett dygn. Vi hör av oss om något behöver kompletteras.</p>
@@ -1236,7 +1236,12 @@ function profilrad(){
 }
 
 function startaLista(){
-  // Bara det som måste ske innan sidan ritas om.
+  /* Orten läses från fältet först. Utan det hann raden under rubriken
+     ritas innan svaret sparats, och då stod det "The whole country" även för
+     den som skrivit in sin kommun. */
+  spara();
+
+  // Only det som måste ske innan sidan ritas om.
   document.getElementById("profil").textContent = profilrad();
 
   /* Reservera plats åt listan innan vyn byts. Korten ritas först i nästa
@@ -1289,7 +1294,7 @@ function matcharAlder(j){
   if (j.korkortKravs === true && svar.korkort !== "Ja") return false;
 
   if (svar.alder === "Under 16"){
-    // Bara lätt arbete är tillåtet i den åldern.
+    // Only lätt arbete är tillåtet i den åldern.
     if (EJ_LATT_ARBETE.indexOf(j.kategori) > -1) return false;
     // Står det ingen omfattning går det inte att avgöra om tiderna är
     // lagliga. Då visas jobbet hellre inte alls.
@@ -1324,7 +1329,7 @@ function matcharOrt(j){
 }
 
 // Vilket län ligger den skrivna kommunen i? Uppslagslistan byggs av alla
-// annonser vid hämtningen, så den fungerar även för kommuner utan jobb today.
+// annonser vid hämtningen, så den fungerar även för kommuner utan jobs in dag.
 function lanForOrt(){
   var v = sokordOrt();
   if (!v || typeof KOMMUNLAN === "undefined") return "";
@@ -1648,7 +1653,7 @@ function tomtLage(filter){
     : "Inga jobb just nu. Prova igen om en stund.";
 
   return '<div class="tomt">' + text +
-    '<div style="margin-top:18px"><button class="mini" onclick="nollstall()">Visa alla jobb</button></div></div>';
+    '<div style="margin-top:18px"><button class="mini" onclick="nollstall()">Show all jobs</button></div></div>';
 }
 
 function nollstall(){
@@ -2330,7 +2335,7 @@ function jobbFranAdressen(){
    skickar data om besökarna till tredje part. Det krockar med
    löftet att ingenting sparas om den som använder sidan.
 
-   Bara var femte fel rapporteras, och som mest tre per besök. Utan
+   Only var femte fel rapporteras, och som mest tre per besök. Utan
    den bromsen kan ett fel som upprepas i en slinga fylla hela
    statistiken på en minut.                                       */
 var felRapporterade = 0;
@@ -2342,7 +2347,7 @@ function rapporteraFel(vad, var_) {
     if (Math.random() > 0.2) return;          // var femte
     felRapporterade++;
 
-    // Bara filnamn och radnummer, aldrig innehåll från användaren.
+    // Only filnamn och radnummer, aldrig innehåll från användaren.
     var plats = String(var_ || "").split("/").pop().slice(0, 40);
     var kort = String(vad || "fel").slice(0, 60)
       .replace(/[^a-zA-ZåäöÅÄÖ0-9 ]+/g, " ")
@@ -3271,23 +3276,23 @@ function visaInre(filter){
     aldersnotis = '<div class="ruta" style="font-size:14px">Jobs med natt- eller skiftarbete visas inte för dig. Är du under 18 får du inte jobba mellan 22 och 06. <button class="lank" onclick="oppnaHjalp(\'tider\')">Läs mer om arbetstider</button></div>';
   }
   if (svar.ort && !kandOrt && iOmradet.length === 0) {
-    aldersnotis += '<div class="ruta" style="font-size:14px">Vi hittar ingen kommun som stavas så. Kontrollera stavningen, eller lämna rutan tom för att se jobb i the whole country.</div>';
+    aldersnotis += '<div class="ruta" style="font-size:14px">Vi hittar ingen kommun som stavas så. Kontrollera stavningen, eller lämna rutan tom för att se jobs in the whole country.</div>';
   }
 
   if (lanfall) {
     var antalIOrten = JOBB.filter(matcharOrt).length;
     aldersnotis += '<div class="ruta" style="font-size:14px">'
       + (antalIOrten === 0
-          ? 'Inga jobb i ' + fly(ortsnamn) + ' just nu. Här är jobben i ' + fly(lanfall) + ' i stället.'
-          : 'Bara ' + antalIOrten + (antalIOrten === 1 ? ' jobb' : ' jobb') + ' i ' + fly(ortsnamn)
-            + ' just nu, så vi visar hela ' + fly(lanfall) + '. Jobben i din kommun ligger överst.')
+          ? 'Inga jobs in ' + fly(ortsnamn) + ' just nu. Här är jobben i ' + fly(lanfall) + ' i stället.'
+          : 'Only ' + antalIOrten + (antalIOrten === 1 ? ' jobb' : ' jobb') + ' i ' + fly(ortsnamn)
+            + ' right now, so we are showing all of ' + fly(lanfall) + '. Jobs in your town are shown first.')
       + '</div>';
   }
   if (filter === "direkt") {
     aldersnotis += '<div class="ruta" style="font-size:14px">Här är jobben där du anställs direkt av arbetsplatsen. Bemanningsjobb är ofta en bra väg in, men då anställs du av bemanningsföretaget och uppdragen kan vara korta.</div>';
   }
   if (filter === "nyborjare") {
-    aldersnotis += '<div class="ruta" style="font-size:14px">Här är jobben där arbetsgivaren själv kryssat i att erfarenhet inte krävs. All jobb i Chansen har låga krav, men de här är uttalade. Det är arbetsgivarens ord, inte ett löfte från oss.</div>';
+    aldersnotis += '<div class="ruta" style="font-size:14px">Här är jobben där arbetsgivaren själv kryssat i att erfarenhet inte krävs. All jobs in Chansen har låga krav, men de här är uttalade. Det är arbetsgivarens ord, inte ett löfte från oss.</div>';
   }
   if (notis) {
     notis.innerHTML = aldersnotis + ((filter === "utdrag")
@@ -3308,7 +3313,7 @@ function visaInre(filter){
   }
 
   var platsnamn = lanfall ? lanfall : (ortsnamn ? ortsnamn : "the whole country");
-  document.getElementById("rakning").textContent = valda.length + " jobb i " + platsnamn;
+  document.getElementById("rakning").textContent = valda.length + " jobs in " + platsnamn;
 
   // Stora talet överst. Samma siffra, bara tydligare.
   var ht = document.getElementById("hero-tal");
