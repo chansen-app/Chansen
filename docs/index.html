@@ -239,7 +239,8 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
 .kicker.medel{color:var(--n-600)}
 .titel{font-family:var(--heading);font-weight:400;font-size:20px;line-height:1.2;margin-bottom:4px;overflow-wrap:break-word;word-break:break-word;hyphens:auto}
 .ag{font-size:14px;color:var(--n-700);margin-bottom:14px}
-.beskrivning{font-size:14.5px;line-height:1.5;color:var(--n-700);margin:0 0 12px;
+#enskilt-innehall .beskrivning{-webkit-line-clamp:unset;line-clamp:unset;max-height:none}
+  .beskrivning{font-size:14.5px;line-height:1.5;color:var(--n-700);margin:0 0 12px;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .taggar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .tag{font-size:12px;padding:4px 11px;border-radius:999px;background:var(--n-100);color:var(--n-800)}
@@ -1227,7 +1228,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 123</footer>
+version 124</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1681,6 +1682,18 @@ function kort(j){
   var p = justeradPoang(j);
   var titel = fly(j.titel), arbetsgivare = fly(j.arbetsgivare), ort = fly(j.ort);
   var lank = sakerLank(j.lank);
+
+  /* Annonser som arbetsgivare lagt upp direkt hos oss har sällan någon
+     egen annonssida. Då pekade knappen på företagets startsida, vilket
+     är förvirrande. Finns ett ansökningssätt angivet används det i
+     stället, och knappen får en text som säger vad som händer.      */
+  var knapptext = "Se annonsen";
+  if (j.ansok && /^(https:|mailto:)/i.test(j.ansok)) {
+    lank = j.ansok;
+    knapptext = j.knapptext || (/^mailto:/i.test(j.ansok) ? "Ansök via mejl" : "Till ansökan");
+  } else if (j.egen) {
+    knapptext = j.knapptext || "Till arbetsgivarens sida";
+  }
   var n = niva(p);
   var top = n === "hog";
   var etikett = n === "hog" ? "Bäst chans" : (n === "medel" ? "Värd att söka" : "Högre krav");
@@ -1721,7 +1734,7 @@ function kort(j){
     (j.beskrivning ? '<div class="beskrivning">'+fly(j.beskrivning)+'</div>' : '')+
     '<div class="taggar">'+taggar+'</div>'+
     (extra ? '<div class="taggar extra">'+extra+'</div>' : '')+
-    '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow" onclick="handelse(\'klick-annons\')">Se annonsen</a>'+
+    '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow" onclick="handelse(\'klick-annons\')">'+knapptext+'</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
     '<div class="knapprad">'+
       '<button class="mini" onclick="oppnaAnsokan(\''+encodeURI(lank)+'\')">Skriv ansökan</button>'+
