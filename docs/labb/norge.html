@@ -1263,8 +1263,8 @@ version 124</footer>
 <!-- Går jobbdatan inte att hämta, till exempel på dålig uppkoppling,
      ska sidan ändå fungera och säga vad som hänt i stället för att
      krascha tyst. -->
-<script src="norge-jobb.js" onerror="window.JOBB=[];window.UPPDATERAD='';window.JOBBSAKNAS=true"></script>
-<script src="norge-egna.js" onerror="window.EGNA_JOBB=[]"></script>
+<script>document.write('<scr'+'ipt src="norge-jobb.js?v='+Date.now()+'" onerror="window.JOBB=[];window.UPPDATERAD=&quot;&quot;;window.JOBBSAKNAS=true"></scr'+'ipt>');</script>
+<script>window.EGNA_JOBB = [];</script>
 <script>
 var fragor = {
   alder:      ["Under 16","16 till 17","18 eller äldre"],
@@ -3626,7 +3626,7 @@ window.addEventListener("hashchange", kollaAdress);
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
   raknaBesok();
-    navigator.serviceWorker.register("sw.js").then(function (reg) {
+    Promise.reject(new Error("prototypen använder ingen service worker")).then(function (reg) {
       reg.addEventListener("updatefound", function () {
         var ny = reg.installing;
         if (!ny) return;
