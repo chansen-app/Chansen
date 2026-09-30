@@ -148,7 +148,8 @@ const FLAGGOR = [
   [/\bdbs\s+(?:check|clearance)\b/i, "kräver DBS-kontroll"],
   [/\bown\s+(?:car|transport|vehicle)\b/i, "kräver egen bil"],
   [/\bdriving\s+licen[cs]e\b/i, "nämner körkort"],
-  [/\bnight\s+shift\b/i, "nattarbete"],
+  // Måste fånga både "night shift", "night shifts" och "Operative Nights".
+  [/\bnights?\b|\bnight\s+shifts?\b|\bnight\s+care\b/i, "nattarbete"],
   [/\bzero\s+hours?\b/i, "nolltimmarsavtal"],
   [/\bweekend\b/i, "helgarbete"],
   [/\bcar\s+required\b/i, "kräver egen bil"],
