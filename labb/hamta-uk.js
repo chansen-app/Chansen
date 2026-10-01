@@ -98,6 +98,13 @@ const STOPP = [
   /\bclass\s*[12]\b/i, /\bcategory\s*[cd]\b/i, /\bcat\s*[cd]\b/i,
   /\bhgv\b/i, /\blgv\b/i, /\bcpc\s+card\b/i,
 
+  /* Truckar kräver truckkort, och att arbetsgivaren erbjuder upplärning
+     tar inte bort behörigheten. Reach truck är en egen sort som den
+     tidigare regeln om forklift inte fångade.                        */
+  /\breach\s+truck\b/i, /\bcounterbalance\b/i, /\bfork\s*lift\b/i,
+  /\bflt\b/i, /\bpallet\s+truck\s+licen[cs]e\b/i, /\bplant\s+operator\b/i,
+  /\bteleporter\b/i, /\bcherry\s+picker\b/i,
+
   /* Erfarenhet räknad i månader, som rubriken inte avslöjar. */
   /\bminimum\s+of\s+\d+\s*(?:months?|years?)\b/i,
   /\b\d+\s*months?\s+of\s+[\w\s]{0,24}experience\b/i,
