@@ -166,6 +166,7 @@
       <button id="f-nekad" onclick="visa('nekad')">Nekade</button>
       <button id="f-borttagen" onclick="visa('borttagen')">Borttagna</button>
       <button id="f-alla" onclick="visa('')">Alla</button>
+      <button id="f-synpunkter" onclick="visaSynpunkter()">Synpunkter</button>
     </div>
 
     <div class="landrad">
@@ -364,6 +365,8 @@ function visaHjalp(behall){
 
 function visa(status){
   nuvarande = status;
+  var syn = document.getElementById("f-synpunkter");
+  if (syn) syn.className = "";
   ["väntar","godkänd","nekad",""].forEach(function(s){
     var kn = document.getElementById("f-" + (s || "alla"));
     if (kn) kn.className = (s === status) ? "on" : "";
@@ -490,6 +493,77 @@ function rita(rader){
       + knappar
       + "</div>";
   }).join("");
+}
+
+/* ── synpunkter ─────────────────────────────────────────────────── */
+
+function visaSynpunkter(){
+  nuvarande = "synpunkter";
+  ["väntar","godkänd","nekad","borttagen",""].forEach(function(st){
+    var kn = document.getElementById("f-" + (st || "alla"));
+    if (kn) kn.className = "";
+  });
+  document.getElementById("f-synpunkter").className = "on";
+  document.getElementById("lista").innerHTML = '<p class="laddar">Hämtar...</p>';
+
+  fetch(API + "?vad=synpunkter&biljett=" + encodeURIComponent(biljett))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d || !d.ok){
+        document.getElementById("lista").innerHTML = '<p class="tomt">Det gick inte att hämta.</p>';
+        return;
+      }
+      var rader = d.rader || [];
+      if (!rader.length){
+        document.getElementById("lista").innerHTML = '<p class="tomt">Inga synpunkter än.</p>';
+        return;
+      }
+      document.getElementById("lista").innerHTML = rader.map(function(o){
+        var svar = [
+          ["Letade efter", o["Letade efter"]],
+          ["Saknar", o["Saknar"]],
+          ["Krångligt", o["Krångligt"]],
+          ["Kan bli bättre", o["Kan bli bättre"]]
+        ].filter(function(p){ return p[1]; });
+
+        var hittade = o["Hittade jobb"] || "";
+        var klass = hittade === "Ja" ? "godkand" : hittade === "Nej" ? "nekad" : "vantar";
+
+        return '<div class="rad">'
+          + '<div class="radtopp">'
+          +   '<span class="status ' + klass + '">hittade jobb: ' + fly(hittade || "?") + "</span>"
+          +   '<span class="tid">' + fly(o["Tidpunkt"]) + "</span>"
+          + "</div>"
+          + (svar.length
+              ? svar.map(function(p){
+                  return '<div class="titel" style="font-size:14px;color:var(--damp);margin-bottom:1px">'
+                    + fly(p[0]) + "</div><div style=\"margin-bottom:11px\">" + fly(p[1]) + "</div>";
+                }).join("")
+              : '<div class="foretag">Inget skrivet, bara svaret på första frågan.</div>')
+          + '<dl class="falt">'
+          +   (o["Ålder"] ? "<dt>Ålder</dt><dd>" + fly(o["Ålder"]) + "</dd>" : "")
+          +   (o["Ort"] ? "<dt>Ort</dt><dd>" + fly(o["Ort"]) + "</dd>" : "")
+          +   (o["Antal jobb"] ? '<dt>Jobb som visades</dt><dd class="mono">' + fly(o["Antal jobb"]) + "</dd>" : "")
+          +   (o["Version"] ? '<dt>Version</dt><dd class="mono">' + fly(o["Version"]) + "</dd>" : "")
+          +   (o["Mejl"] ? '<dt>Vill ha svar</dt><dd class="mono">' + fly(o["Mejl"]) + "</dd>" : "")
+          + "</dl>"
+          + (o["Mejl"]
+              ? '<div class="knappar"><button class="btn mejl" onclick="svaraSynpunkt(\''
+                + fly(o["Mejl"]) + '\')">Svara</button></div>'
+              : "")
+          + "</div>";
+      }).join("");
+    })
+    .catch(function(){
+      document.getElementById("lista").innerHTML = '<p class="tomt">Det gick inte att hämta.</p>';
+    });
+}
+
+function svaraSynpunkt(mejl){
+  location.href = "mailto:" + encodeURIComponent(mejl)
+    + "?subject=" + encodeURIComponent("Tack för dina synpunkter om Chansen")
+    + "&body=" + encodeURIComponent("Hej!\n\nTack för att du hörde av dig om Chansen.\n\n\n\n"
+        + "Vänliga hälsningar,\nNathalie\nchansen.nu");
 }
 
 /* ── ändra ett fält ─────────────────────────────────────────────── */
