@@ -233,6 +233,19 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 .chips button{min-height:40px;padding:8px 16px;border-radius:999px;font-family:var(--body);font-size:13.5px;font-weight:700;cursor:pointer;border:1.5px solid var(--accent-100);background:var(--accent-100);color:var(--accent-800)}
 .chips button.on{background:linear-gradient(135deg,var(--knapp-start) 0%,var(--accent-800) 100%);border-color:var(--accent-800);color:#fff6ee}
+  .tyckruta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--sage-100);border-radius:16px;padding:13px 16px;margin:0 0 14px}
+  .tyckruta span{font-size:14px;color:var(--sage-800);flex:1 1 180px;line-height:1.5}
+
+  #v-tyck .steg{display:none}
+  #v-tyck .steg.pa{display:block}
+  #v-tyck .cvfraga{font-family:var(--heading);font-size:21px;line-height:1.25;
+    margin:0 0 6px}
+  .tyckstapel{height:4px;background:var(--n-300);border-radius:999px;margin-bottom:18px;
+    overflow:hidden}
+  .tyckstapel i{display:block;height:100%;background:var(--accent);width:0;
+    transition:width .25s}
+
 .rakning{font-size:14px;color:var(--n-700);margin-bottom:16px}
 .card{background:var(--surface);border-radius:32px;padding:20px;margin-bottom:14px;box-shadow:0 1px 2px rgba(46,43,37,.14);overflow-wrap:break-word;min-width:0}
 .kicker{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-700);margin-bottom:8px}
@@ -1100,8 +1113,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button class="btn block" id="ag-skicka" onclick="agSkicka()">Skicka annonsen</button>
     <div class="hint" style="text-align:center">Annonsen skickas direkt till oss. Vi hör av oss på mejladressen du angett.</div>
 
-    <!-- Vad som händer med uppgifterna. Kort, men ska svara på vad, varför,
-         hur länge och hur man blir av med dem. -->
     <div class="hint" style="margin-top:14px;line-height:1.6">
       Vi sparar uppgifterna du fyller i för att kunna granska och publicera
       annonsen. Ditt namn, din mejladress och ditt telefonnummer publiceras
@@ -1128,6 +1139,62 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
     <div class="kallor">Annonser som lagts upp den här vägen märks med "lagd upp av arbetsgivaren" i listan, så att användaren ser skillnad mot annonser hämtade från Platsbanken. Det är gratis, och det är gratis för alla som söker jobb.</div>
   </div>
+
+<div id="v-tyck" class="dold">
+  <h1>Tyck till</h1>
+  <p class="sub">Sex korta frågor. Allt utom den första går att hoppa över.</p>
+
+  <div class="tyckstapel"><i id="tyck-fyll"></i></div>
+
+  <div id="tyck-steg">
+    <div class="steg pa" data-falt="hittade">
+      <h2 class="cvfraga">Hittade du något jobb som passade dig?</h2>
+      <div class="seg" id="t-hittade"></div>
+    </div>
+
+    <div class="steg" data-falt="letade">
+      <h2 class="cvfraga">Vad letade du efter?</h2>
+      <input class="txt tyckf" id="tyck-letade" placeholder="Till exempel lager, kvällar, Göteborg">
+      <div class="hint">Hjälper mig se vad folk söker som Chansen kanske inte visar.</div>
+    </div>
+
+    <div class="steg" data-falt="saknar">
+      <h2 class="cvfraga">Saknar du något?</h2>
+      <textarea class="tyckf" id="tyck-saknar" placeholder="En funktion, ett filter, något som borde finnas"></textarea>
+    </div>
+
+    <div class="steg" data-falt="kranglig">
+      <h2 class="cvfraga">Var det något som kändes krångligt?</h2>
+      <textarea class="tyckf" id="tyck-kranglig" placeholder="Något som var svårt att förstå eller hitta"></textarea>
+      <div class="hint">Det här ser jag aldrig i statistiken, bara om någon säger det.</div>
+    </div>
+
+    <div class="steg" data-falt="battre">
+      <h2 class="cvfraga">Vad kan bli bättre?</h2>
+      <textarea class="tyckf" id="tyck-battre" placeholder="Vad som helst"></textarea>
+    </div>
+
+    <div class="steg" data-falt="mejl">
+      <h2 class="cvfraga">Vill du ha svar?</h2>
+      <input class="txt tyckf" id="tyck-mejl" placeholder="Din mejladress, frivilligt" inputmode="email">
+      <div class="hint">Lämnar du den sparas den bara för att kunna svara dig, och raderas sedan. Lämnar du den tom vet jag inte vem du är.</div>
+    </div>
+  </div>
+
+  <div id="tyck-status" class="rakning"></div>
+  <button class="btn block" id="tyck-nasta" onclick="tyckNasta()">Nästa</button>
+  <button class="lank" onclick="tyckHoppa()" id="tyck-hoppa"
+          style="display:block;margin:12px auto 0">Hoppa över</button>
+
+  <div id="tyck-tack" class="dold">
+    <div class="ruta">
+      <h3>Tack</h3>
+      <p style="margin:0">Jag läser allt som kommer in. Flera av funktionerna
+      på Chansen finns för att någon sagt till precis så här.</p>
+    </div>
+    <button class="mini" onclick="visaVy('jobb')">Tillbaka till jobben</button>
+  </div>
+</div>
 
 <div id="v-om" class="dold info">
   <h1>Om Chansen</h1>
@@ -1220,6 +1287,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p><b>Du som lägger upp ett jobb.</b> Skickar du in en annons sparar vi det du fyllt i, alltså uppgifterna om jobbet och ditt namn, din mejladress och ditt telefonnummer. Uppgifterna ligger i ett kalkylark hos Google och används bara för att granska annonsen och för att kunna kontakta dig om den. Den rättsliga grunden är berättigat intresse, alltså att kunna hantera annonsen du själv skickat in.</p>
   <p>Dina kontaktuppgifter publiceras aldrig. I annonsen visas bara det du valt ska stå där, till exempel en länk eller en adress dit ansökningar ska skickas. Nekade annonser och annonser vars sista ansökningsdag passerat raderas automatiskt efter sex månader. Vill du att vi tar bort uppgifterna tidigare, eller vill veta vad vi har sparat om dig, mejla chansen.jobb@gmail.com så ordnar vi det.</p>
 
+  <p><b>Synpunkter.</b> Skickar du in synpunkter via Tyck till sparar vi det du skrivit, tillsammans med vad du själv valt i appen: ålder, ort och hur många jobb som visades. Lämnar du en mejladress sparas den bara för att kunna svara dig, och raderas sedan.</p>
+
   <p><b>Besöksstatistik.</b> Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies, spårar inte enskilda besökare och sparar inga uppgifter som kan kopplas till dig.</p>
   <p>Med tjänsten GoatCounter räknar vi också hur många som klickar sig vidare till en annons, hur många som kommer tillbaka till sidan, och om det uppstår tekniska fel. Den använder inga kakor och sparar ingenting om vem du är.</p>
 
@@ -1242,7 +1311,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 127</footer>
+version 128</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1444,7 +1513,7 @@ function visaVy(vy, franBakat){
       catch (e) { /* vissa lägen tillåter inte pushState, då fungerar allt som förut */ }
     }
   }
-  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare","mejl","enskilt"];
+  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare","mejl","enskilt","tyck"];
   for (var i = 0; i < vyer.length; i++){
     var el = document.getElementById("v-" + vyer[i]);
     var bas = (vyer[i] === "om") ? "info" : "";
@@ -1464,7 +1533,7 @@ function visaVy(vy, franBakat){
 
 // Vilken vy syns just nu?
 function synligVy(){
-  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare","mejl","enskilt"];
+  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare","mejl","enskilt","tyck"];
   for (var i = 0; i < vyer.length; i++){
     var el = document.getElementById("v-" + vyer[i]);
     if (el && el.className.indexOf("dold") === -1) return vyer[i];
@@ -3401,6 +3470,20 @@ function ritaBit(nollstall, fyllUpp){
   if (bit) el.insertAdjacentHTML("beforeend", bit);
   visatAntal = till;
 
+  /* Rutan om synpunkter sätts in efter åtta kort. Då har man hunnit se
+     tillräckligt för att ha en åsikt, men inte tröttnat. Den sätts in
+     en gång, och flyttas aldrig när listan fylls på. */
+  if (!document.getElementById("tyckruta") && visatAntal >= 8){
+    var kortEtt = el.querySelectorAll(".card")[7];
+    if (kortEtt){
+      kortEtt.insertAdjacentHTML("afterend",
+        '<div id="tyckruta" class="tyckruta">'
+        + '<span>Saknar du något på Chansen? Säg till, så fixar jag det.</span>'
+        + '<button class="mini" onclick="tyckOppna()">Tyck till</button>'
+        + "</div>");
+    }
+  }
+
   // Reservationen tas bort så snart korten fyller minst lika mycket,
   // annars skulle foten hoppa uppåt i stället.
   if (el.style.minHeight && el.scrollHeight >= parseFloat(el.style.minHeight)) {
@@ -3668,5 +3751,141 @@ hamtaBladjobb();
 </script>
 <script data-goatcounter="https://chansenapp.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "e1504d853e264b418c1c5bc1150468dc"}'></script>
+<script>
+/* ── Tyck till ───────────────────────────────────────────────────────
+   Frågorna visas ett steg i taget. Bara den första måste besvaras.
+   Svaret skickas till samma Apps Script som annonserna, men märkt som
+   synpunkt, så att det hamnar för sig i Chansen Admin.              */
+
+var tyck = {};
+var tyckSteg = 0;
+
+function tyckOppna(){
+  tyckSteg = 0;
+  tyck = {};
+  document.getElementById("tyck-tack").classList.add("dold");
+  document.getElementById("tyck-steg").style.display = "";
+  document.getElementById("tyck-nasta").style.display = "";
+  document.getElementById("tyck-hoppa").style.display = "block";
+  document.getElementById("tyck-status").textContent = "";
+  visaVy("tyck");
+  ritaTyckSteg();
+  handelse("tyck-oppnat");
+}
+
+function ritaTyckSteg(){
+  var steg = document.querySelectorAll("#tyck-steg .steg");
+  for (var i = 0; i < steg.length; i++){
+    steg[i].className = "steg" + (i === tyckSteg ? " pa" : "");
+  }
+  var f = document.getElementById("tyck-fyll");
+  if (f) f.style.width = Math.round((tyckSteg / steg.length) * 100) + "%";
+
+  // Första frågan har knappar, de andra fält
+  if (tyckSteg === 0 && !document.querySelector("#t-hittade button")){
+    var el = document.getElementById("t-hittade");
+    ["Ja", "Nej", "Inte än"].forEach(function(v){
+      var b = document.createElement("button");
+      b.textContent = v;
+      b.onclick = function(){
+        tyck.hittade = v;
+        var alla = el.querySelectorAll("button");
+        for (var k = 0; k < alla.length; k++) alla[k].className = "";
+        b.className = "on";
+        document.getElementById("tyck-status").textContent = "";
+      };
+      el.appendChild(b);
+    });
+  }
+
+  var sista = tyckSteg === steg.length - 1;
+  document.getElementById("tyck-nasta").textContent = sista ? "Skicka" : "Nästa";
+  document.getElementById("tyck-hoppa").style.display = tyckSteg === 0 ? "none" : "block";
+}
+
+function tyckSpara(){
+  var falt = ["letade", "saknar", "kranglig", "battre", "mejl"];
+  for (var i = 0; i < falt.length; i++){
+    var el = document.getElementById("tyck-" + falt[i]);
+    if (el) tyck[falt[i]] = el.value;
+  }
+}
+
+function tyckNasta(){
+  if (tyckSteg === 0 && !tyck.hittade){
+    document.getElementById("tyck-status").textContent = "Välj ett av svaren först.";
+    return;
+  }
+  tyckSpara();
+  var steg = document.querySelectorAll("#tyck-steg .steg");
+  if (tyckSteg < steg.length - 1){
+    tyckSteg++;
+    ritaTyckSteg();
+    window.scrollTo(0, 0);
+  } else {
+    tyckSkicka();
+  }
+}
+
+function tyckHoppa(){
+  tyckSpara();
+  var steg = document.querySelectorAll("#tyck-steg .steg");
+  if (tyckSteg < steg.length - 1){
+    tyckSteg++;
+    ritaTyckSteg();
+    window.scrollTo(0, 0);
+  } else {
+    tyckSkicka();
+  }
+}
+
+function tyckSkicka(){
+  tyckSpara();
+  var kn = document.getElementById("tyck-nasta");
+  if (kn){ kn.textContent = "Skickar..."; kn.disabled = true; }
+
+  /* Det här följer med automatiskt. Inget om vem personen är, bara vad
+     hon själv valt, så att svaret går att förstå. "Finns inga jobb"
+     betyder olika saker om det visades 2 eller 200. */
+  var d = {
+    sort: "synpunkt",
+    hittade: tyck.hittade || "",
+    letade: tyck.letade || "",
+    saknar: tyck.saknar || "",
+    kranglig: tyck.kranglig || "",
+    battre: tyck.battre || "",
+    mejl: tyck.mejl || "",
+    alder: (typeof svar !== "undefined" && svar.alder) || "",
+    ort: (typeof svar !== "undefined" && svar.ort) || "",
+    antalJobb: (typeof aktuellLista !== "undefined") ? aktuellLista.length : "",
+    sidversion: (typeof VERSION !== "undefined") ? VERSION : ""
+  };
+
+  function klart(){
+    document.getElementById("tyck-steg").style.display = "none";
+    document.getElementById("tyck-nasta").style.display = "none";
+    document.getElementById("tyck-hoppa").style.display = "none";
+    document.getElementById("tyck-tack").classList.remove("dold");
+    var f = document.getElementById("tyck-fyll");
+    if (f) f.style.width = "100%";
+    if (kn){ kn.textContent = "Skicka"; kn.disabled = false; }
+    handelse("tyck-skickat");
+    window.scrollTo(0, 0);
+  }
+
+  if (!SKICKA_URL){ klart(); return; }
+
+  var kropp = new URLSearchParams();
+  for (var n in d) kropp.append(n, d[n]);
+
+  fetch(SKICKA_URL, { method: "POST", body: kropp })
+    .then(klart)
+    .catch(function(){
+      fetch(SKICKA_URL, { method: "POST", mode: "no-cors", body: kropp })
+        .then(klart)
+        .catch(klart);   // tacket visas ändå, svaret är inte värt ett felmeddelande
+    });
+}
+</script>
 </body>
 </html>
