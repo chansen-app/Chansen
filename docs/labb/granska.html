@@ -96,6 +96,23 @@
   .ruta-liten.rod .siffra{color:var(--rod)}
   .vanligast{font-size:12.5px;color:var(--damp);margin:0 0 16px;line-height:1.6}
 
+  .landrad{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .flikar.liten button{padding:6px 11px;font-size:12.5px}
+  .hjalpknapp{margin-left:auto;background:transparent;border:1px solid var(--accent);
+    color:var(--accent);border-radius:7px;padding:6px 12px;font-size:12.5px;
+    font-family:var(--sans);cursor:pointer}
+  .landhjalp{background:var(--yta2);border:1px solid var(--linje);border-radius:10px;
+    padding:15px;margin-bottom:14px;font-size:13.5px;line-height:1.6}
+  .landhjalp h3{margin:0 0 7px;font-size:14px;color:var(--accent)}
+  .landhjalp h3:not(:first-child){margin-top:16px}
+  .landhjalp ul{margin:0;padding-left:19px}
+  .landhjalp li{margin-bottom:4px}
+  .landhjalp a{color:var(--accent)}
+  .landhjalp .mono{font-family:var(--mono);font-size:12.5px}
+
+  .land{font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:3px 7px;
+    border-radius:4px;background:var(--yta2);color:var(--damp)}
+
   .sok{width:100%;background:var(--yta);border:1px solid var(--linje);color:var(--text);
     border-radius:8px;padding:10px 13px;font-size:14px;font-family:var(--sans);
     margin-bottom:14px}
@@ -151,6 +168,17 @@
       <button id="f-alla" onclick="visa('')">Alla</button>
     </div>
 
+    <div class="landrad">
+      <div class="flikar liten">
+        <button id="l-alla" class="on" onclick="valjLand('')">Alla länder</button>
+        <button id="l-SE" onclick="valjLand('SE')">Sverige</button>
+        <button id="l-UK" onclick="valjLand('UK')">Storbritannien</button>
+      </div>
+      <button class="hjalpknapp" onclick="visaHjalp()">Att tänka på</button>
+    </div>
+
+    <div id="landhjalp" class="landhjalp" style="display:none"></div>
+
     <input class="sok" id="sok" placeholder="Sök på nummer, företag, titel eller ort"
            oninput="filtrera()" autocomplete="off">
     <div id="lista"><p class="laddar">Hämtar...</p></div>
@@ -166,6 +194,7 @@ var biljett = "";
 var inloggad = "";
 var nuvarande = "väntar";
 var allaRader = [];     // det senast hämtade, för sökningen
+var nuvarandeLand = "";
 
 function fly(t){
   return String(t == null ? "" : t)
@@ -231,7 +260,8 @@ function loggaUt(){
 
 function hamta(status, klar){
   var url = API + "?vad=lista&biljett=" + encodeURIComponent(biljett)
-          + (status ? "&status=" + encodeURIComponent(status) : "");
+          + (status ? "&status=" + encodeURIComponent(status) : "")
+          + (nuvarandeLand ? "&land=" + encodeURIComponent(nuvarandeLand) : "");
   fetch(url)
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -291,6 +321,45 @@ function hamtaOversikt(){
       }
     })
     .catch(function(){});
+}
+
+function valjLand(land){
+  nuvarandeLand = land;
+  ["", "SE", "UK"].forEach(function(l){
+    var kn = document.getElementById("l-" + (l || "alla"));
+    if (kn) kn.className = (l === land) ? "on" : "";
+  });
+  var h = document.getElementById("landhjalp");
+  if (h.style.display === "block") visaHjalp(true);
+  visa(nuvarande);
+}
+
+/* ── att tänka på, per land ─────────────────────────────────────── */
+
+var HJALP = {
+  SE: '<h3>Sverige</h3><ul>'
+    + '<li>Organisationsnumret kontrolleras automatiskt med kontrollsiffra, men slå ändå upp företaget på <a href="https://www.allabolag.se" target="_blank" rel="noopener">allabolag.se</a> och se att namnet stämmer.</li>'
+    + '<li>Lönen ska vara ett belopp eller kollektivavtal. Timlön under 80 eller över 500 kronor nekas automatiskt.</li>'
+    + '<li>Under 18 får inte arbeta natt. Kolla att arbetstiderna stämmer med vad de svarat om minderåriga.</li>'
+    + '<li>Kräver jobbet utdrag ur belastningsregistret ska det stå, annars blir filtret fel.</li>'
+    + '<li>Bemanningsföretag är tillåtet, men ska märkas så att den som söker vet vem som blir arbetsgivare.</li>'
+    + "</ul>",
+  UK: '<h3>Storbritannien</h3><ul>'
+    + '<li>Company number har ingen kontrollsiffra, bara en form: åtta siffror, eller två bokstäver och sex siffror. <b>Slå alltid upp det</b> på <a href="https://find-and-update.company-information.service.gov.uk" target="_blank" rel="noopener">Companies House</a> och se att namnet stämmer.</li>'
+    + '<li>Minimilön per timme sedan 1 april 2026: <span class="mono">£12.71</span> från 21 år, <span class="mono">£10.85</span> för 18 till 20, <span class="mono">£8.00</span> under 18 och för lärlingar. Ändras varje april.</li>'
+    + '<li>Står det en lön under £12.71 måste annonsen också rikta sig till yngre, annars är den olaglig.</li>'
+    + '<li>Kollektivavtal finns inte på samma sätt, så lönen måste alltid anges som ett belopp.</li>'
+    + '<li>Reglerna för under 18 bestäms av varje kommun och kräver ofta arbetstillstånd från skolan. Godkänn inte en brittisk annons som öppen för under 18 utan att arbetsgivaren själv skrivit det.</li>'
+    + '<li>Se upp med <span class="mono">self-employed</span>, <span class="mono">OTE</span> och <span class="mono">commission only</span>. Det är inte anställningar.</li>'
+    + '<li>Kräver jobbet DBS-kontroll ska det stå, det motsvarar vårt utdrag ur belastningsregistret.</li>'
+    + "</ul>"
+};
+
+function visaHjalp(behall){
+  var h = document.getElementById("landhjalp");
+  if (!behall && h.style.display === "block"){ h.style.display = "none"; return; }
+  h.innerHTML = nuvarandeLand ? HJALP[nuvarandeLand] : (HJALP.SE + HJALP.UK);
+  h.style.display = "block";
 }
 
 function visa(status){
@@ -410,6 +479,7 @@ function rita(rader){
       + '<div class="radtopp">'
       +   '<span class="nr">' + fly(o["Nummer"] || "utan nummer") + "</span>"
       +   '<span class="status ' + klass + '">' + fly(st) + "</span>"
+      +   '<span class="land">' + fly(o["Land"] || "SE") + "</span>"
       +   '<span class="tid">' + fly(o["Tidpunkt"]) + "</span>"
       + "</div>"
       + '<div class="titel">' + fly(o["Titel"]) + "</div>"

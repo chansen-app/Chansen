@@ -413,7 +413,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <div class="field">
     <label class="fraga">Where do you live?</label>
-    <input class="txt" id="ort" placeholder="Enter your town" value="" oninput="ortAndrad()">
+    <input class="txt" id="town" placeholder="Enter your town" value="" oninput="ortAndrad()">
     <div class="hint">Leave blank to see jobs across the whole country.</div>
   </div>
 
@@ -537,7 +537,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
        första skärmen, så man såg inget jobb utan att scrolla. -->
   <div id="farskhet" class="hint" style="margin:18px 0 12px"></div>
   <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px">
-    <button class="lank" style="text-decoration:underline" onclick="proto('posting a job')">Are you an employer?</button>
+    <button class="lank" style="text-decoration:underline" onclick="visaVy('arbetsgivare')">Are you an employer?</button>
     <a class="lank" style="text-decoration:underline" href="mailto:chansen.jobb@gmail.com?subject=Fel%20i%20Chansen&body=Beskriv%20vad%20som%20är%20fel,%20och%20klistra%20gärna%20in%20jobbtiteln%20om%20det%20gäller%20en%20annons.">Found something wrong?</a>
   </div>
 </div>
@@ -642,7 +642,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
       <input class="txt cvf" id="cv-namn" placeholder="First name and surname">
     </div>
 
-    <div class="cvsteg dold" data-falt="ort">
+    <div class="cvsteg dold" data-falt="town">
       <h2 class="cvfraga">Where do you live?</h2>
       <input class="txt cvf" id="cv-ort" placeholder="Malmö">
       <div class="hint">The town only. Never put your full address on a CV.</div>
@@ -818,75 +818,75 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 <div id="v-arbetsgivare" class="dold info">
     <!-- Only till för dig själv. Visas med chansen.nu/#arbetsgivare?blad=1 -->
     <div class="rakning dold" id="bladstatus" style="margin-bottom:14px"></div>
-    <h1 style="font-size:28px;margin-bottom:6px">Lägg upp ett jobb</h1>
-    <p class="sub">Gratis. För dig som söker personal och inte kräver erfarenhet. Din annons visas för alla som söker jobs in din kommun.</p>
+    <h1 style="font-size:28px;margin-bottom:6px">Post a job</h1>
+    <p class="sub">Free. For employers who do not require experience. Your advert is shown to everyone looking for work in your area.</p>
 
-    <p>Fyll i formuläret nedan och tryck skicka. Annonsen kommer direkt till oss, du behöver inte mejla något själv.</p>
-    <p>Varje annons granskas of en människa innan den publiceras, oftast inom ett dygn. Vi hör of oss om något behöver kompletteras.</p>
+    <p>Fill in the form below and press send. The advert comes straight to us, you do not need to email anything.</p>
+    <p>Every advert is checked by a person before it goes live, usually within a day. We get in touch if anything is missing.</p>
 
     <div id="ag-tack" class="dold">
       <div class="ruta">
-        <h3>Tack, annonsen är skickad</h3>
+        <h3>Thank you, your advert has been sent</h3>
         <p style="margin:0">Vi granskar den, oftast inom ett dygn, och hör of oss om något behöver kompletteras. Blir den publicerad märks den med "posted by the employer" i listan.</p>
       </div>
-      <p>Något som blev fel? Mejla <a href="mailto:chansen.jobb@gmail.com?subject=Jobbannons">chansen.jobb@gmail.com</a>.</p>
-      <button class="mini" onclick="agNyAnnons()">Skicka en till annons</button>
+      <p>Something wrong? Email <a href="mailto:chansen.jobb@gmail.com?subject=Jobbannons">chansen.jobb@gmail.com</a>.</p>
+      <button class="mini" onclick="agNyAnnons()">Send another advert</button>
     </div>
 
     <div id="ag-formular">
     <div class="field">
-      <label class="fraga">Företagets namn</label>
-      <input class="txt agf" id="ag-foretag" placeholder="Företaget AB">
+      <label class="fraga">Company name</label>
+      <input class="txt agf" id="ag-foretag" placeholder="Example Ltd">
     </div>
 
     <div class="field">
-      <label class="fraga">Organisationsnummer</label>
+      <label class="fraga">Company number</label>
       <input class="txt agf" id="ag-orgnr" placeholder="556036-0793" inputmode="numeric">
       <div class="hint" id="ag-orgnr-svar"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Vad heter jobbet?</label>
-      <input class="txt agf" id="ag-titel" placeholder="Butiksbiträde, helger">
+      <label class="fraga">What is the job called?</label>
+      <input class="txt agf" id="ag-titel" placeholder="Retail assistant, weekends">
     </div>
 
     <div class="field">
-      <label class="fraga">Vad ska man göra? Tre rader räcker</label>
+      <label class="fraga">What does the job involve? Three lines is enough</label>
       <textarea class="cvf agf" id="ag-beskrivning" placeholder="Kassa, påfyllning of varor och kundfrågor. Vi lär upp på plats."></textarea>
-      <div class="hint">Skriv vad jobbet innebär och vad som faktiskt krävs för att klara det. Var hellre för tydlig än för vag, den som söker ska veta vad hen tackar ja till.</div>
+      <div class="hint">Say what the job involves and what is actually needed to do it. Better too clear than too vague, the applicant should know what they are saying yes to.</div>
       <div class="hint" id="ag-beskrivning-svar"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Ort</label>
+      <label class="fraga">Town</label>
       <input class="txt agf" id="ag-ort" placeholder="Kommun">
     </div>
 
     <div class="field">
-      <label class="fraga">Omfattning</label>
+      <label class="fraga">Hours</label>
       <div class="seg" id="ag-omfattning"></div>
-      <div class="hint">Choose one or more. Gäller annonsen både helg och kväll, kryssa i båda.</div>
+      <div class="hint">Choose one or more. If the job covers both weekends and evenings, tick both.</div>
     </div>
 
     <div class="field">
-      <label class="fraga" for="ag-timmar">Ungefär hur många timmar?</label>
+      <label class="fraga" for="ag-timmar">Roughly how many hours?</label>
       <input class="cvf agf" id="ag-timmar" placeholder="Till exempel 10 timmar i veckan, eller 20 timmar totalt">
-      <div class="hint">Skriv om det gäller per vecka eller totalt för hela uppdraget. Är det ett engångsjobb är det viktigt att det framgår.</div>
+      <div class="hint">Say whether that is per week or for the whole job. If it is a one-off, make that clear.</div>
     </div>
 
     <div class="field">
-      <label class="fraga">Finns kollektivavtal?</label>
+      <label class="fraga">Is there a union agreement?</label>
       <div class="seg" id="ag-avtal"></div>
-      <div class="hint">Inget krav, men bra för den som söker att veta.</div>
+      <div class="hint">Not required, but useful for applicants to know.</div>
     </div>
 
     <div class="field">
-      <label class="fraga">Anställningsform</label>
+      <label class="fraga">Contract type</label>
       <div class="seg" id="ag-form"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Kategori</label>
+      <label class="fraga">Category</label>
       <div class="seg" id="ag-kategori"></div>
       <div id="ag-annat-ruta" class="dold" style="margin-top:12px">
         <input class="txt agf" id="ag-annat" placeholder="Skriv vilken bransch det är">
@@ -894,87 +894,87 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     </div>
 
     <div class="field">
-      <label class="fraga">Lön</label>
+      <label class="fraga">Pay</label>
       <div class="seg" id="ag-lonform"></div>
       <div id="ag-belopp-ruta" class="dold" style="margin-top:12px">
-        <input class="txt agf" id="ag-belopp" placeholder="Belopp i kronor, t.ex. 145" inputmode="numeric">
+        <input class="txt agf" id="ag-belopp" placeholder="Amount in pounds, for example 12.71" inputmode="numeric">
       </div>
-      <div class="hint" id="ag-lon-svar">Obligatoriskt. Vi publicerar inte jobb utan lön, och inte provision utan grundlön.</div>
+      <div class="hint" id="ag-lon-svar">Required. We do not publish jobs without pay, or commission without a basic wage.</div>
     </div>
 
     <div class="field">
-      <label class="fraga">Krävs utdrag ur belastningsregistret?</label>
+      <label class="fraga">Is a DBS check required?</label>
       <div class="seg" id="ag-utdrag"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Får någon under 18 utföra jobbet?</label>
+      <label class="fraga">Can someone under 18 do this job?</label>
       <div class="seg" id="ag-minder"></div>
     </div>
 
-    <div class="avsnitt">Kraven för jobbet</div>
-    <p class="hint" style="margin-top:-8px">Chansen visar bara jobb med låga ingångskrav. Det är hela poängen med sidan, så vi publicerar inte annonser som kräver erfarenhet eller utbildning.</p>
+    <div class="avsnitt">What the job requires</div>
+    <p class="hint" style="margin-top:-8px">Chansen only shows jobs with low entry requirements. That is the whole point of the site, so we do not publish adverts that require experience or qualifications.</p>
 
     <div class="field">
-      <label class="fraga">Krävs tidigare erfarenhet of liknande arbete?</label>
+      <label class="fraga">Is previous experience required?</label>
       <div class="seg" id="ag-erfarenhet"></div>
       <div class="hint" id="ag-erfarenhet-svar"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Krävs utbildning, yrkesbevis eller behörighet?</label>
+      <label class="fraga">Is a qualification, certificate or licence required?</label>
       <div class="seg" id="ag-behorighet"></div>
       <div class="hint" id="ag-behorighet-svar"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Länk dit man ansöker</label>
+      <label class="fraga">Link to apply</label>
       <input class="txt agf" id="ag-lank" placeholder="https://foretaget.se/jobb">
       <div class="hint" id="ag-lank-svar"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Sista ansökningsdag</label>
+      <label class="fraga">Closing date</label>
       <input class="txt agf" id="ag-sista" placeholder="2026-09-30" inputmode="numeric">
     </div>
 
     <div class="field">
-      <label class="fraga">Kontakt för den som söker</label>
-      <input class="txt agf" id="ag-publik" placeholder="Anna Andersson, 040-123456">
-      <div class="hint">Visas i annonsen så att den som söker kan höra of sig. Skriv bara uppgifter du vill ha offentliga, gärna en arbetsplats-telefon eller en funktionsmejl.</div>
+      <label class="fraga">Contact for applicants</label>
+      <input class="txt agf" id="ag-publik" placeholder="Alex Bennett, 020 7946 0000">
+      <div class="hint">Shown in the advert so applicants can get in touch. Only write details you are happy to be public, ideally a work number or a shared inbox.</div>
     </div>
 
     <div class="field">
       <label class="fraga">Your email address</label>
       <input class="txt agf" id="ag-mejl" placeholder="namn@foretaget.se" inputmode="email">
-      <div class="hint" id="ag-mejl-svar">Använder vi bara för att kontakta dig. Visas inte i appen.</div>
+      <div class="hint" id="ag-mejl-svar">Only used to contact you. Never shown in the app.</div>
     </div>
 
     <div class="field">
-      <label class="fraga">Ditt namn och telefonnummer</label>
+      <label class="fraga">Your name and phone number</label>
       <input class="txt agf" id="ag-kontakt" placeholder="Namn, 07...">
     </div>
 
     <div id="ag-status" class="rakning"></div>
-    <button class="btn block" id="ag-skicka" onclick="agSkicka()">Skicka annonsen</button>
-    <div class="hint" style="text-align:center">Annonsen skickas direkt till oss. Vi hör of oss på mejladressen du angett.</div>
+    <button class="btn block" id="ag-skicka" onclick="agSkicka()">Send the advert</button>
+    <div class="hint" style="text-align:center">The advert comes straight to us. We will reply to the email address you gave.</div>
 
     </div>
 
-    <h2>Vi publicerar inte</h2>
+    <h2>We do not publish</h2>
     <ul>
-      <li>Jobs utan lön. Ingen obetald praktik, ingen ersättning i form of erfarenhet</li>
-      <li>Provision utan grundlön</li>
-      <li>Jobs där man ska köpa in sig, investera eller betala för utbildning</li>
-      <li>Annonser med formuleringar som "bli din egen chef" eller "obegränsad inkomst"</li>
-      <li>Annonser där enda kontaktvägen är privata meddelanden</li>
-      <li>Annonser som ställer krav på ålder, kön, etnicitet eller liknande</li>
+      <li>Jobs without pay. No unpaid internships, and no paying in experience</li>
+      <li>Commission without a basic wage</li>
+      <li>Jobs where you have to buy in, invest or pay for training</li>
+      <li>Adverts using phrases like "be your own boss" or "unlimited earnings"</li>
+      <li>Adverts where the only way to apply is a private message</li>
+      <li>Adverts with requirements about age, sex, ethnicity or similar</li>
     </ul>
 
-    <h2>About något strular</h2>
-    <p>Fungerar inte formuläret, eller vill du hellre skriva själv? Mejla <a href="mailto:chansen.jobb@gmail.com?subject=Jobbannons">chansen.jobb@gmail.com</a> med företagets namn, organisationsnummer, vad jobbet är, ort, omfattning, lön och en länk dit man ansöker.</p>
+    <h2>If something goes wrong</h2>
+    <p>If the form does not work, or you would rather write to us, email <a href="mailto:chansen.jobb@gmail.com?subject=Jobbannons">chansen.jobb@gmail.com</a> with the company name, company number, what the job is, the town, the hours, the pay and a link to apply.</p>
 
-    <div class="kallor">Annonser som lagts upp den här vägen märks med "posted by the employer" i listan, så att användaren ser skillnad mot annonser hämtade från the job boards. Det är gratis, och det är gratis för alla som söker jobb.</div>
+    <div class="kallor">Adverts posted this way are marked "posted by the employer" in the list, so users can tell them apart from adverts collected from the job boards. It is free for employers, and free for everyone looking for work.</div>
   </div>
 
 <div id="v-om" class="dold info">
@@ -1071,7 +1071,7 @@ var antalCache = null, antalNyckel = "";
 
 function raknaOmraden(){
   if (typeof JOBB === "undefined" || !JOBB.length) return null;
-  var ort = document.getElementById("ort");
+  var ort = document.getElementById("town");
   var sokord = ort ? slat(ort.value.trim()) : "";
   sokord = smeknamn[sokord] || sokord;
   if (sokord.length < 2) sokord = "";
@@ -1174,7 +1174,7 @@ function valj(falt, varde){
 }
 
 function spara(){
-  var f = document.getElementById("ort");
+  var f = document.getElementById("town");
   svar.ort = f ? f.value.trim() : "";
 
   try { localStorage.setItem("chansen", JSON.stringify(svar)); } catch(e){}
@@ -1491,7 +1491,7 @@ function kort(j){
 
   var d = dagarKvar(j.sistaAnsokningsdag), dagtext = "";
   if(d !== null && d >= 0 && d <= 7){
-    taggar += '<span class="tag varn">'+(d === 0 ? "Sista ansökningsdag today" : "Sök inom "+d+" dagar")+'</span>';
+    taggar += '<span class="tag varn">'+(d === 0 ? "Closing date today" : "Sök inom "+d+" dagar")+'</span>';
   } else if(d !== null && d > 7 && d <= 60){
     dagtext = "Apply by " + svenskDatum(j.sistaAnsokningsdag);
   }
@@ -1501,7 +1501,7 @@ function kort(j){
     '<div class="titel">'+titel+'</div>'+
     '<div class="ag">'+arbetsgivare+(ort ? ' &middot; '+ort : '')+(j.egen ? ' &middot; <b>posted by the employer</b>' : '')+'</div>'+
     (j.kontaktSokande ? '<div class="ag" style="margin-top:-8px">Kontakt: '+fly(j.kontaktSokande)+'</div>' : '')+
-    (j.beskrivning ? '<div class="beskrivning">'+fly(j.beskrivning)+'</div>' : '')+
+    (j.beskrivning ? '<div class="description">'+fly(j.beskrivning)+'</div>' : '')+
     '<div class="taggar">'+taggar+'</div>'+
     (extra ? '<div class="taggar extra">'+extra+'</div>' : '')+
     '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow" onclick="handelse(\'klick-annons\')">'+knapptext+'</a>'+
@@ -1664,7 +1664,7 @@ function tomtLage(filter){
 }
 
 function nollstall(){
-  var f = document.getElementById("ort"); if (f) f.value = "";
+  var f = document.getElementById("town"); if (f) f.value = "";
   svar.ort = ""; svar.omrade = []; svar.omfattning = [];
   spara(); ritaFragor();
   document.getElementById("profil").textContent = profilrad();
@@ -1721,8 +1721,8 @@ function bladTillJobb(csv){
     godkand:  hittaKolumn(rubrik, ["godkand"]),
     titel:    hittaKolumn(rubrik, ["titel","jobbet heter","vad heter"]),
     arbetsgivare: hittaKolumn(rubrik, ["arbetsgivare","foretag"]),
-    ort:      hittaKolumn(rubrik, ["ort","stad","kommun"]),
-    omfattning: hittaKolumn(rubrik, ["omfattning","heltid"]),
+    ort:      hittaKolumn(rubrik, ["town","stad","kommun"]),
+    omfattning: hittaKolumn(rubrik, ["hours","heltid"]),
     form:     hittaKolumn(rubrik, ["anstallningsform","anstallning"]),
     kategori: hittaKolumn(rubrik, ["kategori","bransch"]),
     lank:     hittaKolumn(rubrik, ["lank","link","ansoker","ansoka"]),
@@ -1866,7 +1866,7 @@ function agNyAnnons(){
   var f = document.getElementById("ag-formular"); if (f) f.className = "";
   var k = document.getElementById("ag-tack"); if (k) k.className = "dold";
   var kn = document.getElementById("ag-skicka");
-  if (kn){ kn.textContent = "Skicka annonsen"; kn.disabled = false; }
+  if (kn){ kn.textContent = "Send the advert"; kn.disabled = false; }
   agRita();
   window.scrollTo(0,0);
 }
@@ -1887,10 +1887,10 @@ function oppnaHjalp(del){
 var AG_FLERVAL = { omfattning: true };
 var AG_VAL = {
   omfattning: ["Full time","Part time","Weekends","Evenings","Sommar","Vid behov"],
-  form: ["Tillsvidare","Behovsanställning","Sommar","Vikariat"],
+  form: ["Tillsvidare","Casual or zero hours","Sommar","Vikariat"],
   kategori: ["Sales","Customer service","Retail","Warehouse","Hospitality",
              "Cleaning","Care","Schools","Manufacturing","Office","Annat"],
-  lonform: ["Timlön","Månadslön","Enligt kollektivavtal"],
+  lonform: ["Per hour","Per year"],
   utdrag: ["Ja","Nej"],
   minder: ["Ja","Nej"],
   avtal: ["Ja","Nej","Vet inte"],
@@ -1900,17 +1900,15 @@ var AG_VAL = {
 var ag = { omfattning:[], form:null, kategori:null, lonform:null, utdrag:null, minder:null };
 
 function orgnrOk(nr){
-  var t = String(nr || "").replace(/\D/g,"");
-  if (t.length === 12) t = t.slice(2);
-  if (t.length !== 10) return false;
-  var summa = 0;
-  for (var i = 0; i < 10; i++){
-    var d = parseInt(t[i],10);
-    if (i % 2 === 0){ d *= 2; if (d > 9) d -= 9; }
-    summa += d;
-  }
-  return summa % 10 === 0;
+  /* Brittiska company numbers har ingen kontrollsiffra. Åtta siffror,
+     eller två bokstäver och sex siffror, är allt som går att pröva.
+     Att numret hör till företaget kontrolleras för hand. */
+  var t = String(nr || "").toUpperCase().replace(/\s/g,"");
+  return /^[0-9]{8}$/.test(t) || /^[A-Z]{2}[0-9]{6}$/.test(t);
 }
+
+/* Minimilön per timme sedan 1 april 2026. Ses över varje april. */
+var MINLON = { vuxen: 12.71, ungdom: 10.85, under18: 8.00 };
 
 function domanAv(t){
   var m = String(t||"").toLowerCase().match(/@([a-z0-9.-]+)/);
@@ -1984,7 +1982,7 @@ function agKolla(){
   } else if (bs){ bs.textContent = ""; }
 
   // läs of annonstexten mot samma ord som den automatiska filtreringen
-  var besk = agFalt("beskrivning").toLowerCase();
+  var besk = agFalt("description").toLowerCase();
   var hittade = [];
   for (var i = 0; i < AG_STOPPORD.length; i++){
     if (besk.indexOf(AG_STOPPORD[i]) > -1) hittade.push(AG_STOPPORD[i]);
@@ -1998,13 +1996,13 @@ function agKolla(){
   var orgnr = agFalt("orgnr");
   var os = document.getElementById("ag-orgnr-svar");
   if (!orgnr) { if (os) { os.textContent = ""; } }
-  else if (orgnrOk(orgnr)) { if (os) { os.textContent = "Numret ser giltigt ut."; os.style.color = "var(--sage-800)"; } }
-  else { if (os) { os.textContent = "Det här är inte ett giltigt organisationsnummer. Kolla siffrorna."; os.style.color = "var(--accent-700)"; } problem.push("organisationsnummer"); }
+  else if (orgnrOk(orgnr)) { if (os) { os.textContent = "That looks like a valid company number."; os.style.color = "var(--sage-800)"; } }
+  else { if (os) { os.textContent = "That is not a valid company number. It should be eight digits, or two letters and six digits."; os.style.color = "var(--accent-700)"; } problem.push("company number"); }
 
   var lank = agFalt("lank");
   var ls = document.getElementById("ag-lank-svar");
   if (!lank) { if (ls) ls.textContent = ""; }
-  else if (!/^https:\/\//i.test(lank)) { if (ls) { ls.textContent = "Länken måste börja med https:// Det står för att sidan är krypterad."; ls.style.color = "var(--accent-700)"; } problem.push("länk"); }
+  else if (!/^https:\/\//i.test(lank)) { if (ls) { ls.textContent = "Länken måste börja med https:// Det står för att sidan är krypterad."; ls.style.color = "var(--accent-700)"; } problem.push("link"); }
   else { if (ls) ls.textContent = ""; }
 
   var mejl = agFalt("mejl");
@@ -2021,43 +2019,57 @@ function agKolla(){
     if (ms) { ms.textContent = "Mejlen ligger på " + mdom + " men länken på " + ldom + ". Det går bra, men vi kontrollerar annonsen extra noga."; ms.style.color = "var(--n-700)"; }
   } else { if (ms) { ms.textContent = ""; } }
 
-  // lönen: belopp krävs om det inte är kollektivavtal, och det ska vara rimligt
+  /* Lönen anges i pund per timme och jämförs med minimilönen. Något
+     som motsvarar kollektivavtal finns inte, så ett belopp krävs
+     alltid. Satserna ändras varje april. */
   var lonSvar = document.getElementById("ag-lon-svar");
-  var belopp = agFalt("belopp").replace(/\s/g,"").replace(/kr.*$/i,"");
-  if (ag.lonform && ag.lonform !== "Enligt kollektivavtal"){
-    if (!belopp){
-      if (lonSvar){ lonSvar.textContent = "Skriv beloppet i kronor. Ett jobb utan siffra publiceras inte."; lonSvar.style.color = "var(--accent-700)"; }
-      problem.push("lönebelopp");
-    } else if (!/^\d+$/.test(belopp)){
-      if (lonSvar){ lonSvar.textContent = "Skriv bara siffror, till exempel 145."; lonSvar.style.color = "var(--accent-700)"; }
-      problem.push("lönebelopp");
-    } else {
-      var n = parseInt(belopp,10);
-      var lag = ag.lonform === "Timlön" ? 80 : 15000;
-      var hog = ag.lonform === "Timlön" ? 500 : 90000;
-      if (n < lag){
-        if (lonSvar){ lonSvar.textContent = "Det ser lågt ut för " + ag.lonform.toLowerCase() + ". Kolla siffran."; lonSvar.style.color = "var(--accent-700)"; }
-        problem.push("lönebelopp");
-      } else if (n > hog){
-        if (lonSvar){ lonSvar.textContent = "Det ser högt ut för " + ag.lonform.toLowerCase() + ". Kolla siffran."; lonSvar.style.color = "var(--accent-700)"; }
-        problem.push("lönebelopp");
-      } else {
-        if (lonSvar){ lonSvar.textContent = "Lönen ser rimlig ut."; lonSvar.style.color = "var(--sage-800)"; }
-      }
-    }
-  } else if (lonSvar && ag.lonform === "Enligt kollektivavtal"){
-    lonSvar.textContent = "Bra. Skriv gärna vilket avtal i beskrivningen.";
-    lonSvar.style.color = "var(--n-600)";
+  var belopp = agFalt("belopp").replace(/[^0-9.,]/g, "").replace(",", ".");
+
+  function sagLon(text, farg){
+    if (lonSvar){ lonSvar.textContent = text; lonSvar.style.color = farg; }
   }
 
-  var kravda = [["foretag","företagets namn"],["orgnr","organisationsnummer"],["titel","jobbets namn"],
-                ["ort","ort"],["lank","länk"],["mejl","mejladress"],["kontakt","kontaktuppgifter"]];
+  if (ag.lonform){
+    var n = parseFloat(belopp);
+    if (!belopp || isNaN(n)){
+      sagLon("Write the amount, for example 12.71. A job without a figure is not published.",
+             "var(--accent-700)");
+      problem.push("pay");
+    } else if (ag.lonform === "Per hour"){
+      if (n < MINLON.under18){
+        sagLon("That is below the minimum wage for any age. The lowest rate is "
+               + MINLON.under18 + " an hour.", "var(--accent-700)");
+        problem.push("pay");
+      } else if (n > 200){
+        sagLon("That looks high for an hourly rate. Check the figure.", "var(--accent-700)");
+        problem.push("pay");
+      } else if (n < MINLON.ungdom){
+        sagLon("Lawful only for under 18s and apprentices. The rate for 18 to 20 is "
+               + MINLON.ungdom + ".", "var(--n-600)");
+      } else if (n < MINLON.vuxen){
+        sagLon("Lawful only for workers under 21. The rate for 21 and over is "
+               + MINLON.vuxen + ".", "var(--n-600)");
+      } else {
+        sagLon("That is at or above the minimum wage.", "var(--sage-800)");
+      }
+    } else {
+      if (n < 12000 || n > 200000){
+        sagLon("That looks wrong for a yearly salary. Check the figure.", "var(--accent-700)");
+        problem.push("pay");
+      } else {
+        sagLon("Noted.", "var(--sage-800)");
+      }
+    }
+  }
+
+  var kravda = [["foretag","company name"],["orgnr","company number"],["titel","job title"],
+                ["town","town"],["lank","link"],["mejl","email address"],["contact","kontaktuppgifter"]];
   var saknas = [];
   for (var i = 0; i < kravda.length; i++){ if (!agFalt(kravda[i][0])) saknas.push(kravda[i][1]); }
   for (var f in AG_VAL){
     var v = ag[f];
     var tomt = AG_FLERVAL[f] ? !(v && v.length) : !v;
-    if (tomt) saknas.push(f === "minder" ? "om under 18 får jobba" : (f === "lonform" ? "lön" : f));
+    if (tomt) saknas.push(f === "minder" ? "om under 18 får jobba" : (f === "lonform" ? "pay" : f));
   }
   if (ag.kategori === "Annat" && !agFalt("annat")) saknas.push("vilken bransch");
 
@@ -2065,9 +2077,9 @@ function agKolla(){
   var kn = document.getElementById("ag-skicka");
   var klart = !problem.length && !saknas.length;
   if (st){
-    if (problem.length) st.textContent = "Rätta först: " + problem.join(", ") + ".";
-    else if (saknas.length) st.textContent = "Kvar att fylla i: " + saknas.slice(0,4).join(", ") + (saknas.length > 4 ? " med flera" : "") + ".";
-    else st.textContent = "Allt ifyllt. Tryck skicka så kommer annonsen till oss.";
+    if (problem.length) st.textContent = "Fix first: " + problem.join(", ") + ".";
+    else if (saknas.length) st.textContent = "Still to fill in: " + saknas.slice(0,4).join(", ") + (saknas.length > 4 ? " and more" : "") + ".";
+    else st.textContent = "All filled in. Press send and the advert comes to us.";
   }
   if (kn){
     kn.style.opacity = klart ? "1" : "0.5";
@@ -2081,22 +2093,22 @@ function agData(){
     foretag: agFalt("foretag"),
     orgnr: agFalt("orgnr"),
     titel: agFalt("titel"),
-    beskrivning: agFalt("beskrivning"),
-    ort: agFalt("ort"),
+    beskrivning: agFalt("description"),
+    ort: agFalt("town"),
     omfattning: (ag.omfattning || []).join(", "),
     form: ag.form || "",
     kategori: ag.kategori || "",
-    lon: (ag.lonform === "Enligt kollektivavtal")
-      ? "Enligt kollektivavtal"
-      : (ag.lonform || "") + " " + agFalt("belopp").replace(/\s/g,"").replace(/kr.*$/i,"") + " kr",
+    lon: "GBP " + agFalt("belopp").replace(/[^0-9.,]/g,"").replace(",",".")
+      + " " + (ag.lonform === "Per year" ? "per year" : "per hour"),
     utdrag: ag.utdrag || "",
     minder: ag.minder || "",
     annat: agFalt("annat"),
     publik: agFalt("publik"),
     lank: agFalt("lank"),
     sista: agFalt("sista"),
+    land: "UK",
     mejl: agFalt("mejl"),
-    kontakt: agFalt("kontakt"),
+    kontakt: agFalt("contact"),
     // Märks när avsändaren inte mejlar från företagets egen domän, eller
     // när mejlet och länken ligger på olika domäner. Då granskas annonsen
     // extra noga innan den publiceras.
@@ -2138,19 +2150,19 @@ function agMejlText(d){
   return [
     "ANNONS FRÅN ARBETSGIVARE","",
     "Företag: " + d.foretag,
-    "Organisationsnummer: " + d.orgnr,
+    "Company number: " + d.orgnr,
     "Jobs: " + d.titel,
     "Beskrivning: " + d.beskrivning,
-    "Ort: " + d.ort,
-    "Omfattning: " + d.omfattning,
-    "Anställningsform: " + d.form,
-    "Kategori: " + (d.kategori === "Annat" ? "Annat: " + d.annat : d.kategori),
+    "Town: " + d.ort,
+    "Hours: " + d.omfattning,
+    "Contract type: " + d.form,
+    "Category: " + (d.kategori === "Annat" ? "Annat: " + d.annat : d.kategori),
     "Kontakt för sökande: " + (d.publik || "ej angiven"),
-    "Lön: " + d.lon,
+    "Pay: " + d.lon,
     "Utdrag krävs: " + d.utdrag,
     "Under 18 tillåtet: " + d.minder,
     "Länk: " + d.lank,
-    "Sista ansökningsdag: " + (d.sista || "ej angiven"),
+    "Closing date: " + (d.sista || "ej angiven"),
     "Kontakt: " + d.kontakt + ", " + d.mejl,
     "",
     "── KONTROLLERA FÖRE PUBLICERING ──",
@@ -2207,7 +2219,7 @@ function agSkicka(){
       fetch(SKICKA_URL, { method: "POST", mode: "no-cors", body: kropp })
         .then(function(){ agKlart(); })
         .catch(function(){
-          if (kn){ kn.textContent = "Skicka annonsen"; kn.disabled = false; }
+          if (kn){ kn.textContent = "Send the advert"; kn.disabled = false; }
           var st = document.getElementById("ag-status");
           if (st) st.textContent = "Det gick inte att skicka. Din mejl öppnas i stället.";
           agMejla(d);
@@ -2425,7 +2437,7 @@ function delaJobb(lank){
 }
 
 // ══════════════ CV ══════════════
-var CV_FALT = ["namn","ort","tel","mejl","om","skola","skolaar","erf","sprak","ovrigt"];
+var CV_FALT = ["namn","town","tel","mejl","om","skola","skolaar","erf","sprak","ovrigt"];
 var cv = {};
 try {
   var cvSparat = localStorage.getItem("chansen-cv");
@@ -2454,7 +2466,7 @@ var ERF_FORSLAG = [
 ];
 
 var cvSteg = 0;
-var CV_STEG = ["namn","ort","tel","mejl","om","skola","erf","foto","sprak","ovrigt"];
+var CV_STEG = ["namn","town","tel","mejl","om","skola","erf","foto","sprak","ovrigt"];
 
 function cvVisa(del){
   document.getElementById("cv-guide").className = del === "guide" ? "info" : "dold";
@@ -3353,7 +3365,7 @@ if (!valda.length){
 
 ritaFragor();
 kollaKnappar();
-if (svar.ort) document.getElementById("ort").value = svar.ort;
+if (svar.ort) document.getElementById("town").value = svar.ort;
 function doljSprak(){
   document.documentElement.className =
     document.documentElement.className.replace(" visa-sprak", "");
