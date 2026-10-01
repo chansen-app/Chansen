@@ -1033,10 +1033,10 @@ var fragor = {
   // Listan måste innehålla exakt samma namn som kategorierna i hamta.js.
   // Saknas ett namn här går den kategorins jobb inte att filtrera fram,
   // och de blir osynliga för alla som väljer område.
-  omrade:     ["Sales","Customer service","Retail","Warehouse","Transport och bud",
+  omrade:     ["Sales","Customer service","Retail","Warehouse","Transport and delivery",
                "Hospitality","Cleaning","Care","Schools",
-               "Construction","Manufacturing","Kontor",
-               "Event och kultur","Djur och natur","Other"]
+               "Construction","Manufacturing","Office",
+               "Creative","Animals and nature","Other"]
 };
 
 var flerval = { nar:true, omrade:true, omfattning:true };
@@ -1709,8 +1709,8 @@ function hittaKolumn(rubriker, ord){
 }
 
 var KANDA_KATEGORIER = ["Sales","Customer service","Retail","Warehouse","Hospitality",
-  "Cleaning","Care","Schools","Manufacturing","Kontor",
-  "Event och kultur","Djur och natur"];
+  "Cleaning","Care","Schools","Manufacturing","Office",
+  "Creative","Animals and nature"];
 
 function bladTillJobb(csv){
   var rader = csvRader(csv);
@@ -1889,7 +1889,7 @@ var AG_VAL = {
   omfattning: ["Full time","Part time","Weekends","Evenings","Sommar","Vid behov"],
   form: ["Tillsvidare","Behovsanställning","Sommar","Vikariat"],
   kategori: ["Sales","Customer service","Retail","Warehouse","Hospitality",
-             "Cleaning","Care","Schools","Manufacturing","Kontor","Annat"],
+             "Cleaning","Care","Schools","Manufacturing","Office","Annat"],
   lonform: ["Timlön","Månadslön","Enligt kollektivavtal"],
   utdrag: ["Ja","Nej"],
   minder: ["Ja","Nej"],
@@ -2863,7 +2863,7 @@ var KATEGORITEXT = {
            "Skriv att du kommer i tid och är pålitlig, det är det de bryr sig om",
            "Har du jobbat med händerna på något sätt, nämn det"]
   },
-  "Kontor": {
+  "Office": {
     styrka: "Jag är ordningsam, håller reda på detaljer och är van vid dator.",
     tips: ["Nämn vilka program du kan, även bara Word och Excel",
            "Skriv tydligt och kort, det är ett arbetsprov i sig",
@@ -2875,19 +2875,19 @@ var KATEGORITEXT = {
            "Skriv att du kan tidiga morgnar, byggen startar ofta vid sju",
            "Har du körkort, sätt det högt upp, det är ofta avgörande"]
   },
-  "Transport och bud": {
+  "Transport and delivery": {
     styrka: "Jag är punktlig, hittar lätt och tycker om att jobba självständigt.",
     tips: ["Skriv vilket körkort du har och hur länge du haft det",
            "Nämn om du är van vid att köra i stan, det är en egen sak att kunna",
            "Många kör tidiga morgnar eller kvällar, skriv vilka tider du klarar"]
   },
-  "Event och kultur": {
+  "Creative": {
     styrka: "Jag blir inte stressad of mycket folk och tycker om när det händer saker.",
     tips: ["Nämn att du kan jobba helger och kvällar, det är då evenemang sker",
            "Skriv om du varit med och ordnat något, även i skolan eller en förening",
            "Jobben är ofta enstaka pass, så säg att du är flexibel"]
   },
-  "Djur och natur": {
+  "Animals and nature": {
     styrka: "Jag är lugn kring djur, noggrann med rutiner och gillar att jobba utomhus.",
     tips: ["Nämn all erfarenhet of djur, även egna husdjur eller att du ryktat åt någon",
            "Skriv att du klarar tidiga morgnar, djur sköts oftast först på dagen",
