@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Chansen, internt</title>
+<title>Chansen Admin</title>
 <link rel="manifest" href="granska.webmanifest">
 <meta name="theme-color" content="#16130f">
 
@@ -85,13 +85,44 @@
     font-size:13px;margin-bottom:12px}
   .fel{color:var(--rod);font-size:13.5px;margin-top:10px}
   .tomt{color:var(--damp);padding:30px 0;text-align:center}
+
+  .oversikt{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .ruta-liten{background:var(--yta);border:1px solid var(--linje);border-radius:8px;
+    padding:9px 13px;min-width:88px}
+  .ruta-liten .siffra{font-family:var(--mono);font-size:19px;line-height:1.2}
+  .ruta-liten .vad2{font-size:11.5px;color:var(--damp);letter-spacing:.04em}
+  .ruta-liten.gul .siffra{color:var(--gul)}
+  .ruta-liten.gron .siffra{color:var(--gron)}
+  .ruta-liten.rod .siffra{color:var(--rod)}
+  .vanligast{font-size:12.5px;color:var(--damp);margin:0 0 16px;line-height:1.6}
+
+  .sok{width:100%;background:var(--yta);border:1px solid var(--linje);color:var(--text);
+    border-radius:8px;padding:10px 13px;font-size:14px;font-family:var(--sans);
+    margin-bottom:14px}
+
+  .btn.andra{background:transparent;border:1px solid var(--linje);color:var(--damp)}
+  .btn.mejl{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+  .btn.bort{background:transparent;border:1px solid var(--rod);color:var(--rod)}
+
+  .falt dd.andringsbar{cursor:text;border-bottom:1px dashed var(--linje)}
+  .falt dd.andringsbar:hover{border-bottom-color:var(--accent);color:var(--accent)}
+
+  .forhands{background:var(--yta2);border:1px solid var(--linje);border-radius:10px;
+    padding:14px;margin-bottom:12px;font-size:13.5px;line-height:1.55}
+  .forhands .etikett{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+    color:var(--accent);text-transform:uppercase;margin-bottom:6px}
+  .forhands h4{margin:0 0 3px;font-size:16px}
+  .forhands .ag{color:var(--damp);font-size:13px;margin-bottom:8px}
+  .forhands .taggar{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .forhands .tagg{background:var(--bg);border-radius:999px;padding:3px 10px;font-size:11.5px;
+    color:var(--damp)}
   .laddar{color:var(--damp);padding:24px 0}
 </style>
 </head>
 <body>
 
 <div class="topp">
-  <span class="namn">Internt system</span>
+  <span class="namn">Chansen Admin</span>
   <span class="vad">Annonser från arbetsgivare</span>
   <button class="ut" onclick="loggaUt()" id="utknapp" style="display:none">Logga ut</button>
 </div>
@@ -110,12 +141,18 @@
   </div>
 
   <div id="panel" style="display:none">
+    <div id="oversikt" class="oversikt"></div>
+
     <div class="flikar">
       <button id="f-vantar" class="on" onclick="visa('väntar')">Väntar</button>
       <button id="f-godkänd" onclick="visa('godkänd')">Godkända</button>
       <button id="f-nekad" onclick="visa('nekad')">Nekade</button>
+      <button id="f-borttagen" onclick="visa('borttagen')">Borttagna</button>
       <button id="f-alla" onclick="visa('')">Alla</button>
     </div>
+
+    <input class="sok" id="sok" placeholder="Sök på nummer, företag, titel eller ort"
+           oninput="filtrera()" autocomplete="off">
     <div id="lista"><p class="laddar">Hämtar...</p></div>
   </div>
 
@@ -128,6 +165,7 @@ var API = "https://script.google.com/macros/s/AKfycbxkQPEXo4qu04JP9kHBziLLCLXy-s
 var biljett = "";
 var inloggad = "";
 var nuvarande = "väntar";
+var allaRader = [];     // det senast hämtade, för sökningen
 
 function fly(t){
   return String(t == null ? "" : t)
@@ -199,13 +237,60 @@ function hamta(status, klar){
     .then(function(d){
       if (!d || !d.ok){ if (klar) klar(false); return; }
       if (klar) klar(true);
-      rita(d.rader || []);
+      allaRader = d.rader || [];
+      filtrera();
+      hamtaOversikt();
     })
     .catch(function(){
       if (klar) klar(false);
       document.getElementById("lista").innerHTML =
         '<p class="tomt">Det gick inte att hämta just nu.</p>';
     });
+}
+
+function filtrera(){
+  var q = (document.getElementById("sok").value || "").toLowerCase().trim();
+  if (!q) { rita(allaRader); return; }
+  rita(allaRader.filter(function(o){
+    return [o["Nummer"], o["Företag"], o["Titel"], o["Ort"], o["Organisationsnummer"]]
+      .join(" ").toLowerCase().indexOf(q) > -1;
+  }));
+}
+
+/* ── översikt ───────────────────────────────────────────────────── */
+
+function hamtaOversikt(){
+  fetch(API + "?vad=oversikt&biljett=" + encodeURIComponent(biljett))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d || !d.ok) return;
+      var l = d.lagen || {};
+      var rutor = [
+        ["", d.totalt || 0, "totalt"],
+        ["gul", l["väntar"] || 0, "väntar"],
+        ["gron", l["godkänd"] || 0, "godkända"],
+        ["rod", l["nekad"] || 0, "nekade"]
+      ];
+      var html = rutor.map(function(r){
+        return '<div class="ruta-liten ' + r[0] + '"><div class="siffra">' + r[1]
+          + '</div><div class="vad2">' + r[2] + "</div></div>";
+      }).join("");
+      document.getElementById("oversikt").innerHTML = html;
+
+      var v = (d.vanligast || []).filter(function(x){ return x.antal > 1; });
+      var gammal = document.getElementById("vanligast");
+      if (gammal) gammal.remove();
+      if (v.length){
+        var p = document.createElement("p");
+        p.className = "vanligast";
+        p.id = "vanligast";
+        p.innerHTML = "Oftast: " + v.map(function(x){
+          return fly(x.text) + " (" + x.antal + ")";
+        }).join(" · ");
+        document.getElementById("oversikt").after(p);
+      }
+    })
+    .catch(function(){});
 }
 
 function visa(status){
@@ -228,6 +313,10 @@ function kontrollrader(text){
       + '</span><span>' + fly(k.slice(ord.length).trim()) + "</span></div>";
   }).join("");
 }
+
+var ANDRINGSBARA = ["Titel","Beskrivning","Ort","Omfattning","Anställningsform",
+  "Kategori","Lön","Utdrag","Under 18","Länk","Sista","Kontakt för sökande",
+  "Annat","Timmar","Kollektivavtal"];
 
 function falt(o){
   var par = [
@@ -255,10 +344,37 @@ function falt(o){
   for (var i = 0; i < par.length; i++){
     var v = par[i][1];
     if (!v) continue;
-    ut += "<dt>" + fly(par[i][0]) + "</dt><dd" + (par[i][2] ? ' class="mono"' : "")
+    // Vilket fält i kalkylarket raden hör till, så det går att ändra
+    var falt = { "Organisationsnr":"Organisationsnummer", "Utdrag krävs":"Utdrag",
+      "Under 18 får ta":"Under 18", "Sista ansökningsdag":"Sista",
+      "Ansökan går till":"Kontakt för sökande", "Inskickad av":"Kontakt" }[par[i][0]]
+      || par[i][0];
+    var gar = ANDRINGSBARA.indexOf(falt) > -1 && o["Status"] === "väntar";
+    var klasser = (par[i][2] ? "mono " : "") + (gar ? "andringsbar" : "");
+    ut += "<dt>" + fly(par[i][0]) + "</dt><dd"
+       + (klasser.trim() ? ' class="' + klasser.trim() + '"' : "")
+       + (gar ? ' onclick="andra(\'' + fly(o["Nummer"]) + '\',\'' + fly(falt) + '\')"' : "")
        + ">" + fly(v) + "</dd>";
   }
   return '<dl class="falt">' + ut + "</dl>";
+}
+
+/* Så här kommer annonsen se ut på sidan. */
+function forhands(o){
+  var taggar = [o["Omfattning"], o["Kategori"], o["Anställningsform"]]
+    .filter(Boolean).map(function(t){ return '<span class="tagg">' + fly(t) + "</span>"; });
+  if (/nej/i.test(o["Utdrag"] || "")) taggar.push('<span class="tagg">Nämner inte utdrag</span>');
+  if (/ja/i.test(o["Under 18"] || "")) taggar.push('<span class="tagg">Från 16 år</span>');
+
+  var text = String(o["Beskrivning"] || "");
+  return '<div class="forhands">'
+    + '<div class="etikett">Så ser den ut på sidan</div>'
+    + "<h4>" + fly(o["Titel"]) + "</h4>"
+    + '<div class="ag">' + fly(o["Företag"]) + (o["Ort"] ? " · " + fly(o["Ort"]) : "")
+    + " · lagd upp av arbetsgivaren</div>"
+    + "<div>" + fly(text.length > 180 ? text.slice(0, 180) + "..." : text) + "</div>"
+    + '<div class="taggar">' + taggar.join("") + "</div>"
+    + "</div>";
 }
 
 function rita(rader){
@@ -270,13 +386,25 @@ function rita(rader){
   el.innerHTML = rader.map(function(o){
     var st = (o["Status"] || "väntar");
     var klass = st === "godkänd" ? "godkand" : st === "nekad" ? "nekad" : "vantar";
-    var knappar = st === "väntar"
-      ? '<div class="knappar">'
-        + '<button class="btn ja" onclick="avgor(\'' + fly(o["Nummer"]) + '\',true)">Godkänn</button>'
-        + '<button class="btn nej" onclick="avgor(\'' + fly(o["Nummer"]) + '\',false)">Neka</button>'
-        + "</div>"
-      : (o["Skäl"] ? '<div class="kontroll"><span class="m"></span><span>'
-          + fly(o["Skäl"]) + "</span></div>" : "");
+    var nr = fly(o["Nummer"]);
+    var knappar = "";
+    if (st === "väntar"){
+      knappar = '<div class="knappar">'
+        + '<button class="btn ja" onclick="avgor(\'' + nr + '\',true)">Godkänn</button>'
+        + '<button class="btn nej" onclick="avgor(\'' + nr + '\',false)">Neka</button>'
+        + '<button class="btn mejl" onclick="mejla(\'' + nr + '\',\'fraga\')">Mejla</button>'
+        + "</div>";
+    } else if (st === "godkänd"){
+      knappar = '<div class="knappar">'
+        + '<button class="btn mejl" onclick="mejla(\'' + nr + '\',\'publicerad\')">Mejla</button>'
+        + '<button class="btn bort" onclick="taBort(\'' + nr + '\')">Ta bort</button>'
+        + "</div>";
+    } else {
+      knappar = (o["Skäl"] ? '<div class="kontroll"><span class="m"></span><span>'
+        + fly(o["Skäl"]) + "</span></div>" : "")
+        + '<div class="knappar"><button class="btn mejl" onclick="mejla(\'' + nr
+        + '\',\'nekad\')">Mejla</button></div>";'.replace(/;$/, "");
+    }
 
     return '<div class="rad ' + (st === "nekad" ? "nekad" : "") + '">'
       + '<div class="radtopp">'
@@ -286,11 +414,88 @@ function rita(rader){
       + "</div>"
       + '<div class="titel">' + fly(o["Titel"]) + "</div>"
       + '<div class="foretag">' + fly(o["Företag"]) + "</div>"
+      + (st === "väntar" || st === "godkänd" ? forhands(o) : "")
       + falt(o)
       + '<div class="kontroller">' + kontrollrader(o["Kontroller"]) + "</div>"
       + knappar
       + "</div>";
   }).join("");
+}
+
+/* ── ändra ett fält ─────────────────────────────────────────────── */
+
+function andra(nr, falt){
+  var rad = allaRader.filter(function(o){ return o["Nummer"] === nr; })[0];
+  if (!rad) return;
+  var nytt = prompt("Ändra " + falt + " för " + nr + ":", rad[falt] || "");
+  if (nytt === null || nytt === rad[falt]) return;
+
+  fetch(API + "?vad=andra&biljett=" + encodeURIComponent(biljett)
+      + "&nr=" + encodeURIComponent(nr)
+      + "&falt=" + encodeURIComponent(falt)
+      + "&varde=" + encodeURIComponent(nytt))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d && d.ok) visa(nuvarande);
+      else alert("Det gick inte: " + ((d && d.fel) || "okänt fel"));
+    })
+    .catch(function(){ alert("Det gick inte att nå systemet."); });
+}
+
+/* ── ta bort en publicerad annons ───────────────────────────────── */
+
+function taBort(nr){
+  var skal = prompt("Varför tas " + nr + " bort?\n\nTill exempel: tjänsten är tillsatt.");
+  if (skal === null) return;
+  fetch(API + "?vad=tabort&biljett=" + encodeURIComponent(biljett)
+      + "&nr=" + encodeURIComponent(nr)
+      + "&skal=" + encodeURIComponent(skal))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d && d.ok) visa(nuvarande);
+      else alert("Det gick inte: " + ((d && d.fel) || "okänt fel"));
+    })
+    .catch(function(){ alert("Det gick inte att nå systemet."); });
+}
+
+/* ── mejla arbetsgivaren ────────────────────────────────────────── */
+
+var MALLAR = {
+  fraga: {
+    amne: "Din annons på Chansen",
+    text: "Hej!\n\nTack för att du skickat in en annons till Chansen. "
+      + "Innan jag publicerar den undrar jag över en sak:\n\n\n\n"
+      + "Hör av dig så fixar jag det, sedan lägger jag upp annonsen.\n\n"
+      + "Vänliga hälsningar,\nNathalie\nchansen.nu"
+  },
+  publicerad: {
+    amne: "Din annons ligger nu uppe på chansen.nu",
+    text: "Hej!\n\nTack för uppgifterna, nu ligger annonsen uppe på chansen.nu.\n\n"
+      + "Den visas för alla som söker jobb i er kommun, och den försvinner "
+      + "automatiskt efter sista ansökningsdag.\n\n"
+      + "Säg till om något ska ändras, eller när tjänsten är tillsatt.\n\n"
+      + "Vänliga hälsningar,\nNathalie\nchansen.nu"
+  },
+  nekad: {
+    amne: "Din annons på Chansen",
+    text: "Hej!\n\nTack för att du skickat in en annons till Chansen. "
+      + "Tyvärr kan jag inte publicera den den här gången:\n\n\n\n"
+      + "Chansen visar bara jobb med låga ingångskrav, och alltid med lön angiven. "
+      + "Du är varmt välkommen att skicka in en ny annons.\n\n"
+      + "Vänliga hälsningar,\nNathalie\nchansen.nu"
+  }
+};
+
+function mejla(nr, sort){
+  var o = allaRader.filter(function(x){ return x["Nummer"] === nr; })[0];
+  if (!o) return;
+  var mall = MALLAR[sort] || MALLAR.fraga;
+  var text = mall.text;
+  if (sort === "nekad" && o["Skäl"]) text = text.replace("\n\n\n\n", "\n\n" + o["Skäl"] + "\n\n");
+  var url = "mailto:" + encodeURIComponent(o["Mejl"] || "")
+    + "?subject=" + encodeURIComponent(mall.amne + " (" + nr + ")")
+    + "&body=" + encodeURIComponent(text);
+  location.href = url;
 }
 
 /* ── godkänn och neka ───────────────────────────────────────────── */
