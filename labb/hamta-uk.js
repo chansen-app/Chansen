@@ -164,6 +164,42 @@ const MINSTA_ALDER = 18;
 
 function sov(ms){ return new Promise(k => setTimeout(k, ms)); }
 
+/* Adzuna har egna kategorinamn, till exempel "Logistics & Warehouse Jobs".
+   Sidan använder sina egna. Utan den här översättningen står det noll på
+   alla områdesknappar, eftersom namnen aldrig stämmer.               */
+const KATEGORIER = [
+  [/retail|shop|store/i, "Retail"],
+  [/logistics|warehouse|distribution/i, "Warehouse"],
+  [/hospitality|catering|chef|kitchen|bar\b/i, "Hospitality"],
+  [/healthcare|nursing|social\s*work|care/i, "Care"],
+  [/cleaning|domestic|housekeep/i, "Cleaning"],
+  [/teaching|education|school|childcare/i, "Schools"],
+  [/trade|construction|building/i, "Construction"],
+  [/manufacturing|engineering|production|factory/i, "Manufacturing"],
+  [/customer\s*service|call\s*cent/i, "Customer service"],
+  [/transport|driving|delivery|courier/i, "Transport and delivery"],
+  [/admin|office|secretarial/i, "Office"],
+  [/agriculture|animal|farming|garden/i, "Animals and nature"],
+  [/creative|design|media/i, "Creative"],
+  /* Allt annat hamnar under Other. Namnen måste stämma exakt med
+     knapparna på sidan, annars står det noll på dem.                */
+  [/security|facilit|maintenance|property|scientific|qa|laborator|charity|part\s*time/i, "Other"]
+];
+
+// De enda namn sidan känner igen
+const GILTIGA = ["Sales", "Customer service", "Retail", "Warehouse",
+  "Transport and delivery", "Hospitality", "Cleaning", "Care", "Schools",
+  "Construction", "Manufacturing", "Office", "Creative",
+  "Animals and nature", "Other"];
+
+function kategori(adzuna, titel, text){
+  let vald = "";
+  for (const [r, namn] of KATEGORIER) if (r.test(adzuna || "")) { vald = namn; break; }
+  // Står inget användbart i kategorin får titeln och texten avgöra.
+  if (!vald) for (const [r, namn] of KATEGORIER) if (r.test(titel + " " + text)) { vald = namn; break; }
+  return GILTIGA.indexOf(vald) > -1 ? vald : "Other";
+}
+
 function rensa(t){
   return String(t || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -284,7 +320,7 @@ async function kor(){
                 : r.contract_time === "full_time" ? "Full time" : "",
       anstallningsform: r.contract_type === "permanent" ? "Permanent"
                       : r.contract_type === "contract" ? "Contract" : "",
-      kategori: (r.category || {}).label || "",
+      kategori: kategori((r.category || {}).label, titel, text),
       beskrivning: text.slice(0, 400),
       lank: r.redirect_url || "",
       lon: (r.salary_min && !r.salary_is_predicted)
