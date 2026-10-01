@@ -100,9 +100,11 @@
 
   <div id="login" class="ruta" style="display:none">
     <h1>Logga in</h1>
-    <p>Klistra in nyckeln. Den sparas i den här telefonen och frågas inte igen.</p>
-    <input class="nyckel" id="nyckel" type="password" placeholder="Nyckel"
-           autocomplete="off" spellcheck="false">
+    <p>Du förblir inloggad i trettio dagar på den här enheten.</p>
+    <input class="nyckel" id="anvandare" type="text" placeholder="Användarnamn"
+           autocomplete="username" spellcheck="false" autocapitalize="none">
+    <input class="nyckel" id="losen" type="password" placeholder="Lösenord"
+           autocomplete="current-password">
     <button class="btn ja" onclick="loggaIn()">Logga in</button>
     <div class="fel" id="loginfel"></div>
   </div>
@@ -123,7 +125,8 @@
 /* Adressen till Apps Script. Samma som formuläret skickar till. */
 var API = "https://script.google.com/macros/s/AKfycbxkQPEXo4qu04JP9kHBziLLCLXy-sQc_vgK86UtY29GnohJNR1yjfOdQuISwXZmlYSK/exec";
 
-var nyckel = "";
+var biljett = "";
+var inloggad = "";
 var nuvarande = "väntar";
 
 function fly(t){
@@ -135,35 +138,61 @@ function fly(t){
 /* ── inloggning ─────────────────────────────────────────────────── */
 
 function loggaIn(){
-  var v = (document.getElementById("nyckel").value || "").trim();
-  if (v.length < 20){
-    document.getElementById("loginfel").textContent = "Nyckeln ser för kort ut.";
+  var namn = (document.getElementById("anvandare").value || "").trim();
+  var losen = document.getElementById("losen").value || "";
+  if (!namn || !losen){
+    document.getElementById("loginfel").textContent = "Fyll i båda fälten.";
     return;
   }
-  nyckel = v;
   document.getElementById("loginfel").textContent = "Kontrollerar...";
-  hamta("väntar", function(ok){
-    if (ok){
-      try { localStorage.setItem("chansen-nyckel", nyckel); } catch(e){}
-      document.getElementById("login").style.display = "none";
-      document.getElementById("panel").style.display = "block";
-      document.getElementById("utknapp").style.display = "block";
-    } else {
-      nyckel = "";
-      document.getElementById("loginfel").textContent = "Fel nyckel.";
-    }
-  });
+
+  fetch(API + "?vad=logga-in&namn=" + encodeURIComponent(namn)
+            + "&losen=" + encodeURIComponent(losen))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d || !d.ok){
+        document.getElementById("loginfel").textContent =
+          (d && d.fel) ? "Fel användarnamn eller lösenord." : "Det gick inte just nu.";
+        return;
+      }
+      biljett = d.biljett;
+      inloggad = d.namn || namn;
+      try {
+        localStorage.setItem("chansen-biljett", biljett);
+        localStorage.setItem("chansen-vem", inloggad);
+      } catch(e){}
+      document.getElementById("losen").value = "";
+      oppna();
+    })
+    .catch(function(){
+      document.getElementById("loginfel").textContent = "Det gick inte att nå systemet.";
+    });
+}
+
+function oppna(){
+  document.getElementById("login").style.display = "none";
+  document.getElementById("panel").style.display = "block";
+  document.getElementById("utknapp").style.display = "block";
+  var v = document.querySelector(".topp .vad");
+  if (v && inloggad) v.textContent = "Inloggad som " + inloggad;
+  visa("väntar");
 }
 
 function loggaUt(){
-  try { localStorage.removeItem("chansen-nyckel"); } catch(e){}
+  if (biljett){
+    try { fetch(API + "?vad=logga-ut&biljett=" + encodeURIComponent(biljett)); } catch(e){}
+  }
+  try {
+    localStorage.removeItem("chansen-biljett");
+    localStorage.removeItem("chansen-vem");
+  } catch(e){}
   location.reload();
 }
 
 /* ── hämta och rita ─────────────────────────────────────────────── */
 
 function hamta(status, klar){
-  var url = API + "?vad=lista&nyckel=" + encodeURIComponent(nyckel)
+  var url = API + "?vad=lista&biljett=" + encodeURIComponent(biljett)
           + (status ? "&status=" + encodeURIComponent(status) : "");
   fetch(url)
     .then(function(r){ return r.json(); })
@@ -276,7 +305,7 @@ function avgor(nr, ja){
   }
 
   var url = API + "?vad=" + (ja ? "godkann" : "neka")
-          + "&nyckel=" + encodeURIComponent(nyckel)
+          + "&biljett=" + encodeURIComponent(biljett)
           + "&nr=" + encodeURIComponent(nr)
           + "&skal=" + encodeURIComponent(skal || "");
 
@@ -292,24 +321,37 @@ function avgor(nr, ja){
 /* ── start ──────────────────────────────────────────────────────── */
 
 (function(){
-  var sparad = "";
-  try { sparad = localStorage.getItem("chansen-nyckel") || ""; } catch(e){}
-  if (sparad){
-    nyckel = sparad;
-    document.getElementById("panel").style.display = "block";
-    document.getElementById("utknapp").style.display = "block";
-    hamta("väntar", function(ok){
-      if (!ok){
-        nyckel = "";
-        try { localStorage.removeItem("chansen-nyckel"); } catch(e){}
-        document.getElementById("panel").style.display = "none";
-        document.getElementById("login").style.display = "block";
-        document.getElementById("utknapp").style.display = "none";
-      }
-    });
-  } else {
+  var sparad = "", vem = "";
+  try {
+    sparad = localStorage.getItem("chansen-biljett") || "";
+    vem = localStorage.getItem("chansen-vem") || "";
+  } catch(e){}
+
+  if (!sparad){
     document.getElementById("login").style.display = "block";
+    return;
   }
+
+  biljett = sparad;
+  inloggad = vem;
+  document.getElementById("panel").style.display = "block";
+  document.getElementById("utknapp").style.display = "block";
+  var v = document.querySelector(".topp .vad");
+  if (v && vem) v.textContent = "Inloggad som " + vem;
+
+  // Biljetten kan ha gått ut. Då får man logga in igen.
+  hamta("väntar", function(ok){
+    if (!ok){
+      biljett = "";
+      try {
+        localStorage.removeItem("chansen-biljett");
+        localStorage.removeItem("chansen-vem");
+      } catch(e){}
+      document.getElementById("panel").style.display = "none";
+      document.getElementById("utknapp").style.display = "none";
+      document.getElementById("login").style.display = "block";
+    }
+  });
 })();
 </script>
 </body>
