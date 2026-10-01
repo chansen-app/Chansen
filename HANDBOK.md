@@ -104,6 +104,8 @@ Den funktionen kom till efter kritik från användare i mindre orter.
 | `sitemap.xml` | Adresser till Google, skrivs av nattkörningen |
 | `jobb/*.html` | Ortssidor, en per kommun med minst fem jobb |
 | `labb/norge.html` | Norsk prototyp, dold för sökmotorer |
+| `labb/uk.html` | Engelsk prototyp, dold för sökmotorer |
+| `labb/granska.html` | Chansen Admin, kräver inloggning |
 | `labb/norge-jobb.js` | Norska jobben, skrivs av den norska körningen |
 
 ### Filer i roten
@@ -261,30 +263,78 @@ den 30 september, och därefter kom mejlen fram. Supportkontakt: Lucas.
 
 ---
 
-## 10. Annonser från arbetsgivare
+## 10. Annonser från arbetsgivare, och Chansen Admin
 
 Arbetsgivare kan lägga upp jobb gratis via formuläret på sidan. Varje
 annons granskas av en människa innan den publiceras.
+
+### Vägen en annons tar
+
+Formuläret skickar till ett Google Apps Script, som sparar annonsen i ett
+kalkylark. Där får den ett nummer, CH-0001 och uppåt, och kontrolleras
+automatiskt.
+
+**Nekas direkt:** felaktigt organisationsnummer, ingen lön angiven,
+orimlig lön, länk som saknas eller inte börjar med https, formuleringar
+som tyder på provisionsjobb, eller saknade obligatoriska fält.
+
+**Märks men nekas inte:** mejl från gratisdomän, att mejl och länk ligger
+på olika domäner, kort beskrivning, bemanningsföretag, krav på utdrag ur
+belastningsregistret.
+
+Organisationsnumret kontrolleras med samma kontrollsiffra som
+Bolagsverket använder, så påhittade nummer stoppas.
+
+### Chansen Admin
+
+Granskningssidan ligger på `chansen.nu/labb/granska.html`, är dold för
+sökmotorer och kräver inloggning. Den går att lägga till på hemskärmen
+och fungerar då som en app.
+
+**Inloggning** med användarnamn och lösenord. Lösenord sparas aldrig i
+klartext, bara som ett avtryck med salt. En inloggning gäller tolv
+timmar.
+
+**Konton hanteras i Apps Script:** funktionen `skapaKonto` lägger till
+eller byter lösenord, `taBortKonto` tar bort, `visaKonton` listar dem.
+Skriv namn och lösenord i funktionen, kör den, och ta bort lösenordet ur
+koden efteråt.
+
+**Vad man kan göra:** se allt arbetsgivaren fyllt i, se kontrollerna i
+grönt, gult och rött, se en förhandsgranskning av hur annonsen kommer se
+ut, ändra ett fält genom att klicka på det, godkänna, neka, mejla
+arbetsgivaren med en av tre mallar, och ta bort en publicerad annons när
+tjänsten är tillsatt.
+
+**Översikten högst upp** visar hur många som kommit in, väntar, godkänts
+och nekats, plus vad som oftast går fel. Det säger om formuläret behöver
+ändras.
+
+Allt loggas med tidpunkt och vem som gjorde det.
+
+### Personuppgifter
+
+Kontaktuppgifter till den som skickat in publiceras aldrig, bara det hen
+valt ska synas i annonsen. Nekade annonser och sådana vars sista
+ansökningsdag passerat raderas automatiskt efter sex månader, genom ett
+skript som körs varje natt klockan tre.
+
+Information om detta står i formuläret och på Om-sidan. Se även
+`REGISTERFORTECKNING.md`.
+
+### Att lägga in en annons för hand
+
+Går fortfarande, i `docs/egna-jobb.js`. Fältet `id` ger annonsen en egen
+adress, till exempel `chansen.nu/#jobb-hundskotare-hudiksvall`. Fältet
+`ansok` kan vara en mejladress, och då byter knappen text till "Ansök via
+mejl". Annonser försvinner av sig själva efter sista ansökningsdag.
 
 **Kontrollera alltid** organisationsnumret mot allabolag eller
 Bolagsverket, att företaget finns på riktigt, och att lönen är angiven
 eller att de följer kollektivavtal.
 
-**Annonser läggs in för hand** i `docs/egna-jobb.js`. Fältet `id` ger
-annonsen en egen adress, till exempel
-`chansen.nu/#jobb-hundskotare-hudiksvall`. Fältet `ansok` kan vara en
-mejladress, och då byter knappen text till "Ansök via mejl".
-
-**Annonser försvinner av sig själva** efter sista ansökningsdag.
-
-**Formuläret accepterar gmail och hotmail** sedan version 121, men märker
-annonsen för extra granskning. Kravet på företagsdomän stängde ute riktiga
-småföretag.
-
 **Första annonsen:** Hudiksvalls Hundcenter, hundskötare, inlämnad av Li
 Sandberg den 27 september.
-
----
 
 ## 11. Prototyper i andra länder
 
@@ -506,6 +556,8 @@ Kontakta honom när siffrorna är i mål, inte innan.
 ## 17. Pending
 
 - Ortssidor på norska och engelska saknas
+- Arbetsgivarformuläret finns bara på svenska
+- Personuppgiftsbiträdesavtal med Google saknas, se registerförteckningen
 - Hela den norska och brittiska sidans text är på svenska
 - Arbetsgivarformuläret finns bara i den svenska versionen
 - Danmark: väntar på svar om tillgång till Jobnet
