@@ -1,0 +1,53 @@
+name: Hämta brittiska jobb från Reed
+
+# Labb. Kör varje natt, efter den brittiska Adzuna-hämtningen.
+#
+# Skillnaden mot uk.yml är att Reed ger hela annonstexten, så den
+# svenska metoden kan användas: läsa hela texten och sortera bort
+# hinder, i stället för att leta efter annonser som själva säger att
+# erfarenhet inte krävs.
+#
+# Nyckeln registreras gratis på reed.co.uk/developers/jobseeker och
+# läggs som Secret på GitHub med namnet REED_KEY.
+#
+# Du kan också starta den för hand under fliken Actions.
+
+on:
+  schedule:
+    - cron: "30 7 * * *"     # 07:30 UTC, mellan den norska och den brittiska
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  hamta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Hämta repot
+        uses: actions/checkout@v4
+
+      - name: Installera Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Kör hämtningen
+        env:
+          REED_KEY: ${{ secrets.REED_KEY }}
+        run: node labb/hamta-reed.js
+
+      - name: Spara resultatet
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add labb/reedjobb.json docs/labb/reed-jobb.js
+          if git diff --staged --quiet; then
+            echo "Inget nytt att spara."
+          else
+            git commit -m "Nattlig hämtning: brittiska jobb från Reed"
+            git pull --rebase --autostash origin main || git pull --no-rebase -X ours --no-edit origin main
+            git push
+          fi
