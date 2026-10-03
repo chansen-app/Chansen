@@ -164,8 +164,10 @@ function kategori(titel, text){
 /* Timlönen jämförd med minimilönen. Reed anger årslön, så vi räknar
    om vid behov. Under minimilönen för alla åldrar sorteras bort.   */
 function lonOk(r, text){
+  /* Som i Sverige: ingen lön angiven, ingen annons. Reed kräver det
+     inte, men den som söker ska veta vad jobbet ger.               */
   const min = Number(r.minimumSalary || 0);
-  if (!min) return { ok: true, text: "", flagga: "lön ej angiven" };
+  if (!min) return { ok: false, skal: "ingen lön angiven" };
 
   const timlon = /per hour|an hour|hourly|ph\b/i.test(text) || min < 500;
   const perTimme = timlon ? min : min / (52 * 37.5);
