@@ -199,6 +199,22 @@ const GILTIGA = ["Sales", "Customer service", "Retail", "Warehouse",
   "Construction", "Manufacturing", "Office", "Creative",
   "Animals and nature", "Other"];
 
+/* Adzuna anger platsen som en lista från land och nedåt, till exempel
+   [UK, England, Greater Manchester, Manchester, Collyhurst]. Tar man
+   det sista värdet hamnar man i en stadsdel ingen söker på. Vi tar
+   nivån för stad i stället, och länet ovanför den.                  */
+function plats(r) {
+  const omrade = ((r.location || {}).area || []).filter(Boolean);
+  const visat = (r.location || {}).display_name || "";
+
+  // omrade[0] är landet, [1] landsdelen, [2] länet, [3] staden
+  const lan = omrade[2] || omrade[1] || "";
+  const ort = omrade[3] || omrade[2] || visat.split(",")[0].trim();
+
+  return { ort: String(ort).trim(), lan: String(lan).trim(),
+           omrade: omrade.slice(2).join(", ") || visat };
+}
+
 function kategori(adzuna, titel, text){
   let vald = "";
   for (const [r, namn] of KATEGORIER) if (r.test(adzuna || "")) { vald = namn; break; }
@@ -314,15 +330,15 @@ async function kor(){
     const dom = bedom(titel, text, (r.category || {}).label || "");
     if (dom.ut){ bort++; continue; }
 
-    const plats = (r.location || {}).display_name || "";
+    const p = plats(r);
     /* Fälten heter samma sak som i den svenska datan, så att
        prototypsidan kan läsa dem utan ändringar i koden. */
     jobb.push({
       titel,
       arbetsgivare: (r.company || {}).display_name || "",
-      ort: plats.split(",")[0].trim(),
-      lan: plats.split(",").slice(1).join(",").trim() || plats.trim(),
-      omrade: plats,
+      ort: p.ort,
+      lan: p.lan,
+      omrade: p.omrade,
       omfattning: r.contract_time === "part_time" ? "Part time"
                 : r.contract_time === "full_time" ? "Full time" : "",
       anstallningsform: r.contract_type === "permanent" ? "Permanent"
