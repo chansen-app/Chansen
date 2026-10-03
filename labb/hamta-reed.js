@@ -300,17 +300,55 @@ async function kor(){
   if (!fs.existsSync("labb")) fs.mkdirSync("labb");
   fs.writeFileSync("labb/reedjobb.json", JSON.stringify(jobb, null, 2));
 
+  /* ── slå ihop med Adzuna ──────────────────────────────────────────
+     Adzuna täcker fler orter men har aldrig en riktig lön, bara sin
+     egen uppskattning. De jobben kommer med, men märkta, så att den
+     som söker ser skillnaden. Körs sist, eftersom Reed-körningen går
+     efter den brittiska.                                           */
+  const allt = jobb.slice();
+  try {
+    const adzuna = fs.readFileSync("docs/labb/uk-jobb.js", "utf8");
+    const fran = new Function(adzuna + "; return typeof JOBB !== 'undefined' ? JOBB : [];")();
+    const nyckel = j => ((j.titel || "") + "|" + (j.arbetsgivare || ""))
+      .toLowerCase().replace(/\s+/g, " ").trim();
+    const finns = new Set(jobb.map(nyckel));
+
+    let lagda = 0;
+    for (const j of (fran || [])) {
+      if (finns.has(nyckel(j))) continue;      // samma jobb finns redan
+      const flaggor = (j.flaggor || []).slice();
+      if (!j.lon) flaggor.push("lön ej angiven");
+      allt.push(Object.assign({}, j, {
+        lon: "",
+        flaggor,
+        kalla: "Adzuna",
+        // Utan lön kan jobbet aldrig hamna överst
+        poang: Math.min(j.poang || 0, 5),
+        sortpoang: Math.min(j.poang || 0, 5) * 10,
+        chansniva: "medel"
+      }));
+      lagda++;
+    }
+    console.log("Lade till " + lagda + " jobb från Adzuna, märkta utan lön.");
+  } catch (e) {
+    console.log("Kunde inte läsa Adzuna-datan:", e.message);
+  }
+
+  for (const j of jobb) j.kalla = "Reed";
+  allt.sort((a, b) => b.poang - a.poang);
+
   const kommunLan = {};
-  for (const j of jobb) if (j.ort) kommunLan[j.ort] = j.lan;
+  for (const j of allt) if (j.ort) kommunLan[j.ort] = j.lan;
   if (!fs.existsSync("docs/labb")) fs.mkdirSync("docs/labb", { recursive: true });
   fs.writeFileSync("docs/labb/reed-jobb.js",
     'const UPPDATERAD = "' + tid + '";\n' +
     "const JOBB_HAMTAD = UPPDATERAD;\n" +
     "const KOMMUNLAN = " + JSON.stringify(kommunLan) + ";\n" +
-    "const JOBB = " + JSON.stringify(jobb) + ";");
+    "const JOBB = " + JSON.stringify(allt) + ";");
 
   console.log("");
-  console.log("Anrop: " + anrop + ". Kvar: " + jobb.length
+  console.log("Totalt i listan: " + allt.length);
+  console.log("Anrop: " + anrop + ". Från Reed: " + jobb.length
     + ", bortsorterade: " + bort + ", fel: " + fel);
   console.log("De tio bästa:");
   for (const j of jobb.slice(0, 10)){
