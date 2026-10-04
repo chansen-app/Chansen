@@ -32,7 +32,7 @@
     color:var(--damp);border-radius:6px;padding:5px 11px;font-size:12.5px;
     font-family:var(--sans);cursor:pointer}
 
-  .wrap{max-width:820px;margin:0 auto;padding:18px 14px 70px}
+  .wrap{max-width:1040px;margin:0 auto;padding:14px 12px 60px}
 
   .flikar{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap}
   .flikar button{background:var(--yta);border:1px solid var(--linje);color:var(--damp);
@@ -41,8 +41,8 @@
   .flikar button.on{background:var(--accent);border-color:var(--accent);color:#1a1409;
     font-weight:600}
 
-  .rad{background:var(--yta);border:1px solid var(--linje);border-radius:10px;
-    padding:14px 15px;margin-bottom:11px}
+  .rad{background:var(--yta);border:1px solid var(--linje);border-radius:8px;
+    padding:11px 13px;margin-bottom:7px}
   .rad.nekad{opacity:.62}
   .radtopp{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-bottom:9px}
   .nr{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.04em}
@@ -53,17 +53,22 @@
   .status.nekad{background:rgba(232,124,107,.16);color:var(--rod)}
   .tid{font-family:var(--mono);font-size:12px;color:var(--damp);margin-left:auto}
 
-  .titel{font-size:17px;font-weight:600;margin-bottom:2px}
-  .foretag{color:var(--damp);font-size:14px;margin-bottom:12px}
+  .titel{font-size:15.5px;font-weight:600;margin-bottom:1px;line-height:1.3}
+  .foretag{color:var(--damp);font-size:13px;margin-bottom:9px}
 
-  .falt{display:grid;grid-template-columns:142px 1fr;gap:3px 12px;
-    font-size:13.5px;margin-bottom:12px}
+  /* Två kolumner på bredare skärmar, så att hela annonsen ryms utan
+     att man behöver skrolla. */
+  .falt{display:grid;grid-template-columns:128px 1fr;gap:1px 10px;
+    font-size:12.5px;line-height:1.45;margin-bottom:9px}
+  @media (min-width:760px){
+    .falt{grid-template-columns:118px 1fr 118px 1fr;column-gap:14px}
+  }
   .falt dt{color:var(--damp)}
   .falt dd{margin:0;word-break:break-word}
   .falt dd.mono{font-family:var(--mono);font-size:12.5px}
 
-  .kontroller{border-top:1px solid var(--linje);padding-top:10px;margin-bottom:12px}
-  .kontroll{font-size:13px;display:flex;gap:7px;align-items:flex-start;margin-bottom:3px}
+  .kontroller{border-top:1px solid var(--linje);padding-top:8px;margin-bottom:9px}
+  .kontroll{font-size:12px;display:flex;gap:7px;align-items:flex-start;margin-bottom:2px}
   .kontroll .m{font-family:var(--mono);font-size:11px;letter-spacing:.06em;
     min-width:62px;padding-top:1px}
   .kontroll.ok .m{color:var(--gron)}
@@ -71,7 +76,7 @@
   .kontroll.fel .m{color:var(--rod)}
 
   .knappar{display:flex;gap:9px;flex-wrap:wrap}
-  .btn{border:none;border-radius:7px;padding:10px 18px;font-size:14px;
+  .btn{border:none;border-radius:6px;padding:7px 14px;font-size:13px;
     font-family:var(--sans);font-weight:600;cursor:pointer}
   .btn.ja{background:var(--gron);color:#15200d}
   .btn.nej{background:transparent;border:1px solid var(--rod);color:var(--rod)}
@@ -88,9 +93,9 @@
   .tomt{color:var(--damp);padding:30px 0;text-align:center}
 
   .oversikt{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-  .ruta-liten{background:var(--yta);border:1px solid var(--linje);border-radius:8px;
-    padding:9px 13px;min-width:88px}
-  .ruta-liten .siffra{font-family:var(--mono);font-size:19px;line-height:1.2}
+  .ruta-liten{background:var(--yta);border:1px solid var(--linje);border-radius:6px;
+    padding:7px 11px;min-width:74px}
+  .ruta-liten .siffra{font-family:var(--mono);font-size:17px;line-height:1.2}
   .ruta-liten .vad2{font-size:11.5px;color:var(--damp);letter-spacing:.04em}
   .ruta-liten.gul .siffra{color:var(--gul)}
   .ruta-liten.gron .siffra{color:var(--gron)}
@@ -114,6 +119,10 @@
   .land{font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:3px 7px;
     border-radius:4px;background:var(--yta2);color:var(--damp)}
 
+  .genvagar{font-family:var(--mono);font-size:11px;color:var(--damp);
+    margin:-6px 0 14px;letter-spacing:.03em}
+  @media (max-width:700px){ .genvagar{display:none} }
+
   .sok{width:100%;background:var(--yta);border:1px solid var(--linje);color:var(--text);
     border-radius:8px;padding:10px 13px;font-size:14px;font-family:var(--sans);
     margin-bottom:14px}
@@ -125,8 +134,8 @@
   .falt dd.andringsbar{cursor:text;border-bottom:1px dashed var(--linje)}
   .falt dd.andringsbar:hover{border-bottom-color:var(--accent);color:var(--accent)}
 
-  .forhands{background:var(--yta2);border:1px solid var(--linje);border-radius:10px;
-    padding:14px;margin-bottom:12px;font-size:13.5px;line-height:1.55}
+  .forhands{background:var(--yta2);border:1px solid var(--linje);border-radius:8px;
+    padding:11px 12px;margin-bottom:9px;font-size:12.5px;line-height:1.5}
   .forhands .etikett{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
     color:var(--accent);text-transform:uppercase;margin-bottom:6px}
   .forhands h4{margin:0 0 3px;font-size:16px}
@@ -174,6 +183,7 @@
       <div class="flikar liten">
         <button id="l-alla" class="on" onclick="valjLand('')">Alla länder</button>
         <button id="l-SE" onclick="valjLand('SE')">Sverige</button>
+        <button id="l-NO" onclick="valjLand('NO')">Norge</button>
         <button id="l-UK" onclick="valjLand('UK')">Storbritannien</button>
       </div>
       <button class="hjalpknapp" onclick="visaHjalp()">Att tänka på</button>
@@ -183,6 +193,8 @@
 
     <input class="sok" id="sok" placeholder="Sök på nummer, företag, titel eller ort"
            oninput="filtrera()" autocomplete="off">
+
+    <div class="genvagar">1–5 byter flik · S söker · ? visar vad man ska tänka på</div>
     <div id="lista"><p class="laddar">Hämtar...</p></div>
   </div>
 
@@ -196,6 +208,7 @@ var biljett = "";
 var inloggad = "";
 var nuvarande = "väntar";
 var allaRader = [];     // det senast hämtade, för sökningen
+var roll = "admin";     // admin får ändra, lasare får bara titta
 var nuvarandeLand = "";
 
 function fly(t){
@@ -226,9 +239,11 @@ function loggaIn(){
       }
       biljett = d.biljett;
       inloggad = d.namn || namn;
+      roll = d.roll || "admin";
       try {
         localStorage.setItem("chansen-biljett", biljett);
         localStorage.setItem("chansen-vem", inloggad);
+        localStorage.setItem("chansen-roll", roll);
       } catch(e){}
       document.getElementById("losen").value = "";
       oppna();
@@ -243,7 +258,9 @@ function oppna(){
   document.getElementById("panel").style.display = "block";
   document.getElementById("utknapp").style.display = "block";
   var v = document.querySelector(".topp .vad");
-  if (v && inloggad) v.textContent = "Inloggad som " + inloggad;
+  if (v && inloggad) {
+    v.textContent = inloggad + (roll === "lasare" ? " · läsare" : " · admin");
+  }
   visa("väntar");
 }
 
@@ -254,6 +271,7 @@ function loggaUt(){
   try {
     localStorage.removeItem("chansen-biljett");
     localStorage.removeItem("chansen-vem");
+    localStorage.removeItem("chansen-roll");
   } catch(e){}
   location.reload();
 }
@@ -327,7 +345,7 @@ function hamtaOversikt(){
 
 function valjLand(land){
   nuvarandeLand = land;
-  ["", "SE", "UK"].forEach(function(l){
+  ["", "SE", "NO", "UK"].forEach(function(l){
     var kn = document.getElementById("l-" + (l || "alla"));
     if (kn) kn.className = (l === land) ? "on" : "";
   });
@@ -346,6 +364,14 @@ var HJALP = {
     + '<li>Kräver jobbet utdrag ur belastningsregistret ska det stå, annars blir filtret fel.</li>'
     + '<li>Bemanningsföretag är tillåtet, men ska märkas så att den som söker vet vem som blir arbetsgivare.</li>'
     + "</ul>",
+  NO: '<h3>Norge</h3><ul>'
+    + '<li>Organisasjonsnummer är nio siffror med kontrollsiffra, precis som det svenska. Slå upp företaget på <a href="https://w2.brreg.no" target="_blank" rel="noopener">Brønnøysundregistrene</a> och se att namnet stämmer.</li>'
+    + '<li>Minstelønn finns bara i vissa branscher, bland annat bygg, städ, hotell och restaurang. I övrigt sätts lönen fritt, så kontrollera att beloppet är rimligt för yrket.</li>'
+    + '<li>Åldersreglerna följer arbeidsmiljøloven kapitel 11. Nattförbud från klockan 21 för den som är under 18, alltså en timme tidigare än i Sverige.</li>'
+    + '<li>Taxi och persontransport kräver kjøreseddel och minst 20 år.</li>'
+    + '<li>Kräver jobbet politiattest ska det stå, det motsvarar vårt utdrag ur belastningsregistret.</li>'
+    + '<li>Se upp med fagbrev, som är ett yrkesbevis, och med annonser på nynorska där orden stavas annorlunda.</li>'
+    + "</ul>",
   UK: '<h3>Storbritannien</h3><ul>'
     + '<li>Company number har ingen kontrollsiffra, bara en form: åtta siffror, eller två bokstäver och sex siffror. <b>Slå alltid upp det</b> på <a href="https://find-and-update.company-information.service.gov.uk" target="_blank" rel="noopener">Companies House</a> och se att namnet stämmer.</li>'
     + '<li>Minimilön per timme sedan 1 april 2026: <span class="mono">£12.71</span> från 21 år, <span class="mono">£10.85</span> för 18 till 20, <span class="mono">£8.00</span> under 18 och för lärlingar. Ändras varje april.</li>'
@@ -360,7 +386,7 @@ var HJALP = {
 function visaHjalp(behall){
   var h = document.getElementById("landhjalp");
   if (!behall && h.style.display === "block"){ h.style.display = "none"; return; }
-  h.innerHTML = nuvarandeLand ? HJALP[nuvarandeLand] : (HJALP.SE + HJALP.UK);
+  h.innerHTML = nuvarandeLand ? HJALP[nuvarandeLand] : (HJALP.SE + HJALP.NO + HJALP.UK);
   h.style.display = "block";
 }
 
@@ -422,7 +448,8 @@ function falt(o){
       "Under 18 får ta":"Under 18", "Sista ansökningsdag":"Sista",
       "Ansökan går till":"Kontakt för sökande", "Inskickad av":"Kontakt" }[par[i][0]]
       || par[i][0];
-    var gar = ANDRINGSBARA.indexOf(falt) > -1 && o["Status"] === "väntar";
+    var gar = roll === "admin" && ANDRINGSBARA.indexOf(falt) > -1
+              && o["Status"] === "väntar";
     var klasser = (par[i][2] ? "mono " : "") + (gar ? "andringsbar" : "");
     ut += "<dt>" + fly(par[i][0]) + "</dt><dd"
        + (klasser.trim() ? ' class="' + klasser.trim() + '"' : "")
@@ -461,7 +488,10 @@ function rita(rader){
     var klass = st === "godkänd" ? "godkand" : st === "nekad" ? "nekad" : "vantar";
     var nr = fly(o["Nummer"]);
     var knappar = "";
-    if (st === "väntar"){
+    if (roll !== "admin"){
+      knappar = (o["Skäl"] ? '<div class="kontroll"><span class="m"></span><span>'
+        + fly(o["Skäl"]) + "</span></div>" : "");
+    } else if (st === "väntar"){
       knappar = '<div class="knappar">'
         + '<button class="btn ja" onclick="avgor(\'' + nr + '\',true)">Godkänn</button>'
         + '<button class="btn nej" onclick="avgor(\'' + nr + '\',false)">Neka</button>'
@@ -668,6 +698,28 @@ function avgor(nr, ja){
     .catch(function(){ alert("Det gick inte att nå systemet."); });
 }
 
+/* ── tangentbord ────────────────────────────────────────────────────
+   Genvägar för den som sitter vid datorn och går igenom många
+   annonser. Siffrorna byter flik, s går till sökrutan.            */
+document.addEventListener("keydown", function(e){
+  if (e.target && /input|textarea/i.test(e.target.tagName)) {
+    if (e.key === "Escape") e.target.blur();
+    return;
+  }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+  var flikar = { "1": "väntar", "2": "godkänd", "3": "nekad", "4": "borttagen", "5": "" };
+  if (flikar[e.key] !== undefined && document.getElementById("panel").style.display !== "none") {
+    visa(flikar[e.key]);
+    return;
+  }
+  if (e.key === "s" || e.key === "S") {
+    var sok = document.getElementById("sok");
+    if (sok) { e.preventDefault(); sok.focus(); }
+  }
+  if (e.key === "?") visaHjalp();
+});
+
 /* ── start ──────────────────────────────────────────────────────── */
 
 (function(){
@@ -675,6 +727,7 @@ function avgor(nr, ja){
   try {
     sparad = localStorage.getItem("chansen-biljett") || "";
     vem = localStorage.getItem("chansen-vem") || "";
+    roll = localStorage.getItem("chansen-roll") || "admin";
   } catch(e){}
 
   if (!sparad){
@@ -687,7 +740,7 @@ function avgor(nr, ja){
   document.getElementById("panel").style.display = "block";
   document.getElementById("utknapp").style.display = "block";
   var v = document.querySelector(".topp .vad");
-  if (v && vem) v.textContent = "Inloggad som " + vem;
+  if (v && vem) v.textContent = vem + (roll === "lasare" ? " · läsare" : " · admin");
 
   // Biljetten kan ha gått ut. Då får man logga in igen.
   hamta("väntar", function(ok){
