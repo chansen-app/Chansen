@@ -578,9 +578,15 @@ function visaSynpunkter(){
           +   (o["Version"] ? '<dt>Version</dt><dd class="mono">' + fly(o["Version"]) + "</dd>" : "")
           +   (o["Mejl"] ? '<dt>Vill ha svar</dt><dd class="mono">' + fly(o["Mejl"]) + "</dd>" : "")
           + "</dl>"
-          + (o["Mejl"]
-              ? '<div class="knappar"><button class="btn mejl" onclick="svaraSynpunkt(\''
-                + fly(o["Mejl"]) + '\')">Svara</button></div>'
+          + (roll === "admin"
+              ? '<div class="knappar">'
+                + (o["Mejl"]
+                    ? '<button class="btn mejl" onclick="svaraSynpunkt(\'' + fly(o["Mejl"])
+                      + '\')">Svara</button>'
+                    : "")
+                + '<button class="btn bort" onclick="raderaSynpunkt(' + o._rad
+                + ')">Ta bort</button>'
+                + "</div>"
               : "")
           + "</div>";
       }).join("");
@@ -588,6 +594,20 @@ function visaSynpunkter(){
     .catch(function(){
       document.getElementById("lista").innerHTML = '<p class="tomt">Det gick inte att hämta.</p>';
     });
+}
+
+/* Synpunkten raderas helt, inte bara döljs. Den kan innehålla en
+   mejladress, och behöver inte sparas när den är läst och åtgärdad. */
+function raderaSynpunkt(rad){
+  if (!confirm("Ta bort den här synpunkten?\n\nDen försvinner helt och går inte att få tillbaka.")) return;
+  fetch(API + "?vad=radera-synpunkt&biljett=" + encodeURIComponent(biljett)
+      + "&rad=" + encodeURIComponent(rad))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d && d.ok) visaSynpunkter();
+      else alert("Det gick inte: " + ((d && d.fel) || "okänt fel"));
+    })
+    .catch(function(){ alert("Det gick inte att nå systemet."); });
 }
 
 function svaraSynpunkt(mejl){

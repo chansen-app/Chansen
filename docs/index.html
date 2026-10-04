@@ -1311,7 +1311,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 128</footer>
+version 129</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -3470,11 +3470,11 @@ function ritaBit(nollstall, fyllUpp){
   if (bit) el.insertAdjacentHTML("beforeend", bit);
   visatAntal = till;
 
-  /* Rutan om synpunkter sätts in efter åtta kort. Då har man hunnit se
-     tillräckligt för att ha en åsikt, men inte tröttnat. Den sätts in
+  /* Rutan om synpunkter sätts in efter tre kort. Längre ned syntes den
+     knappt, eftersom man då skrollat förbi flera skärmar. Den sätts in
      en gång, och flyttas aldrig när listan fylls på. */
-  if (!document.getElementById("tyckruta") && visatAntal >= 8){
-    var kortEtt = el.querySelectorAll(".card")[7];
+  if (!document.getElementById("tyckruta") && visatAntal >= 3){
+    var kortEtt = el.querySelectorAll(".card")[2];
     if (kortEtt){
       kortEtt.insertAdjacentHTML("afterend",
         '<div id="tyckruta" class="tyckruta">'
