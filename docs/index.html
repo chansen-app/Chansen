@@ -531,6 +531,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button id="f-heltid" onclick="visa('heltid')">Heltid<i></i></button>
     <button id="f-utdrag" onclick="visa('utdrag')">Nämner inte utdrag<i></i></button>
     <button id="f-direkt" onclick="visa('direkt')">Direkt hos arbetsgivaren<i></i></button>
+    <button id="f-sasong" onclick="visa('sasong')">Sommar och säsong<i></i></button>
   </div>
 
   <div class="rakning dold" id="rakning"></div>
@@ -1328,7 +1329,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 134</footer>
+version 135</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -3672,7 +3673,8 @@ function raknaFilter(iOmradet){
       deltid: bas.filter(function(j){ return (j.omfattning||"").indexOf("Deltid") > -1; }).length,
       heltid: bas.filter(function(j){ return (j.omfattning||"").indexOf("Heltid") > -1; }).length,
       utdrag: bas.filter(function(j){ return j.utdrag !== "kravs"; }).length,
-      direkt: bas.filter(function(j){ return j.bemanning !== true; }).length
+      direkt: bas.filter(function(j){ return j.bemanning !== true; }).length,
+      sasong: bas.filter(arSasong).length
     };
     for (var ai in antalPer){
       var kn = document.getElementById("f-" + ai);
@@ -3757,8 +3759,27 @@ function ritaBit(nollstall, fyllUpp){
 
 // Markera knappen direkt och rita om listan i nästa bildruta. Annars
 // måste webbläsaren rita om hela listan innan den hinner reagera på klicket.
+/* Sommar-, ferie- och säsongsjobb. Orden är hämtade ur riktiga
+   annonser. Listan är kort i oktober och lång i februari, eftersom
+   sommarjobben annonseras under vintern.                           */
+var SASONG = /\b(sommarjobb\w*|sommarvikari\w*|sommaranställ\w*|sommarsäsong\w*|sommarpersonal|feriejobb\w*|ferieanställ\w*|feriearbet\w*|semestervikari\w*|säsongsjobb\w*|säsongsanställ\w*|säsongsarbet\w*|säsongspersonal|högsäsong\w*|vintersäsong\w*|skidsäsong\w*|julbemanning|julhandel\w*|jultid\w*)\b/i;
+
+/* "Vi söker extrapersonal inför julen" är ett säsongsjobb.
+   "Du får gärna jobba mer under sommaren 2027" är det inte, utan en
+   bisats i en vanlig tillsvidareannons. Därför krävs antingen ett
+   tydligt ord, eller att det står i rubriken.                      */
+var SASONG_SVAG = /\b(inför julen|under julen|inför sommaren|under sommaren|till sommaren|över sommaren)\b/i;
+
+function arSasong(j){
+  var titel = j.titel || "";
+  var text = titel + " " + (j.beskrivning || "");
+  if (SASONG.test(text)) return true;
+  // svagare formuleringar räknas bara om de står i rubriken
+  return SASONG_SVAG.test(titel);
+}
+
 function visa(filter){
-  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt"];
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong"];
   for (var i = 0; i < ids.length; i++){
     var k = document.getElementById("f-" + ids[i]);
     if (k && k.className !== "dold") k.className = (ids[i] === filter) ? "on" : "";
@@ -3794,7 +3815,7 @@ function visaInre(filter){
     }
   }
   if (underSexton() && filter === "heltid") filter = "alla";
-  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt"];
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong"];
   for(var i=0;i<ids.length;i++){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
@@ -3837,6 +3858,7 @@ function visaInre(filter){
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
   if(filter === "nyborjare") valda = valda.filter(function(j){ return j.nyborjarvanlig === true; });
   if(filter === "direkt") valda = valda.filter(function(j){ return j.bemanning !== true; });
+  if(filter === "sasong") valda = valda.filter(arSasong);
   if(filter === "deltid") valda = valda.filter(function(j){ return (j.omfattning||"").indexOf("Deltid") > -1; });
   if(filter === "heltid") valda = valda.filter(function(j){ return (j.omfattning||"").indexOf("Heltid") > -1; });
   if(filter === "utdrag") valda = valda.filter(function(j){ return j.utdrag !== "kravs"; });
