@@ -588,6 +588,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <textarea id="a-text" style="width:100%;min-height:420px;padding:20px;font:inherit;font-size:15px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical" aria-label="Din ansökningstext"></textarea>
 
+  <button class="mini" onclick="bytFormulering()" style="margin-top:12px">Byt formulering</button>
+
   <div class="ruta" style="font-size:14px;margin-top:16px">
     Många arbetsgivare vill ha ett CV också.
     <button class="lank" onclick="visaVy('cv')">Bygg ett här</button>, det tar ungefär tio minuter.
@@ -1320,7 +1322,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 130</footer>
+version 131</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -2761,11 +2763,53 @@ try {
 } catch(e){}
 
 var OM_FORSLAG = [
-  "Jag går på gymnasiet och söker ett extrajobb vid sidan av skolan. Jag är punktlig, tar ansvar och lär mig snabbt.",
-  "Jag söker mitt första jobb. Jag har inte jobbat tidigare men är van vid att ta ansvar och trivs med att ha något att göra.",
-  "Jag har gymnasieexamen och söker heltid. Jag är noggrann, kommer i tid och tycker om att jobba tillsammans med andra.",
-  "Jag söker ett jobb där jag får möta människor. Jag är utåtriktad, tålmodig och blir lugn när det är mycket att göra."
+  { kort: "Går på gymnasiet", texter: [
+    "Jag går på gymnasiet och söker ett extrajobb vid sidan av skolan. Jag är punktlig, tar ansvar och lär mig snabbt.",
+    "Jag pluggar på gymnasiet och vill jobba extra på kvällar och helger. Jag passar tider, gör det jag lovar och är inte rädd för att fråga när jag är osäker.",
+    "Jag läser på gymnasiet och söker ett jobb bredvid studierna. Jag är van vid att planera min tid och trivs med att ha mycket att göra.",
+    "Jag går sista året på gymnasiet och söker ett extrajobb. Jag kommer i tid, tar tag i det som behöver göras och lär mig nya saker snabbt."
+  ]},
+  { kort: "Första jobbet", texter: [
+    "Jag söker mitt första jobb. Jag har inte jobbat tidigare men är van vid att ta ansvar och trivs med att ha något att göra.",
+    "Det här blir mitt första jobb. Jag saknar erfarenhet men är nyfiken, lyssnar på instruktioner och gör gärna mer än det jag blir ombedd.",
+    "Jag söker mitt första riktiga jobb. Jag lär mig snabbt, frågar hellre en gång för mycket än en gång för lite, och är alltid i tid.",
+    "Jag har inte jobbat förut, men jag är van vid ansvar hemifrån och från skolan. Jag är noggrann och ger inte upp när något är svårt."
+  ]},
+  { kort: "Söker heltid", texter: [
+    "Jag har gymnasieexamen och söker heltid. Jag är noggrann, kommer i tid och tycker om att jobba tillsammans med andra.",
+    "Jag är klar med skolan och söker ett heltidsjobb. Jag är stabil, gör det jag säger att jag ska göra och trivs i ett arbetslag.",
+    "Jag söker heltid och kan börja snart. Jag är ordningsam, tar ansvar för mina uppgifter och ställer upp när det behövs.",
+    "Jag vill jobba heltid och komma in i ett sammanhang där jag får lära mig yrket ordentligt. Jag är punktlig och arbetsvillig."
+  ]},
+  { kort: "Möta människor", texter: [
+    "Jag söker ett jobb där jag får möta människor. Jag är utåtriktad, tålmodig och blir lugn när det är mycket att göra.",
+    "Jag trivs bäst med jobb där det händer saker och där man träffar folk. Jag är trevlig mot kunder även när det är stressigt.",
+    "Jag söker ett jobb med mycket kontakt med människor. Jag lyssnar, är hjälpsam och tycker om att lösa saker på plats.",
+    "Jag vill jobba med service. Jag har lätt för att prata med folk, håller humöret uppe och tappar inte tålamodet när det är kö."
+  ]},
+  { kort: "Tillbaka till jobb", texter: [
+    "Jag har varit borta från arbetslivet ett tag och söker mig tillbaka. Jag är pålitlig, lär mig snabbt och kan börja direkt.",
+    "Jag söker ett nytt jobb efter en period utanför arbetsmarknaden. Jag är motiverad, kommer i tid och är van vid ansvar.",
+    "Efter ett uppehåll vill jag tillbaka i arbete. Jag är stabil, gör det jag lovar och är beredd att lära mig något nytt."
+  ]},
+  { kort: "Byter bransch", texter: [
+    "Jag söker mig till en ny bransch och börjar gärna från grunden. Jag har arbetslivserfarenhet med mig och lär mig fort.",
+    "Jag vill prova något nytt och söker ett jobb där man lär sig på plats. Jag är van vid arbete, rutiner och att ta ansvar.",
+    "Jag byter inriktning och söker ett jobb där viljan väger tyngre än erfarenheten. Jag är punktlig, noggrann och tar instruktioner."
+  ]},
+  { kort: "Ny i Sverige", texter: [
+    "Jag är ny i Sverige och söker arbete. Jag är arbetsvillig, lär mig snabbt och blir bättre på svenska för varje dag.",
+    "Jag har nyligen flyttat till Sverige och vill komma in i arbetslivet. Jag är punktlig, ansvarstagande och lär mig gärna nytt.",
+    "Jag söker ett jobb där jag får använda händerna och lära mig språket samtidigt. Jag kommer i tid och gör det jag ska."
+  ]}
 ];
+
+/* Slumpar fram en av formuleringarna. Alla ska inte få samma text,
+   eftersom arbetsgivare märker direkt när flera ansökningar är
+   ordagrant likadana.                                              */
+function slumpaText(lista){
+  return lista[Math.floor(Math.random() * lista.length)];
+};
 
 var ERF_FORSLAG = [
   ["Barnvakt", "Barnvakt åt syskon och familjer i närområdet. Ansvar för mat, läggning och läxor."],
@@ -2890,9 +2934,9 @@ function oppnaCV(){
   }
 
   var of = document.getElementById("cv-omforslag");
-  if (of) of.innerHTML = OM_FORSLAG.map(function(t, i){
-    var kort = ["Går på gymnasiet","Första jobbet","Söker heltid","Möta människor"][i];
-    return '<button class="forslag" onclick="sattOm(OM_FORSLAG[' + i + '])">' + kort + '</button>';
+  if (of) of.innerHTML = OM_FORSLAG.map(function(grupp, i){
+    return '<button class="forslag" onclick="sattOm(slumpaText(OM_FORSLAG[' + i
+      + '].texter))">' + grupp.kort + "</button>";
   }).join("");
 
   var ef = document.getElementById("cv-erfforslag");
@@ -3278,6 +3322,25 @@ function kortTitel(t){
   return s;
 }
 
+/* Brevets fasta meningar finns i flera varianter. Annars skickar alla
+   som använder Chansen ordagrant samma brev till samma arbetsgivare,
+   och det märks.                                                    */
+var BREV_INLEDNING = [
+  "Jag såg er annons om jobbet som TITEL hos ARB och vill gärna söka det.",
+  "Jag har sett att ni söker TITEL till ARB, och det är ett jobb jag gärna vill ha.",
+  "Jag skriver för att söka jobbet som TITEL hos ARB.",
+  "Er annons om tjänsten som TITEL hos ARB fångade mitt intresse, och jag vill gärna söka den.",
+  "Jag hittade er annons om jobbet som TITEL hos ARB och tänkte direkt att det skulle passa mig."
+];
+
+var BREV_AVSLUTNING = [
+  "Jag kan börja omgående och kommer gärna in på en intervju när det passar er. Hör av er om ni vill veta något mer.",
+  "Jag är tillgänglig för intervju när det passar er, och kan börja så snart ni behöver. Hör gärna av er om ni undrar något.",
+  "Jag träffar gärna er för att berätta mer, och kan börja med kort varsel. Ring eller mejla när som helst.",
+  "Om ni tycker att det låter intressant kommer jag gärna in och pratar. Jag kan börja när det passar er.",
+  "Jag hoppas att få chansen att berätta mer vid en intervju. Jag kan börja direkt och svarar snabbt om ni hör av er."
+];
+
 function byggBrev(j){
   var kat = KATEGORITEXT[j.kategori] || KATEGORITEXT["Övrigt"];
   var namn = svar.namn || "[ditt namn]";
@@ -3286,7 +3349,8 @@ function byggBrev(j){
 
   rader.push("Hej,");
   rader.push("");
-  rader.push("Jag såg er annons om jobbet som " + kortTitel(j.titel) + " hos " + arb + " och vill gärna söka det.");
+  rader.push(slumpaText(BREV_INLEDNING)
+    .replace("TITEL", kortTitel(j.titel)).replace("ARB", arb));
   rader.push("");
 
   var stycke2 = [];
@@ -3309,7 +3373,7 @@ function byggBrev(j){
   rader.push(stycke3.join(" "));
   rader.push("");
 
-  rader.push("Jag kan börja omgående och kommer gärna in på en intervju när det passar er. Hör av er om ni vill veta något mer.");
+  rader.push(slumpaText(BREV_AVSLUTNING));
   rader.push("");
   rader.push("Vänliga hälsningar");
   rader.push(namn);
@@ -3320,6 +3384,21 @@ function byggBrev(j){
 }
 
 var aktuelltJobb = null;
+
+/* Slumpar fram brevet på nytt. Den som inte gillar formuleringen ska
+   kunna trycka igen i stället för att skriva om allt själv. Har man
+   redan ändrat i texten frågar vi först.                            */
+function bytFormulering(){
+  if (!aktuelltJobb) return;
+  var ta = document.getElementById("a-text");
+  if (!ta) return;
+  if (ta.dataset && ta.dataset.andrad === "1"){
+    if (!confirm("Du har ändrat i texten. Vill du skriva över den med en ny formulering?")) return;
+  }
+  ta.value = byggBrev(aktuelltJobb);
+  if (ta.dataset) ta.dataset.andrad = "";
+  handelse("bytte-formulering");
+}
 
 function oppnaAnsokan(lank){
   try {
