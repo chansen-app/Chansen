@@ -1328,7 +1328,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 132</footer>
+version 133</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -3472,11 +3472,21 @@ var aktuelltJobb = null;
 function ritaEgenskaper(){
   var el = document.getElementById("a-egenskaper");
   if (!el) return;
-  el.innerHTML = EGENSKAPER.map(function(g){
+  /* Knapparna byggs utan onclick i texten. JSON.stringify gav dubbla
+     citattecken som bröt attributet, och då hände ingenting när man
+     tryckte. Nu kopplas klicket på i koden i stället.              */
+  el.innerHTML = EGENSKAPER.map(function(g, i){
     var pa = valdaEgenskaper.indexOf(g.kort) > -1;
-    return '<button type="button" class="' + (pa ? "on" : "") + '" onclick="valjEgenskap('
-      + JSON.stringify(g.kort) + ')">' + fly(g.kort) + "</button>";
+    return '<button type="button" data-i="' + i + '" class="' + (pa ? "on" : "")
+      + '">' + fly(g.kort) + "</button>";
   }).join("");
+
+  var knappar = el.querySelectorAll("button");
+  for (var k = 0; k < knappar.length; k++){
+    knappar[k].onclick = function(){
+      valjEgenskap(EGENSKAPER[Number(this.getAttribute("data-i"))].kort);
+    };
+  }
 }
 
 function valjEgenskap(kort){
