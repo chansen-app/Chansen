@@ -586,6 +586,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <input class="txt" id="namn" placeholder="För- och efternamn" value="" oninput="namnAndrat()">
   </div>
 
+  <div class="field" style="margin-bottom:16px">
+    <label class="fraga">Vad stämmer in på dig?</label>
+    <div class="hint" style="margin-bottom:10px">Tryck på det som passar, så skrivs brevet om. Du kan välja flera, men högst tre används åt gången.</div>
+    <div class="chips" id="a-egenskaper"></div>
+  </div>
+
   <textarea id="a-text" style="width:100%;min-height:420px;padding:20px;font:inherit;font-size:15px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical" aria-label="Din ansökningstext"></textarea>
 
   <button class="mini" onclick="bytFormulering()" style="margin-top:12px">Byt formulering</button>
@@ -1322,7 +1328,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 131</footer>
+version 132</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -3325,6 +3331,66 @@ function kortTitel(t){
 /* Brevets fasta meningar finns i flera varianter. Annars skickar alla
    som använder Chansen ordagrant samma brev till samma arbetsgivare,
    och det märks.                                                    */
+/* Egenskaper man kryssar i själv. Varje egenskap har flera meningar,
+   så att två personer som väljer samma sak ändå får olika brev.    */
+var EGENSKAPER = [
+  { kort: "Punktlig", texter: [
+    "Jag kommer i tid, varje gång.",
+    "Att passa tider är självklart för mig.",
+    "Jag är alltid på plats när jag ska vara det." ]},
+  { kort: "Lär mig snabbt", texter: [
+    "Jag lär mig nya saker snabbt och behöver sällan höra något två gånger.",
+    "Jag tar instruktioner lätt och kommer in i nya rutiner fort.",
+    "Visar man mig en gång så sitter det." ]},
+  { kort: "Social", texter: [
+    "Jag har lätt för att prata med människor och trivs bland folk.",
+    "Jag tycker om att möta kunder och gör det gärna med ett leende.",
+    "Jag är utåtriktad och tar gärna kontakt med nya människor." ]},
+  { kort: "Lugn när det är stressigt", texter: [
+    "Jag blir lugn när det är mycket att göra och tappar inte huvudet i stress.",
+    "När det är kö och högt tempo brukar jag vara den som håller ihop det.",
+    "Jag jobbar på i mitt tempo även när det är hektiskt." ]},
+  { kort: "Noggrann", texter: [
+    "Jag är noggrann och slarvar hellre inte, även om det tar någon minut extra.",
+    "Jag gör saker ordentligt och kontrollerar att det blev rätt.",
+    "Jag är petig med detaljer och lämnar inte något halvfärdigt." ]},
+  { kort: "Tar ansvar", texter: [
+    "Jag tar ansvar för mina uppgifter och gör det jag lovat.",
+    "Man kan lita på att jag gör det jag sagt att jag ska göra.",
+    "Jag ser vad som behöver göras utan att någon säger till." ]},
+  { kort: "Fysiskt stark", texter: [
+    "Jag har inget emot fysiskt arbete och är van vid att röra på mig hela dagen.",
+    "Jag är stark nog för tunga lyft och tröttnar inte av att stå upp.",
+    "Fysiskt jobb passar mig bra, jag sitter hellre inte still." ]},
+  { kort: "Flexibel med tider", texter: [
+    "Jag är flexibel med arbetstider och kan hoppa in med kort varsel.",
+    "Jag kan jobba kvällar och helger, och ställer upp när det behövs.",
+    "Mina tider är inte ett problem, jag anpassar mig efter schemat." ]},
+  { kort: "Ordningsam", texter: [
+    "Jag håller ordning omkring mig och gillar när saker ligger på sin plats.",
+    "Jag städar undan efter mig och ser till att det är rent och snyggt.",
+    "Jag trivs med rutiner och håller ordning på mitt." ]},
+  { kort: "Jobbar bra i team", texter: [
+    "Jag trivs i ett arbetslag och hjälper gärna till där det behövs.",
+    "Jag jobbar bra tillsammans med andra och ställer upp för kollegorna.",
+    "Jag gillar att vara en del av ett team där man hjälps åt." ]},
+  { kort: "Jobbar bra själv", texter: [
+    "Jag klarar av att jobba självständigt utan att någon står bredvid.",
+    "Jag kan ta eget ansvar för en uppgift och göra klart den.",
+    "Jag behöver inte bli tillsagd hela tiden för att komma vidare." ]},
+  { kort: "Språk", texter: [
+    "Jag pratar flera språk, vilket brukar vara till nytta i kundkontakt.",
+    "Jag kan hjälpa kunder på mer än ett språk.",
+    "Flera språk gör att jag kan ta hand om fler sorters kunder." ]}
+];
+
+/* De valda egenskaperna sparas, så man slipper kryssa i om vid varje
+   ansökan. Ligger bara i telefonen, som allt annat.                */
+var valdaEgenskaper = [];
+try {
+  valdaEgenskaper = JSON.parse(localStorage.getItem("chansen-egenskaper") || "[]");
+} catch (e) { valdaEgenskaper = []; }
+
 var BREV_INLEDNING = [
   "Jag såg er annons om jobbet som TITEL hos ARB och vill gärna söka det.",
   "Jag har sett att ni söker TITEL till ARB, och det är ett jobb jag gärna vill ha.",
@@ -3358,7 +3424,21 @@ function byggBrev(j){
   var e = erfarenhetsrad(); if (e) stycke2.push(e);
   if (stycke2.length) { rader.push(stycke2.join(" ")); rader.push(""); }
 
-  var stycke3 = [kat.styrka];
+  /* Har man kryssat i egenskaper används de. Annars faller brevet
+     tillbaka på den text som hör till yrkeskategorin, som förut.   */
+  var stycke3 = [];
+  if (valdaEgenskaper.length){
+    var valda = EGENSKAPER.filter(function(g){
+      return valdaEgenskaper.indexOf(g.kort) > -1;
+    });
+    // Max tre, annars blir stycket en uppräkning ingen orkar läsa
+    if (valda.length > 3) {
+      valda = valda.slice().sort(function(){ return Math.random() - 0.5; }).slice(0, 3);
+    }
+    stycke3 = valda.map(function(g){ return slumpaText(g.texter); });
+  } else {
+    stycke3 = [kat.styrka];
+  }
   var t = tillganglighet();
   if (t) {
     var extra = "";
@@ -3388,6 +3468,31 @@ var aktuelltJobb = null;
 /* Slumpar fram brevet på nytt. Den som inte gillar formuleringen ska
    kunna trycka igen i stället för att skriva om allt själv. Har man
    redan ändrat i texten frågar vi först.                            */
+/* Ritar knapparna och skriver om brevet när man kryssar i något. */
+function ritaEgenskaper(){
+  var el = document.getElementById("a-egenskaper");
+  if (!el) return;
+  el.innerHTML = EGENSKAPER.map(function(g){
+    var pa = valdaEgenskaper.indexOf(g.kort) > -1;
+    return '<button type="button" class="' + (pa ? "on" : "") + '" onclick="valjEgenskap('
+      + JSON.stringify(g.kort) + ')">' + fly(g.kort) + "</button>";
+  }).join("");
+}
+
+function valjEgenskap(kort){
+  var i = valdaEgenskaper.indexOf(kort);
+  if (i > -1) valdaEgenskaper.splice(i, 1);
+  else valdaEgenskaper.push(kort);
+  try { localStorage.setItem("chansen-egenskaper", JSON.stringify(valdaEgenskaper)); } catch (e) {}
+  ritaEgenskaper();
+
+  var ta = document.getElementById("a-text");
+  if (ta && aktuelltJobb){
+    if (ta.dataset && ta.dataset.andrad === "1") return;   // rör inte en ändrad text
+    ta.value = byggBrev(aktuelltJobb);
+  }
+}
+
 function bytFormulering(){
   if (!aktuelltJobb) return;
   var ta = document.getElementById("a-text");
@@ -3420,6 +3525,7 @@ function oppnaAnsokanInre(lank){
   // textContent escapar automatiskt, ingen risk här
   var nf = document.getElementById("namn");
   if (nf) nf.value = svar.namn || "";
+  ritaEgenskaper();
   var ta = document.getElementById("a-text");
   ta.value = byggBrev(j);
   if (ta.dataset) ta.dataset.andrad = "";
