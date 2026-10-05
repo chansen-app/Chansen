@@ -1328,7 +1328,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 133</footer>
+version 134</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -3317,6 +3317,7 @@ function utbildningsrad(){
 
 function kortTitel(t){
   var s = (t || "jobbet").trim();
+
   // klipp vid utropstecken, tankstreck, komma eller parentes om det som blir kvar duger
   var brytare = ["!", " – ", " - ", ",", "(", "?"];
   for (var i = 0; i < brytare.length; i++){
@@ -3324,6 +3325,47 @@ function kortTitel(t){
     if (pos > 7) s = s.slice(0, pos);
   }
   s = s.replace(/\.\.\.$/, "").trim();
+
+  /* Annonsrubriker innehåller ofta mer än yrket, till exempel
+     "Extrajobb som butikssäljare till Specsavers Boden". I brevet står
+     redan både arbetsgivare och att man söker, så allt det blir en
+     upprepning. Här skalas rubriken ned till själva yrket.         */
+
+  // "MAX Strängnäs söker restaurangbiträde", alltså företaget först
+  s = s.replace(/^.{2,40}?\s+s[öo]ker(\s+(nu|dig\s+som\s+är|en|ett|flera))?\s+/i, "");
+
+  // "Vi söker en kock" och liknande inledningar
+  s = s.replace(/^(vi\s+)?s[öo]ker(\s+(nu|dig\s+som\s+är|en|ett|flera))?\s+/i, "");
+
+  // "30h/veckan" och liknande tillägg på slutet
+  s = s.replace(/[\s,]+\d+\s*(h|tim|timmar)\s*\/?\s*(vecka|veckan|v)?\.?$/i, "");
+  s = s.replace(/[\s,]+\d+\s*%$/, "");
+  s = s.replace(/^(extrajobb|sommarjobb|helgjobb|feriejobb|timanställning|vikariat)\s+som\s+/i, "");
+  s = s.replace(/^(ledig\s+tjänst|tjänst)\s+som\s+/i, "");
+
+  // "till Specsavers Boden", "hos ICA Maxi", "i Göteborg"
+  s = s.replace(/\s+(till|hos|på|i|inom|för)\s+[^,]+$/i, function(hela){
+    // behåll om det som blir kvar blir för kort för att betyda något
+    var kvar = s.slice(0, s.length - hela.length).trim();
+    return kvar.length >= 6 ? "" : hela;
+  });
+
+  // "Cafepersonal sökes", alltså ordet sökes på slutet
+  s = s.replace(/\s+(sökes|söks|s[öo]ker\s+vi)\b.*$/i, "");
+
+  s = s.replace(/\s{2,}/g, " ").trim();
+  // en inledande versal mitt i en mening ser konstigt ut
+  if (/^[A-ZÅÄÖ][a-zåäö]/.test(s)) s = s.charAt(0).toLowerCase() + s.slice(1);
+
+  /* Rubriker skrivs ibland med Stor Bokstav På Varje Ord. Är mer än
+     hälften av orden så, görs hela raden om till gemener.          */
+  var ord = s.split(" ").filter(Boolean);
+  if (ord.length > 1){
+    var versaler = ord.filter(function(o){ return /^[A-ZÅÄÖ][a-zåäö]/.test(o); }).length;
+    if (versaler >= ord.length / 2) s = s.toLowerCase();
+  }
+
+  if (!s || s.length < 3) s = (t || "jobbet").trim();
   if (s.length > 55) s = s.slice(0, 55).trim();
   return s;
 }
