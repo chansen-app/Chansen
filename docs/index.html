@@ -532,6 +532,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button id="f-utdrag" onclick="visa('utdrag')">Nämner inte utdrag<i></i></button>
     <button id="f-direkt" onclick="visa('direkt')">Direkt hos arbetsgivaren<i></i></button>
     <button id="f-sasong" onclick="visa('sasong')">Sommar och säsong<i></i></button>
+    <button id="f-sprak" onclick="visa('sprak')">Nämner inte språkkrav<i></i></button>
   </div>
 
   <div class="rakning dold" id="rakning"></div>
@@ -1329,7 +1330,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 135</footer>
+version 136</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1990,6 +1991,7 @@ function tomtLage(filter){
   if (filter === "deltid") skal.push("bara deltid");
   if (filter === "heltid") skal.push("bara heltid");
   if (filter === "utdrag") skal.push("utan registerutdrag");
+  if (filter === "sprak") skal.push("utan språkkrav i annonsen");
 
   var text = skal.length
     ? "Inga jobb matchar " + skal.join(", ") + " just nu."
@@ -3674,7 +3676,8 @@ function raknaFilter(iOmradet){
       heltid: bas.filter(function(j){ return (j.omfattning||"").indexOf("Heltid") > -1; }).length,
       utdrag: bas.filter(function(j){ return j.utdrag !== "kravs"; }).length,
       direkt: bas.filter(function(j){ return j.bemanning !== true; }).length,
-      sasong: bas.filter(arSasong).length
+      sasong: bas.filter(arSasong).length,
+      sprak: bas.filter(function(j){ return j.sprak !== "namns"; }).length
     };
     for (var ai in antalPer){
       var kn = document.getElementById("f-" + ai);
@@ -3778,8 +3781,19 @@ function arSasong(j){
   return SASONG_SVAG.test(titel);
 }
 
+var sprakdataSvar = null;
+function harSprakdata(){
+  if (sprakdataSvar === null){
+    sprakdataSvar = false;
+    for (var i = 0; i < JOBB.length; i++){
+      if (JOBB[i].sprak){ sprakdataSvar = true; break; }
+    }
+  }
+  return sprakdataSvar;
+}
+
 function visa(filter){
-  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong"];
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong","sprak"];
   for (var i = 0; i < ids.length; i++){
     var k = document.getElementById("f-" + ids[i]);
     if (k && k.className !== "dold") k.className = (ids[i] === filter) ? "on" : "";
@@ -3815,13 +3829,20 @@ function visaInre(filter){
     }
   }
   if (underSexton() && filter === "heltid") filter = "alla";
-  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong"];
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong","sprak"];
   for(var i=0;i<ids.length;i++){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
 
   var hkn = document.getElementById("f-heltid");
   if (hkn) hkn.className = underSexton() ? "dold" : (filter === "heltid" ? "on" : "");
+
+  /* Språkfältet sätts i nattkörningen. Första dygnet efter en uppdatering
+     saknas det, och då skulle filtret visa precis alla jobb och ljuga.
+     Knappen syns därför bara när datan faktiskt har fältet.           */
+  var skn = document.getElementById("f-sprak");
+  if (skn) skn.className = harSprakdata() ? (filter === "sprak" ? "on" : "") : "dold";
+  if (!harSprakdata() && filter === "sprak") filter = "alla";
 
   // Många kommuner har bara ett eller två jobb. Då är en nästan tom lista
   // sämre än att visa hela länet, så vi fyller på när det är för tunt.
@@ -3859,6 +3880,7 @@ function visaInre(filter){
   if(filter === "nyborjare") valda = valda.filter(function(j){ return j.nyborjarvanlig === true; });
   if(filter === "direkt") valda = valda.filter(function(j){ return j.bemanning !== true; });
   if(filter === "sasong") valda = valda.filter(arSasong);
+  if(filter === "sprak") valda = valda.filter(function(j){ return j.sprak !== "namns"; });
   if(filter === "deltid") valda = valda.filter(function(j){ return (j.omfattning||"").indexOf("Deltid") > -1; });
   if(filter === "heltid") valda = valda.filter(function(j){ return (j.omfattning||"").indexOf("Heltid") > -1; });
   if(filter === "utdrag") valda = valda.filter(function(j){ return j.utdrag !== "kravs"; });
@@ -3902,9 +3924,14 @@ function visaInre(filter){
     aldersnotis += '<div class="ruta" style="font-size:14px">Här är jobben där arbetsgivaren själv kryssat i att erfarenhet inte krävs. Alla jobb i Chansen har låga krav, men de här är uttalade. Det är arbetsgivarens ord, inte ett löfte från oss.</div>';
   }
   if (notis) {
-    notis.innerHTML = aldersnotis + ((filter === "utdrag")
-      ? '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte nämner registerutdrag. Arbetsgivaren kan ändå begära ett. Fråga innan du lägger tid på ansökan.</div>'
-      : "");
+    var rutan = "";
+    if (filter === "utdrag") {
+      rutan = '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte nämner registerutdrag. Arbetsgivaren kan ändå begära ett. Fråga innan du lägger tid på ansökan.</div>';
+    }
+    if (filter === "sprak") {
+      rutan = '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte skriver något om att du måste kunna svenska. Arbetsgivaren kan ändå vilja det. Fråga innan du lägger tid på ansökan.</div>';
+    }
+    notis.innerHTML = aldersnotis + rutan;
   }
   // Räkna hur många varje filter skulle ge, så talen kan stå i knapparna.
   // Räkningen går igenom alla jobb sju gånger och är för tung för att
