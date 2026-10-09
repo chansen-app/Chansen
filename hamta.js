@@ -556,6 +556,36 @@ function utdragskrav(a) {
   return "framgar inte";
 }
 
+/* Språkkrav. Många annonser säger rakt ut att man måste kunna svenska,
+   och för den som inte gör det är de annonserna bortkastad tid. Vi kan
+   bara läsa vad som står, så filtret heter "Nämner inte språkkrav" och
+   lovar inget mer än så. Står det ingenting kan arbetsgivaren ändå
+   kräva svenska i intervjun.                                        */
+const SPRAK_ORD = [
+  "goda kunskaper i svenska", "god kunskap i svenska", "god svenska",
+  "mycket goda kunskaper i svenska", "flytande svenska", "flytande i svenska",
+  "behärskar svenska", "behärska svenska", "behärskar det svenska språket",
+  "svenska i tal och skrift", "svenska i tal & skrift",
+  "talar och skriver svenska", "tala och skriva svenska",
+  "läsa och skriva svenska", "obehindrat svenska", "obehindrat på svenska",
+  "svenska språket i tal", "det svenska språket",
+  "du talar svenska", "du pratar svenska", "kunskaper i svenska",
+  "svenska är ett krav", "krav på svenska", "svenska som arbetsspråk",
+  "goda svenskkunskaper", "svenskkunskaper", "språkkunskaper i svenska",
+  "kommunicera på svenska", "kommunicera obehindrat", "förstå svenska",
+  "svensktalande", "talar flytande svenska"
+];
+
+function sprakkrav(a) {
+  const rå = ((a.description ? a.description.text : "") + " " + (a.headline || "")).toLowerCase();
+  const platt = rå.replace(/å/g, "a").replace(/ä/g, "a").replace(/ö/g, "o");
+  for (const o of SPRAK_ORD) {
+    const p = o.replace(/å/g, "a").replace(/ä/g, "a").replace(/ö/g, "o");
+    if (rå.indexOf(o) > -1 || platt.indexOf(p) > -1) return "namns";
+  }
+  return "namns inte";
+}
+
 function okForMinderarig(a) {
   const titel = (a.headline || "").toLowerCase();
   const text = ((a.description ? a.description.text : "") + " " + titel).toLowerCase();
@@ -678,6 +708,7 @@ async function hamtaJobb() {
           korkortKravs: a.driving_license_required,
           lan: a.workplace_address && a.workplace_address.region ? a.workplace_address.region : "",
         utdrag: utdragskrav(a),
+        sprak: sprakkrav(a),
         provision: harProvision(brodtext) || harRorligDel(a),
         lonform: (a.salary_type && a.salary_type.label) || "",
         nattarbete: harNattarbete(a),
@@ -772,6 +803,9 @@ async function hamtaJobb() {
   let bem = 0;
   for (const j of jobb) { if (j.bemanning) bem++; }
   console.log("Via bemanning eller rekrytering: " + bem);
+  let utanSprak = 0;
+  for (const j of jobb) { if (j.sprak === "namns inte") utanSprak++; }
+  console.log("Nämner inte språkkrav: " + utanSprak);
   console.log("Kommuner i uppslagslistan: " + Object.keys(kommunLan).length);
 }
 
