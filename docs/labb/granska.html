@@ -895,7 +895,13 @@ var STAT_HANDELSER = {
   "filter-direkt": "Filter: Direkt hos arbetsgivaren",
   "filter-sasong": "Filter: Sommar och säsong",
   "filter-sprak": "Filter: Nämner inte språkkrav",
-  "filter-alla": "Filter: Alla"
+  "filter-alla": "Filter: Alla",
+  "ort-ifylld": "Fyllde i en ort",
+  "ort-tom": "Lämnade orten tom",
+  "start-snabb": "Valde snabbstart",
+  "start-alla-fragor": "Svarade på alla frågor",
+  "soker-heltid": "Söker heltid",
+  "forsta-besoket": "Första besöket"
 };
 function handelseNamn_(k){
   if (STAT_HANDELSER[k]) return STAT_HANDELSER[k];
@@ -919,10 +925,15 @@ function kallaNamn_(k){
   if (h === "t.co" || h.indexOf("twitter") > -1 || h === "x.com") return "X";
   if (h.indexOf("threads") > -1) return "Threads";
   if (h.indexOf("chansen.nu") > -1) return "";      // inom sidan räknas inte
+  if (h.indexOf("vklass") > -1) return "Vklass (skola)";
+  if (h.indexOf("teams") > -1 && h.indexOf("microsoft") > -1) return "Microsoft Teams";
   return h.replace(/^www\./, "");
 }
 var STAT_LANDER = { SE:"Sverige", NO:"Norge", DK:"Danmark", FI:"Finland", GB:"Storbritannien",
-  DE:"Tyskland", US:"USA", NL:"Nederländerna", ES:"Spanien", PL:"Polen" };
+  DE:"Tyskland", US:"USA", NL:"Nederländerna", ES:"Spanien", PL:"Polen", IE:"Irland",
+  FR:"Frankrike", IT:"Italien", IS:"Island", EE:"Estland", BE:"Belgien", CH:"Schweiz",
+  AT:"Österrike", PT:"Portugal", GR:"Grekland", TR:"Turkiet", CA:"Kanada", AU:"Australien",
+  IN:"Indien", SG:"Singapore", JP:"Japan" };
 function enhetNamn_(k){ return { desktop:"Dator", mobile:"Mobil", tablet:"Surfplatta" }[k] || k; }
 var STAT_ORTER = { goteborg:"Göteborg", malmo:"Malmö", vasteras:"Västerås", jonkoping:"Jönköping",
   norrkoping:"Norrköping", linkoping:"Linköping", orebro:"Örebro", umea:"Umeå", lulea:"Luleå",
