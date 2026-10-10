@@ -104,6 +104,39 @@
 
   .landrad{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
   .flikar.liten button{padding:6px 11px;font-size:12.5px}
+  /* ── statistik ── */
+  .stat-period{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+  .stat-period button{background:var(--yta);border:1px solid var(--linje);color:var(--damp);
+    border-radius:6px;padding:6px 11px;font-size:12.5px;font-family:var(--sans);cursor:pointer}
+  .stat-period button.on{background:var(--yta2);border-color:var(--accent);color:var(--text)}
+  .stat-rutor{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:18px}
+  .stat-ruta{background:var(--yta);border:1px solid var(--linje);border-radius:8px;padding:11px 13px}
+  .stat-ruta .tal{font-size:23px;font-weight:600;line-height:1.15;color:var(--text);font-variant-numeric:tabular-nums}
+  .stat-ruta .etikett{font-size:12px;color:var(--damp);margin-top:3px}
+  .stat-ruta .extra{font-size:11.5px;color:var(--damp);margin-top:2px}
+  .stat-kort{background:var(--yta);border:1px solid var(--linje);border-radius:8px;
+    padding:13px 14px 10px;margin-bottom:12px;position:relative}
+  .stat-kort h3{font-size:14px;font-weight:600;margin:0 0 2px}
+  .stat-kort .under{font-size:12px;color:var(--damp);margin:0 0 8px}
+  .stat-graf{position:relative}
+  .stat-graf svg{display:block;width:100%;overflow:visible}
+  .stat-tips{position:absolute;pointer-events:none;background:#000;border:1px solid var(--linje);
+    border-radius:6px;padding:6px 9px;font-size:12px;white-space:nowrap;display:none;z-index:5}
+  .stat-tips b{font-weight:600}
+  .stat-tva{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .stat-lista{display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:6px 10px;align-items:center;font-size:13px}
+  .stat-lista .namn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .stat-lista .stapel{grid-column:1 / 2;height:5px;border-radius:3px;background:var(--yta2);margin-top:-3px}
+  .stat-lista .stapel i{display:block;height:100%;border-radius:3px;background:var(--accent)}
+  .stat-lista .v{font-size:13px;font-weight:600;text-align:right;grid-row:span 2;font-variant-numeric:tabular-nums}
+  .stat-not{font-size:12px;color:var(--damp);margin:10px 0 0}
+  .stat-fel{border-color:var(--rod);color:var(--rod);font-size:13px}
+  .stat-tabell{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+  .stat-tabell th,.stat-tabell td{text-align:right;padding:4px 6px;border-bottom:1px solid var(--linje)}
+  .stat-tabell th:first-child,.stat-tabell td:first-child{text-align:left}
+  .stat-tabell td{font-variant-numeric:tabular-nums}
+  details.stat-kort summary{cursor:pointer;font-size:13.5px;color:var(--damp)}
+
   .hjalpknapp{margin-left:auto;background:transparent;border:1px solid var(--accent);
     color:var(--accent);border-radius:7px;padding:6px 12px;font-size:12.5px;
     font-family:var(--sans);cursor:pointer}
@@ -177,6 +210,7 @@
       <button id="f-borttagen" onclick="visa('borttagen')">Borttagna</button>
       <button id="f-alla" onclick="visa('')">Alla</button>
       <button id="f-synpunkter" onclick="visaSynpunkter()">Synpunkter</button>
+      <button id="f-statistik" onclick="visaStatistik()">Statistik</button>
     </div>
 
     <div class="landrad">
@@ -391,6 +425,7 @@ function visaHjalp(behall){
 }
 
 function visa(status){
+  lamnaStatistik_();
   nuvarande = status;
   var syn = document.getElementById("f-synpunkter");
   if (syn) syn.className = "";
@@ -529,8 +564,9 @@ function rita(rader){
 /* ── synpunkter ─────────────────────────────────────────────────── */
 
 function visaSynpunkter(){
+  lamnaStatistik_();
   nuvarande = "synpunkter";
-  ["väntar","godkänd","nekad","borttagen",""].forEach(function(st){
+  ["väntar","vantar","godkänd","nekad","borttagen",""].forEach(function(st){
     var kn = document.getElementById("f-" + (st || "alla"));
     if (kn) kn.className = "";
   });
@@ -776,6 +812,352 @@ document.addEventListener("keydown", function(e){
     }
   });
 })();
+
+/* ── statistik ──────────────────────────────────────────────────────
+   Hämtas från fliken Statistik i kalkylarket, bakom inloggningen.
+   Allt räknas sedan start om man inte väljer en kortare period.    */
+
+var statData = null, statPeriod = 0;
+
+function statDolj_(dolj){
+  var lista = [document.querySelector(".landrad"), document.getElementById("sok"),
+               document.querySelector(".genvagar"), document.getElementById("landhjalp")];
+  lista.forEach(function(el){
+    if (!el) return;
+    if (dolj){ el.setAttribute("data-statdold", el.style.display || "-"); el.style.display = "none"; }
+    else if (el.hasAttribute("data-statdold")){
+      var v = el.getAttribute("data-statdold");
+      el.style.display = v === "-" ? "" : v;
+      el.removeAttribute("data-statdold");
+    }
+  });
+}
+
+function lamnaStatistik_(){
+  var f = document.getElementById("f-statistik");
+  if (f) f.className = "";
+  statDolj_(false);
+}
+
+function visaStatistik(){
+  nuvarande = "statistik";
+  ["väntar","vantar","godkänd","nekad","borttagen",""].forEach(function(st){
+    var kn = document.getElementById("f-" + (st || "alla"));
+    if (kn) kn.className = "";
+  });
+  var syn = document.getElementById("f-synpunkter");
+  if (syn) syn.className = "";
+  document.getElementById("f-statistik").className = "on";
+  statDolj_(true);
+  document.getElementById("lista").innerHTML = '<p class="laddar">Hämtar statistiken...</p>';
+
+  fetch(API + "?vad=statistik&biljett=" + encodeURIComponent(biljett))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (nuvarande !== "statistik") return;
+      if (!d || !d.ok){
+        document.getElementById("lista").innerHTML = '<p class="tomt">Det gick inte att hämta statistiken.'
+          + (d && d.fel === "inte inloggad" ? " Logga in igen." : "") + "</p>";
+        return;
+      }
+      statData = d;
+      ritaStatistik();
+    })
+    .catch(function(){
+      document.getElementById("lista").innerHTML = '<p class="tomt">Det gick inte att hämta statistiken.</p>';
+    });
+}
+
+function valjStatPeriod(dagar){ statPeriod = dagar; ritaStatistik(); }
+
+function tal_(n){ return Math.round(n || 0).toLocaleString("sv-SE"); }
+
+function dagPlus_(dag, n){
+  var d = new Date(dag + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+function kortDatum_(dag){
+  var m = ["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec"];
+  return Number(dag.slice(8, 10)) + " " + m[Number(dag.slice(5, 7)) - 1];
+}
+
+var STAT_HANDELSER = {
+  "visade-jobb": "Visade jobblistan",
+  "klick-annons": "Klickade vidare till en annons",
+  "sparade-jobb": "Sparade ett jobb",
+  "markte-som-sokt": "Markerade som sökt",
+  "filter-hog": "Filter: Bäst chans",
+  "filter-nyborjare": "Filter: Ingen erfarenhet",
+  "filter-deltid": "Filter: Deltid",
+  "filter-heltid": "Filter: Heltid",
+  "filter-utdrag": "Filter: Nämner inte utdrag",
+  "filter-direkt": "Filter: Direkt hos arbetsgivaren",
+  "filter-sasong": "Filter: Sommar och säsong",
+  "filter-sprak": "Filter: Nämner inte språkkrav",
+  "filter-alla": "Filter: Alla"
+};
+function handelseNamn_(k){
+  if (STAT_HANDELSER[k]) return STAT_HANDELSER[k];
+  if (k.indexOf("alder-") === 0){
+    var a = { "18-eller-aldre": "18 eller äldre", "16-till-17": "16 till 17", "under-16": "under 16" }[k.slice(6)];
+    return "Ålder: " + (a || k.slice(6).replace(/-/g, " "));
+  }
+  return k.replace(/-/g, " ");
+}
+
+function kallaNamn_(k){
+  var h = String(k || "").toLowerCase();
+  if (!h || h === "(direkt)") return "Direkt eller okänd";
+  if (h.indexOf("facebook") > -1 || h === "fb.me") return "Facebook";
+  if (h.indexOf("instagram") > -1) return "Instagram";
+  if (h.indexOf("tiktok") > -1) return "TikTok";
+  if (h.indexOf("google") > -1) return "Google";
+  if (h.indexOf("bing") > -1) return "Bing";
+  if (h.indexOf("linkedin") > -1 || h === "lnkd.in") return "LinkedIn";
+  if (h.indexOf("reddit") > -1) return "Reddit";
+  if (h === "t.co" || h.indexOf("twitter") > -1 || h === "x.com") return "X";
+  if (h.indexOf("threads") > -1) return "Threads";
+  if (h.indexOf("chansen.nu") > -1) return "";      // inom sidan räknas inte
+  return h.replace(/^www\./, "");
+}
+var STAT_LANDER = { SE:"Sverige", NO:"Norge", DK:"Danmark", FI:"Finland", GB:"Storbritannien",
+  DE:"Tyskland", US:"USA", NL:"Nederländerna", ES:"Spanien", PL:"Polen" };
+function enhetNamn_(k){ return { desktop:"Dator", mobile:"Mobil", tablet:"Surfplatta" }[k] || k; }
+var STAT_ORTER = { goteborg:"Göteborg", malmo:"Malmö", vasteras:"Västerås", jonkoping:"Jönköping",
+  norrkoping:"Norrköping", linkoping:"Linköping", orebro:"Örebro", umea:"Umeå", lulea:"Luleå",
+  gavle:"Gävle", boras:"Borås", vaxjo:"Växjö", sodertalje:"Södertälje", ostersund:"Östersund",
+  ornskoldsvik:"Örnsköldsvik", taby:"Täby", solleftea:"Sollefteå", skelleftea:"Skellefteå",
+  pitea:"Piteå", jarfalla:"Järfälla", molndal:"Mölndal", nassjo:"Nässjö", varnamo:"Värnamo",
+  skovde:"Skövde", kavlinge:"Kävlinge", lidingo:"Lidingö", mjolby:"Mjölby", norrtalje:"Norrtälje",
+  borlange:"Borlänge", varmdo:"Värmdö", tyreso:"Tyresö", vastervik:"Västervik",
+  trollhattan:"Trollhättan", soderhamn:"Söderhamn", "upplands-vasby":"Upplands Väsby",
+  "upplands-bro":"Upplands-Bro" };
+function sidNamn_(k){
+  if (k === "/" || k === "/index.html") return "Startsidan";
+  var m = String(k).match(/^\/jobb\/([^\/]+?)(\.html)?$/);
+  if (m) return "Ortssida: " + (STAT_ORTER[m[1]] || (m[1].charAt(0).toUpperCase() + m[1].slice(1).replace(/-/g, " ")));
+  return k;
+}
+
+/* Lägg ihop kartor från flera dagar, med namnbyte. */
+function slaIhop_(dagar, falt, namnge, utan){
+  var ut = {};
+  dagar.forEach(function(d){
+    var k = d[falt]; if (!k) return;
+    for (var n in k){
+      if (utan && utan(n)) continue;
+      var namn = namnge ? namnge(n) : n;
+      if (!namn) continue;
+      ut[namn] = (ut[namn] || 0) + Number(k[n] || 0);
+    }
+  });
+  return Object.keys(ut).map(function(n){ return [n, ut[n]]; })
+    .sort(function(a, b){ return b[1] - a[1]; });
+}
+
+function listaHtml_(par, max){
+  par = par.slice(0, max || 8);
+  if (!par.length) return '<p class="stat-not">Inget än.</p>';
+  var topp = par[0][1] || 1;
+  return '<div class="stat-lista">' + par.map(function(p){
+    return '<div class="namn" title="' + fly(p[0]) + '">' + fly(p[0]) + '</div>'
+      + '<div class="v">' + tal_(p[1]) + '</div>'
+      + '<div class="stapel"><i style="width:' + Math.max(2, Math.round(100 * p[1] / topp)) + '%"></i></div>';
+  }).join("") + "</div>";
+}
+
+/* Stapeldiagram eller linje, ritat i den bredd som faktiskt finns. */
+function rita_(id, punkter, typ, enhet){
+  var hall = document.getElementById(id);
+  if (!hall) return;
+  var W = Math.max(260, hall.clientWidth), H = 190;
+  var v = 30, h = 8, t = 10, b = 24;               // marginaler
+  var bredd = W - v - h, hojd = H - t - b;
+  if (!punkter.length){ hall.innerHTML = '<p class="stat-not">Inget än.</p>'; return; }
+
+  var max = Math.max.apply(null, punkter.map(function(p){ return p.v || 0; }));
+  var min = typ === "linje" ? Math.min.apply(null, punkter.map(function(p){ return p.v || 0; })) : 0;
+  if (typ === "linje"){ var luft = Math.max(1, (max - min) * 0.15); min = Math.max(0, min - luft); max = max + luft; }
+  if (max <= min) max = min + 1;
+  // runda skalan till jämna steg
+  var steg = Math.pow(10, Math.floor(Math.log10((max - min) / 3 || 1)));
+  [1, 2, 5, 10].some(function(f){ if ((max - min) / (steg * f) <= 4){ steg *= f; return true; } });
+  var ymin = Math.floor(min / steg) * steg, ymax = Math.ceil(max / steg) * steg;
+  function y(val){ return t + hojd - (val - ymin) / (ymax - ymin) * hojd; }
+
+  var svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + " " + H + '" role="img">';
+  for (var g = ymin; g <= ymax + 1e-9; g += steg){
+    svg += '<line x1="' + v + '" x2="' + (W - h) + '" y1="' + y(g) + '" y2="' + y(g)
+      + '" stroke="var(--linje)" stroke-width="1"/>'
+      + '<text x="' + (v - 6) + '" y="' + (y(g) + 4) + '" fill="var(--damp)" font-size="11" text-anchor="end">'
+      + (g >= 1000 ? (g / 1000).toLocaleString("sv-SE") + "k" : g) + "</text>";
+  }
+  var n = punkter.length, slot = bredd / n;
+  function x(i){ return v + slot * i + slot / 2; }
+
+  if (typ === "stapel"){
+    var bw = Math.max(1, slot - 2);
+    punkter.forEach(function(p, i){
+      var top = y(p.v || 0), bas = y(ymin), hh = Math.max(0, bas - top);
+      if (!hh) return;
+      var r = Math.min(4, bw / 2, hh);
+      var x0 = v + slot * i + 1;
+      svg += '<path d="M' + x0 + "," + bas + "V" + (top + r) + "Q" + x0 + "," + top + " " + (x0 + r) + "," + top
+        + "H" + (x0 + bw - r) + "Q" + (x0 + bw) + "," + top + " " + (x0 + bw) + "," + (top + r)
+        + "V" + bas + 'Z" fill="var(--accent)"/>';
+    });
+  } else {
+    var d = punkter.map(function(p, i){ return (i ? "L" : "M") + x(i).toFixed(1) + "," + y(p.v).toFixed(1); }).join("");
+    svg += '<path d="' + d + '" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  }
+  // datum under, första, mitten och sista
+  [0, Math.floor((n - 1) / 2), n - 1].filter(function(i, k, a){ return a.indexOf(i) === k; }).forEach(function(i, k, a){
+    var anchor = n === 1 ? "middle" : (i === 0 ? "start" : (i === n - 1 ? "end" : "middle"));
+    var xx = anchor === "start" ? v : (anchor === "end" ? W - h : x(i));
+    svg += '<text x="' + xx + '" y="' + (H - 6) + '" fill="var(--damp)" font-size="11" text-anchor="' + anchor + '">'
+      + fly(punkter[i].etikett) + "</text>";
+  });
+  // markör för hovring
+  svg += '<line class="stat-sikte" x1="0" x2="0" y1="' + t + '" y2="' + (t + hojd) + '" stroke="var(--damp)" stroke-width="1" style="display:none"/>';
+  if (typ === "linje") svg += '<circle class="stat-prick" r="4.5" fill="var(--accent)" stroke="var(--yta)" stroke-width="2" style="display:none"/>';
+  svg += '<rect class="stat-yta" x="' + v + '" y="0" width="' + bredd + '" height="' + H + '" fill="transparent"/>';
+  svg += "</svg>";
+  hall.innerHTML = svg + '<div class="stat-tips"></div>';
+
+  var yta = hall.querySelector(".stat-yta"), tips = hall.querySelector(".stat-tips");
+  var sikte = hall.querySelector(".stat-sikte"), prick = hall.querySelector(".stat-prick");
+  function visaTips(ev){
+    var ruta = hall.getBoundingClientRect();
+    var px = (ev.touches ? ev.touches[0].clientX : ev.clientX) - ruta.left;
+    var i = Math.max(0, Math.min(n - 1, Math.floor((px - v) / slot)));
+    var p = punkter[i];
+    tips.innerHTML = fly(p.lang || p.etikett) + "<br><b>" + tal_(p.v) + "</b> " + fly(enhet);
+    tips.style.display = "block";
+    var tx = x(i) + 12;
+    if (tx + tips.offsetWidth > W) tx = x(i) - tips.offsetWidth - 12;
+    tips.style.left = tx + "px"; tips.style.top = (typ === "linje" ? Math.max(0, y(p.v) - 46) : 6) + "px";
+    sikte.setAttribute("x1", x(i)); sikte.setAttribute("x2", x(i)); sikte.style.display = "";
+    if (prick){ prick.setAttribute("cx", x(i)); prick.setAttribute("cy", y(p.v)); prick.style.display = ""; }
+  }
+  function gom(){ tips.style.display = "none"; sikte.style.display = "none"; if (prick) prick.style.display = "none"; }
+  yta.addEventListener("mousemove", visaTips);
+  yta.addEventListener("touchstart", visaTips, { passive: true });
+  yta.addEventListener("touchmove", visaTips, { passive: true });
+  yta.addEventListener("mouseleave", gom);
+}
+
+function ritaStatistik(){
+  var el = document.getElementById("lista");
+  var d = statData;
+  if (!d) return;
+  var alla = d.dagar || [];
+  var idag = new Date().toISOString().slice(0, 10);
+  var fran = statPeriod ? dagPlus_(idag, -statPeriod) : (d.start || "2000-01-01");
+  var dagar = alla.filter(function(x){ return x.datum >= fran; });
+
+  var perioder = [[0, "Sedan start"], [90, "90 dagar"], [30, "30 dagar"], [7, "7 dagar"]];
+  var html = '<div class="stat-period">' + perioder.map(function(p){
+    return '<button class="' + (statPeriod === p[0] ? "on" : "") + '" onclick="valjStatPeriod(' + p[0] + ')">' + p[1] + "</button>";
+  }).join("") + "</div>";
+
+  if (d.fel){
+    html += '<div class="stat-kort stat-fel">Senaste insamlingen fick ett fel: ' + fly(d.fel) + "</div>";
+  }
+  if (!alla.length){
+    el.innerHTML = html + '<p class="tomt">Ingen statistik än. Öppna Apps Script och kör hamtaStatistikBakat en gång, så fylls allt sedan start på.</p>';
+    return;
+  }
+
+  function summa(falt){ return dagar.reduce(function(s, x){ return s + Number(x[falt] || 0); }, 0); }
+  function handelse(namn){ return dagar.reduce(function(s, x){ return s + Number((x["Händelser"] || {})[namn] || 0); }, 0); }
+  function raknaPerDag(karta){ var s = 0; for (var k in (karta || {})) if (k >= fran) s += karta[k]; return s; }
+
+  var besok = summa("Besök"), visningar = summa("Sidvisningar");
+  var klick = handelse("klick-annons"), listor = handelse("visade-jobb");
+  var medJobb = alla.filter(function(x){ return x["Jobb Sverige"]; });
+  var jobbNu = medJobb.length ? medJobb[medJobb.length - 1]["Jobb Sverige"] : 0;
+  var forstaDag = alla[0].datum;
+  var dagarSedan = Math.round((new Date(idag) - new Date(d.start || forstaDag)) / 86400000);
+
+  var rutor = [
+    [tal_(besok), "besök", statPeriod ? "senaste " + statPeriod + " dagarna" : "sedan " + kortDatum_(d.start || forstaDag)],
+    [tal_(visningar), "sidvisningar", ""],
+    [tal_(klick), "klick till annonser", listor ? Math.round(100 * klick / listor) + " % av de som såg listan" : ""],
+    [tal_(jobbNu), "jobb i Sverige i natt", medJobb.length > 1 ? "var " + tal_(medJobb[0]["Jobb Sverige"]) + " första natten" : ""],
+    [tal_(raknaPerDag(d.annonser)), "annonser från arbetsgivare", ""],
+    [tal_(raknaPerDag(d.synpunkter)), "synpunkter", ""],
+    [tal_(dagarSedan), "dagar sedan start", ""]
+  ];
+  html += '<div class="stat-rutor">' + rutor.map(function(r){
+    return '<div class="stat-ruta"><div class="tal">' + r[0] + '</div><div class="etikett">' + fly(r[1])
+      + "</div>" + (r[2] ? '<div class="extra">' + fly(r[2]) + "</div>" : "") + "</div>";
+  }).join("") + "</div>";
+
+  // besök: per dag om perioden är kort, annars per vecka
+  var span = dagar.length;
+  var veckovis = span > 60;
+  html += '<div class="stat-kort"><h3>Besök ' + (veckovis ? "per vecka" : "per dag") + '</h3>'
+    + '<p class="under">Från Cloudflare, uppskattningar</p><div class="stat-graf" id="graf-besok"></div></div>';
+  html += '<div class="stat-kort"><h3>Jobb i Sverige per natt</h3>'
+    + '<p class="under">Efter sorteringen, alltså de som syns på Chansen</p><div class="stat-graf" id="graf-jobb"></div></div>';
+
+  html += '<div class="stat-tva">'
+    + '<div class="stat-kort"><h3>Varifrån de kom</h3><p class="under">Besök per källa</p>'
+    +   listaHtml_(slaIhop_(dagar, "Källor", kallaNamn_), 8) + "</div>"
+    + '<div class="stat-kort"><h3>Vad de tryckte på</h3><p class="under">Knapptryck från GoatCounter</p>'
+    +   listaHtml_(slaIhop_(dagar, "Händelser", handelseNamn_, function(n){ return n.indexOf("sida:") === 0; }), 10) + "</div>"
+    + '<div class="stat-kort"><h3>Mest besökta sidor</h3><p class="under">Sidvisningar</p>'
+    +   listaHtml_(slaIhop_(dagar, "Sidor", sidNamn_), 8) + "</div>"
+    + '<div class="stat-kort"><h3>Länder och enheter</h3><p class="under">Besök</p>'
+    +   listaHtml_(slaIhop_(dagar, "Länder", function(k){ return STAT_LANDER[k] || k; }), 5)
+    +   '<div style="height:12px"></div>'
+    +   listaHtml_(slaIhop_(dagar, "Enheter", enhetNamn_), 3) + "</div>"
+    + "</div>";
+
+  // tabell, för den som vill se varje dag
+  html += '<details class="stat-kort"><summary>Visa varje dag som tabell</summary>'
+    + '<table class="stat-tabell"><thead><tr><th>Datum</th><th>Besök</th><th>Sidvisn.</th><th>Klick</th><th>Jobb</th></tr></thead><tbody>'
+    + dagar.slice().reverse().map(function(x){
+        return "<tr><td>" + x.datum + "</td><td>" + (x["Besök"] != null ? tal_(x["Besök"]) : "–")
+          + "</td><td>" + (x["Sidvisningar"] != null ? tal_(x["Sidvisningar"]) : "–")
+          + "</td><td>" + tal_((x["Händelser"] || {})["klick-annons"]) + "</td><td>"
+          + (x["Jobb Sverige"] ? tal_(x["Jobb Sverige"]) : "–") + "</td></tr>";
+      }).join("") + "</tbody></table></details>";
+
+  html += '<p class="stat-not">Besöken räknas av Cloudflare och är uppskattningar, knapptrycken av GoatCounter. '
+    + "Bara summor per dag sparas, ingenting om enskilda besökare. Uppdateras varje förmiddag.</p>";
+
+  el.innerHTML = html;
+
+  // diagrammen ritas när bredden är känd
+  var bp = [];
+  if (veckovis){
+    var veckor = {};
+    dagar.forEach(function(x){
+      if (x["Besök"] == null) return;
+      var dt = new Date(x.datum + "T12:00:00Z"), dagNr = (dt.getUTCDay() + 6) % 7;
+      var mandag = dagPlus_(x.datum, -dagNr);
+      veckor[mandag] = (veckor[mandag] || 0) + Number(x["Besök"] || 0);
+    });
+    bp = Object.keys(veckor).sort().map(function(m){
+      return { v: veckor[m], etikett: kortDatum_(m), lang: "Veckan från " + kortDatum_(m) };
+    });
+  } else {
+    bp = dagar.filter(function(x){ return x["Besök"] != null; })
+      .map(function(x){ return { v: Number(x["Besök"] || 0), etikett: kortDatum_(x.datum), lang: kortDatum_(x.datum) }; });
+  }
+  var jp = dagar.filter(function(x){ return x["Jobb Sverige"]; })
+    .map(function(x){ return { v: Number(x["Jobb Sverige"]), etikett: kortDatum_(x.datum), lang: kortDatum_(x.datum) }; });
+  rita_("graf-besok", bp, "stapel", "besök");
+  rita_("graf-jobb", jp, "linje", "jobb");
+}
+
+window.addEventListener("resize", function(){
+  if (nuvarande !== "statistik" || !statData) return;
+  clearTimeout(window._statResize);
+  window._statResize = setTimeout(ritaStatistik, 150);
+});
 </script>
 </body>
 </html>
