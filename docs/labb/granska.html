@@ -429,10 +429,14 @@ function visa(status){
   nuvarande = status;
   var syn = document.getElementById("f-synpunkter");
   if (syn) syn.className = "";
-  ["väntar","godkänd","nekad",""].forEach(function(s){
-    var kn = document.getElementById("f-" + (s || "alla"));
-    if (kn) kn.className = (s === status) ? "on" : "";
-  });
+  /* Knappen för Väntar heter f-vantar, utan prick. Borttagna saknades
+     helt, så den lyste aldrig upp och verkade inte gå att trycka på. */
+  var knappId = { "väntar": "f-vantar", "godkänd": "f-godkänd", "nekad": "f-nekad",
+                  "borttagen": "f-borttagen", "": "f-alla" };
+  for (var st in knappId){
+    var kn = document.getElementById(knappId[st]);
+    if (kn) kn.className = (st === status) ? "on" : "";
+  }
   document.getElementById("lista").innerHTML = '<p class="laddar">Hämtar...</p>';
   hamta(status);
 }
@@ -1120,10 +1124,10 @@ function ritaStatistik(){
     +   listaHtml_(slaIhop_(dagar, "Händelser", handelseNamn_, function(n){ return n.indexOf("sida:") === 0; }), 10) + "</div>"
     + '<div class="stat-kort"><h3>Mest besökta sidor</h3><p class="under">Sidvisningar</p>'
     +   listaHtml_(slaIhop_(dagar, "Sidor", sidNamn_), 8) + "</div>"
-    + '<div class="stat-kort"><h3>Länder och enheter</h3><p class="under">Besök</p>'
-    +   listaHtml_(slaIhop_(dagar, "Länder", function(k){ return STAT_LANDER[k] || k; }), 5)
-    +   '<div style="height:12px"></div>'
-    +   listaHtml_(slaIhop_(dagar, "Enheter", enhetNamn_), 3) + "</div>"
+    + '<div class="stat-kort"><h3>Länder</h3><p class="under">Besök per land</p>'
+    +   listaHtml_(slaIhop_(dagar, "Länder", function(k){ return STAT_LANDER[k] || k; }), 8) + "</div>"
+    + '<div class="stat-kort"><h3>Enheter</h3><p class="under">Besök per sorts enhet</p>'
+    +   listaHtml_(slaIhop_(dagar, "Enheter", enhetNamn_), 4) + "</div>"
     + "</div>";
 
   // tabell, för den som vill se varje dag
