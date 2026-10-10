@@ -206,8 +206,7 @@
     <div class="flikar">
       <button id="f-vantar" class="on" onclick="visa('väntar')">Väntar</button>
       <button id="f-godkänd" onclick="visa('godkänd')">Godkända</button>
-      <button id="f-nekad" onclick="visa('nekad')">Nekade</button>
-      <button id="f-borttagen" onclick="visa('borttagen')">Borttagna</button>
+      <button id="f-ej" onclick="visa('ej')">Nekade och borttagna</button>
       <button id="f-alla" onclick="visa('')">Alla</button>
       <button id="f-synpunkter" onclick="visaSynpunkter()">Synpunkter</button>
       <button id="f-statistik" onclick="visaStatistik()">Statistik</button>
@@ -228,7 +227,7 @@
     <input class="sok" id="sok" placeholder="Sök på nummer, företag, titel eller ort"
            oninput="filtrera()" autocomplete="off">
 
-    <div class="genvagar">1–5 byter flik · S söker · ? visar vad man ska tänka på</div>
+    <div class="genvagar">1–4 byter flik · S söker · ? visar vad man ska tänka på</div>
     <div id="lista"><p class="laddar">Hämtar...</p></div>
   </div>
 
@@ -243,7 +242,7 @@ var inloggad = "";
 var nuvarande = "väntar";
 var allaRader = [];     // det senast hämtade, för sökningen
 var roll = "admin";     // admin får ändra, lasare får bara titta
-var nuvarandeLand = "";
+var valdaLander = [];   // tom betyder alla länder
 
 function fly(t){
   return String(t == null ? "" : t)
@@ -313,15 +312,21 @@ function loggaUt(){
 /* ── hämta och rita ─────────────────────────────────────────────── */
 
 function hamta(status, klar){
+  /* "ej" finns inte i kalkylarket. Den hämtar alla och behåller de
+     nekade och borttagna. Länderna filtreras här i sidan, så att man
+     kan välja flera på en gång.                                    */
+  var fraga = status === "ej" ? "" : status;
   var url = API + "?vad=lista&biljett=" + encodeURIComponent(biljett)
-          + (status ? "&status=" + encodeURIComponent(status) : "")
-          + (nuvarandeLand ? "&land=" + encodeURIComponent(nuvarandeLand) : "");
+          + (fraga ? "&status=" + encodeURIComponent(fraga) : "");
   fetch(url)
     .then(function(r){ return r.json(); })
     .then(function(d){
       if (!d || !d.ok){ if (klar) klar(false); return; }
       if (klar) klar(true);
-      allaRader = d.rader || [];
+      allaRader = (d.rader || []).filter(function(o){
+        if (status !== "ej") return true;
+        return o["Status"] === "nekad" || o["Status"] === "borttagen";
+      });
       filtrera();
       hamtaOversikt();
     })
@@ -334,8 +339,11 @@ function hamta(status, klar){
 
 function filtrera(){
   var q = (document.getElementById("sok").value || "").toLowerCase().trim();
-  if (!q) { rita(allaRader); return; }
-  rita(allaRader.filter(function(o){
+  var rader = allaRader.filter(function(o){
+    return !valdaLander.length || valdaLander.indexOf(o["Land"] || "SE") > -1;
+  });
+  if (!q) { rita(rader); return; }
+  rita(rader.filter(function(o){
     return [o["Nummer"], o["Företag"], o["Titel"], o["Ort"], o["Organisationsnummer"]]
       .join(" ").toLowerCase().indexOf(q) > -1;
   }));
@@ -377,15 +385,23 @@ function hamtaOversikt(){
     .catch(function(){});
 }
 
+/* Länderna slås av och på var för sig. Alla länder rensar valet, och
+   är alla tre valda blir det samma sak som Alla länder.            */
 function valjLand(land){
-  nuvarandeLand = land;
-  ["", "SE", "NO", "UK"].forEach(function(l){
-    var kn = document.getElementById("l-" + (l || "alla"));
-    if (kn) kn.className = (l === land) ? "on" : "";
+  if (!land) valdaLander = [];
+  else {
+    var i = valdaLander.indexOf(land);
+    if (i > -1) valdaLander.splice(i, 1); else valdaLander.push(land);
+    if (valdaLander.length === 3) valdaLander = [];
+  }
+  document.getElementById("l-alla").className = valdaLander.length ? "" : "on";
+  ["SE", "NO", "UK"].forEach(function(l){
+    var kn = document.getElementById("l-" + l);
+    if (kn) kn.className = valdaLander.indexOf(l) > -1 ? "on" : "";
   });
   var h = document.getElementById("landhjalp");
   if (h.style.display === "block") visaHjalp(true);
-  visa(nuvarande);
+  if (nuvarande !== "synpunkter" && nuvarande !== "statistik") filtrera();
 }
 
 /* ── att tänka på, per land ─────────────────────────────────────── */
@@ -420,7 +436,8 @@ var HJALP = {
 function visaHjalp(behall){
   var h = document.getElementById("landhjalp");
   if (!behall && h.style.display === "block"){ h.style.display = "none"; return; }
-  h.innerHTML = nuvarandeLand ? HJALP[nuvarandeLand] : (HJALP.SE + HJALP.NO + HJALP.UK);
+  h.innerHTML = (valdaLander.length ? valdaLander : ["SE", "NO", "UK"])
+    .map(function(l){ return HJALP[l]; }).join("");
   h.style.display = "block";
 }
 
@@ -431,11 +448,11 @@ function visa(status){
   if (syn) syn.className = "";
   /* Knappen för Väntar heter f-vantar, utan prick. Borttagna saknades
      helt, så den lyste aldrig upp och verkade inte gå att trycka på. */
-  var knappId = { "väntar": "f-vantar", "godkänd": "f-godkänd", "nekad": "f-nekad",
-                  "borttagen": "f-borttagen", "": "f-alla" };
+  var knappId = { "väntar": "f-vantar", "godkänd": "f-godkänd", "ej": "f-ej", "": "f-alla" };
+  var tand = (status === "nekad" || status === "borttagen") ? "ej" : status;
   for (var st in knappId){
     var kn = document.getElementById(knappId[st]);
-    if (kn) kn.className = (st === status) ? "on" : "";
+    if (kn) kn.className = (st === tand) ? "on" : "";
   }
   document.getElementById("lista").innerHTML = '<p class="laddar">Hämtar...</p>';
   hamta(status);
@@ -570,7 +587,7 @@ function rita(rader){
 function visaSynpunkter(){
   lamnaStatistik_();
   nuvarande = "synpunkter";
-  ["väntar","vantar","godkänd","nekad","borttagen",""].forEach(function(st){
+  ["väntar","vantar","godkänd","ej",""].forEach(function(st){
     var kn = document.getElementById("f-" + (st || "alla"));
     if (kn) kn.className = "";
   });
@@ -768,7 +785,7 @@ document.addEventListener("keydown", function(e){
   }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
 
-  var flikar = { "1": "väntar", "2": "godkänd", "3": "nekad", "4": "borttagen", "5": "" };
+  var flikar = { "1": "väntar", "2": "godkänd", "3": "ej", "4": "" };
   if (flikar[e.key] !== undefined && document.getElementById("panel").style.display !== "none") {
     visa(flikar[e.key]);
     return;
@@ -845,7 +862,7 @@ function lamnaStatistik_(){
 
 function visaStatistik(){
   nuvarande = "statistik";
-  ["väntar","vantar","godkänd","nekad","borttagen",""].forEach(function(st){
+  ["väntar","vantar","godkänd","ej",""].forEach(function(st){
     var kn = document.getElementById("f-" + (st || "alla"));
     if (kn) kn.className = "";
   });
