@@ -995,7 +995,7 @@ function listaHtml_(par, max){
   return '<div class="stat-lista">' + par.map(function(p){
     return '<div class="namn" title="' + fly(p[0]) + '">' + fly(p[0]) + '</div>'
       + '<div class="v">' + tal_(p[1]) + '</div>'
-      + '<div class="stapel"><i style="width:' + Math.max(2, Math.round(100 * p[1] / topp)) + '%"></i></div>';
+      + '<div class="stapel"><i style="width:' + (p[1] ? Math.max(2, Math.round(100 * p[1] / topp)) : 0) + '%"></i></div>';
   }).join("") + "</div>";
 }
 
@@ -1110,6 +1110,12 @@ function ritaStatistik(){
   var medJobb = alla.filter(function(x){ return x["Jobb Sverige"]; });
   var jobbNu = medJobb.length ? medJobb[medJobb.length - 1]["Jobb Sverige"] : 0;
   var forstaDag = alla[0].datum;
+
+  // inskickade annonser i perioden, efter dagen de kom in
+  var inskPeriod = (d.inskickade || []).filter(function(a){ return !a.inkom || a.inkom >= fran; });
+  function antalStatus(st){ return inskPeriod.filter(function(a){ return a.status === st; }).length; }
+  var medEgna = alla.filter(function(x){ return x["Egna annonser"] !== undefined && x["Egna annonser"] !== ""; });
+  var egnaNu = medEgna.length ? Number(medEgna[medEgna.length - 1]["Egna annonser"]) : 0;
   var dagarSedan = Math.round((new Date(idag) - new Date(d.start || forstaDag)) / 86400000);
 
   var rutor = [
@@ -1117,7 +1123,7 @@ function ritaStatistik(){
     [tal_(visningar), "sidvisningar", ""],
     [tal_(klick), "klick till annonser", listor ? Math.round(100 * klick / listor) + " % av de som såg listan" : ""],
     [tal_(jobbNu), "jobb i Sverige i natt", medJobb.length > 1 ? "var " + tal_(medJobb[0]["Jobb Sverige"]) + " första natten" : ""],
-    [tal_(raknaPerDag(d.annonser)), "annonser från arbetsgivare", ""],
+    [tal_(inskPeriod.length), "inskickade annonser", inskPeriod.length ? tal_(antalStatus("godkänd")) + " godkända" : ""],
     [tal_(raknaPerDag(d.synpunkter)), "synpunkter", ""],
     [tal_(dagarSedan), "dagar sedan start", ""]
   ];
@@ -1133,6 +1139,24 @@ function ritaStatistik(){
     + '<p class="under">Från Cloudflare, uppskattningar</p><div class="stat-graf" id="graf-besok"></div></div>';
   html += '<div class="stat-kort"><h3>Jobb i Sverige per natt</h3>'
     + '<p class="under">Efter sorteringen, alltså de som syns på Chansen</p><div class="stat-graf" id="graf-jobb"></div></div>';
+
+  var allaNu = Number(jobbNu || 0) + egnaNu;
+  html += '<div class="stat-tva">'
+    + '<div class="stat-kort"><h3>Jobben på Chansen just nu</h3><p class="under">Var de kommer ifrån</p>'
+    +   listaHtml_([["Från Platsbanken", Number(jobbNu || 0)], ["Direkt från arbetsgivare", egnaNu]], 2)
+    +   '<p class="stat-not">' + (allaNu ? (egnaNu ? tal_(egnaNu) + " av " + tal_(allaNu) + " jobb, "
+          + (Math.round(1000 * egnaNu / allaNu) / 10).toLocaleString("sv-SE") + " %, kommer direkt från en arbetsgivare."
+          : "Inga jobb direkt från arbetsgivare just nu.") : "") + "</p></div>"
+    + '<div class="stat-kort"><h3>Annonser från arbetsgivare</h3><p class="under">Inskickade via formuläret'
+    +   (statPeriod ? ", senaste " + statPeriod + " dagarna" : ", sedan start") + "</p>"
+    +   (inskPeriod.length
+          ? listaHtml_([["Inskickade", inskPeriod.length], ["Godkända", antalStatus("godkänd")],
+              ["Nekade", antalStatus("nekad")], ["Borttagna", antalStatus("borttagen")],
+              ["Väntar på granskning", antalStatus("väntar")]], 5)
+            + '<p class="stat-not">' + Math.round(100 * antalStatus("godkänd") / inskPeriod.length) + " % av de inskickade har godkänts.</p>"
+          : '<p class="stat-not">Inga annonser har skickats in via formuläret' + (statPeriod ? " under perioden." : " än.") + "</p>")
+    + "</div>"
+    + "</div>";
 
   html += '<div class="stat-tva">'
     + '<div class="stat-kort"><h3>Varifrån de kom</h3><p class="under">Besök per källa</p>'
