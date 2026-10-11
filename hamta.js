@@ -586,6 +586,15 @@ function sprakkrav(a) {
   return "namns inte";
 }
 
+/* Landet för jobb utanför Sverige, annars tomt. Används av filtret
+   Utomlands, som inte visas för den som är under 18.               */
+function utlandsLand(a) {
+  const w = a.workplace_address || {};
+  const land = w.country || "";
+  if (!land || /^sverige$/i.test(land) || w.country_code === "SE" || w.country_code === "199") return "";
+  return land;
+}
+
 function okForMinderarig(a) {
   const titel = (a.headline || "").toLowerCase();
   const text = ((a.description ? a.description.text : "") + " " + titel).toLowerCase();
@@ -707,6 +716,9 @@ async function hamtaJobb() {
           erfarenhetKravs: a.experience_required,
           korkortKravs: a.driving_license_required,
           lan: a.workplace_address && a.workplace_address.region ? a.workplace_address.region : "",
+          // jobb utomlands får landet och staden, så att det syns på kortet
+          land: utlandsLand(a),
+          stad: utlandsLand(a) && a.workplace_address && a.workplace_address.city ? a.workplace_address.city : "",
         utdrag: utdragskrav(a),
         sprak: sprakkrav(a),
         provision: harProvision(brodtext) || harRorligDel(a),

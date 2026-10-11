@@ -126,7 +126,7 @@
   .stat-tva{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
   .stat-lista{display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:6px 10px;align-items:center;font-size:13px}
   .stat-lista .namn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .stat-lista .stapel{grid-column:1 / 2;height:5px;border-radius:3px;background:var(--yta2);margin-top:-3px}
+  .stat-lista .stapel{grid-column:1 / 2;height:5px;border-radius:3px;background:var(--yta2);margin-top:-3px;overflow:hidden}
   .stat-lista .stapel i{display:block;height:100%;border-radius:3px;background:var(--accent)}
   .stat-lista .v{font-size:13px;font-weight:600;text-align:right;grid-row:span 2;font-variant-numeric:tabular-nums}
   .stat-not{font-size:12px;color:var(--damp);margin:10px 0 0}
@@ -917,6 +917,21 @@ var STAT_HANDELSER = {
   "filter-sasong": "Filter: Sommar och säsong",
   "filter-sprak": "Filter: Nämner inte språkkrav",
   "filter-alla": "Filter: Alla",
+  "jobb-sparad": "Sparade ett jobb",
+  "jobb-sokt": "Markerade att de sökt",
+  "jobb-svar": "Fick svar",
+  "oppnade-ansokan": "Öppnade ansökningsbrevet",
+  "kopierade-ansokan": "Kopierade ansökningsbrevet",
+  "bytte-formulering": "Bytte formulering i brevet",
+  "kopierade-cv": "Kopierade sitt CV",
+  "cv-till-pdf": "Sparade CV som PDF",
+  "delade-appen": "Delade Chansen",
+  "enskilt-jobb": "Öppnade ett delat jobb",
+  "tyck-oppnat": "Öppnade Tyck till",
+  "tyck-skickat": "Skickade Tyck till",
+  "arbetsgivare-skickade": "Arbetsgivare skickade in annons",
+  "start-nagra-fragor": "Svarade på några frågor",
+  "filter-utland": "Filter: Utomlands",
   "ort-ifylld": "Fyllde i en ort",
   "ort-tom": "Lämnade orten tom",
   "start-snabb": "Valde snabbstart",
@@ -926,6 +941,9 @@ var STAT_HANDELSER = {
 };
 function handelseNamn_(k){
   if (STAT_HANDELSER[k]) return STAT_HANDELSER[k];
+  if (k.indexOf("soker-") === 0) return "Söker " + k.slice(6).replace(/-/g, " ");
+  if (k.indexOf("omrade-") === 0) return "Område: " + k.slice(7).replace(/-/g, " ");
+  if (k.indexOf("hjalp-") === 0) return "Läste hjälp: " + k.slice(6).replace(/-/g, " ");
   if (k.indexOf("alder-") === 0){
     var a = { "18-eller-aldre": "18 eller äldre", "16-till-17": "16 till 17", "under-16": "under 16" }[k.slice(6)];
     return "Ålder: " + (a || k.slice(6).replace(/-/g, " "));
@@ -978,6 +996,7 @@ function slaIhop_(dagar, falt, namnge, utan){
   dagar.forEach(function(d){
     var k = d[falt]; if (!k) return;
     for (var n in k){
+      if (n.charAt(0) === "_") continue;
       if (utan && utan(n)) continue;
       var namn = namnge ? namnge(n) : n;
       if (!namn) continue;
@@ -1079,6 +1098,31 @@ function rita_(id, punkter, typ, enhet){
   yta.addEventListener("mouseleave", gom);
 }
 
+/* Kedjan från besök till ansökan. Staplarna är andel av första steget. */
+function kedjaHtml_(steg){
+  var forst = steg[0][1] || 1;
+  return '<div class="stat-lista">' + steg.map(function(p, i){
+    var andel = Math.round(100 * p[1] / forst);
+    var fore = i ? steg[i - 1][1] : 0;
+    var extra = i && fore ? " (" + Math.round(100 * p[1] / fore) + " % av förra)" : "";
+    return '<div class="namn">' + fly(p[0]) + '<span style="color:var(--damp);font-size:12px">' + fly(extra) + "</span></div>"
+      + '<div class="v">' + tal_(p[1]) + '</div>'
+      + '<div class="stapel"><i style="width:' + (p[1] ? Math.min(100, Math.max(2, andel)) : 0) + '%"></i></div>';
+  }).join("") + "</div>";
+}
+
+function statSlug_(t){
+  return String(t || "").toLowerCase().replace(/[åä]/g, "a").replace(/ö/g, "o")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+/* Svensk timme för en UTC-timme ett visst datum, med sommartid. */
+function svenskTimme_(dag, utcTimme){
+  var d = new Date(dag + "T" + (utcTimme < 10 ? "0" : "") + utcTimme + ":00:00Z");
+  var t = Number(d.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", hour: "2-digit", hour12: false }));
+  return isNaN(t) ? utcTimme : t % 24;
+}
+
 function ritaStatistik(){
   var el = document.getElementById("lista");
   var d = statData;
@@ -1132,18 +1176,37 @@ function ritaStatistik(){
       + "</div>" + (r[2] ? '<div class="extra">' + fly(r[2]) + "</div>" : "") + "</div>";
   }).join("") + "</div>";
 
+  html += '<div class="stat-kort"><h3>Från besök till ansökan</h3>'
+    + '<p class="under">Hur långt folk kommer. Stegen räknas var för sig, så en person kan finnas i flera.</p>'
+    + kedjaHtml_([["Besök", besok], ["Såg jobblistan", handelse("visade-jobb")],
+        ["Klickade på en annons", klick], ["Öppnade ansökningsbrevet", handelse("oppnade-ansokan")],
+        ["Markerade att de sökt", handelse("jobb-sokt")]]) + "</div>";
+
   // besök: per dag om perioden är kort, annars per vecka
   var span = dagar.length;
   var veckovis = span > 60;
   html += '<div class="stat-kort"><h3>Besök ' + (veckovis ? "per vecka" : "per dag") + '</h3>'
     + '<p class="under">Från Cloudflare, uppskattningar</p><div class="stat-graf" id="graf-besok"></div></div>';
+  html += '<div class="stat-tva">'
+    + '<div class="stat-kort"><h3>Besök per veckodag</h3><p class="under">Snitt per dag</p><div class="stat-graf" id="graf-veckodag"></div></div>'
+    + '<div class="stat-kort"><h3>Besök per timme</h3><p class="under">Svensk tid, alla dagar ihop</p><div class="stat-graf" id="graf-timme"></div></div>'
+    + "</div>";
   html += '<div class="stat-kort"><h3>Jobb i Sverige per natt</h3>'
     + '<p class="under">Efter sorteringen, alltså de som syns på Chansen</p><div class="stat-graf" id="graf-jobb"></div></div>';
 
   var allaNu = Number(jobbNu || 0) + egnaNu;
+  var senaste = function(falt){
+    for (var i = alla.length - 1; i >= 0; i--){
+      var v = alla[i][falt];
+      if (v !== undefined && v !== "" && v !== null) return v;
+    }
+    return null;
+  };
+  var utlandNu = Number(senaste("Jobb utomlands") || 0);
   html += '<div class="stat-tva">'
     + '<div class="stat-kort"><h3>Jobben på Chansen just nu</h3><p class="under">Var de kommer ifrån</p>'
     +   listaHtml_([["Från Platsbanken", Number(jobbNu || 0)], ["Direkt från arbetsgivare", egnaNu]], 2)
+    +   (utlandNu ? '<p class="stat-not">' + tal_(utlandNu) + " av jobben från Platsbanken ligger utomlands.</p>" : "")
     +   '<p class="stat-not">' + (allaNu ? (egnaNu ? tal_(egnaNu) + " av " + tal_(allaNu) + " jobb, "
           + (Math.round(1000 * egnaNu / allaNu) / 10).toLocaleString("sv-SE") + " %, kommer direkt från en arbetsgivare."
           : "Inga jobb direkt från arbetsgivare just nu.") : "") + "</p></div>"
@@ -1158,11 +1221,70 @@ function ritaStatistik(){
     + "</div>"
     + "</div>";
 
+  // orter: sökningar mot jobb som finns där
+  var jobbOrt = senaste("Jobb per ort") || {};
+  var ortNamn = {}, ortJobb = {};
+  for (var on in jobbOrt){ ortNamn[statSlug_(on)] = on; ortJobb[statSlug_(on)] = jobbOrt[on]; }
+  var sokta = slaIhop_(dagar, "Händelser", function(k){ return k.slice(4); }, function(k){ return k.indexOf("ort/") !== 0; });
+  var ortRader = sokta.slice(0, 15).map(function(p){
+    var namn = ortNamn[p[0]] || (STAT_ORTER[p[0]] || (p[0].charAt(0).toUpperCase() + p[0].slice(1).replace(/-/g, " ")));
+    var j = ortJobb[p[0]] || 0;
+    return "<tr><td>" + fly(namn) + "</td><td>" + tal_(p[1]) + "</td><td>" + tal_(j) + "</td><td>"
+      + (j < 5 ? '<span style="color:var(--gul)">få jobb</span>' : "") + "</td></tr>";
+  }).join("");
+  html += '<div class="stat-kort"><h3>Var folk letar</h3>'
+    + '<p class="under">Orter folk skrivit in, och hur många jobb som finns där i natt. Orter med få jobb är bra ställen att kontakta arbetsgivare och skolor.</p>'
+    + (ortRader ? '<table class="stat-tabell"><thead><tr><th>Ort</th><th>Sökningar</th><th>Jobb nu</th><th></th></tr></thead><tbody>'
+        + ortRader + "</tbody></table>"
+      : '<p class="stat-not">Inget än. Orterna börjar räknas från version 137 av sidan.</p>')
+    + "</div>";
+
+  // titlar på klickade annonser
+  var titlar = {};
+  dagar.forEach(function(x){ var t = (x["Händelser"] || {})._titlar || {}; for (var id in t) titlar[id] = t[id]; });
+  var annonser = slaIhop_(dagar, "Händelser", function(k){ var id = k.slice(7); return titlar[id] || ("Annons " + id); },
+    function(k){ return k.indexOf("annons/") !== 0; });
+
+  var mejl = senaste("Mejlstatus");
+  var mejlHtml;
+  if (mejl){
+    var akt = Number(mejl.active || 0), obekr = Number(mejl.unconfirmed || 0);
+    var avsl = Number(mejl.unsubscribed || 0) + Number(mejl.bounced || 0);
+    var ovriga = 0;
+    for (var ms in mejl) if (["active","unconfirmed","unsubscribed","bounced"].indexOf(ms) < 0) ovriga += Number(mejl[ms] || 0);
+    mejlHtml = listaHtml_([["Bekräftade", akt], ["Har inte bekräftat", obekr], ["Avslutade eller studsade", avsl]]
+        .concat(ovriga ? [["Annat", ovriga]] : []), 4)
+      + ((akt + obekr) ? '<p class="stat-not">' + Math.round(100 * akt / (akt + obekr)) + " % av de som anmält sig har bekräftat. Siffran gäller i dag, inte perioden.</p>" : "");
+  } else {
+    mejlHtml = '<p class="stat-not">Lägg in SENDER_TOKEN i Apps Script för att se mejllistan.</p>';
+  }
+
+  var franLista = slaIhop_(dagar, "Händelser", function(k){ return k.slice(5); }, function(k){ return k.indexOf("fran/") !== 0; });
+  html += '<div class="stat-tva">'
+    + '<div class="stat-kort"><h3>Grupper och inlägg</h3><p class="under">Besök från länkar med märkning</p>'
+    +   (franLista.length ? listaHtml_(franLista, 10)
+          : '<p class="stat-not">Inget än. Skriv länken som chansen.nu/?fran=hudiksvall när du postar i en grupp, så syns gruppen här.</p>')
+    + "</div>"
+    + '<div class="stat-kort"><h3>Mest klickade annonser</h3><p class="under">Klick vidare till annonsen</p>'
+    +   (annonser.length ? listaHtml_(annonser, 10) : '<p class="stat-not">Inget än. Klicken per annons räknas från version 137 av sidan.</p>')
+    + "</div>"
+    + '<div class="stat-kort"><h3>Mejllistan</h3><p class="under">Jobbtips via mejl</p>' + mejlHtml + "</div>"
+    + '<div class="stat-kort"><h3>Nya och återkommande</h3><p class="under">Besök</p>'
+    +   listaHtml_([["Första besöket", handelse("forsta-besoket")], ["Tillbaka inom en vecka", handelse("ater-inom-veckan")],
+          ["Tillbaka inom en månad", handelse("ater-inom-manaden")], ["Tillbaka efter längre tid", handelse("ater-efter-lange")]], 4)
+    + "</div>"
+    + '<div class="stat-kort"><h3>Ålder</h3><p class="under">Det man svarat på första frågan</p>'
+    +   listaHtml_(slaIhop_(dagar, "Händelser", handelseNamn_, function(k){ return k.indexOf("alder-") !== 0; }), 4)
+    + "</div>"
+    + "</div>";
+
   html += '<div class="stat-tva">'
     + '<div class="stat-kort"><h3>Varifrån de kom</h3><p class="under">Besök per källa</p>'
     +   listaHtml_(slaIhop_(dagar, "Källor", kallaNamn_), 8) + "</div>"
     + '<div class="stat-kort"><h3>Vad de tryckte på</h3><p class="under">Knapptryck från GoatCounter</p>'
-    +   listaHtml_(slaIhop_(dagar, "Händelser", handelseNamn_, function(n){ return n.indexOf("sida:") === 0; }), 10) + "</div>"
+    +   listaHtml_(slaIhop_(dagar, "Händelser", handelseNamn_, function(n){
+          return /^(sida:|ort\/|annons\/|fran\/|larm\/|fel\/|alder-|ater-|forsta-besoket)/.test(n);
+        }), 10) + "</div>"
     + '<div class="stat-kort"><h3>Mest besökta sidor</h3><p class="under">Sidvisningar</p>'
     +   listaHtml_(slaIhop_(dagar, "Sidor", sidNamn_), 8) + "</div>"
     + '<div class="stat-kort"><h3>Länder</h3><p class="under">Besök per land</p>'
@@ -1206,6 +1328,25 @@ function ritaStatistik(){
   var jp = dagar.filter(function(x){ return x["Jobb Sverige"]; })
     .map(function(x){ return { v: Number(x["Jobb Sverige"]), etikett: kortDatum_(x.datum), lang: kortDatum_(x.datum) }; });
   rita_("graf-besok", bp, "stapel", "besök");
+
+  var vdNamn = ["måndag","tisdag","onsdag","torsdag","fredag","lördag","söndag"];
+  var vdSum = [0,0,0,0,0,0,0], vdAntal = [0,0,0,0,0,0,0], tim = [];
+  for (var ti = 0; ti < 24; ti++) tim.push(0);
+  dagar.forEach(function(x){
+    if (x["Besök"] != null){
+      var vd = (new Date(x.datum + "T12:00:00Z").getUTCDay() + 6) % 7;
+      vdSum[vd] += Number(x["Besök"] || 0); vdAntal[vd]++;
+    }
+    (x["Timmar"] || []).forEach(function(v, h){ tim[svenskTimme_(x.datum, h)] += Number(v || 0); });
+  });
+  rita_("graf-veckodag", vdNamn.map(function(n, i){
+    return { v: vdAntal[i] ? Math.round(vdSum[i] / vdAntal[i]) : 0, etikett: n.slice(0, 3), lang: n.charAt(0).toUpperCase() + n.slice(1) + ", snitt" };
+  }), "stapel", "besök");
+  var harTimmar = tim.some(function(v){ return v > 0; });
+  if (harTimmar) rita_("graf-timme", tim.map(function(v, h){
+    return { v: v, etikett: (h < 10 ? "0" : "") + h, lang: "Klockan " + (h < 10 ? "0" : "") + h + " till " + ((h + 1) % 24 < 10 ? "0" : "") + ((h + 1) % 24) };
+  }), "stapel", "besök");
+  else document.getElementById("graf-timme").innerHTML = '<p class="stat-not">Inget än. Kör hamtaStatistikBakat en gång till så fylls timmarna på.</p>';
   rita_("graf-jobb", jp, "linje", "jobb");
 }
 

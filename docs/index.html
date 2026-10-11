@@ -533,6 +533,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button id="f-direkt" onclick="visa('direkt')">Direkt hos arbetsgivaren<i></i></button>
     <button id="f-sasong" onclick="visa('sasong')">Sommar och säsong<i></i></button>
     <button id="f-sprak" onclick="visa('sprak')">Nämner inte språkkrav<i></i></button>
+    <button id="f-utland" onclick="visa('utland')">Utomlands<i></i></button>
   </div>
 
   <div class="rakning dold" id="rakning"></div>
@@ -1330,7 +1331,7 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 136</footer>
+version 137</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -1617,6 +1618,11 @@ function startaLista(){
     if (svar.omfattning && svar.omfattning.length) handelse("soker-" + slug(svar.omfattning[0]));
     if (svar.omrade && svar.omrade.length) handelse("omrade-" + slug(svar.omrade[0]));
     if (svar.ort) handelse("ort-ifylld"); else handelse("ort-tom");
+    /* Vilken kommun man letar i. Bara kommunens namn skickas, och bara
+       om den finns, så att felstavningar och annat skrivet inte följer
+       med. Det blir en summa per kommun i statistiken, inget mer.   */
+    var kommun = kommunForStatistik();
+    if (kommun) handelse("ort/" + slug(kommun));
   };
   if (window.requestIdleCallback) requestIdleCallback(efterat, { timeout: 1200 });
   else setTimeout(efterat, 60);
@@ -1788,6 +1794,9 @@ function dagarKvar(d){ if(!d) return null; return Math.ceil((new Date(d)-new Dat
 function kort(j){
   var p = justeradPoang(j);
   var titel = fly(j.titel), arbetsgivare = fly(j.arbetsgivare), ort = fly(j.ort);
+  if (j.land) ort = fly((j.stad || j.ort ? (j.stad || j.ort) + ", " : "") + j.land);
+  var annonsId = (String(j.lank || "").match(/(\d{5,})/) || [])[1] || slug(j.id || j.titel || "");
+  var annonsNamn = fly(String(j.titel || "") + " · " + String(j.arbetsgivare || ""));
   var lank = sakerLank(j.lank);
 
   /* Annonser som arbetsgivare lagt upp direkt hos oss har sällan någon
@@ -1816,6 +1825,7 @@ function kort(j){
   if(j.nattarbete) taggar += '<span class="tag varn">Natt- eller skiftarbete</span>';
   if(j.nyborjarvanlig) taggar += '<span class="tag sage">Erfarenhet krävs inte</span>';
   if(j.egen) taggar += '<span class="tag sage">Lagd upp här</span>';
+  if(j.land) taggar += '<span class="tag">Utomlands</span>';
   if(j.bemanning) extra += '<span class="tag">Via bemanningsföretag</span>';
 
   // hur ny annonsen är
@@ -1841,7 +1851,7 @@ function kort(j){
     (j.beskrivning ? '<div class="beskrivning">'+fly(j.beskrivning)+'</div>' : '')+
     '<div class="taggar">'+taggar+'</div>'+
     (extra ? '<div class="taggar extra">'+extra+'</div>' : '')+
-    '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow" onclick="handelse(\'klick-annons\')">'+knapptext+'</a>'+
+    '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow" data-annons="'+fly(annonsId)+'" data-namn="'+annonsNamn+'" onclick="klickAnnons(this)">'+knapptext+'</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
     '<div class="knapprad">'+
       '<button class="mini" onclick="oppnaAnsokan(\''+encodeURI(lank)+'\')">Skriv ansökan</button>'+
@@ -2710,6 +2720,33 @@ window.addEventListener("unhandledrejection", function (e) {
   var r = e && e.reason;
   rapporteraFel(r && (r.message || r), "lofte");
 });
+
+function kommunForStatistik(){
+  if (!svar.ort) return "";
+  for (var i = 0; i < JOBB.length; i++){
+    if (JOBB[i].ort && !JOBB[i].land && matcharOrt(JOBB[i])) return JOBB[i].ort;
+  }
+  var s = sokordOrt();
+  if (!s) return "";
+  for (var k in KOMMUNLAN){ if (slat(k) === s) return k; }
+  for (var k2 in KOMMUNLAN){ if (slat(k2).indexOf(s) === 0) return k2; }
+  return "";
+}
+
+/* Räknar klick på en viss annons. Bara annonsens nummer och titel
+   skickas, aldrig något om den som klickar.                       */
+function klickAnnons(el){
+  handelse("klick-annons");
+  var id = el.getAttribute("data-annons"), namn = el.getAttribute("data-namn") || "";
+  if (!id) return;
+  setTimeout(function(){
+    try {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({ path: "handelse/annons/" + id, title: namn.slice(0, 90), event: true });
+      }
+    } catch(e){}
+  }, 0);
+}
 
 function slug(t){
   return String(t || "")
@@ -3667,7 +3704,8 @@ function raknaFilter(iOmradet){
   var kor = function(){
     var bas = iOmradet.filter(matcharAlder).filter(matcharOmrade);
     if (underSexton()) bas = bas.filter(function(j){ return j.omfattning !== "Heltid"; });
-    if (underArton()) bas = bas.filter(function(j){ return j.nattarbete !== true; });
+    if (underArton()) bas = bas.filter(function(j){ return j.nattarbete !== true && !j.land; });
+    var utlandBas = underArton() ? [] : JOBB.filter(function(j){ return !!j.land; }).filter(matcharAlder).filter(matcharOmrade);
     var antalPer = {
       alla: bas.length,
       hog: bas.filter(function(j){ return niva(justeradPoang(j)) === "hog"; }).length,
@@ -3677,7 +3715,8 @@ function raknaFilter(iOmradet){
       utdrag: bas.filter(function(j){ return j.utdrag !== "kravs"; }).length,
       direkt: bas.filter(function(j){ return j.bemanning !== true; }).length,
       sasong: bas.filter(arSasong).length,
-      sprak: bas.filter(function(j){ return j.sprak !== "namns"; }).length
+      sprak: bas.filter(function(j){ return j.sprak !== "namns"; }).length,
+      utland: utlandBas.length
     };
     for (var ai in antalPer){
       var kn = document.getElementById("f-" + ai);
@@ -3781,6 +3820,15 @@ function arSasong(j){
   return SASONG_SVAG.test(titel);
 }
 
+var utlandSvar = null;
+function harUtland(){
+  if (utlandSvar === null){
+    utlandSvar = false;
+    for (var i = 0; i < JOBB.length; i++){ if (JOBB[i].land){ utlandSvar = true; break; } }
+  }
+  return utlandSvar;
+}
+
 var sprakdataSvar = null;
 function harSprakdata(){
   if (sprakdataSvar === null){
@@ -3793,7 +3841,7 @@ function harSprakdata(){
 }
 
 function visa(filter){
-  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong","sprak"];
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong","sprak","utland"];
   for (var i = 0; i < ids.length; i++){
     var k = document.getElementById("f-" + ids[i]);
     if (k && k.className !== "dold") k.className = (ids[i] === filter) ? "on" : "";
@@ -3829,7 +3877,7 @@ function visaInre(filter){
     }
   }
   if (underSexton() && filter === "heltid") filter = "alla";
-  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong","sprak"];
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong","sprak","utland"];
   for(var i=0;i<ids.length;i++){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
@@ -3843,6 +3891,14 @@ function visaInre(filter){
   var skn = document.getElementById("f-sprak");
   if (skn) skn.className = harSprakdata() ? (filter === "sprak" ? "on" : "") : "dold";
   if (!harSprakdata() && filter === "sprak") filter = "alla";
+
+  /* Jobb utomlands syns inte för den som är under 18. Att flytta till
+     ett annat land för ett jobb är något annat än ett extrajobb hemma.
+     Knappen syns bara när det finns jobb med land i datan.           */
+  var ukn = document.getElementById("f-utland");
+  var utlandOk = !underArton() && harUtland();
+  if (ukn) ukn.className = utlandOk ? (filter === "utland" ? "on" : "") : "dold";
+  if (!utlandOk && filter === "utland") filter = "alla";
 
   // Många kommuner har bara ett eller två jobb. Då är en nästan tom lista
   // sämre än att visa hela länet, så vi fyller på när det är för tunt.
@@ -3873,9 +3929,12 @@ function visaInre(filter){
     }
   }
 
+  // utomlands gäller oavsett vilken ort man skrivit in
+  if (filter === "utland"){ iOmradet = JOBB.filter(function(j){ return !!j.land; }); lanfall = ""; }
+
   var valda = iOmradet.filter(matcharAlder).filter(matcharOmrade);
   if (underSexton()) valda = valda.filter(function(j){ return j.omfattning !== "Heltid"; });
-  if (underArton()) valda = valda.filter(function(j){ return j.nattarbete !== true; });
+  if (underArton()) valda = valda.filter(function(j){ return j.nattarbete !== true && !j.land; });
   if(filter === "hog")    valda = valda.filter(function(j){ return niva(justeradPoang(j)) === "hog"; });
   if(filter === "nyborjare") valda = valda.filter(function(j){ return j.nyborjarvanlig === true; });
   if(filter === "direkt") valda = valda.filter(function(j){ return j.bemanning !== true; });
@@ -4009,6 +4068,22 @@ function kollaAdress(){
   return false;
 }
 window.addEventListener("hashchange", kollaAdress);
+
+/* Märkning i länken, till exempel chansen.nu/?fran=hudiksvall. Visar i
+   statistiken vilka inlägg och grupper som ger besök. Märkningen tas
+   bort ur adressen direkt, så att den inte följer med om någon delar
+   länken vidare och räknas en gång till.                           */
+(function(){
+  try {
+    var m = /[?&]fran=([^&#]+)/.exec(location.search);
+    if (!m) return;
+    var tagg = decodeURIComponent(m[1]).toLowerCase()
+      .replace(/[åä]/g, "a").replace(/ö/g, "o").replace(/[^a-z0-9-]+/g, "-").slice(0, 40);
+    if (tagg) handelse("fran/" + tagg);
+    var rest = location.search.replace(/([?&])fran=[^&#]*&?/, "$1").replace(/[?&]$/, "");
+    history.replaceState(null, "", location.pathname + rest + location.hash);
+  } catch(e){}
+})();
 
 // Håller den installerade appen uppdaterad. Utan den kan någon som lagt
 // Chansen på hemskärmen sitta kvar på en gammal version i dagar.
