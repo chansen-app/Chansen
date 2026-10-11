@@ -236,6 +236,9 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
   .tyckruta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
     background:var(--sage-100);border-radius:16px;padding:13px 16px;margin:0 0 14px}
   .tyckruta span{font-size:14px;color:var(--sage-800);flex:1 1 180px;line-height:1.5}
+  .tyckruta{border:1.5px solid var(--sage-800);border-color:rgba(61,71,43,.35)}
+  .tyckruta b{display:block;font-size:15.5px;margin-bottom:2px}
+  .tyckruta .tyckval{display:flex;gap:8px;flex-wrap:wrap}
 
   /* Fälten i Tyck till ska se ut som resten av sidan, inte som
      webbläsarens standardrutor. */
@@ -538,6 +541,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <button id="f-direkt" data-fler onclick="visa('direkt')">Direkt hos arbetsgivaren<i></i></button>
     <button id="f-sasong" data-fler onclick="visa('sasong')">Sommar och säsong<i></i></button>
     <button id="f-sprak" data-fler onclick="visa('sprak')">Nämner inte språkkrav<i></i></button>
+    <button id="f-hemifran" data-fler onclick="visa('hemifran')">Hemifrån<i></i></button>
     <button id="f-utland" data-fler onclick="visa('utland')">Utomlands<i></i></button>
     <button id="f-fler" type="button" aria-expanded="false" onclick="vaxlaFlerFilter()">Fler filter ▾</button>
   </div>
@@ -1228,15 +1232,16 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <h2>Vad Chansen är</h2>
   <p>En gratis tjänst som visar jobb med låga ingångskrav och sorterar dem efter hur få hinder som står mellan dig och en ansökan. Den är byggd med förstagångssökande i åtanke, men är öppen för alla och stänger inte ute någon.</p>
+  <p>Chansen drivs av en privatperson och har ingenting med Arbetsförmedlingen att göra. Jobben hämtas från Platsbanken, men sidan är inte deras.</p>
 
   <h2>Varför Chansen finns</h2>
-  <p>Det ligger runt 40 000 jobbannonser i Platsbanken, men många kräver flera års erfarenhet, även för arbeten man lär sig på ett par veckor. Och det står sällan i rubriken, så man måste öppna och läsa varje annons för att upptäcka det.</p>
+  <p>Det ligger tiotusentals jobbannonser i Platsbanken, men många kräver flera års erfarenhet, även för arbeten man lär sig på ett par veckor. Och det står sällan i rubriken, så man måste öppna och läsa varje annons för att upptäcka det.</p>
   <p>Chansen gör den sorteringen åt dig. Varje natt läses alla annonser igenom, och det som kräver utbildning, yrkesbevis eller lång erfarenhet sorteras bort. Kvar blir jobb med låga ingångskrav, så din tid går till att söka i stället för att sortera.</p>
 
   <h2>Det här kan du göra</h2>
   <ul>
     <li><b>Hitta jobb nära dig.</b> Svara på tre frågor, så får du jobben i din kommun. Finns det få, fylls listan på med resten av länet.</li>
-    <li><b>Filtrera.</b> Till exempel bara jobb där ingen erfarenhet krävs, bara deltid, eller bara jobb direkt hos arbetsgivaren.</li>
+    <li><b>Filtrera.</b> Till exempel bara jobb där ingen erfarenhet krävs, bara deltid, sommar- och säsongsjobb, jobb du kan göra hemifrån, eller jobb som inte nämner språkkrav eller registerutdrag. Fler filter hittar du under Fler filter.</li>
     <li><b>Spara jobb</b> och hålla koll på vilka du har sökt.</li>
     <li><b>Få hjälp med ansökningsbrevet</b>, anpassat efter jobbet.</li>
     <li><b>Bygga ett CV</b> med tre mallar och spara det som PDF. <button class="lank" onclick="visaVy('cv')">Till CV-byggaren</button></li>
@@ -1257,21 +1262,22 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <ul>
     <li>Vi frågar aldrig om etnicitet, kön, hälsa, religion eller brottshistorik</li>
     <li>Vi märker jobb, inte människor. Allt som visas handlar om vad annonsen kräver</li>
-    <li>Vi gömmer inga jobb utom sådant som enligt lag inte får utföras av den som är under 18</li>
+    <li>Är du under 18 visas inte jobb som lagen inte tillåter, till exempel nattarbete, och inte heller jobb utomlands. Utöver det döljer vi inga jobb för någon</li>
     <li>Vi lovar aldrig att du får ett jobb, och räknar inte ut sannolikheter</li>
     <li>Tjänsten är gratis och kommer alltid att vara det för dig som söker jobb</li>
   </ul>
 
   <h2>Vad som sparas</h2>
   <p>Dina svar på frågorna, de jobb du sparat och datumet för ditt senaste besök ligger i din egen webbläsare, på din telefon eller dator. De skickas ingenstans och vi kan inte se dem. Rensar du webbläsarens data försvinner de.</p>
-  <p>Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies och spårar inte enskilda besökare.</p>
+  <p>Vi använder Cloudflare Web Analytics och GoatCounter för att se hur många som besöker sidan och vad som används. De använder inga cookies och spårar inte enskilda besökare. Läs mer under Besöksstatistik längre ned.</p>
   <p>Anmäler du dig till mejllistan sparas din mejladress hos tjänsten Sender, som sköter utskicken åt oss. Läs mer under Personuppgifter längre ned.</p>
 
   <h2>Är du arbetsgivare?</h2>
   <p>Söker du personal och kräver ingen erfarenhet kan du lägga upp ett jobb gratis. <button class="lank" onclick="visaVy('arbetsgivare')">Lägg upp ett jobb här</button>. Varje annons granskas av en människa innan den publiceras.</p>
 
   <h2>Var jobben kommer ifrån</h2>
-  <p>Annonserna hämtas från Arbetsförmedlingens öppna API JobSearch och uppdateras en gång per dygn. Chansen skapar inga egna annonser och ansvarar inte för innehållet i dem. Klickar du på Se annonsen kommer du till originalet i Platsbanken.</p>
+  <p>De flesta annonserna hämtas från Arbetsförmedlingens öppna API JobSearch och uppdateras en gång per dygn. Det gäller även de få jobb som ligger utomlands. Chansen skapar inga egna annonser och ansvarar inte för innehållet i dem. Klickar du på Se annonsen kommer du till originalet i Platsbanken.</p>
+  <p>Några annonser har arbetsgivare skickat in direkt till Chansen. De är märkta med "lagd upp av arbetsgivaren", och varje sådan annons har granskats av en människa innan den publicerades.</p>
 
   <h2>Det vi inte kan veta</h2>
   <p>Vi kan bara läsa vad som står i annonsen. Står det inget om registerutdrag betyder det inte att arbetsgivaren låter bli att begära ett. Är något viktigt för dig, fråga arbetsgivaren innan du lägger tid på ansökan.</p>
@@ -1316,7 +1322,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <p><b>Synpunkter.</b> Skickar du in synpunkter via Tyck till sparar vi det du skrivit, tillsammans med vad du själv valt i appen: ålder, ort och hur många jobb som visades. Lämnar du en mejladress sparas den bara för att kunna svara dig, och raderas sedan.</p>
 
   <p><b>Besöksstatistik.</b> Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies, spårar inte enskilda besökare och sparar inga uppgifter som kan kopplas till dig.</p>
-  <p>Med tjänsten GoatCounter räknar vi också hur många som klickar sig vidare till en annons, hur många som kommer tillbaka till sidan, och om det uppstår tekniska fel. Den använder inga kakor och sparar ingenting om vem du är.</p>
+  <p>Med tjänsten GoatCounter räknar vi också hur sidan används: hur många som klickar sig vidare till en annons och vilka annonser det gäller, vilka filter som används, vilken kommun folk söker jobb i, vilken åldersgrupp man valt, varifrån man kom till sidan, hur många som kommer tillbaka, svaren på frågan om man hittar något jobb, och om det uppstår tekniska fel. Allt räknas som totaler, till exempel "40 sökte i Halmstad i dag". GoatCounter använder inga kakor och sparar ingenting om vem du är, så inget av det går att koppla till dig.</p>
 
   <p><b>Du som är arbetsgivare.</b> Skickar du in en annons sparar vi det du fyllt i: företagets namn och organisationsnummer, uppgifter om jobbet, samt ditt namn, din mejladress och ditt telefonnummer. Det sparas i ett kalkylblad hos Google som bara vi har tillgång till.</p>
   <p>Vi använder uppgifterna för att kontrollera att företaget finns, för att kunna kontakta dig om annonsen, och för att publicera jobbet. Den rättsliga grunden är berättigat intresse. Kontaktuppgifter du själv angett som kontakt för sökande publiceras i annonsen, resten publiceras inte.</p>
@@ -1329,6 +1335,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
   <h2>Kontakt</h2>
   <p>Chansen drivs av en privatperson. Ser du något som är fel, en annons som inte borde vara med, eller har du en idé, hör av dig till <a href="mailto:chansen.jobb@gmail.com">chansen.jobb@gmail.com</a>.</p>
+  <p>Saknar du något, eller var något krångligt? <button class="lank" onclick="tyckOppna()">Tyck till här</button>. Det tar en minut och du behöver inte skriva vem du är.</p>
 </div>
 
 <footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center;line-height:1.6">
@@ -1337,7 +1344,8 @@ Datan är släppt som <a href="https://creativecommons.org/publicdomain/zero/1.0
 Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
-version 138</footer>
+<button class="lank" style="font-size:12px" onclick="tyckOppna()">Saknar du något? Tyck till</button><br>
+version 139</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -3722,6 +3730,11 @@ function raknaFilter(iOmradet){
       direkt: bas.filter(function(j){ return j.bemanning !== true; }).length,
       sasong: bas.filter(arSasong).length,
       sprak: bas.filter(function(j){ return j.sprak !== "namns"; }).length,
+      hemifran: hemifranLista().filter(matcharAlder).filter(matcharOmrade).filter(function(j){
+        if (underSexton() && j.omfattning === "Heltid") return false;
+        if (underArton() && j.nattarbete === true) return false;
+        return true;
+      }).length,
       utland: utlandBas.length
     };
     for (var ai in antalPer){
@@ -3771,13 +3784,7 @@ function ritaBit(nollstall, fyllUpp){
      en gång, och flyttas aldrig när listan fylls på. */
   if (!document.getElementById("tyckruta") && visatAntal >= 3){
     var kortEtt = el.querySelectorAll(".card")[2];
-    if (kortEtt){
-      kortEtt.insertAdjacentHTML("afterend",
-        '<div id="tyckruta" class="tyckruta">'
-        + '<span>Saknar du något på Chansen? Säg till, så fixar jag det.</span>'
-        + '<button class="mini" onclick="tyckOppna()">Tyck till</button>'
-        + "</div>");
-    }
+    if (kortEtt) kortEtt.insertAdjacentHTML("afterend", tyckrutaHtml());
   }
 
   // Reservationen tas bort så snart korten fyller minst lika mycket,
@@ -3836,6 +3843,45 @@ function vaxlaFlerFilter(){
   if (oppen) handelse("fler-filter");
 }
 
+/* Jobb som går att göra hemifrån. Det står sällan i något eget fält,
+   så det läses ur texten. "Tjänsten går ej att utföra på distans"
+   ska inte räknas, och inte heller en personlig assistent vars
+   brukare själv jobbar på distans.                                  */
+var HEMIFRAN = /\b((?:jobba|arbeta|jobb|extrajobb|arbetet|jobbet|arbetar|jobbar)\s+(?:\S+\s+){0,2}?hemifrån|hemifrån\s+(?:som|med|kvällar|deltid|extra)|på distans|distansarbete\w*|distansjobb\w*|distans\s*\/\s*hemifrån|(?:jobba|arbeta)\s+hemma|hemarbete|remote)\b/i;
+var HEMIFRAN_TITEL = /\b(hemifrån|distans\w*|remote|arbeta hemma|jobba hemma)\b/i;
+var HEMIFRAN_INTE = /\b(ej|inte|icke|ingen|aldrig|utan)\b[^.!?]{0,40}$/i;
+
+function arHemifran(j){
+  if (j.land) return false;
+  var titel = j.titel || "";
+  if (/personlig assistent/i.test(titel)) return false;
+  var t = titel.search(HEMIFRAN_TITEL);
+  if (t > -1 && !HEMIFRAN_INTE.test(titel.slice(0, t))) return true;
+  var text = j.beskrivning || "";
+  var re = new RegExp(HEMIFRAN.source, "gi"), m;
+  while ((m = re.exec(text))){
+    if (!HEMIFRAN_INTE.test(text.slice(Math.max(0, m.index - 60), m.index))) return true;
+  }
+  return false;
+}
+
+/* Samma annons läggs ofta upp i fem städer. Hemifrån spelar orten
+   ingen roll, så varje annons visas bara en gång.                  */
+var hemifranCache = null;
+function hemifranLista(){
+  if (hemifranCache === null){
+    var sett = {};
+    hemifranCache = JOBB.filter(function(j){
+      if (!arHemifran(j)) return false;
+      var nyckel = (j.titel || "") + "|" + (j.arbetsgivare || "");
+      if (sett[nyckel]) return false;
+      sett[nyckel] = true;
+      return true;
+    });
+  }
+  return hemifranCache;
+}
+
 var utlandSvar = null;
 function harUtland(){
   if (utlandSvar === null){
@@ -3857,7 +3903,7 @@ function harSprakdata(){
 }
 
 function visa(filter){
-  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong","sprak","utland"];
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong","sprak","hemifran","utland"];
   for (var i = 0; i < ids.length; i++){
     var k = document.getElementById("f-" + ids[i]);
     if (k && k.className !== "dold") k.className = (ids[i] === filter) ? "on" : "";
@@ -3893,7 +3939,7 @@ function visaInre(filter){
     }
   }
   if (underSexton() && filter === "heltid") filter = "alla";
-  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong","sprak","utland"];
+  var ids = ["alla","hog","nyborjare","deltid","heltid","utdrag","direkt","sasong","sprak","hemifran","utland"];
   for(var i=0;i<ids.length;i++){
     document.getElementById("f-"+ids[i]).className = filter === ids[i] ? "on" : "";
   }
@@ -3915,6 +3961,11 @@ function visaInre(filter){
   var utlandOk = !underArton() && harUtland();
   if (ukn) ukn.className = utlandOk ? (filter === "utland" ? "on" : "") : "dold";
   if (!utlandOk && filter === "utland") filter = "alla";
+
+  var hkn2 = document.getElementById("f-hemifran");
+  var hemOk = hemifranLista().length > 0;
+  if (hkn2) hkn2.className = hemOk ? (filter === "hemifran" ? "on" : "") : "dold";
+  if (!hemOk && filter === "hemifran") filter = "alla";
 
   // Många kommuner har bara ett eller två jobb. Då är en nästan tom lista
   // sämre än att visa hela länet, så vi fyller på när det är för tunt.
@@ -3945,7 +3996,11 @@ function visaInre(filter){
     }
   }
 
-  // utomlands gäller oavsett vilken ort man skrivit in
+  // Knapparnas siffror ska gälla orten, även när listan visar annat
+  var forRakning = iOmradet;
+
+  // hemifrån och utomlands gäller oavsett vilken ort man skrivit in
+  if (filter === "hemifran"){ iOmradet = hemifranLista(); lanfall = ""; }
   if (filter === "utland"){ iOmradet = JOBB.filter(function(j){ return !!j.land; }); lanfall = ""; }
 
   var valda = iOmradet.filter(matcharAlder).filter(matcharOmrade);
@@ -4003,6 +4058,9 @@ function visaInre(filter){
     if (filter === "utdrag") {
       rutan = '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte nämner registerutdrag. Arbetsgivaren kan ändå begära ett. Fråga innan du lägger tid på ansökan.</div>';
     }
+    if (filter === "hemifran") {
+      rutan = '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen säger att du kan jobba hemifrån, oavsett var du bor. Många är telefonförsäljning eller kundtjänst. Kolla om lönen är fast eller bara provision innan du söker.</div>';
+    }
     if (filter === "sprak") {
       rutan = '<div class="ruta" style="font-size:14px">Det här är jobb där annonsen inte skriver något om att du måste kunna svenska. Arbetsgivaren kan ändå vilja det. Fråga innan du lägger tid på ansökan.</div>';
     }
@@ -4011,7 +4069,7 @@ function visaInre(filter){
   // Räkna hur många varje filter skulle ge, så talen kan stå i knapparna.
   // Räkningen går igenom alla jobb sju gånger och är för tung för att
   // ligga i klickets väg. Den körs därför när webbläsaren är ledig.
-  raknaFilter(iOmradet);
+  raknaFilter(forRakning);
 
   if (window.JOBBSAKNAS){
     document.getElementById("rakning").textContent = "Jobben kunde inte hämtas";
@@ -4022,7 +4080,10 @@ function visaInre(filter){
   }
 
   var platsnamn = lanfall ? lanfall : (ortsnamn ? ortsnamn : "hela Sverige");
-  document.getElementById("rakning").textContent = valda.length + " jobb i " + platsnamn;
+  var rakText = valda.length + " jobb i " + platsnamn;
+  if (filter === "hemifran") rakText = valda.length + " jobb du kan göra hemifrån";
+  if (filter === "utland") rakText = valda.length + " jobb utomlands";
+  document.getElementById("rakning").textContent = rakText;
 
   // Stora talet överst. Samma siffra, bara tydligare.
   var ht = document.getElementById("hero-tal");
@@ -4145,6 +4206,48 @@ hamtaBladjobb();
 
 var tyck = {};
 var tyckSteg = 0;
+
+/* Rutan i listan ställer en fråga som besvaras med ett tryck. Det är
+   lättare att svara på än ett helt formulär, och svaret syns direkt i
+   statistiken. Den som vill kan sedan skriva mer. Har man redan svarat
+   visas den vanliga rutan i stället.                                */
+function tyckrutaHtml(){
+  var svarat = false;
+  try { svarat = !!localStorage.getItem("chansen-tyckt"); } catch(e){}
+  if (svarat){
+    return '<div id="tyckruta" class="tyckruta">'
+      + '<span>Saknar du något på Chansen? Säg till, så fixar jag det.</span>'
+      + '<button class="mini" onclick="tyckOppna()">Tyck till</button>'
+      + '</div>';
+  }
+  return '<div id="tyckruta" class="tyckruta">'
+    + '<span><b>Hittar du något jobb som passar dig?</b>Ett tryck räcker. Det hjälper mig göra Chansen bättre.</span>'
+    + '<div class="tyckval">'
+    + '<button class="mini" onclick="tyckSnabb(\'Ja\')">Ja</button>'
+    + '<button class="mini" onclick="tyckSnabb(\'Nej\')">Nej</button>'
+    + '<button class="mini" onclick="tyckSnabb(\'Inte än\')">Inte än</button>'
+    + '</div></div>';
+}
+
+function tyckSnabb(v){
+  var namn = { "Ja": "ja", "Nej": "nej", "Inte än": "inte-an" }[v] || "annat";
+  handelse("tyck-snabb-" + namn);
+  try { localStorage.setItem("chansen-tyckt", v); } catch(e){}
+  var ruta = document.getElementById("tyckruta");
+  if (!ruta) return;
+  var fraga = v === "Ja"
+    ? "Kul! Saknar du ändå något?"
+    : "Tack. Vad letar du efter? Berätta, så ser jag om det går att fixa.";
+  ruta.innerHTML = '<span>' + fraga + '</span>'
+    + '<button class="mini" onclick="tyckOppnaMed(\'' + v + '\')">Skriv några ord</button>';
+}
+
+function tyckOppnaMed(v){
+  tyckOppna();
+  tyck.hittade = v;
+  tyckSteg = 1;
+  ritaTyckSteg();
+}
 
 function tyckOppna(){
   tyckSteg = 0;
