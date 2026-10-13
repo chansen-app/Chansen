@@ -1345,7 +1345,7 @@ Vi anger källan för din skull, inte för att vi måste.<br>
 <span id="uppdaterad"></span><br>
 <button class="lank" style="font-size:12px" onclick="visaVy('arbetsgivare')">Är du arbetsgivare? Lägg upp ett jobb gratis</button><br>
 <button class="lank" style="font-size:12px" onclick="tyckOppna()">Saknar du något? Tyck till</button><br>
-version 139</footer>
+version 140</footer>
 </div>
 
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
@@ -4141,6 +4141,8 @@ try {
 // så att den går att skicka direkt till ett företag.
 function kollaAdress(){
   if (location.hash === "#arbetsgivare") { visaVy("arbetsgivare"); return true; }
+  // chansen.nu/#cv öppnar CV-byggaren direkt, till exempel från en affisch
+  if (location.hash === "#cv") { visaVy("cv"); return true; }
   if (/^#jobb-[\wåäöÅÄÖ-]+$/.test(location.hash || "")) return jobbFranAdressen();
   return false;
 }
