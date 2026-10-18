@@ -331,6 +331,13 @@ nav button{font-size:12px;padding:0 4px}
   #cv-utskrift .cvm-modern{padding:0}
   @page{margin:16mm}
 }
+.cv-varning{margin-top:12px;padding:12px 14px;border-radius:12px;background:#f7e3c0;color:#6e4408;font-size:15px;line-height:1.45}
+.cv-varning p{margin:0}
+.cv-varning p+p{margin-top:6px}
+.cvhjalp{margin:0 0 30px;padding:16px 18px;border-radius:14px;background:var(--surface);font-size:15px;line-height:1.5}
+.cvhjalp b{display:block;margin-top:10px}
+.cvhjalp b:first-child{margin-top:0}
+.cvhjalp ol{margin:6px 0 0;padding-left:20px}
 .cvstapel{height:8px;background:var(--n-300);border-radius:4px;overflow:hidden;margin-bottom:12px}
 .cvstapel-fyll{height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width .3s ease}
 .cvsteg-nr{font-size:13px;color:var(--n-600);margin-bottom:26px}
@@ -694,12 +701,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
       <h2 class="cvfraga" id="fraga-cv-tel">Ditt telefonnummer</h2>
       <input class="txt cvf" id="cv-tel" aria-labelledby="fraga-cv-tel" placeholder="07...">
       <div class="hint">Det här är hur de når dig. Dubbelkolla siffrorna.</div>
+      <div class="cv-varning dold" id="cv-tel-varning" role="status" aria-live="polite"></div>
     </div>
 
     <div class="cvsteg dold" data-falt="mejl">
       <h2 class="cvfraga" id="fraga-cv-mejl">Din mejladress</h2>
       <input class="txt cvf" id="cv-mejl" aria-labelledby="fraga-cv-mejl" placeholder="fornamn.efternamn@...">
       <div class="hint">Har du en med smeknamn i, skaffa en med ditt namn. Det tar två minuter.</div>
+      <div class="cv-varning dold" id="cv-mejl-varning" role="status" aria-live="polite"></div>
     </div>
 
     <div class="cvsteg dold" data-falt="om">
@@ -742,6 +751,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
       <input class="txt cvf" id="cv-ovrigt" aria-labelledby="fraga-cv-ovrigt" placeholder="Körkort, program du kan, certifikat">
       <div class="hint">Hoppa över om du inte har något. Det är helt normalt.</div>
     </div>
+    <div class="cvsteg dold" data-falt="ref">
+      <h2 class="cvfraga" id="fraga-cv-ref">Referenser</h2>
+      <div class="hint" style="margin-top:0;margin-bottom:12px">En referens är någon som kan berätta hur du är, till exempel en tidigare chef, en lärare eller en tränare. Fråga alltid personen först. Lämnar du tomt står det "Lämnas på begäran", och det är helt okej.</div>
+      <textarea class="cvf" id="cv-ref" aria-labelledby="fraga-cv-ref" placeholder="Namn, vad personen är för dig och telefonnummer. En per rad."></textarea>
+    </div>
 
     <div class="cvknappar">
       <button class="btn block" id="cv-nasta" onclick="cvNasta()">Nästa</button>
@@ -754,6 +768,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     <div id="cv-klar" class="dold">
       <h2 class="cvfraga" style="margin-bottom:6px">Ditt CV är klart</h2>
       <div class="rakning" id="cv-status" role="status" aria-live="polite"></div>
+      <div class="cv-varning dold" id="cv-varning" role="alert"></div>
       <div class="hint" style="margin:0 0 10px">Välj utseende</div>
       <div class="chips" id="cv-mallval" style="margin-bottom:18px"></div>
       <div id="cv-forhandsvisning"></div>
@@ -767,6 +782,27 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
         <button class="mini" onclick="kopieraCV()">Kopiera texten</button>
         <button class="mini" onclick="cvOm()">Ändra något</button>
         <button class="mini" onclick="cvVisa('guide')">Till guiden</button>
+      </div>
+      <div class="cvhjalp">
+        <b>Så sparar du ditt CV som PDF</b>
+        Tryck på Spara som PDF. Sedan:
+        <b>På iPhone</b>
+        <ol>
+          <li>Tryck på dela-knappen, rutan med en pil uppåt, högst upp.</li>
+          <li>Välj Spara i Filer.</li>
+          <li>Välj var du vill spara och tryck Spara.</li>
+        </ol>
+        <b>På Android</b>
+        <ol>
+          <li>Tryck på raden högst upp där det står en skrivare.</li>
+          <li>Välj Spara som PDF.</li>
+          <li>Tryck på den runda knappen där det står PDF, och sedan Spara.</li>
+        </ol>
+        <b>På datorn</b>
+        <ol>
+          <li>Välj Spara som PDF där det står skrivare eller mål.</li>
+          <li>Tryck Spara.</li>
+        </ol>
       </div>
     </div>
   </div>
@@ -2814,7 +2850,7 @@ function delaJobb(lank){
 }
 
 // ══════════════ CV ══════════════
-var CV_FALT = ["namn","ort","tel","mejl","om","skola","skolaar","erf","sprak","ovrigt"];
+var CV_FALT = ["namn","ort","tel","mejl","om","skola","skolaar","erf","sprak","ovrigt","ref"];
 var cv = {};
 try {
   var cvSparat = localStorage.getItem("chansen-cv");
@@ -2885,7 +2921,7 @@ var ERF_FORSLAG = [
 ];
 
 var cvSteg = 0;
-var CV_STEG = ["namn","ort","tel","mejl","om","skola","erf","foto","sprak","ovrigt"];
+var CV_STEG = ["namn","ort","tel","mejl","om","skola","erf","foto","sprak","ovrigt","ref"];
 
 function cvVisa(del){
   document.getElementById("cv-guide").className = del === "guide" ? "info" : "dold";
@@ -2898,7 +2934,8 @@ function cvVisa(del){
 
 function forstaOfyllda(){
   for (var i = 0; i < CV_STEG.length; i++){
-    if (CV_STEG[i] === "foto") continue;
+    // Foto och referenser är frivilliga, där ska man inte hamna igen.
+    if (CV_STEG[i] === "foto" || CV_STEG[i] === "ref") continue;
     var v = cv[CV_STEG[i]];
     if (!v || !String(v).trim()) return i;
   }
@@ -3008,7 +3045,47 @@ function oppnaCV(){
   byggCV();
 }
 
+// Fel i telefonnummer eller mejl gör att arbetsgivaren aldrig når en.
+// Kollar bara det vanligaste, och säger det på ett vänligt sätt.
+function kontaktFel(){
+  var fel = { tel: "", mejl: "" };
+  var tel = String(cv.tel || "").trim();
+  if (tel) {
+    var siffror = tel.replace(/\D/g, "").length;
+    if (/[a-zåäö]/i.test(tel)) fel.tel = "Telefonnumret innehåller bokstäver. Kolla att det stämmer.";
+    else if (siffror < 8) fel.tel = "Telefonnumret verkar ha för få siffror. Kolla att det stämmer.";
+    else if (siffror > 13) fel.tel = "Telefonnumret verkar ha för många siffror. Kolla att det stämmer.";
+  }
+  var mejl = String(cv.mejl || "").trim();
+  if (mejl) {
+    if (mejl.indexOf("@") < 0) fel.mejl = "Mejladressen saknar @. Kolla att den stämmer.";
+    else if (/\s/.test(mejl)) fel.mejl = "Mejladressen har ett mellanslag. Ta bort det.";
+    else if (!/^[^@]+@[^@]+\.[a-z]{2,}$/i.test(mejl)) fel.mejl = "Mejladressen ser inte hel ut. Kolla slutet, till exempel .com eller .se.";
+  }
+  return fel;
+}
+
+function visaKontaktFel(){
+  var fel = kontaktFel();
+  [["cv-tel-varning", fel.tel], ["cv-mejl-varning", fel.mejl]].forEach(function(par){
+    var el = document.getElementById(par[0]);
+    if (!el) return;
+    el.textContent = par[1];
+    el.className = par[1] ? "cv-varning" : "cv-varning dold";
+  });
+  var samlat = [fel.tel, fel.mejl].filter(Boolean);
+  if (!String(cv.tel || "").trim() && !String(cv.mejl || "").trim()) {
+    samlat.push("Du har inte skrivit något telefonnummer eller någon mejladress. Då kan arbetsgivaren inte nå dig.");
+  }
+  var ruta = document.getElementById("cv-varning");
+  if (ruta) {
+    ruta.innerHTML = samlat.map(function(t){ return "<p>" + fly(t) + "</p>"; }).join("");
+    ruta.className = samlat.length ? "cv-varning" : "cv-varning dold";
+  }
+}
+
 function byggCV(){
+  visaKontaktFel();
   var rader = [];
   var namn = cv.namn || "[ditt namn]";
   rader.push(namn.toUpperCase());
@@ -3038,7 +3115,11 @@ function byggCV(){
   if (cv.ovrigt && cv.ovrigt.trim()) { rader.push("ÖVRIGT"); rader.push(cv.ovrigt); rader.push(""); }
 
   rader.push("REFERENSER");
-  rader.push("Lämnas på begäran.");
+  if (cv.ref && cv.ref.trim()) {
+    cv.ref.split("\n").forEach(function(r){ if (r.trim()) rader.push(r.trim()); });
+  } else {
+    rader.push("Lämnas på begäran.");
+  }
   if (cv.foto) { rader.push(""); rader.push("(Foto finns i PDF-versionen.)"); }
 
   var ut = document.getElementById("cv-resultat");
@@ -3146,13 +3227,17 @@ function cvDelar(){
       ? "<p>" + fly(cv.skola || "[skola]") + (cv.skolaar ? "<br>" + fly(cv.skolaar) : "") + "</p>" : "",
     erfarenhet: radlista(cv.erf),
     sprak: cv.sprak && cv.sprak.trim() ? "<p>" + fly(cv.sprak) + "</p>" : "",
-    ovrigt: cv.ovrigt && cv.ovrigt.trim() ? "<p>" + fly(cv.ovrigt) + "</p>" : ""
+    ovrigt: cv.ovrigt && cv.ovrigt.trim() ? "<p>" + fly(cv.ovrigt) + "</p>" : "",
+    ref: cv.ref && cv.ref.trim()
+      ? "<p>" + cv.ref.split("\n").filter(function(r){ return r.trim(); })
+          .map(function(r){ return fly(r.trim()); }).join("<br>") + "</p>"
+      : "<p>Lämnas på begäran.</p>"
   };
 }
 
 function mallHtml(mall){
   var d = cvDelar();
-  var ref = '<div class="m-rub">Referenser</div><p>Lämnas på begäran.</p>';
+  var ref = '<div class="m-rub">Referenser</div>' + d.ref;
 
   if (mall === "modern") {
     return '<div class="cvm cvm-modern">' +
@@ -3161,7 +3246,7 @@ function mallHtml(mall){
         '<div class="m-rub">Kontakt</div><p>' + d.kontakt.replace(/ &nbsp;·&nbsp; /g,"<br>") + '</p>' +
         (d.sprak ? '<div class="m-rub">Språk</div>' + d.sprak : '') +
         (d.ovrigt ? '<div class="m-rub">Övrigt</div>' + d.ovrigt : '') +
-        '<div class="m-rub">Referenser</div><p>Lämnas på begäran.</p>' +
+        ref +
       '</div>' +
       '<div class="m-huvud">' +
         '<div class="m-namn">' + d.namn + '</div><div class="m-linje"></div>' +
