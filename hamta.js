@@ -913,7 +913,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
     const titel = "Jobb med låga ingångskrav i " + ort;
     const beskrivning = antal + " jobb i " + ort + " som inte kräver "
       + "flera års erfarenhet. Uppdateras varje natt från Platsbanken. "
-      + "Gratis och kräver inget konto.";
+      + "Gratis att använda.";
 
     let rader = "";
     for (const j of lista.slice(0, 40)) {
@@ -968,7 +968,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '<h2>Om Chansen</h2>\n'
       + '<p>Chansen går igenom hela Platsbanken varje natt och sorterar bort allt '
       + 'som kräver utbildning, yrkesbevis eller flera års erfarenhet. Sidan är '
-      + 'gratis, kräver inget konto och sparar ingenting om dig.</p>\n'
+      + 'gratis att använda och sparar ingenting om dig.</p>\n'
       + '<p>Jobben kommer från Arbetsförmedlingens öppna data. '
       + 'Arbetsförmedlingen står inte bakom sidan, den drivs av en privatperson.</p>\n'
       + '<footer>Uppdaterad ' + datum + '. '
