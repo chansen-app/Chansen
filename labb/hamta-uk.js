@@ -398,7 +398,7 @@ async function kor(){
   console.log("De tio bästa:");
   for (const j of jobb.slice(0, 10)){
     console.log("  " + String(j.poang).padStart(2) + "  "
-      + j.titel.slice(0, 44).padEnd(46) + j.ort.slice(0, 18));
+      + tvatta(j.titel).slice(0, 44).padEnd(46) + j.ort.slice(0, 18));
   }
 }
 

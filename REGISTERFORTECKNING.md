@@ -1,6 +1,7 @@
 # Registerförteckning, Chansen
 
-Enligt artikel 30 i dataskyddsförordningen. Upprättad 1 oktober 2026.
+Enligt artikel 30 i dataskyddsförordningen. Upprättad 1 oktober 2026,
+uppdaterad 18 oktober 2026.
 
 Den här filen beskriver vilka personuppgifter Chansen behandlar, varför,
 hur länge och var de finns. Den ska kunna visas upp om någon frågar, och
@@ -37,6 +38,11 @@ Tjänsten drivs inom EU.
 ett klick i varje utskick. Adressen raderas då.
 
 **Delas med:** ingen utöver Sender.
+
+**Hur utskicken görs:** varje tisdag gör ett skript på GitHub ett
+utkast till nyhetsbrev och lägger upp det i Sender. Skriptet hämtar
+aldrig prenumeranternas adresser, det anger bara vilken grupp utkastet
+ska till. Nathalie skickar sedan utkastet själv.
 
 **Åldersgräns:** minst 13 år för att anmäla sig själv.
 
@@ -76,7 +82,8 @@ synas i annonsen publiceras.
 **Vad som behandlas:** inga personuppgifter.
 
 Svaren på frågorna, sparade jobb och CV lagras i besökarens egen
-webbläsare och skickas aldrig till Chansen.
+webbläsare och skickas aldrig till Chansen. Det gäller också
+referenspersoner som besökaren själv skriver in i sitt CV.
 
 Besöksstatistik samlas in med Cloudflare Web Analytics och GoatCounter.
 Ingen av dem använder cookies, spårar enskilda besökare eller sparar
@@ -111,7 +118,13 @@ Varje godkännande, nekande, ändring och borttagning loggas med tidpunkt
 och vem som gjorde det.
 
 Inga nycklar eller lösenord finns i källkoden, som är öppet publicerad
-på GitHub. De ligger i separata inställningar.
+på GitHub. De ligger i separata inställningar. Nyckeln till Sender ligger
+som en secret på GitHub, och skriptet som använder den får bara läsa
+listan med grupper och skapa utkast.
+
+Mejladresser, telefonnummer och personnummer tas bort ur annonstexterna
+innan de sparas. En spärr stoppar uppladdning av personuppgifter och
+nycklar till GitHub, både från datorn och från nattkörningarna.
 
 Sidan serveras enbart över https.
 

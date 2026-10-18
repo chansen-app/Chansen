@@ -6,7 +6,7 @@ Så här blir flödet när det är klart:
 
 1. Arbetsgivaren fyller i formuläret i appen och trycker skicka
 2. Raden dyker upp i ditt kalkylblad
-3. Du granskar enligt `granska-arbetsgivare.md`
+3. Du granskar annonsen i Chansen Admin, chansen.nu/labb/granska.html
 4. Du skriver **ja** i kolumnen Godkänd
 5. Jobbet syns i appen inom några minuter
 

@@ -1,17 +1,25 @@
 # Labb
 
-Här ligger saker som är under utveckling och **inte** ska publiceras.
+Här ligger saker som är under utveckling.
 
-## Varför den här mappen är säker
+## Vad som syns och inte
 
-GitHub Pages publicerar bara det som ligger i mappen `docs`. Allt som ligger
-här i `labb` finns på din dator och i din git-historik, men syns inte på
-chansen.nu och kan inte nås av besökare.
+GitHub Pages publicerar bara det som ligger i mappen `docs`. Det som ligger
+här i `labb` syns därför inte på chansen.nu.
 
-Lägg alltså aldrig något du vill publicera här, och lägg aldrig något
-halvfärdigt i `docs`.
+Men repot är offentligt på GitHub. Allt här går att läsa där. Lägg därför
+aldrig något här som inte får synas, till exempel namn, kontaktuppgifter
+eller nycklar. Sådant hör hemma i mappen `privat`, som aldrig följer med
+till GitHub.
+
+Skripten här skriver också filer till `docs/labb`, till exempel
+`norge-jobb.js` och `uk-jobb.js`. De syns på chansen.nu, men sidorna är
+dolda för sökmotorer.
 
 ## Vad som ligger här nu
+
+`hamta-norge.js`, `hamta-uk.js` och `hamta-reed.js` hämtar jobb till
+prototyperna för Norge och Storbritannien. De körs varje natt.
 
 `hamta-utbildning.js` — hämtar annonser och sorterar dem efter vilken
 utbildning de kräver. Motsatsen till Chansen: i stället för att sålla bort
