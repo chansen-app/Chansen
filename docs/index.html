@@ -246,7 +246,7 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
     border-radius:18px;padding:14px 16px;font-family:var(--body);font-size:16px;
     line-height:1.5;color:var(--text);-webkit-appearance:none;appearance:none}
   .tyckf::placeholder{color:var(--n-600)}
-  .tyckf:focus{outline:none;border-color:var(--accent);background:var(--n-100)}
+  .tyckf:focus{outline:2px solid var(--accent-700);outline-offset:2px;border-color:var(--accent);background:var(--n-100)}
   textarea.tyckf{min-height:118px;resize:vertical}
 
   #v-tyck .steg{display:none}
@@ -403,7 +403,7 @@ button.lank[onclick*="arbetsgivare"], a.lank[href^="mailto"]{
 .chips.visa-fler button[data-fler]:not(.dold){display:inline-block}
 .chips #f-fler{background:transparent;border-style:dashed;color:var(--accent-800)}
 a{color:var(--accent-700)}
-a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent-700);outline-offset:2px}
 #sprak{display:none}
 .visa-sprak #sprak{display:block}
 </style>
@@ -447,7 +447,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div class="field">
-    <label class="fraga">Var bor du?</label>
+    <label class="fraga" for="ort">Var bor du?</label>
     <input class="txt" id="ort" placeholder="Skriv din kommun" value="" oninput="ortAndrad()">
     <div class="hint">Lämna tomt om du vill se jobb i hela Sverige.</div>
   </div>
@@ -532,21 +532,21 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   </div>
 
   <div class="chips">
-    <button id="f-alla" class="on" onclick="visa('alla')">Alla<i></i></button>
-    <button id="f-hog" onclick="visa('hog')">Bäst chans<i></i></button>
-    <button id="f-nyborjare" onclick="visa('nyborjare')">Ingen erfarenhet<i></i></button>
-    <button id="f-deltid" onclick="visa('deltid')">Deltid<i></i></button>
-    <button id="f-heltid" onclick="visa('heltid')">Heltid<i></i></button>
-    <button id="f-utdrag" data-fler onclick="visa('utdrag')">Nämner inte utdrag<i></i></button>
-    <button id="f-direkt" data-fler onclick="visa('direkt')">Direkt hos arbetsgivaren<i></i></button>
-    <button id="f-sasong" data-fler onclick="visa('sasong')">Sommar och säsong<i></i></button>
-    <button id="f-sprak" data-fler onclick="visa('sprak')">Nämner inte språkkrav<i></i></button>
-    <button id="f-hemifran" data-fler onclick="visa('hemifran')">Hemifrån<i></i></button>
-    <button id="f-utland" data-fler onclick="visa('utland')">Utomlands<i></i></button>
+    <button id="f-alla" class="on" aria-pressed="true" onclick="visa('alla')">Alla<i></i></button>
+    <button id="f-hog" aria-pressed="false" onclick="visa('hog')">Bäst chans<i></i></button>
+    <button id="f-nyborjare" aria-pressed="false" onclick="visa('nyborjare')">Ingen erfarenhet<i></i></button>
+    <button id="f-deltid" aria-pressed="false" onclick="visa('deltid')">Deltid<i></i></button>
+    <button id="f-heltid" aria-pressed="false" onclick="visa('heltid')">Heltid<i></i></button>
+    <button id="f-utdrag" data-fler aria-pressed="false" onclick="visa('utdrag')">Nämner inte utdrag<i></i></button>
+    <button id="f-direkt" data-fler aria-pressed="false" onclick="visa('direkt')">Direkt hos arbetsgivaren<i></i></button>
+    <button id="f-sasong" data-fler aria-pressed="false" onclick="visa('sasong')">Sommar och säsong<i></i></button>
+    <button id="f-sprak" data-fler aria-pressed="false" onclick="visa('sprak')">Nämner inte språkkrav<i></i></button>
+    <button id="f-hemifran" data-fler aria-pressed="false" onclick="visa('hemifran')">Hemifrån<i></i></button>
+    <button id="f-utland" data-fler aria-pressed="false" onclick="visa('utland')">Utomlands<i></i></button>
     <button id="f-fler" type="button" aria-expanded="false" onclick="vaxlaFlerFilter()">Fler filter ▾</button>
   </div>
 
-  <div class="rakning dold" id="rakning"></div>
+  <div class="rakning dold" id="rakning" role="status" aria-live="polite"></div>
   <div id="gammaldata" class="dold"></div>
   <div id="notis"></div>
   <div id="lista"></div>
@@ -595,7 +595,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   <div style="font-size:15px;color:var(--n-700);margin-bottom:20px" id="a-jobb"></div>
 
   <div class="field" style="margin-bottom:16px">
-    <label class="fraga">Ditt namn, till underskriften</label>
+    <label class="fraga" for="namn">Ditt namn, till underskriften</label>
     <input class="txt" id="namn" placeholder="För- och efternamn" value="" oninput="namnAndrat()">
   </div>
 
@@ -680,47 +680,47 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     <div class="cvsteg-nr" id="cv-nr"></div>
 
     <div class="cvsteg dold" data-falt="namn">
-      <h2 class="cvfraga">Vad heter du?</h2>
-      <input class="txt cvf" id="cv-namn" placeholder="För- och efternamn">
+      <h2 class="cvfraga" id="fraga-cv-namn">Vad heter du?</h2>
+      <input class="txt cvf" id="cv-namn" aria-labelledby="fraga-cv-namn" placeholder="För- och efternamn">
     </div>
 
     <div class="cvsteg dold" data-falt="ort">
-      <h2 class="cvfraga">Var bor du?</h2>
-      <input class="txt cvf" id="cv-ort" placeholder="Malmö">
+      <h2 class="cvfraga" id="fraga-cv-ort">Var bor du?</h2>
+      <input class="txt cvf" id="cv-ort" aria-labelledby="fraga-cv-ort" placeholder="Malmö">
       <div class="hint">Bara orten. Skriv aldrig din fullständiga adress i ett CV.</div>
     </div>
 
     <div class="cvsteg dold" data-falt="tel">
-      <h2 class="cvfraga">Ditt telefonnummer</h2>
-      <input class="txt cvf" id="cv-tel" placeholder="07...">
+      <h2 class="cvfraga" id="fraga-cv-tel">Ditt telefonnummer</h2>
+      <input class="txt cvf" id="cv-tel" aria-labelledby="fraga-cv-tel" placeholder="07...">
       <div class="hint">Det här är hur de når dig. Dubbelkolla siffrorna.</div>
     </div>
 
     <div class="cvsteg dold" data-falt="mejl">
-      <h2 class="cvfraga">Din mejladress</h2>
-      <input class="txt cvf" id="cv-mejl" placeholder="fornamn.efternamn@...">
+      <h2 class="cvfraga" id="fraga-cv-mejl">Din mejladress</h2>
+      <input class="txt cvf" id="cv-mejl" aria-labelledby="fraga-cv-mejl" placeholder="fornamn.efternamn@...">
       <div class="hint">Har du en med smeknamn i, skaffa en med ditt namn. Det tar två minuter.</div>
     </div>
 
     <div class="cvsteg dold" data-falt="om">
-      <h2 class="cvfraga">Kort om dig</h2>
+      <h2 class="cvfraga" id="fraga-cv-om">Kort om dig</h2>
       <div class="hint" style="margin-top:0;margin-bottom:12px">Tryck på det som stämmer, ändra sen texten till ditt eget.</div>
       <div class="chips" id="cv-omforslag" style="margin-bottom:14px"></div>
-      <textarea class="cvf" id="cv-om" placeholder="Tre rader om vem du är och vad du söker"></textarea>
+      <textarea class="cvf" id="cv-om" aria-labelledby="fraga-cv-om" placeholder="Tre rader om vem du är och vad du söker"></textarea>
     </div>
 
     <div class="cvsteg dold" data-falt="skola">
-      <h2 class="cvfraga">Vad har du för utbildning?</h2>
+      <h2 class="cvfraga" id="fraga-cv-skola">Vad har du för utbildning?</h2>
       <div class="hint" style="margin-bottom:12px">Gymnasium, yrkesutbildning, folkhögskola, högskola eller universitet. Skriv det du senast gick klart, eller det du går nu.</div>
-      <input class="txt cvf" id="cv-skola" placeholder="Skola och inriktning, eller examen">
-      <input class="txt cvf" id="cv-skolaar" placeholder="År, till exempel 2019 till 2022" style="margin-top:12px">
+      <input class="txt cvf" id="cv-skola" aria-labelledby="fraga-cv-skola" placeholder="Skola och inriktning, eller examen">
+      <input class="txt cvf" id="cv-skolaar" aria-label="Vilka år du gick utbildningen" placeholder="År, till exempel 2019 till 2022" style="margin-top:12px">
     </div>
 
     <div class="cvsteg dold" data-falt="erf">
-      <h2 class="cvfraga">Vad har du jobbat med, eller gjort?</h2>
+      <h2 class="cvfraga" id="fraga-cv-erf">Vad har du jobbat med, eller gjort?</h2>
       <div class="hint" style="margin-top:0;margin-bottom:12px">Har du aldrig jobbat har du ändå erfarenhet. Tryck på allt som stämmer, raderna skrivs färdiga åt dig.</div>
       <div class="chips" id="cv-erfforslag" style="margin-bottom:14px"></div>
-      <textarea class="cvf" id="cv-erf" placeholder="En rad per sak du gjort" style="min-height:170px"></textarea>
+      <textarea class="cvf" id="cv-erf" aria-labelledby="fraga-cv-erf" placeholder="En rad per sak du gjort" style="min-height:170px"></textarea>
     </div>
 
     <div class="cvsteg dold" data-falt="foto">
@@ -732,14 +732,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     </div>
 
     <div class="cvsteg dold" data-falt="sprak">
-      <h2 class="cvfraga">Vilka språk kan du?</h2>
-      <input class="txt cvf" id="cv-sprak" placeholder="Svenska, engelska, ...">
+      <h2 class="cvfraga" id="fraga-cv-sprak">Vilka språk kan du?</h2>
+      <input class="txt cvf" id="cv-sprak" aria-labelledby="fraga-cv-sprak" placeholder="Svenska, engelska, ...">
       <div class="hint">Skriv inte flytande om du inte är flytande. Det märks direkt.</div>
     </div>
 
     <div class="cvsteg dold" data-falt="ovrigt">
-      <h2 class="cvfraga">Något mer värt att nämna?</h2>
-      <input class="txt cvf" id="cv-ovrigt" placeholder="Körkort, program du kan, certifikat">
+      <h2 class="cvfraga" id="fraga-cv-ovrigt">Något mer värt att nämna?</h2>
+      <input class="txt cvf" id="cv-ovrigt" aria-labelledby="fraga-cv-ovrigt" placeholder="Körkort, program du kan, certifikat">
       <div class="hint">Hoppa över om du inte har något. Det är helt normalt.</div>
     </div>
 
@@ -753,7 +753,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
     <div id="cv-klar" class="dold">
       <h2 class="cvfraga" style="margin-bottom:6px">Ditt CV är klart</h2>
-      <div class="rakning" id="cv-status"></div>
+      <div class="rakning" id="cv-status" role="status" aria-live="polite"></div>
       <div class="hint" style="margin:0 0 10px">Välj utseende</div>
       <div class="chips" id="cv-mallval" style="margin-bottom:18px"></div>
       <div id="cv-forhandsvisning"></div>
@@ -1019,30 +1019,30 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
     <div id="ag-formular">
     <div class="field">
-      <label class="fraga">Företagets namn</label>
+      <label class="fraga" for="ag-foretag">Företagets namn</label>
       <input class="txt agf" id="ag-foretag" placeholder="Företaget AB">
     </div>
 
     <div class="field">
-      <label class="fraga">Organisationsnummer</label>
+      <label class="fraga" for="ag-orgnr">Organisationsnummer</label>
       <input class="txt agf" id="ag-orgnr" placeholder="999999-0006" inputmode="numeric">
       <div class="hint" id="ag-orgnr-svar"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Vad heter jobbet?</label>
+      <label class="fraga" for="ag-titel">Vad heter jobbet?</label>
       <input class="txt agf" id="ag-titel" placeholder="Butiksbiträde, helger">
     </div>
 
     <div class="field">
-      <label class="fraga">Vad ska man göra? Tre rader räcker</label>
+      <label class="fraga" for="ag-beskrivning">Vad ska man göra? Tre rader räcker</label>
       <textarea class="cvf agf" id="ag-beskrivning" placeholder="Kassa, påfyllning av varor och kundfrågor. Vi lär upp på plats."></textarea>
       <div class="hint">Skriv vad jobbet innebär och vad som faktiskt krävs för att klara det. Var hellre för tydlig än för vag, den som söker ska veta vad hen tackar ja till.</div>
       <div class="hint" id="ag-beskrivning-svar"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Ort</label>
+      <label class="fraga" for="ag-ort">Ort</label>
       <input class="txt agf" id="ag-ort" placeholder="Kommun">
     </div>
 
@@ -1053,7 +1053,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     </div>
 
     <div class="field">
-      <label class="fraga" for="ag-timmar">Ungefär hur många timmar?</label>
+      <label class="fraga" for="ag-timmar" for="ag-timmar">Ungefär hur många timmar?</label>
       <input class="cvf agf" id="ag-timmar" placeholder="Till exempel 10 timmar i veckan, eller 20 timmar totalt">
       <div class="hint">Skriv om det gäller per vecka eller totalt för hela uppdraget. Är det ett engångsjobb är det viktigt att det framgår.</div>
     </div>
@@ -1073,7 +1073,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
       <label class="fraga">Kategori</label>
       <div class="seg" id="ag-kategori"></div>
       <div id="ag-annat-ruta" class="dold" style="margin-top:12px">
-        <input class="txt agf" id="ag-annat" placeholder="Skriv vilken bransch det är">
+        <input class="txt agf" id="ag-annat" aria-label="Vilken bransch" placeholder="Skriv vilken bransch det är">
       </div>
     </div>
 
@@ -1081,7 +1081,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
       <label class="fraga">Lön</label>
       <div class="seg" id="ag-lonform"></div>
       <div id="ag-belopp-ruta" class="dold" style="margin-top:12px">
-        <input class="txt agf" id="ag-belopp" placeholder="Belopp i kronor, t.ex. 145" inputmode="numeric">
+        <input class="txt agf" id="ag-belopp" aria-label="Lön i kronor" placeholder="Belopp i kronor, t.ex. 145" inputmode="numeric">
       </div>
       <div class="hint" id="ag-lon-svar">Obligatoriskt. Vi publicerar inte jobb utan lön, och inte provision utan grundlön.</div>
     </div>
@@ -1112,34 +1112,34 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     </div>
 
     <div class="field">
-      <label class="fraga">Länk dit man ansöker</label>
+      <label class="fraga" for="ag-lank">Länk dit man ansöker</label>
       <input class="txt agf" id="ag-lank" placeholder="https://foretaget.se/jobb">
       <div class="hint" id="ag-lank-svar"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Sista ansökningsdag</label>
+      <label class="fraga" for="ag-sista">Sista ansökningsdag</label>
       <input class="txt agf" id="ag-sista" placeholder="2026-09-30" inputmode="numeric">
     </div>
 
     <div class="field">
-      <label class="fraga">Kontakt för den som söker</label>
+      <label class="fraga" for="ag-publik">Kontakt för den som söker</label>
       <input class="txt agf" id="ag-publik" placeholder="Anna Andersson, 040-123456">
       <div class="hint">Visas i annonsen så att den som söker kan höra av sig. Skriv bara uppgifter du vill ha offentliga, gärna en arbetsplats-telefon eller en funktionsmejl.</div>
     </div>
 
     <div class="field">
-      <label class="fraga">Din mejladress</label>
+      <label class="fraga" for="ag-mejl">Din mejladress</label>
       <input class="txt agf" id="ag-mejl" placeholder="namn@foretaget.se" inputmode="email">
       <div class="hint" id="ag-mejl-svar">Använder vi bara för att kontakta dig. Visas inte i appen.</div>
     </div>
 
     <div class="field">
-      <label class="fraga">Ditt namn och telefonnummer</label>
+      <label class="fraga" for="ag-kontakt">Ditt namn och telefonnummer</label>
       <input class="txt agf" id="ag-kontakt" placeholder="Namn, 07...">
     </div>
 
-    <div id="ag-status" class="rakning"></div>
+    <div id="ag-status" role="status" aria-live="polite" class="rakning"></div>
     <button class="btn block" id="ag-skicka" onclick="agSkicka()">Skicka annonsen</button>
     <div class="hint" style="text-align:center">Annonsen skickas direkt till oss. Vi hör av oss på mejladressen du angett.</div>
 
@@ -1183,35 +1183,35 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
     </div>
 
     <div class="steg" data-falt="letade">
-      <h2 class="cvfraga">Vad letade du efter?</h2>
-      <input class="txt tyckf" id="tyck-letade" placeholder="Till exempel lager, kvällar, Göteborg">
+      <h2 class="cvfraga" id="fraga-tyck-letade">Vad letade du efter?</h2>
+      <input class="txt tyckf" id="tyck-letade" aria-labelledby="fraga-tyck-letade" placeholder="Till exempel lager, kvällar, Göteborg">
       <div class="hint">Hjälper mig se vad folk söker som Chansen kanske inte visar.</div>
     </div>
 
     <div class="steg" data-falt="saknar">
-      <h2 class="cvfraga">Saknar du något?</h2>
-      <textarea class="tyckf" id="tyck-saknar" placeholder="En funktion, ett filter, något som borde finnas"></textarea>
+      <h2 class="cvfraga" id="fraga-tyck-saknar">Saknar du något?</h2>
+      <textarea class="tyckf" id="tyck-saknar" aria-labelledby="fraga-tyck-saknar" placeholder="En funktion, ett filter, något som borde finnas"></textarea>
     </div>
 
     <div class="steg" data-falt="kranglig">
-      <h2 class="cvfraga">Var det något som kändes krångligt?</h2>
-      <textarea class="tyckf" id="tyck-kranglig" placeholder="Något som var svårt att förstå eller hitta"></textarea>
+      <h2 class="cvfraga" id="fraga-tyck-kranglig">Var det något som kändes krångligt?</h2>
+      <textarea class="tyckf" id="tyck-kranglig" aria-labelledby="fraga-tyck-kranglig" placeholder="Något som var svårt att förstå eller hitta"></textarea>
       <div class="hint">Det här ser jag aldrig i statistiken, bara om någon säger det.</div>
     </div>
 
     <div class="steg" data-falt="battre">
-      <h2 class="cvfraga">Vad kan bli bättre?</h2>
-      <textarea class="tyckf" id="tyck-battre" placeholder="Vad som helst"></textarea>
+      <h2 class="cvfraga" id="fraga-tyck-battre">Vad kan bli bättre?</h2>
+      <textarea class="tyckf" id="tyck-battre" aria-labelledby="fraga-tyck-battre" placeholder="Vad som helst"></textarea>
     </div>
 
     <div class="steg" data-falt="mejl">
-      <h2 class="cvfraga">Vill du ha svar?</h2>
-      <input class="txt tyckf" id="tyck-mejl" placeholder="Din mejladress, frivilligt" inputmode="email">
+      <h2 class="cvfraga" id="fraga-tyck-mejl">Vill du ha svar?</h2>
+      <input class="txt tyckf" id="tyck-mejl" aria-labelledby="fraga-tyck-mejl" placeholder="Din mejladress, frivilligt" inputmode="email">
       <div class="hint">Lämnar du den sparas den bara för att kunna svara dig, och raderas sedan. Lämnar du den tom vet jag inte vem du är.</div>
     </div>
   </div>
 
-  <div id="tyck-status" class="rakning"></div>
+  <div id="tyck-status" role="status" aria-live="polite" class="rakning"></div>
   <button class="btn block" id="tyck-nasta" onclick="tyckNasta()">Nästa</button>
   <button class="lank" onclick="tyckHoppa()" id="tyck-hoppa"
           style="display:block;margin:12px auto 0">Hoppa över</button>
@@ -3907,6 +3907,7 @@ function visa(filter){
   for (var i = 0; i < ids.length; i++){
     var k = document.getElementById("f-" + ids[i]);
     if (k && k.className !== "dold") k.className = (ids[i] === filter) ? "on" : "";
+    if (k) k.setAttribute("aria-pressed", ids[i] === filter ? "true" : "false");
   }
   // Avbryt en väntande ritning först. Utan det staplas korten på
   // varandra om man trycker snabbt på flera filter.
