@@ -20,6 +20,16 @@ const SVARSADRESS = "nyhetsbrev@chansen.nu";
 
 const nyckel = process.env.SENDER_API_TOKEN;
 
+// De enda anrop skriptet får göra: läsa listan med grupper och skapa ett
+// utkast. Allt annat stoppas, till exempel att hämta prenumeranter eller
+// att skicka ett mejl.
+const TILLATNA_ANROP = [
+  { metod: "GET", sokvag: /^\/groups\?page=\d+$/ },
+  { metod: "POST", sokvag: /^\/campaigns$/ }
+];
+
+const MINST_JOBB = 5;
+
 function svenskDatum(d) {
   const t = new Date(d);
   const m = ["januari","februari","mars","april","maj","juni",
@@ -28,6 +38,10 @@ function svenskDatum(d) {
 }
 
 async function anrop(metod, sokvag, kropp) {
+  const tillatet = TILLATNA_ANROP.some(function (a) {
+    return a.metod === metod && a.sokvag.test(sokvag);
+  });
+  if (!tillatet) throw new Error("Stoppat: skriptet får inte göra " + metod + " " + sokvag.split("?")[0] + ".");
   const svar = await fetch(API + sokvag, {
     method: metod,
     headers: {
@@ -44,6 +58,17 @@ async function anrop(metod, sokvag, kropp) {
     throw new Error("Sender svarade med felkod " + svar.status + " på " + sokvag + ".");
   }
   return text ? JSON.parse(text) : {};
+}
+
+/* Kollar att mejlet ser rimligt ut. Returnerar vad som är fel, eller null. */
+function kontrollera(html) {
+  const jobb = (html.match(/>Se jobbet</g) || []).length;
+  if (jobb < MINST_JOBB) return "bara " + jobb + " jobb, minst " + MINST_JOBB + " behövs.";
+  const lankar = html.match(/href="[^"]*"/g) || [];
+  const fel = lankar.filter(function (l) { return !/^href="https:\/\/chansen\.nu(\/[^"]*)?"$/.test(l); });
+  if (fel.length) return fel.length + " länkar går inte till chansen.nu.";
+  if (/@/.test(html.replace(/<[^>]*>/g, ""))) return "mejlet innehåller en mejladress.";
+  return null;
 }
 
 async function hittaGrupp() {
@@ -68,6 +93,11 @@ async function main() {
   }
 
   const html = fs.readFileSync("nyhetsbrev.html", "utf8");
+  const fel = kontrollera(html);
+  if (fel) {
+    console.log("Inget utkast lades upp: " + fel);
+    process.exit(1);
+  }
   const grupp = await hittaGrupp();
   if (!grupp) {
     console.log("Hittar ingen grupp som heter " + GRUPP + " i Sender.");
