@@ -1,8 +1,8 @@
 /*  Kolla personuppgifter
  *
- *  Letar efter mejladresser, telefonnummer, personnummer och namn på
- *  privatpersoner. Hittar den något avslutas den med fel, så att det
- *  inte kan sparas eller läggas upp.
+ *  Letar efter mejladresser, telefonnummer, personnummer, namn på
+ *  privatpersoner och nycklar eller lösenord. Hittar den något avslutas
+ *  den med fel, så att det inte kan sparas eller läggas upp.
  *
  *  Kör med:
  *    node .\kolla-personuppgifter.js              alla filer i repot
@@ -89,6 +89,19 @@ function stagadeFiler() {
     });
 }
 
+// Nycklar och lösenord, till exempel till Sender, GitHub eller Adzuna.
+// De ska bara ligga som secrets på GitHub, aldrig i en fil.
+const NYCKLAR = [
+  /eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]{10,}/,
+  /\b(ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]{20,}/,
+  /\bBearer\s+[A-Za-z0-9._~+\/-]{20,}/,
+  /\b(api[_-]?key|api[_-]?token|access[_-]?token|token|secret|password|passwd|lösenord|losenord|app[_-]?key)\b["']?\s*[:=]\s*["'][^"'\s]{12,}["']/i
+];
+
+// Koder som är offentliga med flit. Cloudflares statistikkod laddas ner
+// av alla besökare och ger inte tillgång till något.
+const NYCKEL_UNDANTAG = [/data-cf-beacon=/];
+
 function kolla(fil, text) {
   const ut = [];
   const norm = fil.replace(/\\/g, "/");
@@ -101,6 +114,10 @@ function kolla(fil, text) {
     namnMonster.forEach(function (n) {
       if (n.re.test(rad)) ut.push({ fil: norm, rad: i + 1, typ: "namn från listan" });
     });
+    if (NYCKLAR.some(function (re) { return re.test(rad); })
+        && !NYCKEL_UNDANTAG.some(function (re) { return re.test(rad); })) {
+      ut.push({ fil: norm, rad: i + 1, typ: "nyckel eller lösenord" });
+    }
   });
   return ut;
 }
