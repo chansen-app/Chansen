@@ -86,7 +86,7 @@ function inlagg(ort, jobb) {
   }
   rader.push("");
   rader.push("Chansen går igenom hela Platsbanken varje natt och visar bara jobben");
-  rader.push("där kraven faktiskt är låga. Gratis, inget konto, ingen reklam.");
+  rader.push("där kraven faktiskt är låga. Helt gratis att använda.");
   rader.push("");
   rader.push("chansen.nu");
   rader.push("");
