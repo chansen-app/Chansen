@@ -40,6 +40,14 @@ jobs:
           ADZUNA_KEY: ${{ secrets.ADZUNA_KEY }}
         run: node labb/hamta-uk.js
 
+      # Stoppar körningen innan något laddas upp, om en annons ändå
+      # innehåller mejl, telefonnummer, personnummer eller ett namn från
+      # listan. Då kommer ett mejl från GitHub om att körningen misslyckades.
+      - name: Kolla personuppgifter
+        env:
+          PERSONNAMN: ${{ secrets.PERSONNAMN }}
+        run: node kolla-personuppgifter.js labb/ukjobb.js labb/ukjobb.json docs/labb/uk-jobb.js
+
       - name: Spara resultatet
         run: |
           git config user.name "github-actions"

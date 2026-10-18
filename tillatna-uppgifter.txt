@@ -1,0 +1,29 @@
+# Tillåtna uppgifter
+#
+# Mejladresser och telefonnummer som får stå i repot. Allt annat som ser
+# ut som en personuppgift stoppas av kolla-personuppgifter.js.
+#
+# Lägg bara till sådant som är meningen att det ska synas, till exempel
+# ett företags egen adress för ansökningar. Aldrig en privatpersons.
+# En uppgift per rad.
+
+# Chansens egna adresser
+chansen.jobb@gmail.com
+nyhetsbrev@chansen.nu
+
+# GitHubs egna adresser för nattkörningarna
+github-actions@github.com
+actions@github.com
+
+# Myndigheter och tjänster
+nav.team.arbeidsplassen@nav.no
+
+# Påhittade exempel i formulär och CV-byggaren
+namn@foretaget.se
+alex.bennett@gmail.com
+040-123456
+07700 900123
+020 7946 0000
+
+# Företag som annonserar via Chansen, deras egna adresser för ansökningar
+hudiksvallshundcenter@hotmail.com

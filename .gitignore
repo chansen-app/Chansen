@@ -3,3 +3,6 @@ node_modules/
 .env.local
 HANDBOK.md
 *.bundle
+
+# Anteckningar med namn och kontakter. Följer aldrig med till GitHub.
+privat/

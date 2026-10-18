@@ -20,6 +20,7 @@
  */
 
 const fs = require("fs");
+const { tvatta } = require("../personuppgifter");
 
 const SOK = "https://www.reed.co.uk/api/1.0/search";
 const DETALJ = "https://www.reed.co.uk/api/1.0/jobs/";
@@ -268,7 +269,7 @@ async function kor(){
       anstallningsform: r.contractType === "permanent" ? "Permanent"
                       : r.contractType === "temp" ? "Temporary" : "",
       kategori: kategori(titel, text),
-      beskrivning: text.slice(0, 400),
+      beskrivning: tvatta(text).slice(0, 400),
       lank: d.jobUrl || r.jobUrl || "",
       lon: lon.text,
       lonform: "",

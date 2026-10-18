@@ -11,3 +11,4 @@ Läs HANDBOK.md och README.md innan du börjar. Där står hur projektet fungera
 5. Det får aldrig stå "inget konto", "ingen inloggning", "anonymt" eller "ingen reklam".
 6. Chansen drivs av mig som privatperson, inte av Arbetsförmedlingen.
 7. Ändra inget utan att först förklara vad du tänker göra och få mitt ja.
+8. Skriv aldrig namn på privatpersoner, mejladresser, telefonnummer eller personnummer i någon fil i repot. Sådant hör hemma i mappen privat, som aldrig följer med till GitHub. Kör node kolla-personuppgifter.js innan varje commit.

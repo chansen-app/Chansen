@@ -1,0 +1,38 @@
+name: Kolla personuppgifter
+
+# Körs varje gång något laddas upp och går igenom alla filer i repot.
+# Hittar den mejl, telefonnummer, personnummer eller ett namn från listan
+# misslyckas körningen, och GitHub mejlar dig.
+#
+# Namnen ligger i en secret som heter PERSONNAMN, under Settings,
+# Secrets and variables, Actions. Ett namn per rad.
+#
+# Själva uppgiften skrivs aldrig ut i loggen, bara fil och rad.
+#
+# OBS: filen måste sparas utan BOM.
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kolla:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Hämta repot
+        uses: actions/checkout@v4
+
+      - name: Installera Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Kolla personuppgifter
+        env:
+          PERSONNAMN: ${{ secrets.PERSONNAMN }}
+        run: node kolla-personuppgifter.js

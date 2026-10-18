@@ -27,6 +27,7 @@
  */
 
 const fs = require("fs");
+const { tvatta } = require("../personuppgifter");
 
 const BAS = "https://api.adzuna.com/v1/api/jobs/gb/search";
 const PER_SIDA = 50;          // Adzunas tak
@@ -344,7 +345,7 @@ async function kor(){
       anstallningsform: r.contract_type === "permanent" ? "Permanent"
                       : r.contract_type === "contract" ? "Contract" : "",
       kategori: kategori((r.category || {}).label, titel, text),
-      beskrivning: text.slice(0, 400),
+      beskrivning: tvatta(text).slice(0, 400),
       lank: r.redirect_url || "",
       lon: (r.salary_min && !r.salary_is_predicted)
         ? Math.round(r.salary_min) + (r.salary_max && r.salary_max !== r.salary_min

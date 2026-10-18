@@ -10,6 +10,7 @@
  */
 
 const fs = require("fs");
+const { tvatta } = require("./personuppgifter");
 
 // ── sökningar: yrkesområden med låga ingångskrav ──────────────────────
 const SOKNINGAR = [
@@ -433,11 +434,9 @@ function poang(a) {
 function kortBeskrivning(a) {
   var t = (a.description ? a.description.text : "") || "";
   t = t.replace(/\s+/g, " ").trim();
-  // Mejladresser och telefonnummer publiceras aldrig. Den som vill söka
-  // hittar dem i annonsen på Platsbanken.
-  t = t.replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, "(se annonsen)")
-       .replace(/(?<![\w+])(\+46|0)[\s-]?\d{1,3}[\s-]?\d{2,3}[\s-]?\d{2}[\s-]?\d{2,3}(?!\d)/g, "(se annonsen)")
-       .replace(/\(se annonsen\)(\s*(och|eller|,)?\s*\(se annonsen\))+/g, "(se annonsen)");
+  // Mejladresser, telefonnummer och personnummer publiceras aldrig. Den
+  // som vill söka hittar kontaktuppgifterna i annonsen på Platsbanken.
+  t = tvatta(t);
   if (!t) return "";
   // hoppa över inledande företagspresentationer om texten är lång
   if (t.length > 700) {

@@ -31,6 +31,14 @@ jobs:
       - name: Kör hämtningen
         run: node labb/hamta-utbildning.js
 
+      # Stoppar körningen innan något laddas upp, om en annons ändå
+      # innehåller mejl, telefonnummer, personnummer eller ett namn från
+      # listan. Då kommer ett mejl från GitHub om att körningen misslyckades.
+      - name: Kolla personuppgifter
+        env:
+          PERSONNAMN: ${{ secrets.PERSONNAMN }}
+        run: node kolla-personuppgifter.js labb/utbildningsjobb.js labb/utbildningsjobb.json
+
       - name: Spara resultatet
         run: |
           git config user.name "github-actions"
