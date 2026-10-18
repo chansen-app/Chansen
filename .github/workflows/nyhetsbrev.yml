@@ -53,11 +53,11 @@ jobs:
 
       - name: Hämta repot
         if: steps.tid.outputs.kor == 'ja'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Installera Node
         if: steps.tid.outputs.kor == 'ja'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "24"
 
