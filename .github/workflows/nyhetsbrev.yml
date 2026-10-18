@@ -1,0 +1,79 @@
+name: Nyhetsbrev
+
+# Gör veckans nyhetsbrev och lägger upp det i Sender som ett utkast till
+# gruppen Jobbtips. Ingenting skickas till prenumeranterna förrän du själv
+# trycker på skicka i Sender.
+#
+# Ska komma varje tisdag klockan 15 svensk tid, både sommar och vinter.
+# GitHub räknar i UTC och flyttar inte klockan, därför finns två tider:
+# 13:00 UTC är 15 på sommaren och 14:00 UTC är 15 på vintern. Körningen
+# kollar vilken som gäller just nu och avslutas direkt om det är fel tid.
+#
+# Du kan också starta den för hand under fliken Actions, knappen heter
+# "Run workflow". Då kommer utkastet direkt, oavsett tid.
+#
+# Nyckeln till Sender ligger i en secret som heter SENDER_API_TOKEN.
+#
+# OBS: filen måste sparas utan BOM.
+
+on:
+  schedule:
+    - cron: "0 13 * * 2"    # 15:00 svensk sommartid
+    - cron: "0 14 * * 2"    # 15:00 svensk vintertid
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nyhetsbrev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Rätt tid?
+        id: tid
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "kor=ja" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # +0200 är sommartid, +0100 är vintertid.
+          if [ "$(TZ=Europe/Stockholm date +%z)" = "+0200" ]; then
+            ratt="0 13 * * 2"
+          else
+            ratt="0 14 * * 2"
+          fi
+          if [ "${{ github.event.schedule }}" = "$ratt" ]; then
+            echo "kor=ja" >> "$GITHUB_OUTPUT"
+          else
+            echo "Fel tid för den här årstiden, gör ingenting."
+            echo "kor=nej" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Hämta repot
+        if: steps.tid.outputs.kor == 'ja'
+        uses: actions/checkout@v4
+
+      - name: Installera Node
+        if: steps.tid.outputs.kor == 'ja'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Gör nyhetsbrevet
+        if: steps.tid.outputs.kor == 'ja'
+        run: node nyhetsbrev.js
+
+      - name: Kolla personuppgifter
+        if: steps.tid.outputs.kor == 'ja'
+        env:
+          PERSONNAMN: ${{ secrets.PERSONNAMN }}
+        run: |
+          if [ -f nyhetsbrev.html ]; then node kolla-personuppgifter.js nyhetsbrev.html; fi
+
+      - name: Lägg upp utkastet i Sender
+        if: steps.tid.outputs.kor == 'ja'
+        env:
+          SENDER_API_TOKEN: ${{ secrets.SENDER_API_TOKEN }}
+        run: node skicka-nyhetsbrev.js
