@@ -37,6 +37,9 @@ jobs:
       - name: Kör hämtningen
         run: node hamta.js
 
+      - name: Skriv dagens inlägg
+        run: node dagens-inlagg.js
+
       - name: Spara resultatet
         run: |
           git config user.name "github-actions"
@@ -45,7 +48,7 @@ jobs:
           # sparas här, annars slängs de när körningen är klar.
           # -A tar med sidor som tagits bort, till exempel en ort som
           # inte längre har tillräckligt många jobb.
-          git add -A docs/jobb.json docs/jobb.js docs/jobb docs/sitemap.xml
+          git add -A docs/jobb.json docs/jobb.js docs/jobb docs/sitemap.xml dagens-inlagg.txt
           if git diff --staged --quiet; then
             echo "Inget nytt att spara."
             exit 0
