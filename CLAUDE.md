@@ -1,6 +1,6 @@
 # Regler för Claude i Chansen
 
-Läs HANDBOK.md och README.md innan du börjar. Där står hur projektet fungerar och vilka regler som gäller för sidan.
+Läs README.md innan du börjar. Handboken finns inte i repot, den har jag sparad själv. Fråga mig om du behöver något därifrån.
 
 ## Mina regler
 

@@ -90,7 +90,7 @@
     { "@type": "Question", "name": "Hur skriver man ett CV när man aldrig jobbat?",
       "acceptedAnswer": { "@type": "Answer", "text": "Räkna med sådant som inte är lönearbete: praktik, föreningsuppdrag, barnvakt, ideellt arbete och skolprojekt. Chansen har en CV-byggare med tre mallar som hjälper dig steg för steg." } },
     { "@type": "Question", "name": "Kostar Chansen något?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Nej. Sidan är gratis att använda och sparar ingenting om dig. Den drivs av en privatperson och bygger på Arbetsförmedlingens öppna data. Arbetsförmedlingen står inte bakom sidan." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Nej. Sidan är gratis att använda. Det du fyller i sparas bara i din egen telefon. Den drivs av en privatperson och bygger på Arbetsförmedlingens öppna data. Arbetsförmedlingen står inte bakom sidan." } },
     { "@type": "Question", "name": "Var kommer jobben ifrån?",
       "acceptedAnswer": { "@type": "Answer", "text": "Från Arbetsförmedlingens öppna data, alltså samma annonser som finns i Platsbanken. Skillnaden ar att Chansen går igenom alla och bara visar de med laga ingangskrav. Annonserna hämtas varje natt." } }
   ]
@@ -331,6 +331,7 @@ nav button{font-size:12px;padding:0 4px}
   #cv-utskrift .cvm-modern{padding:0}
   @page{margin:16mm}
 }
+.statusknappar{display:contents}
 .cv-varning{margin-top:12px;padding:12px 14px;border-radius:12px;background:#f7e3c0;color:#6e4408;font-size:15px;line-height:1.45}
 .cv-varning p{margin:0}
 .cv-varning p+p{margin-top:6px}
@@ -388,6 +389,15 @@ button.lank[onclick*="arbetsgivare"], a.lank[href^="mailto"]{
 .knapprad{margin-top:10px;gap:8px}
 .knapprad .mini{min-height:34px;padding:6px 12px;font-size:12.5px}
 .taggar.extra .tag{font-size:12px;padding:3px 9px}
+/* På mobilen trycker man med tummen. Knapparna blir därför minst 44
+   punkter höga, som rekommendationen säger. Små textlänkar får en
+   större osynlig yta runt sig, så de syns likadant men är lättare att
+   träffa. */
+@media (max-width:600px){
+  .mini, .knapprad .mini, .chips button{min-height:44px}
+  .knapprad .mini{padding:8px 14px;font-size:13.5px}
+  .lank{display:inline-block;padding:12px 4px;margin:-12px -4px}
+}
 
 /* ── Stora talet överst i jobblistan ── */
 #hero{
@@ -1347,7 +1357,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   <h2>Personuppgifter</h2>
   <p>Chansen drivs av en privatperson, som är personuppgiftsansvarig för de uppgifter som beskrivs här.</p>
 
-  <p><b>Du som söker jobb.</b> Dina svar på frågorna, dina sparade jobb och ditt CV lagras i din egen webbläsare och skickas aldrig till oss. Vi kan inte se dem. Rensar du webbläsarens data försvinner de. Vi har inga konton och samlar inte in uppgifter om dig, om du inte själv väljer att anmäla dig till mejllistan.</p>
+  <p><b>Du som söker jobb.</b> Dina svar på frågorna, dina sparade jobb och ditt CV lagras i din egen webbläsare och skickas aldrig till oss. Vi kan inte se dem. Rensar du webbläsarens data försvinner de. Chansen har i dagsläget inga konton. Vi samlar inte in uppgifter om dig, om du inte själv väljer att anmäla dig till mejllistan.</p>
 
   <p><b>Mejllistan.</b> Anmäler du dig sparar vi bara din mejladress. Den ligger hos tjänsten Sender, som sköter utskicken åt oss, och används bara för att skicka dig mejl om nya jobb på Chansen. Den rättsliga grunden är ditt samtycke. Du måste vara minst 13 år för att anmäla dig själv.</p>
   <p>Sender registrerar också tekniska uppgifter vid anmälan, som tidpunkt och IP-adress, för att kunna visa att du själv har anmält dig. Du bekräftar anmälan via ett mejl, och varje utskick har en länk där du avslutar med ett klick. Vill du att din adress raderas helt, mejla oss. Vi delar aldrig adressen med någon annan.</p>
@@ -1815,7 +1825,12 @@ function settStatus(lank, lage){
   }
   sparaStatus();
   ritaMina();
-  visa(aktivtFilter);
+  // Byt bara knapparna på kortet. Att rita om hela listan gjorde att
+  // sidan hoppade upp och man tappade platsen.
+  var rutor = document.querySelectorAll(".statusknappar");
+  for (var i = 0; i < rutor.length; i++){
+    if (rutor[i].getAttribute("data-lank") === lank) rutor[i].innerHTML = statusknapparInre(lank);
+  }
 }
 
 function dagarSedan(iso){
@@ -1904,12 +1919,18 @@ function kort(j){
     '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow" data-annons="'+fly(annonsId)+'" data-namn="'+annonsNamn+'" onclick="klickAnnons(this)">'+knapptext+'</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
     '<div class="knapprad">'+
-      '<button class="mini" onclick="oppnaAnsokan(\''+encodeURI(lank)+'\')">Skriv ansökan</button>'+
-      '<button class="mini" onclick="delaJobb(\''+encodeURI(lank)+'\')">Dela</button>'+
+      // j.lank och inte lank, eftersom lank kan vara en mejladress för
+      // jobb där man söker via mejl. Jobbet letas upp med j.lank.
+      '<button class="mini" onclick="oppnaAnsokan(\''+encodeURI(j.lank)+'\')">Skriv ansökan</button>'+
+      '<button class="mini" onclick="delaJobb(\''+encodeURI(j.lank)+'\')">Dela</button>'+
       statusknappar(j.lank) +'</div></div>';
 }
 
 function statusknappar(lank){
+  return '<span class="statusknappar" data-lank="' + fly(lank) + '">' + statusknapparInre(lank) + '</span>';
+}
+
+function statusknapparInre(lank){
   var nu = minaJobb[lank] ? minaJobb[lank].lage : null;
   var ut = "";
   ut += '<button class="mini'+(nu === "sparad" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sparad" ? "bort" : "sparad")+'\')">'+(nu === "sparad" ? "Sparad" : "Spara")+'</button>';
@@ -3702,7 +3723,7 @@ function oppnaAnsokan(lank){
   } catch (fel) {
     var l = document.getElementById("lista");
     if (l) l.innerHTML = '<div class="tomt">Något gick fel när ansökan skulle öppnas.<br><br>' +
-      String(fel && fel.message ? fel.message : fel) + '</div>' + l.innerHTML;
+      fly(String(fel && fel.message ? fel.message : fel)) + '</div>' + l.innerHTML;
   }
 }
 

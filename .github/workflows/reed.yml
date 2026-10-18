@@ -32,7 +32,7 @@ jobs:
       - name: Installera Node
         uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Kör hämtningen
         env:
@@ -56,6 +56,16 @@ jobs:
             echo "Inget nytt att spara."
           else
             git commit -m "Nattlig hämtning: brittiska jobb från Reed"
-            git pull --rebase --autostash origin main || git pull --no-rebase -X ours --no-edit origin main
-            git push
+            # Försök upp till fem gånger. Hinner en annan körning ladda upp under
+            # tiden avbryts den misslyckade sammanslagningen först, annars fastnar
+            # git och resten av försöken fungerar inte.
+            for forsok in 1 2 3 4 5; do
+              if ! git pull --rebase --autostash origin main; then
+                git rebase --abort || true
+                git pull --no-rebase -X ours --no-edit origin main
+              fi
+              git push && break
+              if [ "$forsok" = 5 ]; then exit 1; fi
+              sleep 15
+            done
           fi

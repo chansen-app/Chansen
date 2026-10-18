@@ -216,24 +216,47 @@ function kategori(titel, text) {
   return "Övrigt";
 }
 
-async function nyckel() {
-  if (process.env.NAV_TOKEN) return process.env.NAV_TOKEN.trim();
-  const svar = await fetch(BAS + "/api/publicToken");
+// Den publika nyckeln byts ut av NAV med jämna mellanrum, så den hämtas
+// på nytt varje körning.
+async function publikNyckel() {
+  const svar = await fetch(BAS + "/api/publicToken", { signal: AbortSignal.timeout(30000) });
+  if (!svar.ok) throw new Error("NAV svarade " + svar.status + " när nyckeln skulle hämtas.");
   const text = await svar.text();
   const rad = text.split("\n").map(r => r.trim()).filter(r => r.startsWith("ey"))[0];
   if (!rad) throw new Error("Hittade ingen nyckel i svaret från NAV.");
   return rad;
 }
 
+/* Hämtar en adress. Svarar NAV inte, eller svarar med ett tillfälligt
+   fel, görs tre nya försök med paus emellan. Det var ett enda misslyckat
+   anrop som fick hela körningen att avbrytas i oktober 2026.
+   304 betyder att inget har ändrats, och ger en tom sida i stället för
+   ett fel. */
 async function hamta(url, token, extra) {
-  const svar = await fetch(url.startsWith("http") ? url : BAS + url, {
-    headers: Object.assign({
-      accept: "application/json",
-      Authorization: "Bearer " + token
-    }, extra || {})
-  });
-  if (!svar.ok) throw new Error("Status " + svar.status + " för " + url);
-  return svar.json();
+  let senasteFel;
+  for (let forsok = 1; forsok <= 4; forsok++) {
+    try {
+      const svar = await fetch(url.startsWith("http") ? url : BAS + url, {
+        headers: Object.assign({
+          accept: "application/json",
+          Authorization: "Bearer " + token
+        }, extra || {}),
+        signal: AbortSignal.timeout(30000)
+      });
+      if (svar.status === 304) return { items: [], next_url: null };
+      if (svar.ok) return svar.json();
+      const fel = new Error("Status " + svar.status);
+      fel.status = svar.status;
+      // 401 och 403 blir inte bättre av att försöka igen.
+      if (svar.status === 401 || svar.status === 403) throw fel;
+      senasteFel = fel;
+    } catch (e) {
+      if (e.status === 401 || e.status === 403) throw e;
+      senasteFel = e;
+    }
+    if (forsok < 4) await sov(forsok * 3000);
+  }
+  throw senasteFel;
 }
 
 function rensa(html) {
@@ -293,7 +316,9 @@ function poang(titel, text) {
 }
 
 async function kor() {
-  const token = await nyckel();
+  // En egen nyckel används först om den finns. Har den gått ut tas den
+  // publika i stället, så att körningen inte stannar.
+  let token = process.env.NAV_TOKEN ? process.env.NAV_TOKEN.trim() : await publikNyckel();
   console.log("Nyckel hämtad.");
 
   const sedan = new Date(Date.now() - DAGAR_BAKAT * 86400000).toUTCString();
@@ -301,7 +326,22 @@ async function kor() {
   const poster = new Map();      // uuid -> senaste posten, så dubbletter försvinner
 
   for (let i = 0; i < MAX_SIDOR && sida; i++) {
-    const d = await hamta(sida, token, i === 0 ? { "If-Modified-Since": sedan } : null);
+    let d;
+    try {
+      d = await hamta(sida, token, i === 0 ? { "If-Modified-Since": sedan } : null);
+    } catch (e) {
+      if ((e.status === 401 || e.status === 403) && process.env.NAV_TOKEN && i === 0) {
+        console.log("Den egna nyckeln fungerade inte, provar den publika.");
+        token = await publikNyckel();
+        d = await hamta(sida, token, { "If-Modified-Since": sedan });
+      } else if (poster.size > 0) {
+        // Det som redan hämtats räcker. Bättre än att avbryta allt.
+        console.log("Sida " + (i + 1) + " gick inte att hämta, fortsätter med det som finns.");
+        break;
+      } else {
+        throw e;
+      }
+    }
     for (const post of d.items || []) {
       const f = post._feed_entry || {};
       if (f.status !== "ACTIVE") { poster.delete(f.uuid); continue; }
@@ -384,6 +424,13 @@ async function kor() {
   jobb.sort((a, b) => b.poang - a.poang);
   const tid = new Date().toISOString();
 
+  // Kom inga jobb alls med, till exempel om NAV inte svarade, ligger
+  // gårdagens lista kvar i stället för en tom sida.
+  if (!jobb.length) {
+    console.log("Inga jobb kom med den här gången. Den gamla listan behålls.");
+    return;
+  }
+
   if (!fs.existsSync("labb")) fs.mkdirSync("labb");
   fs.writeFileSync("labb/norgejobb.json", JSON.stringify(jobb, null, 2));
   fs.writeFileSync("labb/norgejobb.js",
@@ -407,7 +454,7 @@ async function kor() {
   console.log("De tio bästa:");
   for (const j of jobb.slice(0, 10)) {
     console.log("  " + String(j.poang).padStart(3) + "  " +
-                (j.titel || "").slice(0, 44).padEnd(46) +
+                tvatta(j.titel || "").slice(0, 44).padEnd(46) +
                 (j.ort || "").slice(0, 14));
   }
 }

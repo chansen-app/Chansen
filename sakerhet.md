@@ -1,7 +1,8 @@
 # Säkerhet, det som faktiskt spelar roll
 
-Chansen har ingen server och ingen databas. Det finns inget att bryta sig in i.
-Den enda vägen in är dina konton. Fixar du listan nedan är du klar.
+Chansen har ingen egen server. Det som finns är ett kalkylark och ett skript
+hos Google, mejllistan hos Sender och nycklar som secrets på GitHub. Den
+enda vägen in är dina konton. Fixar du listan nedan är du klar.
 
 Allt här är gratis.
 
@@ -55,9 +56,12 @@ Det här behöver du inte göra, det är gjort:
 - All text från annonser och arbetsgivare skrivs ut som text, aldrig som kod.
   En annons kan alltså inte köra något i besökarens webbläsare.
 - Länkar som inte börjar med https tas bort automatiskt.
-- Sidan får bara ladda saker från Google Fonts, Google Sheets och Cloudflare.
-  Allt annat blockeras av webbläsaren, även om någon fick in en främmande
-  adress i koden.
+- Sidan får bara ladda saker från sig själv, Google, GoatCounter och
+  Cloudflare. Allt annat blockeras av webbläsaren, även om någon fick in en
+  främmande adress i koden.
+- Mejl, telefonnummer och personnummer tas bort ur annonserna innan de
+  sparas, och kolla-personuppgifter.js stoppar uppladdning av personuppgifter
+  och nycklar.
 - Skriptet som tar emot annonser kortar av för långa texter, kräver att
   företagsnamn och jobbtitel finns, och stoppar fler än 40 inskick per dygn.
 - Ingenting publiceras utan att du skrivit ja.

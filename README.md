@@ -69,7 +69,8 @@ de annonser arbetsgivare skickat in direkt till tjänsten.
 
 ## Status
 
-Under utveckling. Första versionen omfattar en ort.
+Öppen för alla sedan 9 augusti 2026, med jobb i hela Sverige och en egen
+sida för varje ort med minst fem jobb.
 
 ## Kontakt
 

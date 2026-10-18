@@ -12,9 +12,10 @@
  *
  *  Kör med:   node .\nyhetsbrev.js
  *
- *  Resultatet sparas i nyhetsbrev.html. Öppna filen i webbläsaren,
- *  markera allt med Ctrl + A, kopiera med Ctrl + C och klistra in i Sender
- *  med Ctrl + V. Länken ligger då redan bakom "Se jobbet".
+ *  Resultatet sparas i nyhetsbrev.html. Varje tisdag lägger
+ *  skicka-nyhetsbrev.js upp det som ett utkast i Sender, så det här
+ *  behövs bara om du vill titta på det själv. Öppna då filen i
+ *  webbläsaren.
  *
  *  I fönstret skrivs också en lista med varje jobb och dess länk, om
  *  länkarna skulle behöva läggas in för hand.

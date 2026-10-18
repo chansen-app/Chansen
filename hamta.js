@@ -968,7 +968,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '<h2>Om Chansen</h2>\n'
       + '<p>Chansen går igenom hela Platsbanken varje natt och sorterar bort allt '
       + 'som kräver utbildning, yrkesbevis eller flera års erfarenhet. Sidan är '
-      + 'gratis att använda och sparar ingenting om dig.</p>\n'
+      + 'gratis att använda. Det du fyller i sparas bara i din egen telefon.</p>\n'
       + '<p>Jobben kommer från Arbetsförmedlingens öppna data. '
       + 'Arbetsförmedlingen står inte bakom sidan, den drivs av en privatperson.</p>\n'
       + '<footer>Uppdaterad ' + datum + '. '

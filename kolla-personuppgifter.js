@@ -81,11 +81,13 @@ function allaFiler(argument) {
   return ut;
 }
 
+// -z och execFileSync gör att filnamn med å, ä och ö fungerar. Utan dem
+// skriver git namnen med koder, och då hittas inte filen.
 function stagadeFiler() {
-  return cp.execSync("git diff --cached --name-only --diff-filter=ACMR", { encoding: "utf8" })
-    .split("\n").filter(Boolean)
+  return cp.execFileSync("git", ["diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z"], { encoding: "utf8" })
+    .split("\u0000").filter(Boolean)
     .map(function (f) {
-      return { fil: f, text: cp.execSync("git show :" + JSON.stringify(f), { encoding: "utf8", maxBuffer: 1 << 28 }) };
+      return { fil: f, text: cp.execFileSync("git", ["show", ":" + f], { encoding: "utf8", maxBuffer: 1 << 28 }) };
     });
 }
 
