@@ -26,6 +26,7 @@
  */
 
 const fs = require("fs");
+const { tvatta } = require("../personuppgifter");
 
 const BAS = "https://pam-stilling-feed.nav.no";
 const DAGAR_BAKAT = 2;          // hur långt bak i flödet vi börjar
@@ -353,7 +354,7 @@ async function kor() {
       omfattning: a.extent || "",
       anstallningsform: a.engagementtype || "",
       kategori: kategori(a.title, text),
-      beskrivning: rensa(a.description).slice(0, 400),
+      beskrivning: tvatta(rensa(a.description)).slice(0, 400),
       lank: a.link || a.applicationUrl || "",
       sistaAnsokningsdag: a.applicationDue || "",
       publicerad: a.published || "",

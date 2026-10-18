@@ -39,6 +39,14 @@ jobs:
           NAV_TOKEN: ${{ secrets.NAV_TOKEN }}
         run: node labb/hamta-norge.js
 
+      # Stoppar körningen innan något laddas upp, om en annons ändå
+      # innehåller mejl, telefonnummer, personnummer eller ett namn från
+      # listan. Då kommer ett mejl från GitHub om att körningen misslyckades.
+      - name: Kolla personuppgifter
+        env:
+          PERSONNAMN: ${{ secrets.PERSONNAMN }}
+        run: node kolla-personuppgifter.js labb/norgejobb.js labb/norgejobb.json docs/labb/norge-jobb.js
+
       - name: Spara resultatet
         run: |
           git config user.name "github-actions"
