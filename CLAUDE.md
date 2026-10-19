@@ -12,3 +12,4 @@ Läs README.md innan du börjar. Handboken finns inte i repot, den har jag spara
 6. Chansen drivs av mig som privatperson, inte av Arbetsförmedlingen.
 7. Ändra inget utan att först förklara vad du tänker göra och få mitt ja.
 8. Skriv aldrig namn på privatpersoner, mejladresser, telefonnummer eller personnummer i någon fil i repot. Sådant hör hemma i mappen privat, som aldrig följer med till GitHub. Kör node kolla-personuppgifter.js innan varje commit.
+9. Kalkylarket Jobbansökningar Chansen får aldrig publiceras i sin helhet. Bara fliken Publicerat får vara öppen på nätet, eftersom de andra flikarna innehåller arbetsgivarnas mejl och telefonnummer. Föreslå aldrig något som publicerar mer.
