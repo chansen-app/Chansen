@@ -1,6 +1,7 @@
 name: Kolla personuppgifter
 
-# Körs varje gång något laddas upp och går igenom alla filer i repot.
+# Körs varje gång något laddas upp, och varje morgon. Går igenom alla
+# filer i repot, och kollar att kalkylarket inte visar för mycket.
 # Hittar den mejl, telefonnummer, personnummer eller ett namn från listan
 # misslyckas körningen, och GitHub mejlar dig.
 #
@@ -13,6 +14,8 @@ name: Kolla personuppgifter
 
 on:
   push:
+  schedule:
+    - cron: "30 5 * * *"   # varje morgon, efter nattkörningen
   workflow_dispatch:
 
 permissions:
@@ -36,3 +39,8 @@ jobs:
         env:
           PERSONNAMN: ${{ secrets.PERSONNAMN }}
         run: node kolla-personuppgifter.js
+
+      # Kalkylarket med arbetsgivarannonser får bara vara öppet med fliken
+      # Publicerat. Är något mer öppet misslyckas körningen och du får ett mejl.
+      - name: Kolla kalkylarket
+        run: node kolla-kalkylark.js
