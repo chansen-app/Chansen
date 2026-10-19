@@ -4290,6 +4290,26 @@ if ("serviceWorker" in navigator) {
     }).catch(function () { /* fungerar ändå, bara utan offlinestöd */ });
   });
 }
+/* Kommun i länken, till exempel chansen.nu/?ort=Halmstad. Används av
+   sökrutan som skolor och kommuner lägger på sin hemsida, widget.html.
+   Orten fylls i och sparas, och tas sedan bort ur adressen så att den
+   inte följer med om länken delas vidare.                          */
+(function(){
+  try {
+    var m = /[?&]ort=([^&#]*)/.exec(location.search);
+    if (!m) return;
+    var o = decodeURIComponent(m[1].replace(/\+/g, " ")).replace(/[<>"]/g, "").trim().slice(0, 60);
+    if (o) {
+      var f = document.getElementById("ort");
+      if (f) f.value = o;
+      spara();
+      antalCache = null;
+    }
+    var rest = location.search.replace(/([?&])ort=[^&#]*&?/, "$1").replace(/[?&]$/, "");
+    history.replaceState(null, "", location.pathname + rest + location.hash);
+  } catch(e){}
+})();
+
 if (kollaAdress()) {
   // arbetsgivare kom via direktlänk
 } else if (svar.alder) { startaLista(); } else { visaVy("start"); }

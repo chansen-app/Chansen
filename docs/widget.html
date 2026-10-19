@@ -1,0 +1,70 @@
+<!doctype html>
+<!--
+  Sökruta för skolor och kommuner
+
+  Läggs in på en annan hemsida med en iframe. Den som skriver sin kommun
+  och trycker på Visa jobben kommer till Chansen i en ny flik, med
+  kommunen redan ifylld.
+
+  Två val kan stå i adressen:
+    ort   kommunen som är ifylld från början, till exempel ort=Halmstad
+    fran  en märkning som visar i statistiken vilken skola besöket kom
+          från, till exempel fran=sannarp
+
+  Inga kakor, ingen spårning och inga jobbannonser. Allt finns i den här
+  filen, så den laddar snabbt.
+
+  Den här adressen måste finnas kvar så länge någon skola använder den.
+  Byt aldrig namn på filen.
+-->
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Sök jobb i Chansen</title>
+<style>
+  :root{--bg:#f5ead8;--text:#201e1d;--dampad:#645c50;--knapp:#ac5e2b;--kant:#dcd3c4;--fokus:#8c491a}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  form{padding:16px;max-width:420px}
+  h1{font-size:19px;line-height:1.25;margin:0 0 4px}
+  p{font-size:14px;line-height:1.45;color:var(--dampad);margin:0 0 12px}
+  label{display:block;font-size:15px;font-weight:600;margin-bottom:6px}
+  .rad{display:flex;gap:8px;flex-wrap:wrap}
+  input{flex:1 1 160px;min-height:46px;padding:10px 14px;font:inherit;font-size:16px;
+    border:1.5px solid var(--kant);border-radius:12px;background:#fff;color:var(--text)}
+  button{flex:0 0 auto;min-height:46px;padding:10px 20px;font:inherit;font-size:15px;
+    font-weight:700;color:#fff;background:var(--knapp);border:0;border-radius:999px;cursor:pointer}
+  input:focus-visible,button:focus-visible{outline:2px solid var(--fokus);outline-offset:2px}
+  .fot{margin:10px 0 0;font-size:13px}
+</style>
+</head>
+<body>
+<form action="https://chansen.nu/" method="get" target="_blank" rel="noopener">
+  <h1>Hitta jobb där erfarenhet inte krävs</h1>
+  <p>Gratis att använda. Drivs av en privatperson.</p>
+  <label for="ort">Din kommun</label>
+  <div class="rad">
+    <input id="ort" name="ort" autocomplete="address-level2" placeholder="Till exempel Göteborg">
+    <button type="submit">Visa jobben</button>
+  </div>
+  <input type="hidden" id="fran" name="fran" value="">
+  <p class="fot">Öppnas i en ny flik på chansen.nu</p>
+</form>
+<script>
+  // Fyller i kommun och märkning från adressen, om de finns.
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search);
+      var ort = (q.get("ort") || "").slice(0, 60);
+      var fran = (q.get("fran") || "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").slice(0, 40);
+      if (ort) document.getElementById("ort").value = ort;
+      var f = document.getElementById("fran");
+      if (fran) f.value = fran; else f.parentNode.removeChild(f);
+    } catch (e) {}
+  })();
+</script>
+</body>
+</html>
