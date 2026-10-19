@@ -4296,6 +4296,27 @@ if ("serviceWorker" in navigator) {
    inte följer med om länken delas vidare.                          */
 (function(){
   try {
+    /* Kodad länk, till exempel chansen.nu/?k=... för en skola. Koden
+       innehåller orten och en märkning, så att varken ort eller skola
+       syns i länken. Vad märkningen betyder vet bara Chansen Admin. */
+    var kod = /[?&]k=([A-Za-z0-9_-]{4,80})/.exec(location.search);
+    if (kod) {
+      var b = kod[1].replace(/-/g, "+").replace(/_/g, "/");
+      while (b.length % 4) b += "=";
+      var delar = decodeURIComponent(escape(atob(b))).split(".");
+      var tagg = (delar[1] || "").toLowerCase().replace(/[^a-z0-9-]+/g, "").slice(0, 20);
+      if (tagg) handelse("fran/" + tagg);
+      var r = location.search.replace(/([?&])k=[^&#]*&?/, "$1").replace(/[?&]$/, "");
+      history.replaceState(null, "", location.pathname + r + location.hash);
+      var ko = (delar[0] || "").replace(/[<>"]/g, "").trim().slice(0, 60);
+      if (ko) {
+        var fk = document.getElementById("ort");
+        if (fk) fk.value = ko;
+        spara();
+        antalCache = null;
+      }
+    }
+
     var m = /[?&]ort=([^&#]*)/.exec(location.search);
     if (!m) return;
     var o = decodeURIComponent(m[1].replace(/\+/g, " ")).replace(/[<>"]/g, "").trim().slice(0, 60);
