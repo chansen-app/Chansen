@@ -11,8 +11,8 @@
     fran  en märkning som visar i statistiken vilken skola besöket kom
           från, till exempel fran=sannarp
 
-  Inga kakor, ingen spårning och inga jobbannonser. Allt finns i den här
-  filen, så den laddar snabbt.
+  Inga kakor, ingen spårning och inga jobbannonser. Typsnitten hämtas
+  från chansen.nu, allt annat finns i den här filen.
 
   Den här adressen måste finnas kvar så länge någon skola använder den.
   Byt aldrig namn på filen.
@@ -24,34 +24,40 @@
 <meta name="robots" content="noindex">
 <title>Sök jobb i Chansen</title>
 <style>
-  :root{--bg:#f5ead8;--text:#201e1d;--dampad:#645c50;--knapp:#ac5e2b;--kant:#dcd3c4;--fokus:#8c491a}
+  @font-face{font-family:"Caprasimo";font-style:normal;font-weight:400;font-display:swap;
+    src:url("caprasimo.woff2") format("woff2")}
+  @font-face{font-family:"Figtree";font-style:normal;font-weight:400 700;font-display:swap;
+    src:url("figtree.woff2") format("woff2")}
+  :root{--bg:#f5ead8;--yta:#ebddc5;--text:#201e1d;--dampad:#645c50;
+    --knapp:#ac5e2b;--knapp-mork:#643312;--kant:#dcd3c4;--fokus:#8c491a}
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--text);
-    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-  form{padding:16px;max-width:420px}
-  h1{font-size:19px;line-height:1.25;margin:0 0 4px}
-  p{font-size:14px;line-height:1.45;color:var(--dampad);margin:0 0 12px}
-  label{display:block;font-size:15px;font-weight:600;margin-bottom:6px}
-  .rad{display:flex;gap:8px;flex-wrap:wrap}
-  input{flex:1 1 160px;min-height:46px;padding:10px 14px;font:inherit;font-size:16px;
-    border:1.5px solid var(--kant);border-radius:12px;background:#fff;color:var(--text)}
-  button{flex:0 0 auto;min-height:46px;padding:10px 20px;font:inherit;font-size:15px;
-    font-weight:700;color:#fff;background:var(--knapp);border:0;border-radius:999px;cursor:pointer}
+    font-family:"Figtree",system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+  body{display:flex;justify-content:center;padding:18px 16px}
+  form{width:100%;max-width:400px;text-align:center}
+  .logga{font-family:"Caprasimo",Georgia,serif;font-size:15px;color:var(--fokus);margin:0 0 6px}
+  h1{font-family:"Caprasimo",Georgia,serif;font-weight:400;font-size:25px;line-height:1.15;margin:0 0 8px}
+  p{font-size:15px;line-height:1.45;color:var(--dampad);margin:0 0 16px}
+  label{display:block;font-size:15px;font-weight:700;margin:0 0 8px}
+  input{width:100%;min-height:50px;padding:12px 16px;font:inherit;font-size:17px;text-align:center;
+    border:1.5px solid var(--kant);border-radius:999px;background:var(--yta);color:var(--text)}
+  button{width:100%;min-height:50px;margin-top:10px;padding:12px 20px;font:inherit;font-size:16px;
+    font-weight:700;color:#fff6ee;border:0;border-radius:999px;cursor:pointer;
+    background:linear-gradient(135deg,var(--knapp) 0%,var(--knapp-mork) 100%)}
   input:focus-visible,button:focus-visible{outline:2px solid var(--fokus);outline-offset:2px}
-  .fot{margin:10px 0 0;font-size:13px}
+  .fot{margin:12px 0 0;font-size:13px}
 </style>
 </head>
 <body>
 <form action="https://chansen.nu/" method="get" target="_blank" rel="noopener">
-  <h1>Hitta jobb där erfarenhet inte krävs</h1>
-  <p>Gratis att använda. Drivs av en privatperson.</p>
+  <div class="logga">Chansen</div>
+  <h1>Jobb som är värda att söka</h1>
+  <p>Chansen går igenom alla jobb i Platsbanken varje natt och visar de där du inte behöver erfarenhet. Skriv din kommun och se vilka som finns just nu.</p>
   <label for="ort">Din kommun</label>
-  <div class="rad">
-    <input id="ort" name="ort" autocomplete="address-level2" placeholder="Till exempel Göteborg">
-    <button type="submit">Visa jobben</button>
-  </div>
+  <input id="ort" name="ort" autocomplete="address-level2" placeholder="Till exempel Göteborg">
   <input type="hidden" id="fran" name="fran" value="">
-  <p class="fot">Öppnas i en ny flik på chansen.nu</p>
+  <button type="submit">Visa jobben</button>
+  <p class="fot">Gratis att använda. Drivs av en privatperson. Öppnas på chansen.nu</p>
 </form>
 <script>
   // Fyller i kommun och märkning från adressen, om de finns.
