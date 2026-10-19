@@ -1127,6 +1127,25 @@ function svenskTimme_(dag, utcTimme){
   return isNaN(t) ? utcTimme : t % 24;
 }
 
+function kodord_(){
+  try {
+    var o = JSON.parse(localStorage.getItem("chansen-admin-kodord") || "{}");
+    return (o && typeof o === "object" && !Array.isArray(o)) ? o : {};
+  } catch(e){ return {}; }
+}
+
+function sparaKodord_(){
+  var el = document.getElementById("kodord-text");
+  if (!el) return;
+  var ut = {};
+  el.value.split("\n").forEach(function(rad){
+    var m = /^\s*([a-z0-9-]+)\s*[=:]\s*(.+?)\s*$/i.exec(rad);
+    if (m) ut[m[1].toLowerCase()] = m[2].slice(0, 60);
+  });
+  try { localStorage.setItem("chansen-admin-kodord", JSON.stringify(ut)); } catch(e){}
+  ritaStatistik();
+}
+
 function ritaStatistik(){
   var el = document.getElementById("lista");
   var d = statData;
@@ -1263,11 +1282,23 @@ function ritaStatistik(){
     mejlHtml = '<p class="stat-not">Lägg in SENDER_TOKEN i Apps Script för att se mejllistan.</p>';
   }
 
-  var franLista = slaIhop_(dagar, "Händelser", function(k){ return k.slice(5); }, function(k){ return k.indexOf("fran/") !== 0; });
+  // Kodord, till exempel k7, översätts till skolans namn. Vad koderna
+  // betyder sparas bara i den här telefonen, aldrig på GitHub.
+  var kodord = kodord_();
+  var franLista = slaIhop_(dagar, "Händelser", function(k){
+    var t = k.slice(5);
+    return kodord[t] ? kodord[t] + " (" + t + ")" : t;
+  }, function(k){ return k.indexOf("fran/") !== 0; });
   html += '<div class="stat-tva">'
     + '<div class="stat-kort"><h3>Grupper och inlägg</h3><p class="under">Besök från länkar med märkning</p>'
     +   (franLista.length ? listaHtml_(franLista, 10)
           : '<p class="stat-not">Inget än. Skriv länken som chansen.nu/?fran=hudiksvall när du postar i en grupp, så syns gruppen här.</p>')
+    +   '<details style="margin-top:12px"><summary class="stat-not" style="cursor:pointer">Kodord</summary>'
+    +     '<p class="stat-not">En rad per kod, till exempel k7 = Skolans namn. Sparas bara i den här telefonen.</p>'
+    +     '<textarea id="kodord-text" rows="4" style="width:100%;font:inherit;padding:8px;border-radius:10px">'
+    +       fly(Object.keys(kodord).map(function(k){ return k + " = " + kodord[k]; }).join("\n")) + '</textarea>'
+    +     '<button class="mini" style="margin-top:8px" onclick="sparaKodord_()">Spara kodord</button>'
+    +   '</details>'
     + "</div>"
     + '<div class="stat-kort"><h3>Mest klickade annonser</h3><p class="under">Klick vidare till annonsen</p>'
     +   (annonser.length ? listaHtml_(annonser, 10) : '<p class="stat-not">Inget än. Klicken per annons räknas från version 137 av sidan.</p>')
