@@ -899,6 +899,14 @@ function skrivOrtssidor(jobb, hamtadTid) {
 
   const datum = hamtadTid.slice(0, 10);
 
+  // Orter med egen sida, grupperade per län, för länkarna till orter i
+  // närheten längst ned på varje sida.
+  const orterPerLan = {};
+  for (const ort of orter) {
+    const lan = (perOrt[ort].find(j => j.lan) || {}).lan;
+    if (lan) (orterPerLan[lan] = orterPerLan[lan] || []).push(ort);
+  }
+
   for (const ort of orter) {
     const lista = perOrt[ort].slice().sort(
       (a, b) => (b.sortpoang || b.poang || 0) - (a.sortpoang || a.poang || 0));
@@ -908,12 +916,72 @@ function skrivOrtssidor(jobb, hamtadTid) {
     const kategorier = {};
     for (const j of lista) kategorier[j.kategori] = (kategorier[j.kategori] || 0) + 1;
     const toppkat = Object.keys(kategorier)
-      .sort((a, b) => kategorier[b] - kategorier[a]).slice(0, 4);
+      .filter(k => k && k !== "Övrigt")
+      .sort((a, b) => kategorier[b] - kategorier[a]).slice(0, 3);
 
-    const titel = "Jobb med låga ingångskrav i " + ort;
+    // Rubriken använder orden folk söker på, inte "låga ingångskrav".
+    const titel = "Jobb utan krav på erfarenhet i " + ort;
     const beskrivning = antal + " jobb i " + ort + " som inte kräver "
-      + "flera års erfarenhet. Uppdateras varje natt från Platsbanken. "
-      + "Gratis att använda.";
+      + "flera års erfarenhet, bland annat extrajobb och deltid. "
+      + "Uppdateras varje natt från Platsbanken. Gratis att använda.";
+
+    /* Siffror som gör varje sida unik. Google rankar sidor lägre om de
+       ser nästan likadana ut, och siffrorna är dessutom det besökaren
+       vill veta.                                                      */
+    const deltid = lista.filter(j => /deltid/i.test(j.omfattning || "")).length;
+    const heltid = lista.filter(j => /heltid/i.test(j.omfattning || "")).length;
+    const unga = lista.filter(j => j.minderarigOk === true).length;
+    const nyborjare = lista.filter(j => j.nyborjarvanlig === true).length;
+    // "samt" före sista, eftersom kategorierna själva innehåller "och".
+    const katText = toppkat.map(fly).join(", ").replace(/, ([^,]*)$/, " samt $1");
+    const katRa = toppkat.join(", ").replace(/, ([^,]*)$/, " samt $1");
+    const jobbOrd = n => n === 1 ? "1 jobb" : n + " jobb";
+
+    const fragor = [
+      {
+        f: "Finns det extrajobb i " + ort + " för den som är under 18?",
+        s: unga
+          ? "Just nu finns " + jobbOrd(unga) + " i " + ort + " som går att söka för dig som är under 18. "
+            + "I Chansen visas bara arbeten och arbetstider som lagen tillåter för din ålder."
+          : "Just nu finns inga jobb i " + ort + " som går att söka för dig som är under 18. "
+            + "Nya jobb kommer varje natt, och i Chansen kan du också se jobb i resten av länet."
+      },
+      {
+        f: "Finns det deltidsjobb i " + ort + "?",
+        s: deltid
+          ? "Ja, just nu finns " + jobbOrd(deltid) + " på deltid i " + ort
+            + (heltid ? ", och " + jobbOrd(heltid) + " på heltid." : ".")
+          : "Just nu finns inga jobb på deltid i " + ort
+            + (heltid ? ", men " + jobbOrd(heltid) + " på heltid." : ".")
+      },
+      {
+        f: "Vilka jobb utan erfarenhet är vanligast i " + ort + "?",
+        s: katRa
+          ? "Just nu är det mest jobb inom " + katRa + ". "
+            + (nyborjare ? "I " + jobbOrd(nyborjare) + " skriver arbetsgivaren själv att erfarenhet inte krävs." : "")
+          : "Det varierar från natt till natt. Se listan ovan för de jobb som finns just nu."
+      }
+    ];
+    const fragorHtml = fragor.map(q =>
+      '<h3>' + fly(q.f) + '</h3>\n<p>' + fly(q.s) + '</p>\n').join("");
+    const fragorData = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": fragor.map(q => ({
+        "@type": "Question", "name": q.f,
+        "acceptedAnswer": { "@type": "Answer", "text": q.s }
+      }))
+    }).replace(/</g, "\\u003c");
+
+    // Andra orter i samma län, så att den som kan pendla hittar fler jobb.
+    const lan = (lista.find(j => j.lan) || {}).lan;
+    const nara = (orterPerLan[lan] || []).filter(o => o !== ort)
+      .sort((a, b) => perOrt[b].length - perOrt[a].length).slice(0, 6);
+    const naraHtml = nara.length
+      ? '<h2>Jobb i samma län</h2>\n<p>' + nara.map(o =>
+          '<a href="https://chansen.nu/jobb/' + ortslug(o) + '.html">' + fly(o) + '</a>').join(" · ")
+        + '</p>\n'
+      : '';
 
     let rader = "";
     for (const j of lista.slice(0, 40)) {
@@ -940,12 +1008,14 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '<meta property="og:description" content="' + fly(beskrivning) + '">\n'
       + '<meta property="og:image" content="https://chansen.nu/delning.png">\n'
       + '<meta property="og:url" content="https://chansen.nu/jobb/' + slug + '.html">\n'
+      + '<script type="application/ld+json">' + fragorData + '</script>\n'
       + '<style>\n'
       + 'body{font-family:system-ui,sans-serif;background:#f5ead8;color:#201e1d;'
       + 'margin:0;padding:24px 18px;line-height:1.6}\n'
       + '.inre{max-width:44em;margin:0 auto}\n'
       + 'h1{font-size:26px;line-height:1.25;margin:0 0 10px}\n'
       + 'h2{font-size:19px;margin:32px 0 10px}\n'
+      + 'h3{font-size:16px;margin:20px 0 4px}\n'
       + 'a{color:#8c491a}\n'
       + '.knapp{display:inline-block;background:#ac5e2b;color:#fff;text-decoration:none;'
       + 'padding:13px 24px;border-radius:999px;margin:18px 0;font-weight:600}\n'
@@ -958,13 +1028,18 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '<h1>' + fly(titel) + '</h1>\n'
       + '<p>Det finns ' + antal + ' jobb i ' + fly(ort) + ' just nu som inte kräver '
       + 'flera års erfarenhet, utbildning eller yrkesbevis. '
-      + (toppkat.length ? 'Mest inom ' + toppkat.map(fly).join(', ').replace(/, ([^,]*)$/, ' och $1') + '. ' : '')
+      + (toppkat.length ? 'Mest inom ' + katText + '. ' : '')
+      + (deltid ? jobbOrd(deltid) + ' är på deltid och kan passa som extrajobb. ' : '')
+      + (unga ? jobbOrd(unga) + ' går att söka för dig som är under 18. ' : '')
       + 'Listan uppdateras varje natt.</p>\n'
       + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
       + '<h2>Jobb i ' + fly(ort) + ' just nu</h2>\n'
       + '<ul>\n' + rader + '</ul>\n'
       + (antal > 40 ? '<p>Och ' + (antal - 40) + ' till. '
          + '<a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
+      + '<h2>Vanliga frågor om jobb i ' + fly(ort) + '</h2>\n'
+      + fragorHtml
+      + naraHtml
       + '<h2>Om Chansen</h2>\n'
       + '<p>Chansen går igenom hela Platsbanken varje natt och sorterar bort allt '
       + 'som kräver utbildning, yrkesbevis eller flera års erfarenhet. Sidan är '
