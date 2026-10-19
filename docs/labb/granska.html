@@ -1282,7 +1282,7 @@ function ritaStatistik(){
     mejlHtml = '<p class="stat-not">Lägg in SENDER_TOKEN i Apps Script för att se mejllistan.</p>';
   }
 
-  // Kodord, till exempel k7, översätts till skolans namn. Vad koderna
+  // Kodord, till exempel ab12, översätts till skolans namn. Vad koderna
   // betyder sparas bara i den här telefonen, aldrig på GitHub.
   var kodord = kodord_();
   var franLista = slaIhop_(dagar, "Händelser", function(k){
@@ -1294,7 +1294,7 @@ function ritaStatistik(){
     +   (franLista.length ? listaHtml_(franLista, 10)
           : '<p class="stat-not">Inget än. Skriv länken som chansen.nu/?fran=hudiksvall när du postar i en grupp, så syns gruppen här.</p>')
     +   '<details style="margin-top:12px"><summary class="stat-not" style="cursor:pointer">Kodord</summary>'
-    +     '<p class="stat-not">En rad per kod, till exempel k7 = Skolans namn. Sparas bara i den här telefonen.</p>'
+    +     '<p class="stat-not">En rad per kod, till exempel ab12 = Skolans namn. Sparas bara i den här telefonen.</p>'
     +     '<textarea id="kodord-text" rows="4" style="width:100%;font:inherit;padding:8px;border-radius:10px">'
     +       fly(Object.keys(kodord).map(function(k){ return k + " = " + kodord[k]; }).join("\n")) + '</textarea>'
     +     '<button class="mini" style="margin-top:8px" onclick="sparaKodord_()">Spara kodord</button>'
