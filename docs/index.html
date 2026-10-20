@@ -1242,7 +1242,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
 <div id="v-tyck" class="dold">
   <h1>Tyck till</h1>
-  <p class="sub">Sex korta frågor. Allt utom den första går att hoppa över.</p>
+  <p class="sub">Tre korta frågor, under en minut. Bara den första behöver du svara på.</p>
 
   <div class="tyckstapel"><i id="tyck-fyll"></i></div>
 
@@ -1252,26 +1252,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
       <div class="seg" id="t-hittade"></div>
     </div>
 
-    <div class="steg" data-falt="letade">
-      <h2 class="cvfraga" id="fraga-tyck-letade">Vad letade du efter?</h2>
-      <input class="txt tyckf" id="tyck-letade" aria-labelledby="fraga-tyck-letade" placeholder="Till exempel lager, kvällar, Göteborg">
-      <div class="hint">Hjälper mig se vad folk söker som Chansen kanske inte visar.</div>
-    </div>
-
-    <div class="steg" data-falt="saknar">
-      <h2 class="cvfraga" id="fraga-tyck-saknar">Saknar du något?</h2>
-      <textarea class="tyckf" id="tyck-saknar" aria-labelledby="fraga-tyck-saknar" placeholder="En funktion, ett filter, något som borde finnas"></textarea>
-    </div>
-
-    <div class="steg" data-falt="kranglig">
-      <h2 class="cvfraga" id="fraga-tyck-kranglig">Var det något som kändes krångligt?</h2>
-      <textarea class="tyckf" id="tyck-kranglig" aria-labelledby="fraga-tyck-kranglig" placeholder="Något som var svårt att förstå eller hitta"></textarea>
-      <div class="hint">Det här ser jag aldrig i statistiken, bara om någon säger det.</div>
-    </div>
-
+    <!-- Snabbval först, så att ingen behöver skriva. Den som vill kan
+         skriva mer i rutan under. Valen sparas i fältet saknar och texten
+         i fältet battre, så att kalkylarket inte behöver ändras. -->
     <div class="steg" data-falt="battre">
-      <h2 class="cvfraga" id="fraga-tyck-battre">Vad kan bli bättre?</h2>
-      <textarea class="tyckf" id="tyck-battre" aria-labelledby="fraga-tyck-battre" placeholder="Vad som helst"></textarea>
+      <h2 class="cvfraga" id="fraga-tyck-battre">Vad skulle göra Chansen bättre för dig?</h2>
+      <div class="hint" style="margin:0 0 12px">Tryck på det som stämmer. Du kan välja flera.</div>
+      <div class="chips" id="tyck-val" style="margin-bottom:14px"></div>
+      <textarea class="tyckf" id="tyck-battre" aria-labelledby="fraga-tyck-battre" placeholder="Skriv gärna mer, om du vill"></textarea>
     </div>
 
     <div class="steg" data-falt="mejl">
@@ -4583,6 +4571,8 @@ function tyckOppnaMed(v){
 function tyckOppna(){
   tyckSteg = 0;
   tyck = {};
+  var valEl = document.getElementById("tyck-val");
+  if (valEl) valEl.innerHTML = "";   // ritas om utan gamla val
   document.getElementById("tyck-tack").classList.add("dold");
   document.getElementById("tyck-steg").style.display = "";
   document.getElementById("tyck-nasta").style.display = "";
@@ -4600,6 +4590,28 @@ function ritaTyckSteg(){
   }
   var f = document.getElementById("tyck-fyll");
   if (f) f.style.width = Math.round((tyckSteg / steg.length) * 100) + "%";
+
+  // Snabbvalen på andra frågan. Valda sparas i tyck.saknar.
+  var valEl = document.getElementById("tyck-val");
+  if (valEl && !valEl.querySelector("button")){
+    var valda = [];
+    ["Fler jobb där jag bor", "Andra sorters jobb", "Fler deltidsjobb",
+     "Jobb för mig under 18", "Hjälp med ansökan", "Svårt att förstå sidan", "Annat"].forEach(function(v){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = v;
+      b.setAttribute("aria-pressed", "false");
+      b.onclick = function(){
+        var i = valda.indexOf(v);
+        if (i > -1) valda.splice(i, 1); else valda.push(v);
+        var pa = valda.indexOf(v) > -1;
+        b.className = pa ? "on" : "";
+        b.setAttribute("aria-pressed", pa ? "true" : "false");
+        tyck.saknar = valda.join("; ");
+      };
+      valEl.appendChild(b);
+    });
+  }
 
   // Första frågan har knappar, de andra fält
   if (tyckSteg === 0 && !document.querySelector("#t-hittade button")){
