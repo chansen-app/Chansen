@@ -332,6 +332,28 @@ nav button{font-size:12px;padding:0 4px}
   @page{margin:16mm}
 }
 .statusknappar{display:contents}
+/* Nya jobb sedan senaste besöket, överst i listan. */
+#sedansist{display:flex;gap:12px;align-items:center;margin:0 0 14px;padding:14px 18px;border-radius:24px;
+  background:linear-gradient(135deg,var(--accent-100),#fde6d6)}
+#sedansist.dold{display:none}
+#sedansist b{font-family:var(--heading);font-weight:400;font-size:32px;line-height:1;color:var(--knapp-start)}
+#sedansist span{font-size:14.5px;line-height:1.35}
+#sedansist small{display:block;color:var(--n-700);font-size:12.5px;margin-top:2px}
+/* Påminn mig, och kvittot som visas efteråt. */
+.mini.paminn{background:var(--sage-100);border-color:var(--sage-100);color:var(--sage-800)}
+#kvitto{position:fixed;left:16px;right:16px;bottom:90px;z-index:8;max-width:480px;margin:0 auto;
+  background:var(--text);color:#fff6ee;border-radius:18px;padding:14px 16px;font-size:14px;line-height:1.4}
+#kvitto.dold{display:none}
+/* Rutan om hemskärmen. */
+#hemskarm{position:fixed;inset:0;z-index:9;background:rgba(32,30,29,.35);display:flex;align-items:flex-end;justify-content:center}
+#hemskarm.dold{display:none}
+#hemskarm .ark{width:100%;max-width:520px;background:var(--surface);border-radius:30px 30px 0 0;padding:24px 22px 30px;box-sizing:border-box}
+#hemskarm h2{font-family:var(--heading);font-weight:400;font-size:24px;margin:0 0 6px}
+#hemskarm p{font-size:14.5px;line-height:1.4;color:var(--n-700);margin:0 0 14px}
+#hemskarm ol{margin:0;padding-left:22px;font-size:14.5px;line-height:1.5}
+#hemskarm ol li{margin-bottom:6px}
+#hemskarm .rad2{display:flex;gap:10px;margin-top:18px}
+#hemskarm .rad2 button{flex:1}
 .cv-varning{margin-top:12px;padding:12px 14px;border-radius:12px;background:#f7e3c0;color:#6e4408;font-size:15px;line-height:1.45}
 .cv-varning p{margin:0}
 .cv-varning p+p{margin-top:6px}
@@ -547,6 +569,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     <button class="mini" onclick="visaVy('mejl')"
             style="white-space:nowrap">Få jobbtips</button>
   </div>
+
+  <div id="sedansist" class="dold" role="status" aria-live="polite"></div>
 
   <div class="chips">
     <button id="f-alla" class="on" aria-pressed="true" onclick="visa('alla')">Alla<i></i></button>
@@ -1394,6 +1418,22 @@ Vi anger källan för din skull, inte för att vi måste.<br>
 version 140</footer>
 </div>
 
+<div id="kvitto" class="dold" role="status" aria-live="polite"></div>
+
+<!-- Visas en gång, vid andra besöket, för den som har Chansen i webbläsaren
+     och inte redan lagt den på hemskärmen. -->
+<div id="hemskarm" class="dold" role="dialog" aria-modal="true" aria-labelledby="hemskarm-rubrik">
+  <div class="ark">
+    <h2 id="hemskarm-rubrik">Ha Chansen nära till hands</h2>
+    <p>Lägg Chansen på hemskärmen, så öppnar du den som en app. Det tar tio sekunder.</p>
+    <ol id="hemskarm-steg"></ol>
+    <div class="rad2">
+      <button class="mini" onclick="hemskarmSvar('inte-nu')">Inte nu</button>
+      <button class="btn" id="hemskarm-ok" onclick="hemskarmSvar('ja')">Jag har gjort det</button>
+    </div>
+  </div>
+</div>
+
 <div id="nyversion" class="dold" style="position:fixed;left:16px;right:16px;bottom:160px;z-index:7">
   <div class="ruta" style="font-size:14px;display:flex;align-items:center;gap:14px;justify-content:space-between">
     <span>En ny version av Chansen finns.</span>
@@ -1881,6 +1921,7 @@ function kort(j){
   // De tre viktigaste taggarna först. Resten hamnar i en dämpad rad under,
   // så kortet går att skanna med ögat utan att man tappar information.
   var taggar = "", extra = "";
+  if(nyttSedanSist(j)) taggar += '<span class="tag varm">Ny sedan sist</span>';
   if(j.omfattning) taggar += '<span class="tag">'+fly(j.omfattning)+'</span>';
   if(j.kategori && j.kategori !== "Övrigt") taggar += '<span class="tag">'+fly(j.kategori)+'</span>';
   if(j.anstallningsform) extra += '<span class="tag">'+fly(j.anstallningsform)+'</span>';
@@ -1923,7 +1964,11 @@ function kort(j){
       // jobb där man söker via mejl. Jobbet letas upp med j.lank.
       '<button class="mini" onclick="oppnaAnsokan(\''+encodeURI(j.lank)+'\')">Skriv ansökan</button>'+
       '<button class="mini" onclick="delaJobb(\''+encodeURI(j.lank)+'\')">Dela</button>'+
-      statusknappar(j.lank) +'</div></div>';
+      statusknappar(j.lank) +
+      // Påminn mig bara när det är minst två dagar kvar att söka.
+      (dagarKvar(j.sistaAnsokningsdag) >= 2
+        ? '<button class="mini paminn" onclick="paminnMig(\''+encodeURI(j.lank)+'\')">Påminn mig</button>' : '') +
+      '</div></div>';
 }
 
 function statusknappar(lank){
@@ -2646,6 +2691,126 @@ function handelse(namn){
       }
     } catch(e){}
   }, 0);
+}
+
+/* När var man här förra gången? Används för "nya jobb sedan senast".
+   Under hela dagen jämförs med förra dagen man var här, så att siffran
+   inte försvinner om man laddar om sidan. Sparas bara i den egna
+   telefonen.                                                        */
+var FORRA_BESOK = (function(){
+  try {
+    var NYCKEL = "chansen-forra-besok";
+    var idag = new Date().toISOString().slice(0, 10);
+    var d = JSON.parse(localStorage.getItem(NYCKEL) || "{}") || {};
+    if (d.dag !== idag) d = { dag: idag, forra: d.sista || null };
+    d.sista = new Date().toISOString();
+    localStorage.setItem(NYCKEL, JSON.stringify(d));
+    return d.forra || null;
+  } catch(e){ return null; }
+})();
+
+function nyttSedanSist(j){
+  if (!FORRA_BESOK || !j.publicerad) return false;
+  var p = new Date(j.publicerad);
+  return !isNaN(p) && p > new Date(FORRA_BESOK);
+}
+
+// "i går", "i fredags" eller ett datum.
+function narDuVarHar(iso){
+  var d = new Date(iso), nu = new Date();
+  var dagar = Math.round((new Date(nu.toDateString()) - new Date(d.toDateString())) / 86400000);
+  if (dagar <= 1) return "i går";
+  if (dagar < 7) return "i " + ["söndags","måndags","tisdags","onsdags","torsdags","fredags","lördags"][d.getDay()];
+  return "den " + svenskDatum(iso);
+}
+
+/* Lägger en påminnelse i telefonens kalender, dagen före sista
+   ansökningsdag klockan 10. Det görs med en kalenderfil som telefonen
+   själv öppnar. Inget skickas till Chansen.                         */
+function paminnMig(lank){
+  var j = hittaJobb(decodeURI(lank));
+  if (!j || !j.sistaAnsokningsdag) return;
+  handelse("paminn-mig");
+  var sista = new Date(j.sistaAnsokningsdag);
+  var dag = new Date(sista.getFullYear(), sista.getMonth(), sista.getDate() - 1, 10, 0, 0);
+  function tid(d){
+    function n(x){ return (x < 10 ? "0" : "") + x; }
+    return d.getFullYear() + n(d.getMonth() + 1) + n(d.getDate()) + "T" + n(d.getHours()) + n(d.getMinutes()) + "00";
+  }
+  function ren(t){ return String(t || "").replace(/[\\;,]/g, " ").replace(/[\r\n]+/g, " ").slice(0, 120); }
+  var id = (String(j.lank || "").match(/(\d{5,})/) || [])[1] || slug(j.id || j.titel || "");
+  var slut = new Date(dag.getTime() + 15 * 60000);
+  var ics = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Chansen//SV", "BEGIN:VEVENT",
+    "UID:" + id + "-" + Date.now() + "@chansen.nu",
+    "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z",
+    "DTSTART:" + tid(dag), "DTEND:" + tid(slut),
+    "SUMMARY:Sista dagen att söka " + ren(j.titel) + " i morgon",
+    "DESCRIPTION:" + ren(j.titel) + " hos " + ren(j.arbetsgivare) + ". Jobbet finns på chansen.nu",
+    "URL:https://chansen.nu/#jobb-" + id,
+    "BEGIN:VALARM", "TRIGGER:-PT0M", "ACTION:DISPLAY", "DESCRIPTION:Sista dagen att söka i morgon", "END:VALARM",
+    "END:VEVENT", "END:VCALENDAR"
+  ].join("\r\n");
+  try {
+    var url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+    var a = document.createElement("a");
+    a.href = url; a.download = "paminnelse-chansen.ics";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 10000);
+    visaKvitto("Påminnelsen öppnas i din kalender. Spara den där, så påminns du den " + svenskDatum(dag) + ".");
+  } catch(e){
+    visaKvitto("Det gick inte att skapa påminnelsen på den här telefonen.");
+  }
+}
+
+var kvittoTimer = 0;
+function visaKvitto(text){
+  var el = document.getElementById("kvitto");
+  if (!el) return;
+  el.textContent = text;
+  el.className = "";
+  if (kvittoTimer) clearTimeout(kvittoTimer);
+  kvittoTimer = setTimeout(function(){ el.className = "dold"; }, 6000);
+}
+
+/* Rutan om hemskärmen. Visas en gång, vid andra besöket, bara på mobil
+   och bara om Chansen inte redan är installerad. Svarar man stängs den
+   för gott.                                                         */
+var installeraHandelse = null;
+window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); installeraHandelse = e; });
+
+function visaHemskarm(){
+  try {
+    if (localStorage.getItem("chansen-hemskarm")) return;
+    if (!FORRA_BESOK) return;   // bara vid andra besöket eller senare
+    var installerad = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    if (installerad) return;
+    var ua = navigator.userAgent || "";
+    var ios = /iPhone|iPad|iPod/.test(ua);
+    var android = /Android/.test(ua);
+    if (!ios && !android) return;
+    var steg = ios
+      ? ["Tryck på dela-knappen, rutan med en pil uppåt.", "Välj Lägg till på hemskärmen.", "Tryck Lägg till."]
+      : ["Tryck på de tre prickarna uppe till höger.", "Välj Lägg till på startskärmen.", "Tryck Lägg till."];
+    document.getElementById("hemskarm-steg").innerHTML = steg.map(function(s){ return "<li>" + s + "</li>"; }).join("");
+    if (installeraHandelse) {
+      // Android kan lägga till direkt, med ett tryck.
+      document.getElementById("hemskarm-steg").innerHTML = "";
+      document.getElementById("hemskarm-ok").textContent = "Lägg till";
+    }
+    document.getElementById("hemskarm").className = "";
+    handelse("hemskarm-visad");
+  } catch(e){}
+}
+
+function hemskarmSvar(svarat){
+  try { localStorage.setItem("chansen-hemskarm", svarat); } catch(e){}
+  document.getElementById("hemskarm").className = "dold";
+  handelse("hemskarm-" + svarat);
+  if (svarat === "ja" && installeraHandelse) {
+    installeraHandelse.prompt();
+    installeraHandelse = null;
+  }
 }
 
 /* Räknar hur många som kommer tillbaka, utan att lagra något om personen.
@@ -4192,6 +4357,20 @@ function visaInre(filter){
   if (filter === "utland") rakText = valda.length + " jobb utomlands";
   document.getElementById("rakning").textContent = rakText;
 
+  // Nya jobb sedan förra besöket, bland de jobb som visas just nu.
+  var ss = document.getElementById("sedansist");
+  if (ss) {
+    var nyaSedan = FORRA_BESOK ? valda.filter(nyttSedanSist).length : 0;
+    if (nyaSedan > 0) {
+      ss.innerHTML = '<b>' + nyaSedan + '</b><span>' + (nyaSedan === 1 ? 'nytt jobb' : 'nya jobb')
+        + ' i ' + fly(platsnamn) + ' sedan du var här senast'
+        + '<small>Du var här ' + narDuVarHar(FORRA_BESOK) + '</small></span>';
+      ss.className = "";
+    } else {
+      ss.className = "dold";
+    }
+  }
+
   // Stora talet överst. Samma siffra, bara tydligare.
   var ht = document.getElementById("hero-tal");
   if (ht) ht.textContent = valda.length;
@@ -4334,6 +4513,8 @@ if ("serviceWorker" in navigator) {
 if (kollaAdress()) {
   // arbetsgivare kom via direktlänk
 } else if (svar.alder) { startaLista(); } else { visaVy("start"); }
+// Rutan om hemskärmen kommer efter en stund, när man hunnit titta på jobben.
+setTimeout(visaHemskarm, 8000);
 window.addEventListener("scroll", function(){
   var k = document.getElementById("upp");
   if (k) k.className = (window.scrollY > 600) ? "syns" : "";
