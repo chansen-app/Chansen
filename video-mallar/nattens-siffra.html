@@ -1,0 +1,86 @@
+<!doctype html>
+<!--
+  Mall 1, Nattens siffra. Ritas bild för bild av videor.js.
+
+  Sidan har inga animationer av sig själv. videor.js anropar rita(t) för
+  varje bild, där t är tiden i sekunder, och tar sedan en bild av sidan.
+  Då blir varje video exakt likadan, oavsett hur snabb datorn är.
+
+  Siffrorna kommer från videor.js via window.DATA och är aldrig påhittade.
+-->
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="gemensam.css">
+<style>
+  .bransch{display:flex;justify-content:space-between;align-items:center;text-align:left;
+    font-family:"Figtree",sans-serif;font-weight:700;font-size:54px;line-height:1.2;
+    background:var(--yta);border-radius:999px;padding:32px 46px;margin:0 0 26px}
+  .bransch b{font-family:"Caprasimo",serif;font-weight:400;font-size:70px;color:var(--knapp);margin-left:30px}
+</style>
+</head>
+<body>
+<div class="ram"></div>
+<div class="topp"><span>chansen.nu</span><span id="datum"></span></div>
+
+<div class="scen" id="s1">
+  <div class="tal" id="tal">0</div>
+  <div class="under" id="under"></div>
+</div>
+<div class="scen" id="s2"><div id="branscher"></div></div>
+<div class="scen" id="s3"><div class="logga">chansen.nu</div></div>
+
+<script src="maskot.js"></script>
+<script>
+  var D = window.DATA || { antal: 24, plats: "Göteborg", datum: "19 oktober", flera: true,
+    branscher: ["Restaurang och café", "Lager och logistik", "Butik"], antalPer: [9, 6, 4] };
+
+  document.getElementById("datum").textContent = D.datum || "";
+  document.getElementById("under").textContent = "nya jobb i " + D.plats;
+
+  Maskot.repliker([
+    "Hej! I natt kom det nya jobb där erfarenhet inte krävs.",
+    D.flera ? "De flesta finns inom de här." : "Bland annat inom de här.",
+    "Du hittar dem på chansen.nu"
+  ]);
+
+  var lista = document.getElementById("branscher");
+  D.branscher.forEach(function (b, i) {
+    var rad = document.createElement("div"); rad.className = "bransch";
+    var namn = document.createElement("span"); namn.textContent = b; rad.appendChild(namn);
+    if (D.antalPer && D.antalPer[i]) {
+      var tal = document.createElement("b"); tal.textContent = D.antalPer[i]; rad.appendChild(tal);
+    }
+    lista.appendChild(rad);
+  });
+  var rutor = document.querySelectorAll(".bransch");
+
+  function klamp(x) { return Math.max(0, Math.min(1, x)); }
+  function mjuk(x) { x = klamp(x); return 1 - Math.pow(1 - x, 3); }
+  function synlig(t, a, b) { return klamp((t - a) / 0.5) * klamp((b - t) / 0.5); }
+  function $(id) { return document.getElementById(id); }
+
+  window.LANGD = 16;
+  window.BILDER = [2.6, 9, 14];
+  window.rita = function (t) {
+    var a = synlig(t, 0, 5.5), b = synlig(t, 5.5, 12), c = synlig(t, 12, 99);
+    $("s1").style.opacity = a; $("s2").style.opacity = b; $("s3").style.opacity = c;
+    Maskot.rita(t, [a, b, c], b > 0.5 ? "pekar" : "vinkar");
+
+    // Siffran räknas upp och växer lite när den är klar.
+    var tal = $("tal");
+    tal.textContent = Math.round(D.antal * mjuk((t - 0.6) / 2.4));
+    var puff = klamp((t - 3) / 0.25) * klamp((3.6 - t) / 0.35);
+    tal.style.transform = "scale(" + (1 + 0.12 * puff) + ")";
+
+    // Branscherna glider in, en i taget.
+    for (var i = 0; i < rutor.length; i++) {
+      var p = mjuk((t - 6.2 - i * 0.8) / 0.7);
+      rutor[i].style.opacity = p;
+      rutor[i].style.transform = "translateX(" + ((1 - p) * 160) + "px)";
+    }
+  };
+  window.rita(0);
+</script>
+</body>
+</html>

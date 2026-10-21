@@ -9,5 +9,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "ffmpeg-static": "5.2.0",
+    "puppeteer-core": "23.11.1"
+  }
 }

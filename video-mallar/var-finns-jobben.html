@@ -1,0 +1,82 @@
+<!doctype html>
+<!--
+  Mall 2, Var finns jobben just nu? Ritas bild för bild av videor.js.
+
+  Staplar som växer fram, en per bransch, med hur många jobb där
+  erfarenhet inte krävs som finns i orten just nu. Högst sex branscher.
+  Siffrorna kommer från videor.js via window.DATA.
+-->
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="gemensam.css">
+<style>
+  .rubrik{font-family:"Caprasimo",serif;font-size:62px;line-height:1.1;margin:0 0 36px}
+  .stapelrad{display:grid;grid-template-columns:1fr;text-align:left;margin:0 0 16px}
+  .stapelnamn{font-family:"Figtree",sans-serif;font-weight:700;font-size:38px;line-height:1.2;margin:0 0 6px;
+    display:flex;justify-content:space-between}
+  .stapelnamn b{font-family:"Caprasimo",serif;font-weight:400;color:var(--knapp);font-size:46px}
+  .spar{height:26px;background:var(--yta);border-radius:999px;overflow:hidden}
+  .fyll{height:100%;width:0;background:linear-gradient(90deg,var(--orange),var(--knapp));border-radius:999px}
+  /* Lite mer plats för staplarna, så att inget krockar med texten högst upp. */
+  #s1{top:350px;height:760px}
+</style>
+</head>
+<body>
+<div class="ram"></div>
+<div class="topp"><span>chansen.nu</span><span id="datum"></span></div>
+
+<div class="scen" id="s1">
+  <div class="rubrik" id="rubrik"></div>
+  <div id="staplar"></div>
+</div>
+<div class="scen" id="s2"><div class="logga">chansen.nu</div></div>
+
+<script src="maskot.js"></script>
+<script>
+  var D = window.DATA || { plats: "Göteborg", datum: "20 oktober", totalt: 55,
+    branscher: ["Restaurang och café", "Vård och omsorg", "Butik", "Städ", "Lager och logistik", "Kontor"],
+    antalPer: [13, 7, 5, 5, 5, 2] };
+
+  document.getElementById("datum").textContent = D.datum || "";
+  document.getElementById("rubrik").textContent = "Jobb i " + D.plats + " just nu";
+
+  Maskot.repliker([
+    "Så här många jobb utan krav på erfarenhet finns i " + D.plats + " just nu.",
+    "Du hittar dem på chansen.nu"
+  ]);
+
+  var max = Math.max.apply(null, D.antalPer);
+  var html = "";
+  D.branscher.forEach(function (b, i) {
+    html += '<div class="stapelrad"><div class="stapelnamn"><span></span><b>0</b></div>'
+      + '<div class="spar"><div class="fyll"></div></div></div>';
+  });
+  document.getElementById("staplar").innerHTML = html;
+  var rader = document.querySelectorAll(".stapelrad");
+  D.branscher.forEach(function (b, i) { rader[i].querySelector("span").textContent = b; });
+
+  function klamp(x) { return Math.max(0, Math.min(1, x)); }
+  function mjuk(x) { x = klamp(x); return 1 - Math.pow(1 - x, 3); }
+  function synlig(t, a, b) { return klamp((t - a) / 0.5) * klamp((b - t) / 0.5); }
+
+  window.LANGD = 15;
+  window.BILDER = [3, 8, 13];
+  window.rita = function (t) {
+    var a = synlig(t, 0, 10.5), c = synlig(t, 10.5, 99);
+    document.getElementById("s1").style.opacity = a;
+    document.getElementById("s2").style.opacity = c;
+    Maskot.rita(t, [a, c], a > 0.5 ? "pekar" : "vinkar");
+
+    // Staplarna växer fram en i taget, och siffran räknas upp samtidigt.
+    for (var i = 0; i < rader.length; i++) {
+      var p = mjuk((t - 1 - i * 0.6) / 1.4);
+      rader[i].style.opacity = klamp((t - 0.8 - i * 0.6) / 0.4);
+      rader[i].querySelector(".fyll").style.width = (p * 100 * D.antalPer[i] / max) + "%";
+      rader[i].querySelector("b").textContent = Math.round(p * D.antalPer[i]);
+    }
+  };
+  window.rita(0);
+</script>
+</body>
+</html>

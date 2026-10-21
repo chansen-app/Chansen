@@ -1,0 +1,106 @@
+<!doctype html>
+<!--
+  Mall 4, Skärminspelningen. Ritas bild för bild av videor.js.
+
+  En telefon som visar en förenklad version av Chansens startsida. Någon
+  skriver in sin kommun och jobblistan visas. Jobben i listan är
+  påhittade exempel med arbetsgivare som heter Exempel, aldrig riktiga
+  annonser. Ortnamnet och antalet kommer från videor.js via window.DATA.
+-->
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="gemensam.css">
+<style>
+  .telefon{position:absolute;left:310px;top:340px;width:460px;height:800px;box-sizing:border-box;
+    border:16px solid var(--text);border-radius:64px;background:var(--bg);overflow:hidden}
+  .notch{position:absolute;left:50%;top:10px;width:120px;height:26px;margin-left:-60px;
+    background:var(--text);border-radius:999px;z-index:2}
+  .skarm{position:absolute;left:0;right:0;top:0;padding:64px 28px 0;font-family:"Figtree",sans-serif}
+  .skarm h1{font-family:"Caprasimo",serif;font-weight:400;font-size:38px;line-height:1.1;margin:0 0 22px}
+  .fraga{font-size:22px;margin:0 0 8px}
+  .falt{background:var(--yta);border-radius:999px;padding:16px 22px;font-size:24px;min-height:30px}
+  .markor{display:inline-block;width:2px;height:26px;background:var(--text);vertical-align:-5px;margin-left:2px}
+  .knapp{display:block;text-align:center;margin:18px 0 0;padding:16px;border-radius:999px;color:#fff6ee;
+    font-weight:700;font-size:22px;background:linear-gradient(135deg,#ac5e2b 0%,#643312 100%)}
+  .lista{position:absolute;left:0;right:0;top:0;padding:64px 22px 0;font-family:"Figtree",sans-serif}
+  .antal{position:relative;z-index:1;background:var(--bg);font-weight:700;font-size:26px;padding:0 0 14px;margin:0}
+  .kortlista{position:relative}
+  .kort{background:#fff;border-radius:22px;padding:18px 20px;margin:0 0 14px}
+  .kort .tagg{display:inline-block;font-size:15px;font-weight:700;color:#3d472b;background:#f0fae1;
+    border-radius:999px;padding:4px 12px;margin:0 0 8px}
+  .kort h3{font-size:24px;line-height:1.2;margin:0 0 4px}
+  .kort p{font-size:18px;color:var(--dampad);margin:0}
+  .exempel{position:absolute;left:90px;right:90px;top:1152px;text-align:center;
+    font-family:"Figtree",sans-serif;font-size:28px;color:var(--dampad)}
+  /* Maskoten och bubblan flyttas ned lite, så att telefonen får plats. */
+  .bubbla{top:1230px;min-height:260px}
+  .maskot{top:1330px;width:300px;height:300px}
+</style>
+</head>
+<body>
+<div class="ram"></div>
+<div class="topp"><span>chansen.nu</span><span id="datum"></span></div>
+
+<div class="telefon">
+  <div class="notch"></div>
+  <div class="skarm" id="start">
+    <h1>Jobb som är värda att söka.</h1>
+    <div class="fraga">Var bor du?</div>
+    <div class="falt"><span id="skrivet"></span><span class="markor" id="markor"></span></div>
+    <span class="knapp" id="visa">Visa jobben</span>
+  </div>
+  <div class="lista" id="lista">
+    <div class="antal" id="antal"></div>
+    <div class="kortlista" id="kortlista">
+    <div class="kort"><span class="tagg">Bäst chans</span><h3>Kafébiträde</h3><p>Exempel Café AB · Deltid</p></div>
+    <div class="kort"><span class="tagg">Bäst chans</span><h3>Lagermedarbetare</h3><p>Exempel Lager AB · Heltid</p></div>
+    <div class="kort"><h3>Butiksmedarbetare</h3><p>Exempel Butik AB · Deltid</p></div>
+    <div class="kort"><h3>Städare</h3><p>Exempel Städ AB · Deltid</p></div>
+    </div>
+  </div>
+</div>
+<div class="exempel">Jobben i telefonen är påhittade exempel</div>
+
+<script src="maskot.js"></script>
+<script>
+  var D = window.DATA || { plats: "Göteborg", datum: "20 oktober", antal: 55 };
+
+  document.getElementById("datum").textContent = D.datum || "";
+  document.getElementById("antal").textContent = D.antal + " jobb i " + D.plats;
+
+  Maskot.repliker([
+    "Skriv in din kommun på chansen.nu.",
+    "Då ser du jobben där du bor. I " + D.plats + " finns " + D.antal + " just nu.",
+    "Du hittar dem på chansen.nu"
+  ]);
+
+  function klamp(x) { return Math.max(0, Math.min(1, x)); }
+  function mjuk(x) { x = klamp(x); return 1 - Math.pow(1 - x, 3); }
+  function synlig(t, a, b) { return klamp((t - a) / 0.5) * klamp((b - t) / 0.5); }
+
+  window.LANGD = 17;
+  window.BILDER = [3.2, 9.2, 15];
+  window.rita = function (t) {
+    // Kommunen skrivs in en bokstav i taget.
+    var bokstaver = Math.floor(klamp((t - 1.2) / 2.2) * D.plats.length);
+    document.getElementById("skrivet").textContent = D.plats.slice(0, bokstaver);
+    document.getElementById("markor").style.opacity = (t < 5 && Math.floor(t * 2.5) % 2 === 0) ? 1 : 0;
+
+    // Knappen trycks, och listan glider in.
+    var tryck = klamp((t - 4.2) / 0.15) * klamp((4.6 - t) / 0.15);
+    document.getElementById("visa").style.transform = "scale(" + (1 - 0.06 * tryck) + ")";
+    var lista = mjuk((t - 4.8) / 0.7);
+    document.getElementById("start").style.opacity = 1 - lista;
+    document.getElementById("lista").style.opacity = lista;
+    document.getElementById("lista").style.transform = "translateY(" + ((1 - lista) * 120) + "px)";
+    // Korten rullar sakta, som när man bläddrar. Rubriken står kvar.
+    document.getElementById("kortlista").style.transform = "translateY(" + (-Math.max(0, t - 7) * 18) + "px)";
+
+    var a = synlig(t, 0, 5), b = synlig(t, 5, 13), c = synlig(t, 13, 99);
+    Maskot.rita(t, [a, b, c], c > 0.5 ? "vinkar" : "pekar");
+  };
+  window.rita(0);
+</script>
+</body>
+</html>
