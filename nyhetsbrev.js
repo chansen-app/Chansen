@@ -29,15 +29,21 @@ const DAGAR_UPPLAGT = 5;
 const DAGAR_KVAR = 10;
 const DAG = 24 * 60 * 60 * 1000;
 
+// Samma regioner och ordning som i mejlet Nathalie gjorde själv i Sender.
 const REGIONER = {
+  "Västsverige": ["Västra Götalands län", "Värmlands län"],
+  "Stockholm och Uppsala": ["Stockholms län", "Uppsala län"],
+  "Mellansverige": ["Södermanlands län", "Västmanlands län", "Örebro län", "Dalarnas län"],
+  "Östergötland och Småland": ["Östergötlands län", "Jönköpings län", "Kronobergs län",
+                               "Kalmar län", "Gotlands län"],
+  "Södra Sverige": ["Skåne län", "Hallands län", "Blekinge län"],
   "Norrland": ["Norrbottens län", "Västerbottens län", "Jämtlands län",
-               "Västernorrlands län", "Gävleborgs län"],
-  "Svealand": ["Stockholms län", "Uppsala län", "Södermanlands län",
-               "Västmanlands län", "Örebro län", "Värmlands län", "Dalarnas län"],
-  "Götaland": ["Östergötlands län", "Jönköpings län", "Kronobergs län",
-               "Kalmar län", "Gotlands län", "Blekinge län", "Skåne län",
-               "Hallands län", "Västra Götalands län"]
+               "Västernorrlands län", "Gävleborgs län"]
 };
+
+// Färger och typsnitt som fungerar i alla mejlprogram.
+const F = "font-family:Arial,Helvetica,sans-serif;";
+const LINJE = '<tr><td style="padding:28px 60px;"><div style="border-top:1px solid #c67139;"></div></td></tr>\n';
 
 function svenskDatum(d) {
   const t = new Date(d);
@@ -128,17 +134,23 @@ function valjJobb(jobb, nu) {
   return { valda: valda, antalKandidater: kandidater.length };
 }
 
+// Tar bort orten först i rubriken, till exempel "Göteborg: Cafébiträde".
+function snyggTitel(j) {
+  let t = String(j.titel || "").trim();
+  if (j.ort) t = t.replace(new RegExp("^" + j.ort.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*[:,-]\\s*", "i"), "");
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
 function jobbHtml(j) {
-  const rad2 = [j.omfattning, "Sök senast " + svenskDatum(j.sistaAnsokningsdag)]
-    .filter(Boolean).join(" · ");
+  const rad2 = [j.arbetsgivare, j.ort, j.omfattning || j.anstallningsform,
+    j.korkortKravs === true ? "Kräver körkort" : ""].filter(Boolean).map(fly).join(" · ");
   return ''
-    + '<div style="margin:0 0 22px 0;">\n'
-    + '  <div style="font-size:17px;font-weight:bold;color:#201e1d;">' + fly(j.titel) + '</div>\n'
-    + '  <div style="font-size:15px;color:#201e1d;">' + fly(j.arbetsgivare) + ', ' + fly(j.ort) + '</div>\n'
-    + '  <div style="font-size:15px;color:#645c50;">' + fly(rad2) + '</div>\n'
-    + '  <div style="font-size:15px;margin-top:4px;"><a href="https://chansen.nu/#jobb-' + nummer(j)
-    + '" style="color:#ac5e2b;font-weight:bold;">Se jobbet</a></div>\n'
-    + '</div>\n';
+    + '<p style="' + F + 'margin:0 0 22px;font-size:17px;line-height:1.5;color:#201e1d;text-align:center;">\n'
+    + '  <b>' + fly(snyggTitel(j)) + '</b><br>\n'
+    + '  ' + rad2 + '<br>\n'
+    + '  Sök senast ' + svenskDatum(j.sistaAnsokningsdag) + ' · '
+    + '<a href="https://chansen.nu/#jobb-' + nummer(j) + '" style="color:#c67139;text-decoration:none;">Se jobbet</a>\n'
+    + '</p>\n';
 }
 
 const data = laddaJobb();
@@ -151,28 +163,54 @@ if (!valda.length) {
   process.exit(0);
 }
 
+/* Utseendet bygger på mejlet Nathalie gjorde själv i Sender: loggan
+   överst, tunna orange linjer, allt centrerat, och en orange fot.
+   Tabeller i stället för vanlig layout, eftersom många mejlprogram
+   bara klarar tabeller. Senders egen länk för att avsluta läggs till
+   av Sender längst ned.                                            */
 let html = ''
   + '<!doctype html>\n<html lang="sv">\n<head>\n<meta charset="utf-8">\n'
-  + '<title>Nyhetsbrev ' + svenskDatum(nu) + '</title>\n</head>\n'
-  + '<body style="margin:0;padding:24px;background:#f5ead8;font-family:Figtree,Arial,sans-serif;color:#201e1d;">\n'
-  + '<div style="max-width:560px;margin:0 auto;">\n'
-  + '<h1 style="font-size:24px;margin:0 0 12px 0;">Nya jobb att söka</h1>\n'
-  + '<p style="font-size:15px;line-height:1.5;margin:0 0 24px 0;">Hej! Här är ' + valda.length
-  + ' jobb från de senaste dagarna där arbetsgivaren skriver att erfarenhet inte krävs. '
-  + 'Alla går att söka i minst tio dagar till.</p>\n';
+  + '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+  + '<title>Veckans jobbtips</title>\n</head>\n'
+  + '<body style="margin:0;padding:0;background:#f5ead8;">\n'
+  + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5ead8;">'
+  + '<tr><td align="center" style="padding:24px 12px;">\n'
+  + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#f5ead8;">\n'
+  + '<tr><td align="center" style="padding:20px 0 0;">'
+  + '<a href="https://chansen.nu"><img src="https://chansen.nu/mejl-logga.png" width="100" height="100" alt="Chansen" style="display:block;border:0;"></a>'
+  + '</td></tr>\n'
+  + LINJE
+  + '<tr><td style="padding:0 40px;' + F + 'text-align:center;color:#201e1d;">\n'
+  + '<p style="margin:0 0 22px;font-size:26px;font-weight:bold;">Hej!</p>\n'
+  + '<p style="margin:0;font-size:19px;line-height:1.55;">Här är veckans jobbtips. I alla jobb nedan krävs ingen '
+  + 'tidigare erfarenhet, och de lades upp de senaste dagarna. Klicka på "Se jobbet" för att läsa mer och söka.</p>\n'
+  + '</td></tr>\n';
 
 Object.keys(REGIONER).forEach(function (r) {
   const iRegionen = valda.filter(function (j) { return region(j.lan) === r; });
   if (!iRegionen.length) return;
-  html += '<h2 style="font-size:19px;color:#8c491a;margin:28px 0 14px 0;">' + r + '</h2>\n';
+  html += LINJE
+    + '<tr><td style="padding:0 40px;">\n'
+    + '<p style="' + F + 'margin:0 0 8px;font-size:22px;font-weight:bold;text-decoration:underline;text-align:center;color:#201e1d;">' + r + '</p>\n';
   iRegionen.forEach(function (j) { html += jobbHtml(j); });
+  html += '</td></tr>\n';
 });
 
-html += ''
-  + '<p style="font-size:15px;line-height:1.5;margin:28px 0 0 0;">Fler jobb hittar du på '
-  + '<a href="https://chansen.nu" style="color:#ac5e2b;font-weight:bold;">chansen.nu</a>. '
-  + 'Nya jobb varje natt.</p>\n'
-  + '</div>\n</body>\n</html>\n';
+html += LINJE
+  + '<tr><td style="padding:0 40px;' + F + 'text-align:center;color:#201e1d;">\n'
+  + '<p style="margin:0 0 22px;font-size:17px;line-height:1.55;"><b>Hittar du inget nära dig?</b><br>'
+  + 'Skriv in din kommun på <a href="https://chansen.nu" style="color:#c67139;text-decoration:none;">chansen.nu</a>. '
+  + 'Där finns fler jobb, och nya kommer varje natt.</p>\n'
+  + '<p style="margin:0;font-size:19px;font-weight:bold;">Lycka till med jobbsökandet!</p>\n'
+  + '</td></tr>\n'
+  + LINJE
+  + '<tr><td align="center" style="background:#c67139;padding:36px 40px;' + F + 'text-align:center;color:#ffffff;">\n'
+  + '<p style="margin:0 0 4px;font-size:17px;">Chansen</p>\n'
+  + '<p style="margin:0 0 22px;font-size:17px;"><a href="https://chansen.nu" style="color:#fff2eb;text-decoration:none;">chansen.nu</a></p>\n'
+  + '<p style="margin:0;font-size:17px;line-height:1.55;">Chansen är gratis och drivs av en privatperson. '
+  + 'Den har inget med Arbetsförmedlingen att göra. Du hittar Chansen även på Facebook: &#64;chansen</p>\n'
+  + '</td></tr>\n'
+  + '</table>\n</td></tr></table>\n</body>\n</html>\n';
 
 fs.writeFileSync("nyhetsbrev.html", html);
 
