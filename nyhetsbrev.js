@@ -209,6 +209,11 @@ html += LINJE
   + '<p style="margin:0 0 22px;font-size:17px;"><a href="https://chansen.nu" style="color:#fff2eb;text-decoration:none;">chansen.nu</a></p>\n'
   + '<p style="margin:0;font-size:17px;line-height:1.55;">Chansen är gratis och drivs av en privatperson. '
   + 'Den har inget med Arbetsförmedlingen att göra. Du hittar Chansen även på Facebook: &#64;chansen</p>\n'
+  // Länken för att avsluta måste finnas, annars går mejlet inte att skicka.
+  // {$unsubscribe_link} byts ut av Sender mot en egen länk för varje
+  // mottagare. Koden kommer från Senders hjälp om egen HTML.
+  + '<p style="margin:22px 0 0;font-size:14px;line-height:1.5;color:#fff2eb;">Vill du inte få fler mejl? '
+  + '<a href="{$unsubscribe_link}" style="color:#ffffff;text-decoration:underline;">Avsluta prenumerationen här</a>.</p>\n'
   + '</td></tr>\n'
   + '</table>\n</td></tr></table>\n</body>\n</html>\n';
 
