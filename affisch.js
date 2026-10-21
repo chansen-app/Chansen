@@ -3,9 +3,9 @@
  *  Gör en affisch i A4 med en telefon som visar Chansen och en QR-kod
  *  som öppnar Chansen med orten ifylld. En per skola eller ställe.
  *
- *  Kör med:   node .\affisch.js Halmstad k7
+ *  Kör med:   node .\affisch.js Ortnamn kodord
  *             (ort och kodord, samma kodord som i privat/markningar.txt)
- *  eller:     node .\affisch.js Halmstad   utan kodord, då räknas besöken bara på orten
+ *  eller:     node .\affisch.js Ortnamn   utan kodord, då räknas besöken bara på orten
  *
  *  Två versioner sparas i mappen affischer, som aldrig följer med till
  *  GitHub: en i färg för tryckeri eller skolans skrivare, och en
@@ -182,7 +182,7 @@ function affischHtml(ort, skarm, qr, svartvit) {
 async function main() {
   const ort = (process.argv[2] || "").trim();
   const kod = (process.argv[3] || "").toLowerCase().trim();
-  if (!ort) { console.log("Skriv till exempel: node .\\affisch.js Halmstad k7"); process.exit(1); }
+  if (!ort) { console.log("Skriv till exempel: node .\\affisch.js Ortnamn kodord"); process.exit(1); }
   if (kod && !/^[a-z0-9-]{1,20}$/.test(kod)) { console.log("Kodordet får bara ha små bokstäver, siffror och bindestreck."); process.exit(1); }
 
   if (!fs.existsSync("affischer")) fs.mkdirSync("affischer");
