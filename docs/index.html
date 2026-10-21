@@ -476,7 +476,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 </div>
 
 <div id="v-start">
-  <h1>Jobb som är värda att söka.</h1>
+  <h1 id="start-rubrik">Jobb som är värda att söka.</h1>
   <p class="sub">Några snabba frågor. Svaren sparas bara i din telefon.</p>
 
   <div class="field">
@@ -1698,6 +1698,8 @@ function startaLista(){
   var efterat = function(){
     spara();
     handelse("visade-jobb");
+    // Rubriktestet: räknas en gång, för den som såg startsidan.
+    if (RUBRIK_VISAD && !RUBRIK_RAKNAD) { handelse("rubrik-" + RUBRIK_VARIANT + "-vidare"); RUBRIK_RAKNAD = true; }
     // vet vi om folk går vidare direkt eller svarar på allt först?
     var extra = (svar.utbildning ? 1 : 0) + (svar.korkort ? 1 : 0)
               + (svar.erfarenhet ? 1 : 0) + ((svar.omrade && svar.omrade.length) ? 1 : 0);
@@ -4498,9 +4500,33 @@ if ("serviceWorker" in navigator) {
   } catch(e){}
 })();
 
+/* Rubriktest. Varannan ny besökare får rubrik A, varannan rubrik B, och
+   samma besökare får alltid samma. I statistiken syns hur många som såg
+   varje rubrik och hur många av dem som gick vidare till jobben. Det
+   enda som sparas är bokstaven, i den egna telefonen.
+   Byt text i RUBRIKER för att testa något nytt.                     */
+var RUBRIKER = {
+  a: "Jobb som är värda att söka.",
+  b: "Jobb med låga krav, nära dig."
+};
+var RUBRIK_VARIANT = "a", RUBRIK_VISAD = false, RUBRIK_RAKNAD = false;
+try {
+  RUBRIK_VARIANT = localStorage.getItem("chansen-rubrik") || (Math.random() < 0.5 ? "a" : "b");
+  if (!RUBRIKER[RUBRIK_VARIANT]) RUBRIK_VARIANT = "a";
+  localStorage.setItem("chansen-rubrik", RUBRIK_VARIANT);
+} catch(e){}
+(function(){
+  var h = document.getElementById("start-rubrik");
+  if (h) h.textContent = RUBRIKER[RUBRIK_VARIANT];
+})();
+
 if (kollaAdress()) {
   // arbetsgivare kom via direktlänk
-} else if (svar.alder) { startaLista(); } else { visaVy("start"); }
+} else if (svar.alder) { startaLista(); } else {
+  visaVy("start");
+  RUBRIK_VISAD = true;
+  handelse("rubrik-" + RUBRIK_VARIANT + "-visad");
+}
 // Rutan om hemskärmen kommer efter en stund, när man hunnit titta på jobben.
 setTimeout(visaHemskarm, 8000);
 window.addEventListener("scroll", function(){
