@@ -1285,6 +1285,9 @@ function ritaStatistik(){
   // Kodord, till exempel ab12, översätts till skolans namn. Vad koderna
   // betyder sparas bara i den här telefonen, aldrig på GitHub.
   var kodord = kodord_();
+  // Annonser som besökare anmält som borttagna, med numret i Platsbanken.
+  var bortaLista = slaIhop_(dagar, "Händelser", function(k){ return k.slice(13); },
+    function(k){ return k.indexOf("annons-borta/") !== 0; });
   var franLista = slaIhop_(dagar, "Händelser", function(k){
     var t = k.slice(5);
     return kodord[t] ? kodord[t] + " (" + t + ")" : t;
@@ -1302,6 +1305,15 @@ function ritaStatistik(){
     + "</div>"
     + '<div class="stat-kort"><h3>Mest klickade annonser</h3><p class="under">Klick vidare till annonsen</p>'
     +   (annonser.length ? listaHtml_(annonser, 10) : '<p class="stat-not">Inget än. Klicken per annons räknas från version 137 av sidan.</p>')
+    + "</div>"
+    + '<div class="stat-kort"><h3>Anmälda annonser</h3><p class="under">Besökare som säger att annonsen inte finns längre</p>'
+    +   (bortaLista.length
+          ? '<div class="stat-lista">' + bortaLista.slice(0, 15).map(function(p){
+              var id = p[0];
+              var lank = /^\d+$/.test(id) ? '<a href="https://arbetsformedlingen.se/platsbanken/annonser/' + id + '" target="_blank" rel="noopener">' + fly(id) + '</a>' : fly(id);
+              return '<div class="namn">' + lank + '</div><div class="v">' + tal_(p[1]) + '</div><div></div>';
+            }).join("") + '</div>'
+          : '<p class="stat-not">Inget än. Bra, då verkar annonserna stämma.</p>')
     + "</div>"
     + '<div class="stat-kort"><h3>Mejllistan</h3><p class="under">Jobbtips via mejl</p>' + mejlHtml + "</div>"
     + '<div class="stat-kort"><h3>Nya och återkommande</h3><p class="under">Besök</p>'
