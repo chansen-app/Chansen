@@ -1,0 +1,32 @@
+/*  Gemensamt utseende för alla videomallar.
+
+    Bilden är 1080 × 1920. 250 pixlar upptill och nedtill hålls fria,
+    eftersom TikToks knappar och text ligger där.                      */
+
+@font-face{font-family:"Caprasimo";src:url("../docs/caprasimo.woff2") format("woff2")}
+@font-face{font-family:"Figtree";font-weight:400 700;src:url("../docs/figtree.woff2") format("woff2")}
+
+:root{--bg:#f5ead8;--yta:#ebddc5;--text:#201e1d;--dampad:#645c50;--knapp:#ac5e2b;
+  --orange:#c67139;--mork:#8c491a;--ljus:#fff6ee;--linje:#dcd3c4}
+
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:var(--bg);color:var(--text)}
+
+.ram{position:absolute;left:40px;right:40px;top:230px;bottom:230px;border:6px solid var(--orange);border-radius:48px}
+.topp{position:absolute;left:100px;right:100px;top:276px;display:flex;justify-content:space-between;
+  font-family:"Figtree",sans-serif;font-size:40px;color:var(--dampad)}
+
+/* Övre delen, där siffrorna visas. */
+.scen{position:absolute;left:90px;right:90px;top:360px;height:700px;
+  display:flex;flex-direction:column;justify-content:center;text-align:center}
+.tal{font-family:"Caprasimo",serif;font-size:330px;line-height:1;color:var(--knapp)}
+.under{font-family:"Figtree",sans-serif;font-weight:700;font-size:64px;line-height:1.2;margin-top:10px}
+.logga{font-family:"Caprasimo",serif;font-size:150px;line-height:1;color:var(--mork)}
+
+/* Nedre delen: maskoten och pratbubblan. */
+.maskot{position:absolute;left:70px;top:1290px;width:330px;height:330px}
+.bubbla{position:absolute;left:420px;right:90px;top:1150px;min-height:300px;box-sizing:border-box;
+  background:var(--ljus);border-radius:44px;box-shadow:0 6px 0 rgba(140,73,26,.12);transform-origin:0% 80%}
+.bubbla:before{content:"";position:absolute;left:-34px;bottom:70px;border-style:solid;
+  border-width:22px 40px 22px 0;border-color:transparent var(--ljus) transparent transparent}
+.repl{position:absolute;inset:40px 44px;display:flex;align-items:center;
+  font-family:"Figtree",sans-serif;font-weight:700;font-size:50px;line-height:1.25}
