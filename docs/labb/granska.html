@@ -1294,6 +1294,32 @@ function ritaStatistik(){
   // Kodord, till exempel ab12, översätts till skolans namn. Vad koderna
   // betyder sparas bara i den här telefonen, aldrig på GitHub.
   var kodord = kodord_();
+  /* Det som byggdes i oktober, samlat. Rubriktestet visar hur stor del
+     av dem som såg varje rubrik som gick vidare till jobben.        */
+  function andel(a, b){ return b ? Math.round(100 * a / b) + " %" : "–"; }
+  var raV = handelse("rubrik-a-visad"), raG = handelse("rubrik-a-vidare");
+  var rbV = handelse("rubrik-b-visad"), rbG = handelse("rubrik-b-vidare");
+  var bortaAlla = dagar.reduce(function(s, x){
+    var h = x["Händelser"] || {}, n = 0;
+    for (var k in h) if (k.indexOf("annons-borta/") === 0) n += Number(h[k] || 0);
+    return s + n;
+  }, 0);
+  function rad(namn, varde){ return '<div class="namn">' + namn + '</div><div class="v">' + varde + '</div><div></div>'; }
+  html += '<div class="stat-kort"><h3>Nytt i oktober</h3><p class="under">Det som lades till på sidan i oktober</p>'
+    + '<p class="stat-not" style="margin:0 0 6px"><b>Rubriktestet på startsidan.</b> Vilken rubrik får flest att gå vidare till jobben?</p>'
+    + '<div class="stat-lista">'
+    + rad("A: Jobb som är värda att söka.", tal_(raG) + " av " + tal_(raV) + ", " + andel(raG, raV))
+    + rad("B: Jobb med låga krav, nära dig.", tal_(rbG) + " av " + tal_(rbV) + ", " + andel(rbG, rbV))
+    + '</div>'
+    + ((raV + rbV) < 200 ? '<p class="stat-not">För få besök än för att säga vilken som vinner. Vänta tills båda har minst 100.</p>' : '')
+    + '<div class="stat-lista" style="margin-top:12px">'
+    + rad("Påminn mig", tal_(handelse("paminn-mig")) + " tryck")
+    + rad("Rutan om hemskärmen", tal_(handelse("hemskarm-visad")) + " visad, " + tal_(handelse("hemskarm-ja")) + " ja, " + tal_(handelse("hemskarm-inte-nu")) + " inte nu")
+    + rad("Hittade du ett jobb? Snabbsvar", tal_(handelse("tyck-snabb-ja")) + " ja, " + tal_(handelse("tyck-snabb-nej")) + " nej, " + tal_(handelse("tyck-snabb-inte-an")) + " inte än")
+    + rad("Skickade formuläret", tal_(handelse("tyck-skickat")))
+    + rad("Anmälda annonser", tal_(bortaAlla))
+    + '</div></div>';
+
   // Annonser som besökare anmält som borttagna, med numret i Platsbanken.
   var bortaLista = slaIhop_(dagar, "Händelser", function(k){ return k.slice(13); },
     function(k){ return k.indexOf("annons-borta/") !== 0; });
