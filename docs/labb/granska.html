@@ -1160,6 +1160,15 @@ function ritaStatistik(){
     return '<button class="' + (statPeriod === p[0] ? "on" : "") + '" onclick="valjStatPeriod(' + p[0] + ')">' + p[1] + "</button>";
   }).join("") + "</div>";
 
+  // När statistiken senast samlades in, så att man ser att den är färsk.
+  var senastUppd = alla.reduce(function(m, x){ var u = String(x["Uppdaterad"] || ""); return u > m ? u : m; }, "");
+  if (senastUppd){
+    var uDag = senastUppd.slice(0, 10), uTid = senastUppd.slice(11, 16);
+    html += '<p class="stat-not" style="margin:0 0 12px">Senast uppdaterad '
+      + (uDag === idag ? "i dag" : (uDag === dagPlus_(idag, -1) ? "i går" : kortDatum_(uDag)))
+      + (uTid ? " kl " + uTid : "") + "</p>";
+  }
+
   if (d.fel){
     html += '<div class="stat-kort stat-fel">Senaste insamlingen fick ett fel: ' + fly(d.fel) + "</div>";
   }
@@ -1346,7 +1355,10 @@ function ritaStatistik(){
     + dagar.slice().reverse().map(function(x){
         return "<tr><td>" + x.datum + "</td><td>" + (x["Besök"] != null ? tal_(x["Besök"]) : "–")
           + "</td><td>" + (x["Sidvisningar"] != null ? tal_(x["Sidvisningar"]) : "–")
-          + "</td><td>" + tal_((x["Händelser"] || {})["klick-annons"]) + "</td><td>"
+          // Saknas knapptrycken för en dag kunde de inte hämtas. Då står
+          // det saknas, inte 0, så att det inte ser ut som att ingen klickade.
+          + "</td><td>" + (x["Händelser"] && typeof x["Händelser"] === "object" && Object.keys(x["Händelser"]).length
+              ? tal_(x["Händelser"]["klick-annons"] || 0) : '<span class="stat-not">saknas</span>') + "</td><td>"
           + (x["Jobb Sverige"] ? tal_(x["Jobb Sverige"]) : "–") + "</td></tr>";
       }).join("") + "</tbody></table></details>";
 
