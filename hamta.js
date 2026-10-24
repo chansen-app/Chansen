@@ -69,7 +69,11 @@ const YRKESSTOPP = [
   "anlaggning","anläggning","besiktning","installator","installatör",
   "snickare","svetsare","pilot","polis","brandman","officer","maklare","mäklare",
   "art director","copywriter","journalist","redaktor","redaktör","undersköterska",
-  "underskoterska","barnskötare","barnskotare","tandhygienist","key account"
+  "underskoterska","barnskötare","barnskotare","tandhygienist","key account",
+  // Yrken som kräver utbildning, även när arbetsgivaren har kryssat i att
+  // erfarenhet inte krävs. En besökare hittade dem och undrade varför.
+  "medicinsk sekreterare","medicinska sekreterare","skadetekniker","skadeverkstad",
+  "bilmekaniker","platslagare","plåtslagare","billackerare"
 ];
 
 const TEXTSTOPP = [
