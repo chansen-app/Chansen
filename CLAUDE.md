@@ -4,7 +4,7 @@ Läs README.md innan du börjar. Handboken finns inte i repot, den har jag spara
 
 ## Mina regler
 
-1. Du arbetar bara med Chansen och bara med filerna i den här mappen. Öppna, läs eller ändra aldrig filer utanför mappen, och rör inget annat på datorn eller i andra projekt. Om något verkar kräva det, fråga mig först.
+1. Du arbetar bara med Chansen och bara med filerna i den här mappen och i mappen C:\Users\Natha\Chansens sekretess. Öppna, läs eller ändra aldrig andra filer, och rör inget annat på datorn eller i andra projekt. Om något verkar kräva det, fråga mig först.
 2. Skriv på svenska, vänligt och kort. Inga tankstreck, inga modeord, inget skryt.
 3. Ge alltid hela den uppdaterade texten när något ändras.
 4. I synlig text står bara chansen.nu, aldrig långa länkar med ?fran=.
@@ -13,3 +13,4 @@ Läs README.md innan du börjar. Handboken finns inte i repot, den har jag spara
 7. Ändra inget utan att först förklara vad du tänker göra och få mitt ja.
 8. Skriv aldrig namn på privatpersoner, mejladresser, telefonnummer eller personnummer i någon fil i repot. Sådant hör hemma i mappen privat, som aldrig följer med till GitHub. Kör node kolla-personuppgifter.js innan varje commit.
 9. Kalkylarket Jobbansökningar Chansen får aldrig publiceras i sin helhet. Bara fliken Publicerat får vara öppen på nätet, eftersom de andra flikarna innehåller arbetsgivarnas mejl och telefonnummer. Föreslå aldrig något som publicerar mer.
+10. Kontakter, utskick och annat som aldrig får synas på chansen.nu eller GitHub sparas i C:\Users\Natha\Chansens sekretess, aldrig i mappen chansen. Den mappen är inte kopplad till GitHub.
