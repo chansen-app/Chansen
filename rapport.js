@@ -138,6 +138,53 @@ ${lanRader}
 </body></html>`;
 }
 
+/* Ett pressmeddelande till lokaltidningar, med siffrorna från rapporten.
+   Ett nationellt stycke först, sedan ett färdigt stycke per län, så att
+   det går att skicka till tidningen i just det länet. Citatet skriver
+   Nathalie själv, det står inom hakparentes.                         */
+function press(s, datum) {
+  const d = new Date(datum);
+  const manad = MANADER[d.getMonth()];
+  const dag = d.getDate() + " " + manad + " " + d.getFullYear();
+  const rent = v => String(v).replace(/&nbsp;/g, " ");
+  const branscher = s.branscher.slice(0, 3).map(b => b.namn.toLowerCase());
+  const lista = branscher.slice(0, -1).join(", ") + " samt " + branscher[branscher.length - 1];
+
+  const rader = [];
+  rader.push("PRESSMEDDELANDE, " + dag);
+  rader.push("");
+  rader.push(rent(tal(s.utanKrav)) + " jobb i Sverige där erfarenhet inte krävs just nu");
+  rader.push("");
+  rader.push("Just nu finns " + rent(tal(s.alla)) + " lediga jobb i Sverige med låga ingångskrav, och i "
+    + rent(tal(s.utanKrav)) + " av dem skriver arbetsgivaren själv att erfarenhet inte krävs. Det visar en "
+    + "genomgång av alla annonser i Platsbanken som gratissidan Chansen gör varje natt. Flest jobb finns inom "
+    + lista + ". " + rent(tal(s.unga)) + " av jobben går att söka för den som är under 18.");
+  rader.push("");
+  rader.push("[Skriv ett citat här, till exempel om varför du startade Chansen och vad siffrorna betyder för den som söker sitt första jobb.]");
+  rader.push("");
+  rader.push("Om Chansen");
+  rader.push("Chansen, chansen.nu, är en gratis sida som varje natt går igenom Platsbanken och sorterar bort "
+    + "annonser som kräver utbildning, yrkesbevis eller flera års erfarenhet. Sidan drivs av en privatperson, "
+    + "utan vinstsyfte. Jobben kommer från Arbetsförmedlingens öppna data, men Arbetsförmedlingen står inte bakom sidan.");
+  rader.push("");
+  rader.push("Kontakt: chansen.jobb@gmail.com");
+  rader.push("");
+  rader.push("Siffrorna gäller " + dag + " och ändras varje natt.");
+  rader.push("");
+  rader.push("");
+  rader.push("STYCKEN PER LÄN, att byta mot det nationella stycket när du skickar till en lokaltidning");
+  rader.push("");
+  for (const l of s.lan) {
+    const storst = Object.keys(l.orter).sort((a, b) => l.orter[b] - l.orter[a])[0] || "";
+    rader.push(l.namn.toUpperCase());
+    rader.push("Just nu finns " + rent(tal(l.alla)) + " lediga jobb med låga ingångskrav i " + l.namn + ", och i "
+      + rent(tal(l.utanKrav)) + " av dem skriver arbetsgivaren att erfarenhet inte krävs. Flest finns i " + storst
+      + ". " + rent(tal(l.deltid)) + " är på deltid, och " + rent(tal(l.unga)) + " går att söka för den som är under 18.");
+    rader.push("");
+  }
+  return rader.join("\n");
+}
+
 async function main() {
   const data = laddaJobb();
   const s = rakna(data.JOBB);
@@ -150,6 +197,7 @@ async function main() {
   if (!fs.existsSync("rapporter")) fs.mkdirSync("rapporter");
   const bas = path.join("rapporter", "chansen-rapport-" + datum.slice(0, 7));
   fs.writeFileSync(bas + ".html", html(s, data.UPPDATERAD));
+  fs.writeFileSync(path.join("rapporter", "pressmeddelande-" + datum.slice(0, 7) + ".txt"), press(s, data.UPPDATERAD));
 
   const b = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ["--allow-file-access-from-files"] });
   try {
