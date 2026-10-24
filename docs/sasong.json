@@ -1,0 +1,506 @@
+{
+ "dagar": {
+  "2026-08-11": {
+   "totalt": 776,
+   "jul": 1,
+   "sommar": 84,
+   "vinter": 3,
+   "sasong": 3
+  },
+  "2026-08-12": {
+   "totalt": 781,
+   "jul": 1,
+   "sommar": 84,
+   "vinter": 5,
+   "sasong": 3
+  },
+  "2026-08-13": {
+   "totalt": 775,
+   "jul": 0,
+   "sommar": 86,
+   "vinter": 5,
+   "sasong": 5
+  },
+  "2026-08-14": {
+   "totalt": 774,
+   "jul": 0,
+   "sommar": 86,
+   "vinter": 5,
+   "sasong": 5
+  },
+  "2026-08-15": {
+   "totalt": 485,
+   "jul": 0,
+   "sommar": 58,
+   "vinter": 3,
+   "sasong": 5
+  },
+  "2026-08-16": {
+   "totalt": 468,
+   "jul": 0,
+   "sommar": 54,
+   "vinter": 3,
+   "sasong": 3
+  },
+  "2026-08-17": {
+   "totalt": 513,
+   "jul": 0,
+   "sommar": 57,
+   "vinter": 3,
+   "sasong": 3
+  },
+  "2026-08-18": {
+   "totalt": 511,
+   "jul": 0,
+   "sommar": 57,
+   "vinter": 3,
+   "sasong": 3
+  },
+  "2026-08-19": {
+   "totalt": 447,
+   "jul": 0,
+   "sommar": 9,
+   "vinter": 3,
+   "sasong": 3
+  },
+  "2026-08-20": {
+   "totalt": 444,
+   "jul": 0,
+   "sommar": 59,
+   "vinter": 2,
+   "sasong": 2
+  },
+  "2026-08-21": {
+   "totalt": 455,
+   "jul": 0,
+   "sommar": 57,
+   "vinter": 2,
+   "sasong": 2
+  },
+  "2026-08-22": {
+   "totalt": 456,
+   "jul": 0,
+   "sommar": 57,
+   "vinter": 2,
+   "sasong": 3
+  },
+  "2026-08-23": {
+   "totalt": 447,
+   "jul": 0,
+   "sommar": 48,
+   "vinter": 3,
+   "sasong": 4
+  },
+  "2026-08-24": {
+   "totalt": 440,
+   "jul": 0,
+   "sommar": 48,
+   "vinter": 3,
+   "sasong": 4
+  },
+  "2026-08-25": {
+   "totalt": 444,
+   "jul": 2,
+   "sommar": 44,
+   "vinter": 3,
+   "sasong": 5
+  },
+  "2026-08-26": {
+   "totalt": 449,
+   "jul": 2,
+   "sommar": 43,
+   "vinter": 3,
+   "sasong": 5
+  },
+  "2026-08-27": {
+   "totalt": 470,
+   "jul": 2,
+   "sommar": 44,
+   "vinter": 4,
+   "sasong": 6
+  },
+  "2026-08-28": {
+   "totalt": 473,
+   "jul": 2,
+   "sommar": 43,
+   "vinter": 4,
+   "sasong": 6
+  },
+  "2026-08-29": {
+   "totalt": 473,
+   "jul": 2,
+   "sommar": 43,
+   "vinter": 4,
+   "sasong": 6
+  },
+  "2026-08-30": {
+   "totalt": 471,
+   "jul": 2,
+   "sommar": 43,
+   "vinter": 4,
+   "sasong": 6
+  },
+  "2026-08-31": {
+   "totalt": 461,
+   "jul": 2,
+   "sommar": 31,
+   "vinter": 4,
+   "sasong": 6
+  },
+  "2026-09-02": {
+   "totalt": 481,
+   "jul": 3,
+   "sommar": 28,
+   "vinter": 4,
+   "sasong": 7
+  },
+  "2026-09-03": {
+   "totalt": 1485,
+   "jul": 5,
+   "sommar": 31,
+   "vinter": 18,
+   "sasong": 36
+  },
+  "2026-09-04": {
+   "totalt": 1489,
+   "jul": 6,
+   "sommar": 31,
+   "vinter": 19,
+   "sasong": 41
+  },
+  "2026-09-05": {
+   "totalt": 1469,
+   "jul": 6,
+   "sommar": 23,
+   "vinter": 17,
+   "sasong": 41
+  },
+  "2026-09-06": {
+   "totalt": 1455,
+   "jul": 6,
+   "sommar": 22,
+   "vinter": 17,
+   "sasong": 41
+  },
+  "2026-09-07": {
+   "totalt": 1432,
+   "jul": 6,
+   "sommar": 22,
+   "vinter": 18,
+   "sasong": 41
+  },
+  "2026-09-09": {
+   "totalt": 1447,
+   "jul": 7,
+   "sommar": 24,
+   "vinter": 20,
+   "sasong": 45
+  },
+  "2026-09-10": {
+   "totalt": 1460,
+   "jul": 7,
+   "sommar": 25,
+   "vinter": 20,
+   "sasong": 44
+  },
+  "2026-09-13": {
+   "totalt": 1434,
+   "jul": 9,
+   "sommar": 24,
+   "vinter": 20,
+   "sasong": 39
+  },
+  "2026-09-15": {
+   "totalt": 1416,
+   "jul": 9,
+   "sommar": 18,
+   "vinter": 21,
+   "sasong": 36
+  },
+  "2026-09-16": {
+   "totalt": 1408,
+   "jul": 7,
+   "sommar": 16,
+   "vinter": 20,
+   "sasong": 35
+  },
+  "2026-09-17": {
+   "totalt": 1446,
+   "jul": 7,
+   "sommar": 14,
+   "vinter": 22,
+   "sasong": 37
+  },
+  "2026-09-18": {
+   "totalt": 1436,
+   "jul": 7,
+   "sommar": 15,
+   "vinter": 20,
+   "sasong": 39
+  },
+  "2026-09-19": {
+   "totalt": 1437,
+   "jul": 7,
+   "sommar": 15,
+   "vinter": 20,
+   "sasong": 39
+  },
+  "2026-09-20": {
+   "totalt": 1420,
+   "jul": 7,
+   "sommar": 13,
+   "vinter": 20,
+   "sasong": 39
+  },
+  "2026-09-21": {
+   "totalt": 1377,
+   "jul": 7,
+   "sommar": 11,
+   "vinter": 19,
+   "sasong": 37
+  },
+  "2026-09-22": {
+   "totalt": 1405,
+   "jul": 7,
+   "sommar": 12,
+   "vinter": 19,
+   "sasong": 37
+  },
+  "2026-09-23": {
+   "totalt": 1425,
+   "jul": 7,
+   "sommar": 16,
+   "vinter": 19,
+   "sasong": 38
+  },
+  "2026-09-24": {
+   "totalt": 1437,
+   "jul": 6,
+   "sommar": 18,
+   "vinter": 19,
+   "sasong": 37
+  },
+  "2026-09-25": {
+   "totalt": 1449,
+   "jul": 7,
+   "sommar": 18,
+   "vinter": 19,
+   "sasong": 35
+  },
+  "2026-09-26": {
+   "totalt": 1395,
+   "jul": 8,
+   "sommar": 16,
+   "vinter": 18,
+   "sasong": 35
+  },
+  "2026-09-27": {
+   "totalt": 1361,
+   "jul": 7,
+   "sommar": 16,
+   "vinter": 18,
+   "sasong": 35
+  },
+  "2026-09-28": {
+   "totalt": 1346,
+   "jul": 7,
+   "sommar": 17,
+   "vinter": 18,
+   "sasong": 34
+  },
+  "2026-09-29": {
+   "totalt": 1366,
+   "jul": 8,
+   "sommar": 17,
+   "vinter": 19,
+   "sasong": 36
+  },
+  "2026-09-30": {
+   "totalt": 1377,
+   "jul": 9,
+   "sommar": 17,
+   "vinter": 20,
+   "sasong": 36
+  },
+  "2026-10-01": {
+   "totalt": 1228,
+   "jul": 9,
+   "sommar": 17,
+   "vinter": 22,
+   "sasong": 32
+  },
+  "2026-10-02": {
+   "totalt": 1218,
+   "jul": 9,
+   "sommar": 22,
+   "vinter": 20,
+   "sasong": 27
+  },
+  "2026-10-03": {
+   "totalt": 1232,
+   "jul": 9,
+   "sommar": 22,
+   "vinter": 21,
+   "sasong": 26
+  },
+  "2026-10-04": {
+   "totalt": 1219,
+   "jul": 10,
+   "sommar": 22,
+   "vinter": 21,
+   "sasong": 25
+  },
+  "2026-10-05": {
+   "totalt": 1220,
+   "jul": 9,
+   "sommar": 19,
+   "vinter": 21,
+   "sasong": 25
+  },
+  "2026-10-06": {
+   "totalt": 1254,
+   "jul": 11,
+   "sommar": 18,
+   "vinter": 22,
+   "sasong": 29
+  },
+  "2026-10-07": {
+   "totalt": 1282,
+   "jul": 13,
+   "sommar": 17,
+   "vinter": 20,
+   "sasong": 28
+  },
+  "2026-10-08": {
+   "totalt": 1305,
+   "jul": 12,
+   "sommar": 16,
+   "vinter": 21,
+   "sasong": 28
+  },
+  "2026-10-09": {
+   "totalt": 1330,
+   "jul": 14,
+   "sommar": 16,
+   "vinter": 23,
+   "sasong": 31
+  },
+  "2026-10-10": {
+   "totalt": 1333,
+   "jul": 14,
+   "sommar": 15,
+   "vinter": 19,
+   "sasong": 30
+  },
+  "2026-10-11": {
+   "totalt": 1326,
+   "jul": 14,
+   "sommar": 15,
+   "vinter": 19,
+   "sasong": 30
+  },
+  "2026-10-12": {
+   "totalt": 1288,
+   "jul": 17,
+   "sommar": 14,
+   "vinter": 19,
+   "sasong": 27
+  },
+  "2026-10-13": {
+   "totalt": 1295,
+   "jul": 16,
+   "sommar": 14,
+   "vinter": 20,
+   "sasong": 27
+  },
+  "2026-10-14": {
+   "totalt": 1319,
+   "jul": 16,
+   "sommar": 14,
+   "vinter": 22,
+   "sasong": 26
+  },
+  "2026-10-15": {
+   "totalt": 1325,
+   "jul": 17,
+   "sommar": 19,
+   "vinter": 23,
+   "sasong": 29
+  },
+  "2026-10-16": {
+   "totalt": 1330,
+   "jul": 15,
+   "sommar": 19,
+   "vinter": 25,
+   "sasong": 30
+  },
+  "2026-10-17": {
+   "totalt": 1318,
+   "jul": 13,
+   "sommar": 19,
+   "vinter": 24,
+   "sasong": 27
+  },
+  "2026-10-18": {
+   "totalt": 1309,
+   "jul": 14,
+   "sommar": 18,
+   "vinter": 25,
+   "sasong": 26
+  },
+  "2026-10-19": {
+   "totalt": 1291,
+   "jul": 13,
+   "sommar": 18,
+   "vinter": 26,
+   "sasong": 25
+  },
+  "2026-10-20": {
+   "totalt": 1324,
+   "jul": 14,
+   "sommar": 18,
+   "vinter": 23,
+   "sasong": 24
+  },
+  "2026-10-21": {
+   "totalt": 1334,
+   "jul": 16,
+   "sommar": 17,
+   "vinter": 21,
+   "sasong": 25
+  },
+  "2026-10-22": {
+   "totalt": 1348,
+   "jul": 14,
+   "sommar": 17,
+   "vinter": 21,
+   "sasong": 26
+  },
+  "2026-10-23": {
+   "totalt": 1365,
+   "jul": 16,
+   "sommar": 18,
+   "vinter": 22,
+   "sasong": 26
+  }
+ },
+ "uppdaterad": "2026-10-24T07:58:48.265Z",
+ "sorter": {
+  "jul": "Jul och nyår",
+  "sommar": "Sommarjobb",
+  "vinter": "Vinter och snö",
+  "sasong": "Säsongsjobb"
+ },
+ "varningar": [
+  {
+   "sort": "jul",
+   "typ": "okar",
+   "text": "Jul och nyår ökar: i snitt 14 jobb om dagen nu, mot 8 för tre veckor sedan. Dags för inlägg."
+  },
+  {
+   "sort": "vinter",
+   "typ": "kalender",
+   "text": "Vintersäsongen i fjällen anställer. Bra tid för inlägg om säsongsjobb i fjällen."
+  }
+ ]
+}

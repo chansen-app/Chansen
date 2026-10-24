@@ -838,7 +838,7 @@ document.addEventListener("keydown", function(e){
    Hämtas från fliken Statistik i kalkylarket, bakom inloggningen.
    Allt räknas sedan start om man inte väljer en kortare period.    */
 
-var statData = null, statPeriod = 0;
+var statData = null, statPeriod = 0, sasongData = null;
 
 function statDolj_(dolj){
   var lista = [document.querySelector(".landrad"), document.getElementById("sok"),
@@ -1294,6 +1294,31 @@ function ritaStatistik(){
   // Kodord, till exempel ab12, översätts till skolans namn. Vad koderna
   // betyder sparas bara i den här telefonen, aldrig på GitHub.
   var kodord = kodord_();
+  /* Säsong: hämtas från chansen.nu/sasong.json, som nattkörningen skriver.
+     Visar när jul, sommar, vinter eller säsongsjobb börjar öka.     */
+  if (sasongData === null) {
+    sasongData = false;
+    fetch("../sasong.json?v=" + Date.now()).then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(s){ if (s) { sasongData = s; ritaStatistik(); } }).catch(function(){});
+  }
+  if (sasongData && sasongData.dagar) {
+    var sd = Object.keys(sasongData.dagar).sort(), sNu = sd[sd.length - 1];
+    var sForr = sd.filter(function(x){ return x <= dagPlus_(sNu, -21); }).pop();
+    var sRader = Object.keys(sasongData.sorter || {}).map(function(k){
+      var nu = sasongData.dagar[sNu][k] || 0, forr = sForr ? (sasongData.dagar[sForr][k] || 0) : null;
+      var pil = forr === null ? "" : (nu > forr ? " ↑" : (nu < forr ? " ↓" : ""));
+      return '<div class="namn">' + fly(sasongData.sorter[k]) + '</div><div class="v">' + tal_(nu) + pil
+        + (forr === null ? "" : ' <span class="stat-not">(' + tal_(forr) + ' för tre veckor sedan)</span>') + '</div><div></div>';
+    }).join("");
+    html += '<div class="stat-kort"><h3>Säsong</h3><p class="under">Jobb som handlar om jul, sommar, vinter och säsong, i natt</p>'
+      + ((sasongData.varningar || []).length
+          ? (sasongData.varningar || []).map(function(v){
+              return '<p style="margin:0 0 8px;padding:10px 12px;border-radius:12px;background:' + (v.typ === "okar" ? "#fff2eb" : "#f0fae1") + '">' + fly(v.text) + "</p>";
+            }).join("")
+          : '<p class="stat-not">Inget som ökar just nu.</p>')
+      + '<div class="stat-lista" style="margin-top:10px">' + sRader + "</div></div>";
+  }
+
   /* Det som byggdes i oktober, samlat. Rubriktestet visar hur stor del
      av dem som såg varje rubrik som gick vidare till jobben.        */
   function andel(a, b){ return b ? Math.round(100 * a / b) + " %" : "–"; }
