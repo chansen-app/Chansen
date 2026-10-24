@@ -81,7 +81,7 @@ function html(s, datum) {
 
   const font = "file:///" + path.resolve("docs").replace(/\\/g, "/");
   return `<!doctype html><html lang="sv"><head><meta charset="utf-8">
-<title>Jobb där erfarenhet inte krävs, ${manad}</title>
+<title>Jobb med låga krav, ${manad}</title>
 <style>
   @font-face{font-family:"Caprasimo";src:url("${font}/caprasimo.woff2") format("woff2")}
   @font-face{font-family:"Figtree";font-weight:400 700;src:url("${font}/figtree.woff2") format("woff2")}
@@ -110,7 +110,7 @@ function html(s, datum) {
   .sida{break-before:page}
 </style></head><body>
 <div class="topp"><span class="logga">Chansen</span><span class="dampad">chansen.nu · ${dag}</span></div>
-<h1>Jobb där erfarenhet inte krävs, ${manad}</h1>
+<h1>Jobb med låga krav, ${manad}</h1>
 <p class="ingress">Chansen går varje natt igenom alla annonser i Platsbanken och sorterar bort dem som kräver utbildning, yrkesbevis eller flera års erfarenhet. Det här är läget den ${dag}, per län och bransch.</p>
 
 <div class="nycklar">
@@ -153,14 +153,12 @@ function press(s, datum) {
   const rader = [];
   rader.push("PRESSMEDDELANDE, " + dag);
   rader.push("");
-  rader.push(rent(tal(s.utanKrav)) + " jobb i Sverige där erfarenhet inte krävs just nu");
+  rader.push(rent(tal(s.alla)) + " jobb med låga krav i Sverige just nu");
   rader.push("");
   rader.push("Just nu finns " + rent(tal(s.alla)) + " lediga jobb i Sverige med låga ingångskrav, och i "
     + rent(tal(s.utanKrav)) + " av dem skriver arbetsgivaren själv att erfarenhet inte krävs. Det visar en "
     + "genomgång av alla annonser i Platsbanken som gratissidan Chansen gör varje natt. Flest jobb finns inom "
     + lista + ". " + rent(tal(s.unga)) + " av jobben går att söka för den som är under 18.");
-  rader.push("");
-  rader.push("[Skriv ett citat här, till exempel om varför du startade Chansen och vad siffrorna betyder för den som söker sitt första jobb.]");
   rader.push("");
   rader.push("Om Chansen");
   rader.push("Chansen, chansen.nu, är en gratis sida som varje natt går igenom Platsbanken och sorterar bort "

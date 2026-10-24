@@ -945,8 +945,9 @@ function skrivOrtssidor(jobb, hamtadTid) {
       .filter(k => k && k !== "Övrigt")
       .sort((a, b) => kategorier[b] - kategorier[a]).slice(0, 3);
 
-    // Rubriken använder orden folk söker på, inte "låga ingångskrav".
-    const titel = "Jobb utan krav på erfarenhet i " + ort;
+    // Rubriken säger låga krav, inte "utan erfarenhet", eftersom en del jobb
+    // ändå kan vilja ha lite erfarenhet.
+    const titel = "Jobb med låga krav i " + ort;
     const beskrivning = antal + " jobb i " + ort + " som inte kräver "
       + "flera års erfarenhet, bland annat extrajobb och deltid. "
       + "Uppdateras varje natt från Platsbanken. Gratis att använda.";
@@ -981,7 +982,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
             + (heltid ? ", men " + jobbOrd(heltid) + " på heltid." : ".")
       },
       {
-        f: "Vilka jobb utan erfarenhet är vanligast i " + ort + "?",
+        f: "Vilka jobb med låga krav är vanligast i " + ort + "?",
         s: katRa
           ? "Just nu är det mest jobb inom " + katRa + ". "
             + (nyborjare ? "I " + jobbOrd(nyborjare) + " skriver arbetsgivaren själv att erfarenhet inte krävs." : "")
@@ -1073,7 +1074,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
       const ung = iBransch.filter(j => j.minderarigOk === true).length;
       const ovriga = branscher.filter(x => x !== k);
       fs.writeFileSync("docs/jobb/" + slug + "-" + branschslug(k) + ".html", sida({
-        titel: "Jobb inom " + k + " i " + ort + ", utan krav på erfarenhet",
+        titel: "Jobb inom " + k + " i " + ort + ", med låga krav",
         beskrivning: n + " jobb inom " + k.toLowerCase() + " i " + ort + " som inte kräver flera års erfarenhet. "
           + "Uppdateras varje natt från Platsbanken. Gratis att använda.",
         url: branschlank(k),

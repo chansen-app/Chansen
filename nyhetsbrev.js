@@ -182,7 +182,7 @@ let html = ''
   + LINJE
   + '<tr><td style="padding:0 40px;' + F + 'text-align:center;color:#201e1d;">\n'
   + '<p style="margin:0 0 22px;font-size:26px;font-weight:bold;">Hej!</p>\n'
-  + '<p style="margin:0;font-size:19px;line-height:1.55;">Här är veckans jobbtips. I alla jobb nedan krävs ingen '
+  + '<p style="margin:0;font-size:19px;line-height:1.55;">Här är veckans jobbtips. I alla jobb nedan skriver arbetsgivaren att det inte krävs någon '
   + 'tidigare erfarenhet, och de lades upp de senaste dagarna. Klicka på "Se jobbet" för att läsa mer och söka.</p>\n'
   + '</td></tr>\n';
 
