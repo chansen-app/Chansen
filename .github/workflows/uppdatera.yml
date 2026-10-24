@@ -40,13 +40,20 @@ jobs:
       - name: Skriv dagens inlägg
         run: node dagens-inlagg.js
 
+      # Räknar jobb för jul, sommar, vinter och säsong, och varnar i
+      # Chansen Admin när någon sort börjar öka.
+      - name: Räkna säsong
+        # Går något fel här sparas jobben ändå.
+        continue-on-error: true
+        run: node sasong.js
+
       # Stoppar körningen innan något laddas upp, om en annons ändå
       # innehåller mejl, telefonnummer, personnummer eller ett namn från
       # listan. Då kommer ett mejl från GitHub om att körningen misslyckades.
       - name: Kolla personuppgifter
         env:
           PERSONNAMN: ${{ secrets.PERSONNAMN }}
-        run: node kolla-personuppgifter.js docs/jobb.json docs/jobb.js docs/jobb docs/sitemap.xml dagens-inlagg.txt
+        run: node kolla-personuppgifter.js docs/jobb.json docs/jobb.js docs/jobb docs/sitemap.xml dagens-inlagg.txt docs/sasong.json
 
       - name: Spara resultatet
         run: |
@@ -56,7 +63,7 @@ jobs:
           # sparas här, annars slängs de när körningen är klar.
           # -A tar med sidor som tagits bort, till exempel en ort som
           # inte längre har tillräckligt många jobb.
-          git add -A docs/jobb.json docs/jobb.js docs/jobb docs/sitemap.xml dagens-inlagg.txt
+          git add -A docs/jobb.json docs/jobb.js docs/jobb docs/sitemap.xml dagens-inlagg.txt docs/sasong.json
           if git diff --staged --quiet; then
             echo "Inget nytt att spara."
             exit 0
