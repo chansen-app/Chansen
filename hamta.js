@@ -790,11 +790,14 @@ async function hamtaJobb() {
   }
 
   fs.writeFileSync("docs/jobb.json", JSON.stringify(jobb, null, 2));
+  // Uppgifter som sidan inte använder tas bort ur jobb.js, som mobilen
+  // laddar ner. De finns kvar i jobb.json, om de behövs senare.
+  const BARA_I_JSON = ["nyborjarskal"];
   fs.writeFileSync("docs/jobb.js",
     "const UPPDATERAD = \"" + hamtadTid + "\";\n" +
     "const JOBB_HAMTAD = UPPDATERAD;\n" +
     "const KOMMUNLAN = " + JSON.stringify(kommunLan) + ";\n" +
-    "const JOBB = " + JSON.stringify(jobb) + ";");
+    "const JOBB = " + JSON.stringify(jobb, (k, v) => BARA_I_JSON.includes(k) ? undefined : v) + ";");
 
   skrivOrtssidor(jobb, hamtadTid);
 
