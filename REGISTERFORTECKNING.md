@@ -1,7 +1,7 @@
 # Registerförteckning, Chansen
 
 Enligt artikel 30 i dataskyddsförordningen. Upprättad 1 oktober 2026,
-uppdaterad 18 oktober 2026.
+uppdaterad 25 oktober 2026.
 
 Den här filen beskriver vilka personuppgifter Chansen behandlar, varför,
 hur länge och var de finns. Den ska kunna visas upp om någon frågar, och
@@ -67,9 +67,14 @@ kunna hantera en annons som personen själv skickat in, och behandlingen
 chansen.jobb@gmail.com. Åtkomst sker via Chansen Admin, som kräver
 användarnamn och lösenord.
 
-**Hur länge:** nekade annonser och annonser vars sista ansökningsdag
-passerat raderas automatiskt efter sex månader. Raderingen sker nattligen
-genom ett schemalagt skript.
+**Hur länge:** nekade och borttagna annonser raderas samma natt, både
+annonsen och kontaktpersonens uppgifter. Publicerade annonser raderas
+natten efter sista ansökningsdagen. Annonser utan sista ansökningsdag
+raderas 90 dagar efter att de godkändes. Raderingen sker automatiskt
+varje natt klockan 3, genom ett schemalagt skript hos Google.
+
+Vill personen få sina uppgifter och sin annons borttagna tidigare görs
+det på begäran till chansen.jobb@gmail.com.
 
 **Delas med:** ingen. Kontaktuppgifterna publiceras aldrig, varken i
 annonsen eller någon annanstans. Endast det arbetsgivaren själv valt ska
@@ -77,7 +82,39 @@ synas i annonsen publiceras.
 
 ---
 
-## 3. Besökare på sidan
+## 3. Synpunkter via Tyck till
+
+**Vad som behandlas:** svaren på frågorna och fritext som personen själv
+skriver. Dessutom ålder, ort och antal jobb som visades, som personen
+själv valt i appen, och vilken version av sidan som användes.
+Mejladress om personen själv väljer att lämna den.
+
+**Varför:** för att förstå vad som fungerar och vad som saknas på
+Chansen. Ålder och ort visar om sidan fungerar sämre för en viss grupp
+eller plats, och antalet jobb visar om det fanns för få jobb att välja
+bland. Versionen gör det möjligt att hitta fel. Mejladressen används
+bara för att kunna svara.
+
+**Rättslig grund:** berättigat intresse, artikel 6.1 f. Intresset är att
+kunna förbättra Chansen utifrån det personen själv berättar. Mejladressen
+är frivillig.
+
+**Varifrån:** personen själv, via formuläret Tyck till på chansen.nu.
+
+**Var uppgifterna finns:** i fliken Synpunkter i samma kalkylark hos
+Google som annonserna. Fliken är aldrig publicerad. Åtkomst sker via
+Chansen Admin, som kräver användarnamn och lösenord.
+
+**Hur länge:** mejladressen raderas automatiskt efter 30 dagar, varje
+natt klockan 3. Synpunkten sparas sedan utan adress, tills den raderas i
+Chansen Admin. Vill personen få sin synpunkt eller mejladress borttagen
+tidigare görs det på begäran till chansen.jobb@gmail.com.
+
+**Delas med:** ingen.
+
+---
+
+## 4. Besökare på sidan
 
 **Vad som behandlas:** inga personuppgifter.
 
@@ -91,7 +128,7 @@ uppgifter som kan kopplas till en person.
 
 ---
 
-## 4. Konton i Chansen Admin
+## 5. Konton i Chansen Admin
 
 **Vad som behandlas:** användarnamn och ett avtryck av lösenordet.
 Lösenordet sparas aldrig i klartext.
@@ -155,6 +192,10 @@ ingår i Google Workspace, som kostar omkring 850 kronor om året.
 **Överföring till tredje land.** Google kan behandla uppgifter utanför
 EU. Det regleras av standardavtalsklausuler och av EU:s beslut om
 skyddsnivån i USA, men bör följas upp.
+
+**Versionshistorik hos Google.** Google sparar en versionshistorik för
+kalkylark. Rader som raderats kan därför finnas kvar i historiken en tid.
+Historiken går bara att nå med samma inloggning som kalkylarket.
 
 **Juridisk genomgång.** Den här förteckningen är skriven utan juridisk
 rådgivning och bör granskas av någon sakkunnig innan verksamheten växer.

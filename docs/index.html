@@ -1218,9 +1218,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     <div class="hint" style="margin-top:14px;line-height:1.6">
       Vi sparar uppgifterna du fyller i för att kunna granska och publicera
       annonsen. Ditt namn, din mejladress och ditt telefonnummer publiceras
-      aldrig, bara det du valt ska synas i annonsen. Nekade annonser och
-      annonser vars sista ansökningsdag passerat raderas efter sex månader.
-      Vill du att vi tar bort dina uppgifter tidigare, mejla
+      aldrig, bara det du valt ska synas i annonsen. Nekas eller tas
+      annonsen bort raderas både annonsen och dina personuppgifter samma
+      natt. Annars raderas de natten efter sista ansökningsdagen, eller
+      efter 90 dagar om annonsen saknar sista ansökningsdag. Vill du få
+      dina personuppgifter och din annons borttagna tidigare, mejla
       chansen.jobb@gmail.com.
     </div>
 
@@ -1267,7 +1269,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     <div class="steg" data-falt="mejl">
       <h2 class="cvfraga" id="fraga-tyck-mejl">Vill du ha svar?</h2>
       <input class="txt tyckf" id="tyck-mejl" aria-labelledby="fraga-tyck-mejl" placeholder="Din mejladress, frivilligt" inputmode="email">
-      <div class="hint">Lämnar du den sparas den bara för att kunna svara dig, och raderas sedan. Lämnar du den tom vet jag inte vem du är.</div>
+      <div class="hint">Lämnar du din mejladress sparas den bara för att kunna svara dig. Den raderas automatiskt efter 30 dagar, och det du skrivit blir kvar utan adressen. Vill du få den borttagen tidigare, mejla chansen.jobb@gmail.com. Lämnar du rutan tom vet jag inte vem du är.</div>
     </div>
   </div>
 
@@ -1376,17 +1378,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   <p><b>Mejllistan.</b> Anmäler du dig sparar vi bara din mejladress. Den ligger hos tjänsten Sender, som sköter utskicken åt oss, och används bara för att skicka dig mejl om nya jobb på Chansen. Den rättsliga grunden är ditt samtycke. Du måste vara minst 13 år för att anmäla dig själv.</p>
   <p>Sender registrerar också tekniska uppgifter vid anmälan, som tidpunkt och IP-adress, för att kunna visa att du själv har anmält dig. Du bekräftar anmälan via ett mejl, och varje utskick har en länk där du avslutar med ett klick. Vill du att din adress raderas helt, mejla oss. Vi delar aldrig adressen med någon annan.</p>
 
-  <p><b>Du som lägger upp ett jobb.</b> Skickar du in en annons sparar vi det du fyllt i, alltså uppgifterna om jobbet och ditt namn, din mejladress och ditt telefonnummer. Uppgifterna ligger i ett kalkylark hos Google och används bara för att granska annonsen och för att kunna kontakta dig om den. Den rättsliga grunden är berättigat intresse, alltså att kunna hantera annonsen du själv skickat in.</p>
-  <p>Dina kontaktuppgifter publiceras aldrig. I annonsen visas bara det du valt ska stå där, till exempel en länk eller en adress dit ansökningar ska skickas. Nekade annonser och annonser vars sista ansökningsdag passerat raderas automatiskt efter sex månader. Vill du att vi tar bort uppgifterna tidigare, eller vill veta vad vi har sparat om dig, mejla chansen.jobb@gmail.com så ordnar vi det.</p>
+  <p><b>Du som lägger upp ett jobb.</b> Skickar du in en annons sparar vi det du fyllt i: företagets namn och organisationsnummer, uppgifterna om jobbet, samt ditt namn, din mejladress och ditt telefonnummer. Det sparas i ett kalkylark hos Google som bara vi har tillgång till.</p>
+  <p>Vi använder uppgifterna för att kontrollera att företaget finns, för att kunna kontakta dig om annonsen och för att publicera jobbet. Den rättsliga grunden är berättigat intresse, alltså att kunna hantera annonsen du själv skickat in. Dina kontaktuppgifter publiceras aldrig. I annonsen visas bara det du valt ska stå där, till exempel en länk eller en adress dit ansökningar ska skickas.</p>
+  <p><b>Så länge sparas uppgifterna.</b> Nekas eller tas annonsen bort raderas både annonsen och dina personuppgifter samma natt. Är annonsen publicerad raderas allt natten efter sista ansökningsdagen. Saknar annonsen sista ansökningsdag raderas allt efter 90 dagar. Raderingen sker automatiskt varje natt.</p>
+  <p>Vill du få dina personuppgifter och din annons borttagna tidigare, eller veta vad vi har sparat om dig, mejla chansen.jobb@gmail.com så ordnar vi det.</p>
 
-  <p><b>Synpunkter.</b> Skickar du in synpunkter via Tyck till sparar vi det du skrivit, tillsammans med vad du själv valt i appen: ålder, ort och hur många jobb som visades. Lämnar du en mejladress sparas den bara för att kunna svara dig, och raderas sedan.</p>
+  <p><b>Synpunkter.</b> Skickar du in synpunkter via Tyck till sparar vi svaren på frågorna och det du skrivit. Vi sparar också det du själv valt i appen: din ålder, din ort och hur många jobb som visades för dig. Det hjälper oss att förstå synpunkten, till exempel om sidan fungerar sämre för en viss ålder, eller om det finns för få jobb på en viss ort. Vi sparar också vilken version av sidan du använde, så att vi kan hitta fel.</p>
+  <p>Lämnar du en mejladress sparas den bara för att kunna svara dig. Den raderas automatiskt efter 30 dagar, och synpunkten blir kvar utan adressen. Den rättsliga grunden är berättigat intresse, alltså att kunna göra Chansen bättre utifrån det du berättar. Vill du få din synpunkt eller mejladress borttagen tidigare, mejla chansen.jobb@gmail.com.</p>
 
   <p><b>Besöksstatistik.</b> Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies, spårar inte enskilda besökare och sparar inga uppgifter som kan kopplas till dig.</p>
   <p>Med tjänsten GoatCounter räknar vi också hur sidan används: hur många som klickar sig vidare till en annons och vilka annonser det gäller, vilka filter som används, vilken kommun folk söker jobb i, vilken åldersgrupp man valt, varifrån man kom till sidan, hur många som kommer tillbaka, svaren på frågan om man hittar något jobb, och om det uppstår tekniska fel. Allt räknas som totaler, till exempel "40 sökte i Halmstad i dag". GoatCounter använder inga kakor och sparar ingenting om vem du är, så inget av det går att koppla till dig.</p>
-
-  <p><b>Du som är arbetsgivare.</b> Skickar du in en annons sparar vi det du fyllt i: företagets namn och organisationsnummer, uppgifter om jobbet, samt ditt namn, din mejladress och ditt telefonnummer. Det sparas i ett kalkylblad hos Google som bara vi har tillgång till.</p>
-  <p>Vi använder uppgifterna för att kontrollera att företaget finns, för att kunna kontakta dig om annonsen, och för att publicera jobbet. Den rättsliga grunden är berättigat intresse. Kontaktuppgifter du själv angett som kontakt för sökande publiceras i annonsen, resten publiceras inte.</p>
-  <p>Uppgifterna sparas så länge annonsen är aktuell och som längst tolv månader därefter. Sedan raderas de.</p>
 
   <p><b>Dina rättigheter.</b> Du har rätt att få veta vilka uppgifter vi har om dig, att få dem rättade eller raderade, och att invända mot behandlingen. Mejla <a href="mailto:chansen.jobb@gmail.com?subject=Personuppgifter">chansen.jobb@gmail.com</a> så fixar vi det. Är du missnöjd med hur vi hanterar dina uppgifter kan du klaga hos Integritetsskyddsmyndigheten, imy.se.</p>
 
