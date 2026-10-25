@@ -971,6 +971,32 @@ function skrivOrtssidor(jobb, hamtadTid) {
     const katRa = toppkat.join(", ").replace(/, ([^,]*)$/, " samt $1");
     const jobbOrd = n => n === 1 ? "1 jobb" : n + " jobb";
 
+    /* Mer som skiljer orterna åt: hur fort det kommer nya jobb, hur många
+       som stänger snart, körkort, och hur stor del av länets jobb som
+       finns här. Allt räknas ur jobben, inget är påhittat.             */
+    const nu = Date.now(), DAG = 86400000;
+    const nyaVecka = lista.filter(j => j.publicerad && nu - new Date(j.publicerad) < 7 * DAG).length;
+    const stangerSnart = lista.filter(j => {
+      if (!j.sistaAnsokningsdag) return false;
+      const kvar = new Date(j.sistaAnsokningsdag) - nu;
+      return kvar >= 0 && kvar < 7 * DAG;
+    }).length;
+    const utanKorkort = lista.filter(j => j.korkortKravs === false).length;
+    const lanet = (lista.find(j => j.lan) || {}).lan;
+    const iLanet = lanet ? (orterPerLan[lanet] || []).reduce((s, o) => s + perOrt[o].length, 0) : 0;
+    const andelLan = iLanet > antal ? Math.round(100 * antal / iLanet) : 0;
+
+    const lageDelar = [];
+    if (nyaVecka) lageDelar.push(jobbOrd(nyaVecka) + " har kommit den senaste veckan");
+    if (stangerSnart) lageDelar.push(jobbOrd(stangerSnart) + " har sista ansökningsdag inom en vecka");
+    if (utanKorkort) lageDelar.push(jobbOrd(utanKorkort) + " kräver inget körkort enligt annonsen");
+    const lageHtml = lageDelar.length || andelLan
+      ? '<h2>Läget i ' + fly(ort) + ' just nu</h2>\n<p>'
+        + (lageDelar.length ? fly(lageDelar.join(", ").replace(/, ([^,]*)$/, " och $1")) + '. ' : '')
+        + (andelLan ? fly(ort) + ' har ' + andelLan + ' procent av jobben med låga krav i ' + fly(lanet) + '.' : '')
+        + '</p>\n'
+      : '';
+
     const fragor = [
       {
         f: "Finns det extrajobb i " + ort + " för den som är under 18?",
@@ -994,6 +1020,24 @@ function skrivOrtssidor(jobb, hamtadTid) {
           ? "Just nu är det mest jobb inom " + katRa + ". "
             + (nyborjare ? "I " + jobbOrd(nyborjare) + " skriver arbetsgivaren själv att erfarenhet inte krävs." : "")
           : "Det varierar från natt till natt. Se listan ovan för de jobb som finns just nu."
+      },
+      {
+        f: "Behöver jag körkort för att jobba i " + ort + "?",
+        s: utanKorkort * 2 >= antal
+          ? "Nej, inte för de flesta. Just nu finns " + jobbOrd(utanKorkort) + " i " + ort
+            + " där annonsen inte kräver körkort."
+          : utanKorkort
+            ? "För en del jobb, ja. Just nu finns " + jobbOrd(utanKorkort) + " i " + ort
+              + " där annonsen inte kräver körkort."
+            : "Just nu kräver jobben i " + ort + " oftast körkort. I Chansen kan du också se jobb i resten av länet."
+      },
+      {
+        f: "Hur ofta kommer det nya jobb i " + ort + "?",
+        s: nyaVecka
+          ? "Den senaste veckan kom " + jobbOrd(nyaVecka) + " med låga krav i " + ort
+            + ". Chansen hämtar nya jobb från Platsbanken varje natt."
+          : "Den senaste veckan kom inga nya jobb med låga krav i " + ort
+            + ". Chansen hämtar nya jobb från Platsbanken varje natt, så titta gärna igen."
       }
     ];
     const fragorHtml = fragor.map(q =>
@@ -1117,6 +1161,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '<ul>\n' + rader + '</ul>\n'
       + (antal > 40 ? '<p>Och ' + (antal - 40) + ' till. '
          + '<a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
+      + lageHtml
       + branschHtml
       + '<h2>Vanliga frågor om jobb i ' + fly(ort) + '</h2>\n'
       + fragorHtml
