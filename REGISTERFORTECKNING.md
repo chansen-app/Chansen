@@ -116,7 +116,15 @@ tidigare görs det på begäran till chansen.jobb@gmail.com.
 
 ## 4. Besökare på sidan
 
-**Vad som behandlas:** inga personuppgifter.
+**Vad som behandlas:** Chansen själv behandlar inga personuppgifter om
+besökare.
+
+Sidan ligger hos GitHub Pages, som ägs av Microsoft. GitHub tar emot
+besökarens IP-adress när sidan visas, och sparar den en tid av
+säkerhetsskäl, enligt GitHubs integritetspolicy. Chansen har ingen
+tillgång till de uppgifterna och använder dem inte. Rättslig grund:
+berättigat intresse, artikel 6.1 f, att sidan ska fungera och vara
+säker. Det står också på chansen.nu, under Var sidan ligger.
 
 Svaren på frågorna, sparade jobb och CV lagras i besökarens egen
 webbläsare och skickas aldrig till Chansen. Det gäller också
@@ -196,6 +204,10 @@ skyddsnivån i USA, men bör följas upp.
 **Versionshistorik hos Google.** Google sparar en versionshistorik för
 kalkylark. Rader som raderats kan därför finnas kvar i historiken en tid.
 Historiken går bara att nå med samma inloggning som kalkylarket.
+
+**GitHub och USA.** GitHub ägs av Microsoft och kan behandla
+besökarnas IP-adresser i USA. Det regleras av EU:s beslut om skyddsnivån
+i USA, men bör följas upp på samma sätt som för Google.
 
 **Juridisk genomgång.** Den här förteckningen är skriven utan juridisk
 rådgivning och bör granskas av någon sakkunnig innan verksamheten växer.
