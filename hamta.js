@@ -1180,7 +1180,9 @@ function skrivOrtssidor(jobb, hamtadTid) {
      Chansen kan visa riktiga jobb för åldern. Reglerna är samma som i
      appen och kommer från Arbetsmiljöverket. Inget får låta som ett
      löfte: vi kan bara läsa det som står i annonsen.                 */
-  const unga = jobb.filter(j => !j.land && j.minderarigOk === true)
+  // Samma urval som appen: inget körkortskrav, eftersom B-körkort
+  // tidigast går att ta vid 18.
+  const unga = jobb.filter(j => !j.land && j.minderarigOk === true && j.korkortKravs !== true)
     .sort((a, b) => (b.sortpoang || b.poang || 0) - (a.sortpoang || a.poang || 0));
   if (unga.length >= MINST_JOBB_FOR_EGEN_SIDA) {
     const jobbOrd = n => n === 1 ? "1 jobb" : n + " jobb";
