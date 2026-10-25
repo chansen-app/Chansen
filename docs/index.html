@@ -1387,7 +1387,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   <p>Lämnar du en mejladress sparas den bara för att kunna svara dig. Den raderas automatiskt efter 30 dagar, och synpunkten blir kvar utan adressen. Den rättsliga grunden är berättigat intresse, alltså att kunna göra Chansen bättre utifrån det du berättar. Vill du få din synpunkt eller mejladress borttagen tidigare, mejla chansen.jobb@gmail.com.</p>
 
   <p><b>Besöksstatistik.</b> Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies, spårar inte enskilda besökare och sparar inga uppgifter som kan kopplas till dig.</p>
-  <p>Med tjänsten GoatCounter räknar vi också hur sidan används: hur många som klickar sig vidare till en annons och vilka annonser det gäller, vilka filter som används, vilken kommun folk söker jobb i, vilken åldersgrupp man valt, varifrån man kom till sidan, hur många som kommer tillbaka, svaren på frågan om man hittar något jobb, och om det uppstår tekniska fel. Allt räknas som totaler, till exempel "40 sökte i Halmstad i dag". GoatCounter använder inga kakor och sparar ingenting om vem du är, så inget av det går att koppla till dig.</p>
+  <p>Med tjänsten GoatCounter räknar vi också hur sidan används: hur många som klickar sig vidare till en annons och vilka annonser det gäller, vilka filter som används, vilken kommun folk söker jobb i, vilka sökningar som inte gav något jobb, vilken åldersgrupp man valt, varifrån man kom till sidan, hur många som kommer tillbaka, svaren på frågan om man hittar något jobb, och om det uppstår tekniska fel. Allt räknas som totaler, till exempel "40 sökte i Halmstad i dag". GoatCounter använder inga kakor och sparar ingenting om vem du är, så inget av det går att koppla till dig.</p>
 
   <p><b>Var sidan ligger.</b> Chansen ligger hos GitHub, som ägs av Microsoft. Som hos alla webbplatser tar GitHub emot din IP-adress när du besöker sidan, eftersom den behövs för att sidan ska kunna skickas till dig. GitHub sparar IP-adressen en tid av säkerhetsskäl, till exempel för att kunna stoppa angrepp mot sidan. Vi kan inte se den och använder den inte. Den rättsliga grunden är berättigat intresse, alltså att sidan ska fungera och vara säker. Läs mer i <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener" target="_blank">GitHubs integritetspolicy</a>.</p>
 
@@ -2128,8 +2128,24 @@ function tomtLage(filter){
     ? "Inga jobb matchar " + skal.join(", ") + " just nu."
     : "Inga jobb just nu. Prova igen om en stund.";
 
+  raknaIngaTraffar();
+
   return '<div class="tomt">' + text +
     '<div style="margin-top:18px"><button class="mini" onclick="nollstall()">Visa alla jobb</button></div></div>';
+}
+
+/* Räknar sökningar som inte gav något jobb, så att det syns vad folk
+   letar efter men inte hittar. Bara kommunens namn skickas, och bara om
+   kommunen finns, så att inget annat folk skrivit i rutan följer med.
+   Området kommer från en fast lista. Samma sökning räknas en gång.   */
+var INGA_TRAFFAR_RAKNADE = {};
+function raknaIngaTraffar(){
+  var kommun = kommunForStatistik();
+  var namn = "inga-traffar/" + (kommun ? slug(kommun) : (svar.ort ? "okand-ort" : "hela-sverige"));
+  if (svar.omrade && svar.omrade.length) namn += "/" + slug(svar.omrade[0]);
+  if (INGA_TRAFFAR_RAKNADE[namn]) return;
+  INGA_TRAFFAR_RAKNADE[namn] = true;
+  handelse(namn);
 }
 
 function nollstall(){
