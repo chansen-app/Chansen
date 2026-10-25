@@ -927,7 +927,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
       <li>Du får aldrig arbeta mellan midnatt och klockan 05</li>
       <li>Rast på minst 30 minuter senast efter fyra och en halv timme</li>
       <li>Minst två sammanhängande lediga dagar varje vecka, minst 36 timmar</li>
-      <li>Är du under 16 måste din vårdnadshavare godkänna att du jobbar</li>
+      <li>Är du under 18 måste din vårdnadshavare godkänna att du tar ett jobb</li>
     </ul>
   </div>
 
@@ -1741,9 +1741,10 @@ function matcharAlder(j){
   if (svar.alder === "Under 16"){
     // Bara lätt arbete är tillåtet i den åldern.
     if (EJ_LATT_ARBETE.indexOf(j.kategori) > -1) return false;
-    // Står det ingen omfattning går det inte att avgöra om tiderna är
-    // lagliga. Då visas jobbet hellre inte alls.
-    if (!j.omfattning) return false;
+    // Bara deltid. Heltid är oftast 40 timmar i veckan, och i den här
+    // åldern får man jobba högst 35 timmar, och bara på lov. Står det
+    // ingen omfattning går det inte att avgöra, och då visas jobbet inte.
+    if (!/deltid/i.test(j.omfattning || "")) return false;
   }
   return true;
 }

@@ -848,6 +848,7 @@ async function hamtaJobb() {
 const MINST_JOBB_FOR_EGEN_SIDA = 5;
 // Adressen till sidan för 16- och 17-åringar, under chansen.nu/jobb/
 const UNGA_SLUG = "jobb-for-16-och-17-aringar";
+const YNGRE_SLUG = "jobb-for-15-aringar";
 
 // Adress för en bransch. é blir e, och Städ blir stadning så att det
 // inte kan förväxlas med en stad.
@@ -1171,39 +1172,138 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + fragorHtml
       + naraHtml
       + (unga ? '<h2>Jobb för din ålder</h2>\n<p><a href="https://chansen.nu/jobb/' + UNGA_SLUG
-         + '.html">Jobb för dig som är 16 eller 17</a></p>\n' : '')
+         + '.html">Jobb för dig som är 16 eller 17</a> · <a href="https://chansen.nu/jobb/' + YNGRE_SLUG
+         + '.html">Jobb för dig som är 13 till 15</a></p>\n' : '')
     });
 
     fs.writeFileSync("docs/jobb/" + slug + ".html", html);
   }
-  /* Sida för 16- och 17-åringar. Konkurrenterna har bara text om reglerna,
-     Chansen kan visa riktiga jobb för åldern. Reglerna är samma som i
-     appen och kommer från Arbetsmiljöverket. Inget får låta som ett
-     löfte: vi kan bara läsa det som står i annonsen.                 */
-  // Samma urval som appen: inget körkortskrav, eftersom B-körkort
-  // tidigast går att ta vid 18.
-  const unga = jobb.filter(j => !j.land && j.minderarigOk === true && j.korkortKravs !== true)
-    .sort((a, b) => (b.sortpoang || b.poang || 0) - (a.sortpoang || a.poang || 0));
-  if (unga.length >= MINST_JOBB_FOR_EGEN_SIDA) {
-    const jobbOrd = n => n === 1 ? "1 jobb" : n + " jobb";
-    const ungaDeltid = unga.filter(j => /deltid/i.test(j.omfattning || "")).length;
-    const ungaNyb = unga.filter(j => j.nyborjarvanlig === true).length;
-    const ungaKat = {};
-    for (const j of unga) if (j.kategori && j.kategori !== "Övrigt") ungaKat[j.kategori] = (ungaKat[j.kategori] || 0) + 1;
-    const ungaTopp = Object.keys(ungaKat).sort((a, b) => ungaKat[b] - ungaKat[a]).slice(0, 3)
-      .map(k => k.toLowerCase());
-    // "samt" före sista, eftersom kategorierna själva innehåller "och".
-    const toppText = ungaTopp.join(", ").replace(/, ([^,]*)$/, " samt $1");
-    const ungaPerOrt = {};
-    for (const j of unga) if (j.ort) ungaPerOrt[j.ort] = (ungaPerOrt[j.ort] || 0) + 1;
-    const ungaOrter = orter.filter(o => ungaPerOrt[o])
-      .sort((a, b) => ungaPerOrt[b] - ungaPerOrt[a]).slice(0, 15);
-    const AV = "https://www.av.se/arbetsmiljoarbete-och-inspektioner/arbetstagarens-deltagande-i-arbetsmiljoarbetet/for-dig-som-ar-ung-i-arbetslivet/";
+  /* Sidor för unga, en för 16 och 17 år och en för 13 till 15 år.
+     Konkurrenterna har bara text om reglerna, Chansen kan visa riktiga
+     jobb för åldern. Urvalet är samma som i appen, och reglerna kommer
+     från Arbetsmiljöverket. Inget får låta som ett löfte: vi kan bara
+     läsa det som står i annonsen.                                     */
+  const AV = "https://www.av.se/arbetsmiljoarbete-och-inspektioner/arbetstagarens-deltagande-i-arbetsmiljoarbetet/for-dig-som-ar-ung-i-arbetslivet/";
+  const AV_LANK = '<p>Reglerna kommer från Arbetsmiljöverket och kan ändras. Kolla alltid deras sida om något är viktigt '
+    + 'för dig: <a href="' + AV + '" rel="noopener">Arbetsmiljöverket, för dig som är ung i arbetslivet</a>.</p>\n';
+  const LON_FRAGA = n => ({
+    f: "Finns det en lägsta lön för " + n + "-åringar?",
+    s: "Det finns ingen lag om lägsta lön i Sverige. Många arbetsplatser har kollektivavtal, "
+      + "och där finns ofta en lägsta lön för unga. Fråga arbetsgivaren om lönen innan du börjar."
+  });
+  const FORALDER_FRAGA = {
+    f: "Måste mina föräldrar säga ja?",
+    s: "Ja. Är du under 18 måste din vårdnadshavare godkänna att du tar ett jobb. "
+      + "Det står i föräldrabalken. Ett muntligt ja räcker, men det är bra om arbetsgivaren vet om det."
+  };
+  const punkter = lista => '<ul style="list-style:disc;padding-left:22px">\n'
+    + lista.map(p => '<li style="background:none;padding:0;margin:0 0 6px">' + p + '</li>\n').join("")
+    + '</ul>\n';
+  const jobbOrdU = n => n === 1 ? "1 jobb" : n + " jobb";
+  const sortera = (a, b) => (b.sortpoang || b.poang || 0) - (a.sortpoang || a.poang || 0);
 
-    const ungaFragor = [
+  // Samma som appen: inget körkortskrav, eftersom B-körkort tidigast går
+  // att ta vid 18. För 13 till 15 år dessutom bara lätt arbete och deltid.
+  const EJ_LATT_ARBETE = ["Vård och omsorg", "Industri och produktion", "Lager och logistik", "Städ"];
+  const unga = jobb.filter(j => !j.land && j.minderarigOk === true && j.korkortKravs !== true).sort(sortera);
+  const yngre = unga.filter(j => EJ_LATT_ARBETE.indexOf(j.kategori) === -1
+    && /deltid/i.test(j.omfattning || ""));
+
+  function aldersida(c) {
+    const urval = c.urval;
+    if (urval.length < MINST_JOBB_FOR_EGEN_SIDA) return false;
+    const deltid = urval.filter(j => /deltid/i.test(j.omfattning || "")).length;
+    const nyb = urval.filter(j => j.nyborjarvanlig === true).length;
+    const kat = {};
+    for (const j of urval) if (j.kategori && j.kategori !== "Övrigt") kat[j.kategori] = (kat[j.kategori] || 0) + 1;
+    // "samt" före sista, eftersom kategorierna själva innehåller "och".
+    const toppText = Object.keys(kat).sort((a, b) => kat[b] - kat[a]).slice(0, 3)
+      .map(k => k.toLowerCase()).join(", ").replace(/, ([^,]*)$/, " samt $1");
+    const perOrtU = {};
+    for (const j of urval) if (j.ort) perOrtU[j.ort] = (perOrtU[j.ort] || 0) + 1;
+    const toppOrter = orter.filter(o => perOrtU[o]).sort((a, b) => perOrtU[b] - perOrtU[a]).slice(0, 15);
+
+    const fragor = c.fragor({ toppText, nyb });
+    const ld = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": fragor.map(q => ({
+        "@type": "Question", "name": q.f,
+        "acceptedAnswer": { "@type": "Answer", "text": q.s }
+      }))
+    }).replace(/</g, "\\u003c");
+
+    let rader = "";
+    for (const j of urval.slice(0, 40)) {
+      const id = j.id || (String(j.lank).match(/\/(\d+)$/) || [])[1] || "";
+      rader += '    <li>\n'
+        + '      <a href="https://chansen.nu/#jobb-' + id + '">' + fly(j.titel) + '</a>\n'
+        + '      <p>' + fly(j.arbetsgivare) + (j.ort ? ' i ' + fly(j.ort) : '')
+        + (j.omfattning ? ' · ' + fly(j.omfattning) : '')
+        + (j.kategori ? ' · ' + fly(j.kategori) : '') + '</p>\n'
+        + (j.beskrivning ? '      <p>' + fly(j.beskrivning.slice(0, 180)) + '</p>\n' : '')
+        + '    </li>\n';
+    }
+
+    fs.writeFileSync("docs/jobb/" + c.slug + ".html", sida({
+      titel: c.titel,
+      beskrivning: c.beskrivning(urval.length),
+      url: "https://chansen.nu/jobb/" + c.slug + ".html",
+      ld,
+      kropp: '<h1>' + fly(c.h1) + '</h1>\n'
+        + '<p>' + c.intro(urval.length, deltid) + ' '
+        + 'Vi kan bara läsa det som står i annonsen, så kolla alltid arbetsuppgifter och arbetstider med arbetsgivaren. '
+        + 'Listan uppdateras varje natt från Platsbanken.</p>\n'
+        + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+        + c.regler
+        + AV_LANK
+        + '<h2>Jobb du kan söka just nu</h2>\n'
+        + '<ul>\n' + rader + '</ul>\n'
+        + (urval.length > 40 ? '<p>Och ' + (urval.length - 40) + ' till. '
+           + '<a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
+        + (toppOrter.length
+          ? '<h2>' + fly(c.ortRubrik) + '</h2>\n<p>' + toppOrter.map(o =>
+              '<a href="https://chansen.nu/jobb/' + ortslug(o) + '.html">' + fly(o) + '</a> ' + perOrtU[o]).join(" · ")
+            + '</p>\n'
+          : '')
+        + '<h2>Vanliga frågor</h2>\n'
+        + fragor.map(q => '<h3>' + fly(q.f) + '</h3>\n<p>' + fly(q.s) + '</p>\n').join("")
+        + '<h2>Jobb för andra åldrar</h2>\n<p>' + c.andra + '</p>\n'
+    }));
+    return true;
+  }
+
+  const aldersidor = [];
+  if (aldersida({
+    slug: UNGA_SLUG,
+    urval: unga,
+    titel: "Jobb för 16- och 17-åringar, med låga krav",
+    beskrivning: n => n + " jobb med låga krav som går att söka när du är 16 eller 17. "
+      + "Regler för arbetstid, vanliga frågor och jobb nära dig. Uppdateras varje natt.",
+    h1: "Jobb för dig som är 16 eller 17",
+    intro: (n, del) => 'Just nu finns ' + n + ' jobb med låga krav i Sverige som går att söka för dig som är 16 eller 17 år. '
+      + (del ? del + ' av dem är på deltid och kan passa som extrajobb. ' : '')
+      + 'Chansen sorterar bort jobb och arbetstider som annonsen visar att du inte får ha i din ålder, '
+      + 'och jobb som kräver körkort.',
+    regler: '<h2>Det här gäller när du är 16 eller 17</h2>\n'
+      + '<p>Har du gått ut nian får du göra vanligt arbete som inte är farligt.</p>\n'
+      + punkter([
+          "Högst 8 timmar per dag och 40 timmar per vecka",
+          "Som huvudregel ingen arbetstid mellan klockan 22 och 06, och aldrig mellan midnatt och klockan 05",
+          "Minst 12 timmars nattvila",
+          "Rast på minst 30 minuter senast efter fyra och en halv timme",
+          "Minst två lediga dagar i rad varje vecka",
+          "Din vårdnadshavare måste godkänna att du tar jobbet"
+        ])
+      + '<p>Vissa arbeten är förbjudna för alla under 18, till exempel arbete med farliga maskiner eller '
+      + 'kemikalier, och ensamarbete där det finns risk för hot eller våld. Har du inte gått ut nian än '
+      + 'gäller samma regler som för 13 till 15 år, och då får du bara göra lätt arbete.</p>\n',
+    ortRubrik: "Jobb för 16- och 17-åringar per ort",
+    andra: '<a href="https://chansen.nu/jobb/' + YNGRE_SLUG + '.html">Jobb för dig som är 13 till 15</a>',
+    fragor: d => [
       {
         f: "Vilka jobb kan man få som 16-åring?",
-        s: (toppText ? "Just nu är det mest jobb inom " + toppText + ". " : "")
+        s: (d.toppText ? "Just nu är det mest jobb inom " + d.toppText + ". " : "")
           + "Det är ofta jobb där man lär sig på plats. Vilka jobb som finns ändras varje natt, "
           + "så titta gärna igen om du inte hittar något som passar."
       },
@@ -1220,82 +1320,69 @@ function skrivOrtssidor(jobb, hamtadTid) {
       },
       {
         f: "Behöver man erfarenhet?",
-        s: "Inte för alla jobb. I " + jobbOrd(ungaNyb) + " för din ålder skriver arbetsgivaren själv "
+        s: "Inte för alla jobb. I " + jobbOrdU(d.nyb) + " för din ålder skriver arbetsgivaren själv "
           + "att erfarenhet inte krävs. Det betyder inte att du får jobbet, men att du kan söka det."
       },
+      FORALDER_FRAGA,
       {
         f: "Hur söker man sitt första jobb?",
         s: "Börja med jobb nära dig, och gör ett kort CV. I Chansen finns hjälp att göra ett CV och "
           + "skriva en ansökan. Berätta också för folk du känner att du söker jobb. "
           + "Många jobb tillsätts på det sättet."
       },
+      LON_FRAGA(16)
+    ]
+  })) aldersidor.push(UNGA_SLUG);
+
+  if (aldersida({
+    slug: YNGRE_SLUG,
+    urval: yngre,
+    titel: "Jobb för 15-åringar, med låga krav",
+    beskrivning: n => n + " deltidsjobb med låga krav som kan passa dig som är 13 till 15. "
+      + "Regler för arbetstid, vanliga frågor och jobb nära dig. Uppdateras varje natt.",
+    h1: "Jobb för dig som är 13 till 15",
+    intro: n => 'Just nu finns ' + n + ' deltidsjobb med låga krav i Sverige som kan passa dig som är 13 till 15 år. '
+      + 'I din ålder får du bara göra lätt arbete, så Chansen visar inte jobb inom vård, städ, lager '
+      + 'eller industri, och inte heltidsjobb eller jobb som kräver körkort.',
+    regler: '<h2>Det här gäller när du är 13 till 15</h2>\n'
+      + '<p>Du får bara göra lätt arbete som inte är farligt och inte påverkar skolan.</p>\n'
+      + punkter([
+          "Högst 2 timmar en skoldag, och 7 timmar en dag utan skola",
+          "Högst 12 timmar en vecka med skola",
+          "På lov som är minst en vecka: högst 7 timmar per dag och 35 timmar per vecka",
+          "Ingen arbetstid mellan klockan 20 och 06",
+          "Minst 14 timmars nattvila",
+          "Rast på minst 30 minuter senast efter fyra och en halv timme",
+          "Din vårdnadshavare måste godkänna att du tar jobbet"
+        ])
+      + '<p>Den som handleder dig på jobbet ska vara över 18. Är du under 13 får du i princip inte '
+      + 'arbeta alls.</p>\n',
+    ortRubrik: "Jobb för 13 till 15-åringar per ort",
+    andra: '<a href="https://chansen.nu/jobb/' + UNGA_SLUG + '.html">Jobb för dig som är 16 eller 17</a>',
+    fragor: d => [
       {
-        f: "Finns det en lägsta lön för 16-åringar?",
-        s: "Det finns ingen lag om lägsta lön i Sverige. Många arbetsplatser har kollektivavtal, "
-          + "och där finns ofta en lägsta lön för unga. Fråga arbetsgivaren om lönen innan du börjar."
-      }
-    ];
-    const ungaLd = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": ungaFragor.map(q => ({
-        "@type": "Question", "name": q.f,
-        "acceptedAnswer": { "@type": "Answer", "text": q.s }
-      }))
-    }).replace(/</g, "\\u003c");
-
-    let ungaRader = "";
-    for (const j of unga.slice(0, 40)) {
-      const id = j.id || (String(j.lank).match(/\/(\d+)$/) || [])[1] || "";
-      ungaRader += '    <li>\n'
-        + '      <a href="https://chansen.nu/#jobb-' + id + '">' + fly(j.titel) + '</a>\n'
-        + '      <p>' + fly(j.arbetsgivare) + (j.ort ? ' i ' + fly(j.ort) : '')
-        + (j.omfattning ? ' · ' + fly(j.omfattning) : '')
-        + (j.kategori ? ' · ' + fly(j.kategori) : '') + '</p>\n'
-        + (j.beskrivning ? '      <p>' + fly(j.beskrivning.slice(0, 180)) + '</p>\n' : '')
-        + '    </li>\n';
-    }
-
-    fs.writeFileSync("docs/jobb/" + UNGA_SLUG + ".html", sida({
-      titel: "Jobb för 16- och 17-åringar, med låga krav",
-      beskrivning: unga.length + " jobb med låga krav som går att söka när du är 16 eller 17. "
-        + "Regler för arbetstid, vanliga frågor och jobb nära dig. Uppdateras varje natt.",
-      url: "https://chansen.nu/jobb/" + UNGA_SLUG + ".html",
-      ld: ungaLd,
-      kropp: '<h1>Jobb för dig som är 16 eller 17</h1>\n'
-        + '<p>Just nu finns ' + unga.length + ' jobb med låga krav i Sverige som går att söka för dig som är '
-        + '16 eller 17 år. ' + (ungaDeltid ? ungaDeltid + ' av dem är på deltid och kan passa som extrajobb. ' : '')
-        + 'Chansen sorterar bort jobb och arbetstider som annonsen visar att du inte får ha i din ålder. '
-        + 'Vi kan bara läsa det som står i annonsen, så kolla alltid arbetstiderna med arbetsgivaren. '
-        + 'Listan uppdateras varje natt från Platsbanken.</p>\n'
-        + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
-        + '<h2>Det här gäller när du är 16 eller 17</h2>\n'
-        + '<p>Har du gått ut nian får du göra vanligt arbete som inte är farligt.</p>\n'
-        + '<ul style="list-style:disc;padding-left:22px">\n'
-        + '<li style="background:none;padding:0;margin:0 0 6px">Högst 8 timmar per dag och 40 timmar per vecka</li>\n'
-        + '<li style="background:none;padding:0;margin:0 0 6px">Som huvudregel ingen arbetstid mellan klockan 22 och 06, och aldrig mellan midnatt och klockan 05</li>\n'
-        + '<li style="background:none;padding:0;margin:0 0 6px">Minst 12 timmars nattvila</li>\n'
-        + '<li style="background:none;padding:0;margin:0 0 6px">Rast på minst 30 minuter senast efter fyra och en halv timme</li>\n'
-        + '<li style="background:none;padding:0;margin:0 0 6px">Minst två lediga dagar i rad varje vecka</li>\n'
-        + '</ul>\n'
-        + '<p>Vissa arbeten är förbjudna för alla under 18, till exempel arbete med farliga maskiner eller '
-        + 'kemikalier, och ensamarbete där det finns risk för hot eller våld. Har du inte gått ut nian än '
-        + 'gäller samma regler som för 13 till 15 år, och då får du bara göra lätt arbete.</p>\n'
-        + '<p>Reglerna kommer från Arbetsmiljöverket och kan ändras. Kolla alltid deras sida om något är viktigt '
-        + 'för dig: <a href="' + AV + '" rel="noopener">Arbetsmiljöverket, för dig som är ung i arbetslivet</a>.</p>\n'
-        + '<h2>Jobb du kan söka just nu</h2>\n'
-        + '<ul>\n' + ungaRader + '</ul>\n'
-        + (unga.length > 40 ? '<p>Och ' + (unga.length - 40) + ' till. '
-           + '<a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
-        + (ungaOrter.length
-          ? '<h2>Jobb för 16- och 17-åringar per ort</h2>\n<p>' + ungaOrter.map(o =>
-              '<a href="https://chansen.nu/jobb/' + ortslug(o) + '.html">' + fly(o) + '</a> ' + ungaPerOrt[o]).join(" · ")
-            + '</p>\n'
-          : '')
-        + '<h2>Vanliga frågor</h2>\n'
-        + ungaFragor.map(q => '<h3>' + fly(q.f) + '</h3>\n<p>' + fly(q.s) + '</p>\n').join("")
-    }));
-  }
+        f: "Vilka jobb kan man få som 15-åring?",
+        s: (d.toppText ? "Just nu är det mest jobb inom " + d.toppText + ". " : "")
+          + "Många passar bäst som sommarjobb eller helgjobb, eftersom du bara får jobba lite under skolveckorna."
+      },
+      {
+        f: "Hur mycket får en 15-åring jobba?",
+        s: "Under en skolvecka högst 12 timmar, och högst 2 timmar en skoldag. "
+          + "På lov som är minst en vecka får du jobba högst 7 timmar per dag och 35 timmar per vecka."
+      },
+      {
+        f: "Får man jobba på kvällen när man är 15?",
+        s: "Nej, inte mellan klockan 20 och 06."
+      },
+      {
+        f: "Behöver man erfarenhet?",
+        s: "Inte för alla jobb. I " + jobbOrdU(d.nyb) + " för din ålder skriver arbetsgivaren själv "
+          + "att erfarenhet inte krävs. Det betyder inte att du får jobbet, men att du kan söka det."
+      },
+      FORALDER_FRAGA,
+      LON_FRAGA(15)
+    ]
+  })) aldersidor.push(YNGRE_SLUG);
 
   // sitemap med startsidan, alla ortssidor och alla branschsidor
   let karta = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -1313,8 +1400,8 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.6</priority>\n  </url>\n';
   }
-  if (fs.existsSync("docs/jobb/" + UNGA_SLUG + ".html")) {
-    karta += '  <url>\n    <loc>https://chansen.nu/jobb/' + UNGA_SLUG + '.html</loc>\n'
+  for (const s of aldersidor) {
+    karta += '  <url>\n    <loc>https://chansen.nu/jobb/' + s + '.html</loc>\n'
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
   }
