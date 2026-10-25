@@ -152,6 +152,43 @@ för att kunna se vem som godkänt eller nekat en annons.
 
 ---
 
+## 6. Kontakter för att sprida Chansen
+
+**Vad som behandlas:** namn, mejladress i jobbet och vilken skola,
+kommun eller organisation personen arbetar på. Dessutom en kort
+anteckning om vad som sagts och när det är dags att följa upp.
+
+**Vems uppgifter:** personer som Nathalie kontaktar i deras yrkesroll
+för att berätta om Chansen, till exempel studie- och yrkesvägledare,
+coacher och personal på bibliotek eller kommuner.
+
+**Varför:** för att kunna berätta om Chansen för personer som möter
+unga och andra som söker jobb, och för att hålla reda på vem som
+kontaktats så att ingen får samma mejl flera gånger.
+
+**Rättslig grund:** berättigat intresse, artikel 6.1 f. Intresset är att
+sprida en gratis tjänst till personer som kan ha nytta av den i sitt
+arbete. Bara uppgifter i yrkesrollen sparas, aldrig privata.
+
+**Varifrån:** personen själv, när hen svarat på ett mejl, eller från en
+kollega som tipsat. Mejladressen är personens adress i jobbet.
+
+**Var uppgifterna finns:** i en fil på Nathalies dator, i en mapp som
+inte är kopplad till GitHub eller chansen.nu. Namnen står i en bilaga
+i samma mapp, inte i den här förteckningen.
+
+**Hur länge:** så länge kontakten är aktuell. En kontakt som inte har
+svarat eller hörts av på ett år tas bort. Den som ber om det tas bort
+direkt.
+
+**Delas med:** ingen.
+
+**Information till personen:** varje mejl från Chansen säger vem som
+skriver och varför. Den som undrar vad som finns sparat kan fråga på
+chansen.jobb@gmail.com.
+
+---
+
 ## Tekniska och organisatoriska åtgärder
 
 Chansen Admin kräver användarnamn och lösenord. Lösenord sparas som
