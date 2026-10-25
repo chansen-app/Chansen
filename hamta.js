@@ -846,6 +846,8 @@ async function hamtaJobb() {
    ────────────────────────────────────────────────────────────── */
 
 const MINST_JOBB_FOR_EGEN_SIDA = 5;
+// Adressen till sidan för 16- och 17-åringar, under chansen.nu/jobb/
+const UNGA_SLUG = "jobb-for-16-och-17-aringar";
 
 // Adress för en bransch. é blir e, och Städ blir stadning så att det
 // inte kan förväxlas med en stad.
@@ -931,6 +933,35 @@ function skrivOrtssidor(jobb, hamtadTid) {
     + 'footer{margin-top:40px;font-size:13px;color:#645c50}\n'
     + '</style>\n';
   const allaBranschsidor = [];
+
+  // Ram runt alla sidor: rubrik, stil, Om Chansen och datum.
+  function sida(o) {
+    return '<!doctype html>\n'
+    + '<html lang="sv">\n<head>\n'
+    + '<meta charset="utf-8">\n'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+    + '<title>' + fly(o.titel) + ' | Chansen</title>\n'
+    + '<meta name="description" content="' + fly(o.beskrivning) + '">\n'
+    + '<link rel="canonical" href="' + o.url + '">\n'
+    + '<meta property="og:title" content="' + fly(o.titel) + '">\n'
+    + '<meta property="og:description" content="' + fly(o.beskrivning) + '">\n'
+    + '<meta property="og:image" content="https://chansen.nu/delning.png">\n'
+    + '<meta property="og:url" content="' + o.url + '">\n'
+    + (o.ld ? '<script type="application/ld+json">' + o.ld + '</script>\n' : '')
+    + STIL
+    + '</head>\n<body>\n<div class="inre">\n'
+    + o.kropp
+    + '<h2>Om Chansen</h2>\n'
+    + '<p>Chansen går igenom hela Platsbanken varje natt och sorterar bort allt '
+    + 'som kräver utbildning, yrkesbevis eller flera års erfarenhet. Sidan är '
+    + 'gratis att använda. Det du fyller i sparas bara i din egen telefon.</p>\n'
+    + '<p>Jobben kommer från Arbetsförmedlingens öppna data. '
+    + 'Arbetsförmedlingen står inte bakom sidan, den drivs av en privatperson.</p>\n'
+    + '<footer>Uppdaterad ' + datum + '. '
+    + '<a href="https://chansen.nu/">chansen.nu</a></footer>\n'
+    + '</div>\n</body>\n</html>\n';
+  }
+
 
   // Orter med egen sida, grupperade per län, för länkarna till orter i
   // närheten längst ned på varje sida.
@@ -1091,33 +1122,6 @@ function skrivOrtssidor(jobb, hamtadTid) {
           '<a href="' + branschlank(k) + '">' + fly(k) + '</a>').join(" · ") + '</p>\n'
       : '';
 
-    function sida(o) {
-      return '<!doctype html>\n'
-      + '<html lang="sv">\n<head>\n'
-      + '<meta charset="utf-8">\n'
-      + '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
-      + '<title>' + fly(o.titel) + ' | Chansen</title>\n'
-      + '<meta name="description" content="' + fly(o.beskrivning) + '">\n'
-      + '<link rel="canonical" href="' + o.url + '">\n'
-      + '<meta property="og:title" content="' + fly(o.titel) + '">\n'
-      + '<meta property="og:description" content="' + fly(o.beskrivning) + '">\n'
-      + '<meta property="og:image" content="https://chansen.nu/delning.png">\n'
-      + '<meta property="og:url" content="' + o.url + '">\n'
-      + (o.ld ? '<script type="application/ld+json">' + o.ld + '</script>\n' : '')
-      + STIL
-      + '</head>\n<body>\n<div class="inre">\n'
-      + o.kropp
-      + '<h2>Om Chansen</h2>\n'
-      + '<p>Chansen går igenom hela Platsbanken varje natt och sorterar bort allt '
-      + 'som kräver utbildning, yrkesbevis eller flera års erfarenhet. Sidan är '
-      + 'gratis att använda. Det du fyller i sparas bara i din egen telefon.</p>\n'
-      + '<p>Jobben kommer från Arbetsförmedlingens öppna data. '
-      + 'Arbetsförmedlingen står inte bakom sidan, den drivs av en privatperson.</p>\n'
-      + '<footer>Uppdaterad ' + datum + '. '
-      + '<a href="https://chansen.nu/">chansen.nu</a></footer>\n'
-      + '</div>\n</body>\n</html>\n';
-    }
-
     for (const k of branscher) {
       const iBransch = lista.filter(j => j.kategori === k);
       const n = iBransch.length;
@@ -1166,10 +1170,131 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '<h2>Vanliga frågor om jobb i ' + fly(ort) + '</h2>\n'
       + fragorHtml
       + naraHtml
+      + (unga ? '<h2>Jobb för din ålder</h2>\n<p><a href="https://chansen.nu/jobb/' + UNGA_SLUG
+         + '.html">Jobb för dig som är 16 eller 17</a></p>\n' : '')
     });
 
     fs.writeFileSync("docs/jobb/" + slug + ".html", html);
   }
+  /* Sida för 16- och 17-åringar. Konkurrenterna har bara text om reglerna,
+     Chansen kan visa riktiga jobb för åldern. Reglerna är samma som i
+     appen och kommer från Arbetsmiljöverket. Inget får låta som ett
+     löfte: vi kan bara läsa det som står i annonsen.                 */
+  const unga = jobb.filter(j => !j.land && j.minderarigOk === true)
+    .sort((a, b) => (b.sortpoang || b.poang || 0) - (a.sortpoang || a.poang || 0));
+  if (unga.length >= MINST_JOBB_FOR_EGEN_SIDA) {
+    const jobbOrd = n => n === 1 ? "1 jobb" : n + " jobb";
+    const ungaDeltid = unga.filter(j => /deltid/i.test(j.omfattning || "")).length;
+    const ungaNyb = unga.filter(j => j.nyborjarvanlig === true).length;
+    const ungaKat = {};
+    for (const j of unga) if (j.kategori && j.kategori !== "Övrigt") ungaKat[j.kategori] = (ungaKat[j.kategori] || 0) + 1;
+    const ungaTopp = Object.keys(ungaKat).sort((a, b) => ungaKat[b] - ungaKat[a]).slice(0, 3)
+      .map(k => k.toLowerCase());
+    // "samt" före sista, eftersom kategorierna själva innehåller "och".
+    const toppText = ungaTopp.join(", ").replace(/, ([^,]*)$/, " samt $1");
+    const ungaPerOrt = {};
+    for (const j of unga) if (j.ort) ungaPerOrt[j.ort] = (ungaPerOrt[j.ort] || 0) + 1;
+    const ungaOrter = orter.filter(o => ungaPerOrt[o])
+      .sort((a, b) => ungaPerOrt[b] - ungaPerOrt[a]).slice(0, 15);
+    const AV = "https://www.av.se/arbetsmiljoarbete-och-inspektioner/arbetstagarens-deltagande-i-arbetsmiljoarbetet/for-dig-som-ar-ung-i-arbetslivet/";
+
+    const ungaFragor = [
+      {
+        f: "Vilka jobb kan man få som 16-åring?",
+        s: (toppText ? "Just nu är det mest jobb inom " + toppText + ". " : "")
+          + "Det är ofta jobb där man lär sig på plats. Vilka jobb som finns ändras varje natt, "
+          + "så titta gärna igen om du inte hittar något som passar."
+      },
+      {
+        f: "Hur mycket får en 16-åring jobba?",
+        s: "Har du gått ut nian får du jobba högst 8 timmar per dag och 40 timmar per vecka. "
+          + "Du ska ha minst 12 timmars nattvila och minst två lediga dagar i rad varje vecka. "
+          + "Har du inte gått ut nian gäller strängare regler."
+      },
+      {
+        f: "Får man jobba på kvällen när man är 16?",
+        s: "Som huvudregel inte mellan klockan 22 och 06. I vissa fall får arbetet pågå till midnatt, "
+          + "men aldrig mellan midnatt och klockan 05."
+      },
+      {
+        f: "Behöver man erfarenhet?",
+        s: "Inte för alla jobb. I " + jobbOrd(ungaNyb) + " för din ålder skriver arbetsgivaren själv "
+          + "att erfarenhet inte krävs. Det betyder inte att du får jobbet, men att du kan söka det."
+      },
+      {
+        f: "Hur söker man sitt första jobb?",
+        s: "Börja med jobb nära dig, och gör ett kort CV. I Chansen finns hjälp att göra ett CV och "
+          + "skriva en ansökan. Berätta också för folk du känner att du söker jobb. "
+          + "Många jobb tillsätts på det sättet."
+      },
+      {
+        f: "Finns det en lägsta lön för 16-åringar?",
+        s: "Det finns ingen lag om lägsta lön i Sverige. Många arbetsplatser har kollektivavtal, "
+          + "och där finns ofta en lägsta lön för unga. Fråga arbetsgivaren om lönen innan du börjar."
+      }
+    ];
+    const ungaLd = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": ungaFragor.map(q => ({
+        "@type": "Question", "name": q.f,
+        "acceptedAnswer": { "@type": "Answer", "text": q.s }
+      }))
+    }).replace(/</g, "\\u003c");
+
+    let ungaRader = "";
+    for (const j of unga.slice(0, 40)) {
+      const id = j.id || (String(j.lank).match(/\/(\d+)$/) || [])[1] || "";
+      ungaRader += '    <li>\n'
+        + '      <a href="https://chansen.nu/#jobb-' + id + '">' + fly(j.titel) + '</a>\n'
+        + '      <p>' + fly(j.arbetsgivare) + (j.ort ? ' i ' + fly(j.ort) : '')
+        + (j.omfattning ? ' · ' + fly(j.omfattning) : '')
+        + (j.kategori ? ' · ' + fly(j.kategori) : '') + '</p>\n'
+        + (j.beskrivning ? '      <p>' + fly(j.beskrivning.slice(0, 180)) + '</p>\n' : '')
+        + '    </li>\n';
+    }
+
+    fs.writeFileSync("docs/jobb/" + UNGA_SLUG + ".html", sida({
+      titel: "Jobb för 16- och 17-åringar, med låga krav",
+      beskrivning: unga.length + " jobb med låga krav som går att söka när du är 16 eller 17. "
+        + "Regler för arbetstid, vanliga frågor och jobb nära dig. Uppdateras varje natt.",
+      url: "https://chansen.nu/jobb/" + UNGA_SLUG + ".html",
+      ld: ungaLd,
+      kropp: '<h1>Jobb för dig som är 16 eller 17</h1>\n'
+        + '<p>Just nu finns ' + unga.length + ' jobb med låga krav i Sverige som går att söka för dig som är '
+        + '16 eller 17 år. ' + (ungaDeltid ? ungaDeltid + ' av dem är på deltid och kan passa som extrajobb. ' : '')
+        + 'Chansen sorterar bort jobb och arbetstider som annonsen visar att du inte får ha i din ålder. '
+        + 'Vi kan bara läsa det som står i annonsen, så kolla alltid arbetstiderna med arbetsgivaren. '
+        + 'Listan uppdateras varje natt från Platsbanken.</p>\n'
+        + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+        + '<h2>Det här gäller när du är 16 eller 17</h2>\n'
+        + '<p>Har du gått ut nian får du göra vanligt arbete som inte är farligt.</p>\n'
+        + '<ul style="list-style:disc;padding-left:22px">\n'
+        + '<li style="background:none;padding:0;margin:0 0 6px">Högst 8 timmar per dag och 40 timmar per vecka</li>\n'
+        + '<li style="background:none;padding:0;margin:0 0 6px">Som huvudregel ingen arbetstid mellan klockan 22 och 06, och aldrig mellan midnatt och klockan 05</li>\n'
+        + '<li style="background:none;padding:0;margin:0 0 6px">Minst 12 timmars nattvila</li>\n'
+        + '<li style="background:none;padding:0;margin:0 0 6px">Rast på minst 30 minuter senast efter fyra och en halv timme</li>\n'
+        + '<li style="background:none;padding:0;margin:0 0 6px">Minst två lediga dagar i rad varje vecka</li>\n'
+        + '</ul>\n'
+        + '<p>Vissa arbeten är förbjudna för alla under 18, till exempel arbete med farliga maskiner eller '
+        + 'kemikalier, och ensamarbete där det finns risk för hot eller våld. Har du inte gått ut nian än '
+        + 'gäller samma regler som för 13 till 15 år, och då får du bara göra lätt arbete.</p>\n'
+        + '<p>Reglerna kommer från Arbetsmiljöverket och kan ändras. Kolla alltid deras sida om något är viktigt '
+        + 'för dig: <a href="' + AV + '" rel="noopener">Arbetsmiljöverket, för dig som är ung i arbetslivet</a>.</p>\n'
+        + '<h2>Jobb du kan söka just nu</h2>\n'
+        + '<ul>\n' + ungaRader + '</ul>\n'
+        + (unga.length > 40 ? '<p>Och ' + (unga.length - 40) + ' till. '
+           + '<a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
+        + (ungaOrter.length
+          ? '<h2>Jobb för 16- och 17-åringar per ort</h2>\n<p>' + ungaOrter.map(o =>
+              '<a href="https://chansen.nu/jobb/' + ortslug(o) + '.html">' + fly(o) + '</a> ' + ungaPerOrt[o]).join(" · ")
+            + '</p>\n'
+          : '')
+        + '<h2>Vanliga frågor</h2>\n'
+        + ungaFragor.map(q => '<h3>' + fly(q.f) + '</h3>\n<p>' + fly(q.s) + '</p>\n').join("")
+    }));
+  }
+
   // sitemap med startsidan, alla ortssidor och alla branschsidor
   let karta = '<?xml version="1.0" encoding="UTF-8"?>\n'
     + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -1185,6 +1310,11 @@ function skrivOrtssidor(jobb, hamtadTid) {
     karta += '  <url>\n    <loc>' + url + '</loc>\n'
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.6</priority>\n  </url>\n';
+  }
+  if (fs.existsSync("docs/jobb/" + UNGA_SLUG + ".html")) {
+    karta += '  <url>\n    <loc>https://chansen.nu/jobb/' + UNGA_SLUG + '.html</loc>\n'
+      + '    <lastmod>' + datum + '</lastmod>\n'
+      + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
   }
   karta += '</urlset>\n';
   fs.writeFileSync("docs/sitemap.xml", karta);
