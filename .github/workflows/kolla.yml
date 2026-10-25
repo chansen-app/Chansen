@@ -44,3 +44,8 @@ jobs:
       # Publicerat. Är något mer öppet misslyckas körningen och du får ett mejl.
       - name: Kolla kalkylarket
         run: node kolla-kalkylark.js
+
+      # Texterna får inte bryta mot reglerna i CLAUDE.md, till exempel
+      # tankstreck eller "inget konto". Hittar den något får du ett mejl.
+      - name: Kolla texterna
+        run: node kolla-texter.js
