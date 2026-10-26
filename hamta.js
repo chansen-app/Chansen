@@ -951,6 +951,8 @@ function skrivOrtssidor(jobb, hamtadTid) {
     return '<!doctype html>\n'
     + '<html lang="sv">\n<head>\n'
     + '<meta charset="utf-8">\n'
+    // bara de valda färgerna, webbläsaren ska inte göra sidan mörk själv
+    + '<meta name="color-scheme" content="only light">\n'
     + '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
     + '<title>' + fly(o.titel) + ' | Chansen</title>\n'
     + '<meta name="description" content="' + fly(o.beskrivning) + '">\n'
