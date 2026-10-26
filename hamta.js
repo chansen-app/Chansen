@@ -10,7 +10,7 @@
  */
 
 const fs = require("fs");
-const { tvatta } = require("./personuppgifter");
+const { tvatta, privatperson } = require("./personuppgifter");
 
 // ── sökningar: yrkesområden med låga ingångskrav ──────────────────────
 const SOKNINGAR = [
@@ -435,25 +435,10 @@ function poang(a) {
   return p;
 }
 
-/* Är arbetsgivaren en privatperson? Det gäller ofta den som anställer en
-   egen personlig assistent, och då säger namnet i annonsen i praktiken
-   att en namngiven person behöver assistans. Det är en uppgift om hälsa,
-   som GDPR skyddar extra. Chansen behöver inte namnet, den som vill se
-   det klickar vidare till Platsbanken.
-
-   Platsbanken visar privatpersoner utan organisationsnummer, och namnet
-   som "Efternamn, Förnamn". En enskild firma har personnummer som
-   organisationsnummer, och då räknas den som privat om namnet ser ut som
-   en persons. Ett företag med vanligt organisationsnummer är aldrig privat. */
+// Regeln står i personuppgifter.js, så att alla hämtningar använder samma.
 function privatArbetsgivare(a) {
   const e = a.employer || {};
-  const namn = String(e.name || "").trim();
-  const nr = String(e.organization_number || "").replace(/\D/g, "");
-  if (/^[^,]+,\s*[^,]+$/.test(namn)) return true;
-  if (!nr) return true;
-  const manad = Number(nr.slice(2, 4));
-  const personnummer = manad >= 1 && manad <= 12;
-  return personnummer && /^[A-ZÅÄÖ][a-zåäöéü-]+( [A-ZÅÄÖ][a-zåäöéü-]+){1,2}$/.test(namn);
+  return privatperson(e.name, e.organization_number, true);
 }
 
 function kortBeskrivning(a) {

@@ -16,6 +16,7 @@
  */
 
 const fs = require("fs");
+const { privatperson } = require("../personuppgifter");
 
 // Hur många sidor per sökord. Höj när det fungerar som du vill.
 const SIDOR_PER_SOKNING = 3;
@@ -607,7 +608,9 @@ async function hamta() {
             omrade: u.omrade,
             avslojatAv: krav,
             titel: a.headline,
-            arbetsgivare: a.employer ? a.employer.name : "",
+            // Privatperson: inget namn. Regeln står i personuppgifter.js.
+            arbetsgivare: privatperson((a.employer || {}).name, (a.employer || {}).organization_number, true)
+              ? "Privatperson" : (a.employer ? a.employer.name : ""),
             ort: a.workplace_address ? a.workplace_address.municipality : "",
             lan: a.workplace_address ? a.workplace_address.region : "",
             yrke: a.occupation ? a.occupation.label : "",

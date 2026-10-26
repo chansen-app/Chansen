@@ -26,7 +26,7 @@
  */
 
 const fs = require("fs");
-const { tvatta } = require("../personuppgifter");
+const { tvatta, privatperson } = require("../personuppgifter");
 
 const BAS = "https://pam-stilling-feed.nav.no";
 const DAGAR_BAKAT = 2;          // hur långt bak i flödet vi börjar
@@ -386,15 +386,20 @@ async function kor() {
     const lan = (plats.county || "").toLowerCase()
       .replace(/(^|[\s-])([a-zåäöæøéè])/g, (m, f, b) => f + b.toUpperCase());
 
+    // NAV har organisationsnummer för företag, men alla annonser har det
+    // inte, så bara namnet avgör här.
+    const privat = privatperson((a.employer || {}).name, "", false);
     jobb.push({
       titel: a.title || "",
-      arbetsgivare: (a.employer || {}).name || "",
+      // Privatperson: inget namn och ingen annonstext. Regeln står i
+      // personuppgifter.js.
+      arbetsgivare: privat ? "Privatperson" : ((a.employer || {}).name || ""),
       ort: ort,
       lan: lan,
       omfattning: a.extent || "",
       anstallningsform: a.engagementtype || "",
       kategori: kategori(a.title, text),
-      beskrivning: tvatta(rensa(a.description)).slice(0, 400),
+      beskrivning: privat ? "" : tvatta(rensa(a.description)).slice(0, 400),
       lank: a.link || a.applicationUrl || "",
       sistaAnsokningsdag: a.applicationDue || "",
       publicerad: a.published || "",
