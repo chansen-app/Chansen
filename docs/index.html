@@ -4746,7 +4746,9 @@ function tyckSkicka(){
     battre: tyck.battre || "",
     mejl: tyck.mejl || "",
     alder: (typeof svar !== "undefined" && svar.alder) || "",
-    ort: (typeof svar !== "undefined" && svar.ort) || "",
+    // Bara en kommun som finns, aldrig det som skrivits i rutan. Någon
+    // kan råka skriva något annat än en ort där.
+    ort: (typeof kommunForStatistik === "function" && kommunForStatistik()) || "",
     antalJobb: (typeof aktuellLista !== "undefined") ? aktuellLista.length : "",
     sidversion: (typeof VERSION !== "undefined") ? VERSION : ""
   };
