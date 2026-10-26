@@ -912,7 +912,7 @@ var MAL = [
     besok: 5000, klick: 1500, andel: 30, prenumeranter: 500, oppnar: 30, hittade: 5 },
   { namn: "Steg 3: Det gör skillnad", till: "sponsorer, stiftelser, större medier och Arbetsförmedlingen lokalt",
     besok: 10000, klick: 3000, andel: 30, prenumeranter: 1000, oppnar: 30, hittade: 10 },
-  { namn: "Stora målet", till: "personer som har byggt något stort, för råd om nästa steg",
+  { namn: "Stora målet", till: "",
     besok: 25000, klick: 7500, andel: 30, prenumeranter: 2000, oppnar: 30, hittade: 20 }
 ];
 
@@ -941,7 +941,7 @@ function malKortHtml_(d){
 
   return '<div class="stat-kort"><h3>Målet</h3>'
     + '<p class="under">' + tal_(stort.besok) + ' besök och ' + tal_(stort.klick) + ' klick till jobb på en månad. '
-    + 'När du når det sparar du rapporten som PDF och hör av dig.</p>'
+    + 'När du når det sparar du rapporten som PDF.</p>'
     + stapel("Besök, senaste 30 dagarna", besok, stort.besok)
     + stapel("Klick till jobb, senaste 30 dagarna" + (besok ? ", " + Math.round(100 * klick / besok) + " % av besöken" : ""), klick, stort.klick)
     + '<p class="stat-not" style="margin:0 0 12px">Delmål på vägen: '
@@ -1021,7 +1021,7 @@ function rapportPdf(){
 
   var stegHtml = MAL.map(function(m, i){
     return "<p class='" + (i < nasta ? "klart" : (i === nasta ? "nu" : "")) + "'><b>" + fly(m.namn) + "</b>"
-      + (i < nasta ? ", klart" : (i === nasta ? ", här är Chansen nu" : "")) + "<br>Visa för " + fly(m.till) + ".</p>";
+      + (i < nasta ? ", klart" : (i === nasta ? ", här är Chansen nu" : "")) + (m.till ? "<br>Visa för " + fly(m.till) + "." : "") + "</p>";
   }).join("");
 
   var kedja = [["Besök", besok], ["Såg jobblistan", listor], ["Klickade på en annons", klick],
