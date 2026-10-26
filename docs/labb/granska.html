@@ -903,16 +903,15 @@ function kortDatum_(dag){
   return Number(dag.slice(8, 10)) + " " + m[Number(dag.slice(5, 7)) - 1];
 }
 
-/* Målen för Chansen, i tre steg. Varje steg säger vem det är dags att
-   höra av sig till när målen nås. Ändra siffrorna här om målen ändras. */
+/* Målstolparna för Chansen. Ändra siffrorna här om målen ändras. */
 var MAL = [
-  { namn: "Steg 1: Det fungerar", till: "skolor, studie- och yrkesvägledare, KAA och bibliotek",
+  { namn: "Målstolpe 1",
     besok: 1000, klick: 300, andel: 30, prenumeranter: 100, oppnar: 35, hittade: 1 },
-  { namn: "Steg 2: Det växer", till: "kommuner, lokaltidningar, ungdomsmottagningar och föreningar",
+  { namn: "Målstolpe 2",
     besok: 5000, klick: 1500, andel: 30, prenumeranter: 500, oppnar: 30, hittade: 5 },
-  { namn: "Steg 3: Det gör skillnad", till: "sponsorer, stiftelser, större medier och Arbetsförmedlingen lokalt",
+  { namn: "Målstolpe 3",
     besok: 10000, klick: 3000, andel: 30, prenumeranter: 1000, oppnar: 30, hittade: 10 },
-  { namn: "Stora målet", till: "",
+  { namn: "Målstolpe 4",
     besok: 25000, klick: 7500, andel: 30, prenumeranter: 2000, oppnar: 30, hittade: 20 }
 ];
 
@@ -944,7 +943,7 @@ function malKortHtml_(d){
     + 'När du når det sparar du rapporten som PDF.</p>'
     + stapel("Besök, senaste 30 dagarna", besok, stort.besok)
     + stapel("Klick till jobb, senaste 30 dagarna" + (besok ? ", " + Math.round(100 * klick / besok) + " % av besöken" : ""), klick, stort.klick)
-    + '<p class="stat-not" style="margin:0 0 12px">Delmål på vägen: '
+    + '<p class="stat-not" style="margin:0 0 12px">Målstolpar: '
     + delmal.map(function(b){ return (b <= besok ? "<b>" + tal_(b) + " klart</b>" : tal_(b)); }).join(" · ") + ' besök i månaden.'
     + (nasta ? ' Nästa: ' + tal_(nasta) + '.' : '') + '</p>'
     + '<details><summary style="cursor:pointer;font-weight:600">Så ska du tänka</summary>'
@@ -1021,7 +1020,8 @@ function rapportPdf(){
 
   var stegHtml = MAL.map(function(m, i){
     return "<p class='" + (i < nasta ? "klart" : (i === nasta ? "nu" : "")) + "'><b>" + fly(m.namn) + "</b>"
-      + (i < nasta ? ", klart" : (i === nasta ? ", här är Chansen nu" : "")) + (m.till ? "<br>Visa för " + fly(m.till) + "." : "") + "</p>";
+      + ": " + tal_(m.besok) + " besök och " + tal_(m.klick) + " klick till jobb i månaden"
+      + (i < nasta ? ", klart" : (i === nasta ? ", här är Chansen nu" : "")) + "</p>";
   }).join("");
 
   var kedja = [["Besök", besok], ["Såg jobblistan", listor], ["Klickade på en annons", klick],
@@ -1041,9 +1041,9 @@ function rapportPdf(){
     + "</style></head><body>"
     + "<button onclick='print()' style='float:right;padding:10px 16px;border-radius:99px;border:0;background:#ac5e2b;color:#fff;font-weight:600'>Spara som PDF</button>"
     + "<h1>Chansen, rapport</h1><p class='under'>" + kortDatum_(fran) + " till " + kortDatum_(idag) + " " + idag.slice(0, 4) + ", de senaste 30 dagarna. chansen.nu</p>"
-    + "<h2>Mot målen" + (nasta < MAL.length ? ", " + fly(MAL[nasta].namn) : "") + "</h2>"
+    + "<h2>" + (nasta < MAL.length ? "Mot " + fly(MAL[nasta].namn.toLowerCase()) : "Alla målstolpar är nådda") + "</h2>"
     + "<table><tr><th>Vad</th><th class='tal'>Nu</th><th class='tal'>Mål</th><th></th><th></th></tr>" + rader + "</table>"
-    + "<h2>Stegen</h2>" + stegHtml
+    + "<h2>Målstolpar</h2>" + stegHtml
     + "<h2>Från besök till ansökan</h2><table>" + kedja + "</table>"
     + "<p class='fot'>Siffrorna är summor för alla besökare tillsammans, från Cloudflare, GoatCounter och Sender. "
     + "Inget går att koppla till en enskild person. Prenumeranterna gäller i dag, inte hela perioden.</p>"
