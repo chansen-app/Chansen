@@ -435,6 +435,27 @@ function poang(a) {
   return p;
 }
 
+/* Är arbetsgivaren en privatperson? Det gäller ofta den som anställer en
+   egen personlig assistent, och då säger namnet i annonsen i praktiken
+   att en namngiven person behöver assistans. Det är en uppgift om hälsa,
+   som GDPR skyddar extra. Chansen behöver inte namnet, den som vill se
+   det klickar vidare till Platsbanken.
+
+   Platsbanken visar privatpersoner utan organisationsnummer, och namnet
+   som "Efternamn, Förnamn". En enskild firma har personnummer som
+   organisationsnummer, och då räknas den som privat om namnet ser ut som
+   en persons. Ett företag med vanligt organisationsnummer är aldrig privat. */
+function privatArbetsgivare(a) {
+  const e = a.employer || {};
+  const namn = String(e.name || "").trim();
+  const nr = String(e.organization_number || "").replace(/\D/g, "");
+  if (/^[^,]+,\s*[^,]+$/.test(namn)) return true;
+  if (!nr) return true;
+  const manad = Number(nr.slice(2, 4));
+  const personnummer = manad >= 1 && manad <= 12;
+  return personnummer && /^[A-ZÅÄÖ][a-zåäöéü-]+( [A-ZÅÄÖ][a-zåäöéü-]+){1,2}$/.test(namn);
+}
+
 function kortBeskrivning(a) {
   var t = (a.description ? a.description.text : "") || "";
   t = t.replace(/\s+/g, " ").trim();
@@ -713,10 +734,13 @@ async function hamtaJobb() {
         const p = poang(a);
         if (p < 3) { bortsorterade++; continue; }
 
+        // Hos en privatperson visas varken namnet eller annonstexten, som
+        // ofta berättar om personens hälsa. Resten står i Platsbanken.
+        const privat = privatArbetsgivare(a);
         jobb.push({
           titel: a.headline,
-        beskrivning: kortBeskrivning(a),
-          arbetsgivare: a.employer ? a.employer.name : "",
+          beskrivning: privat ? "" : kortBeskrivning(a),
+          arbetsgivare: privat ? "Privatperson" : (a.employer ? a.employer.name : ""),
           ort: a.workplace_address && a.workplace_address.municipality ? a.workplace_address.municipality : "",
           omfattning: a.working_hours_type ? a.working_hours_type.label : "",
           anstallningsform: a.employment_type ? a.employment_type.label : "",
@@ -762,6 +786,8 @@ async function hamtaJobb() {
   const kvar = [], bortTak = [];
   for (const j of jobb) {
     const ag = (j.arbetsgivare || "").trim();
+    // Privatpersoner är många olika arbetsgivare, inte ett företag.
+    if (ag === "Privatperson") { kvar.push(j); continue; }
     const nyckelOrt = ag + "|" + (j.ort || "");
     perOrt[nyckelOrt] = (perOrt[nyckelOrt] || 0) + 1;
     perAg[ag] = (perAg[ag] || 0) + 1;

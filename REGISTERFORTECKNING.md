@@ -189,6 +189,43 @@ chansen.jobb@gmail.com.
 
 ---
 
+## 7. Jobbannonser från Platsbanken
+
+**Vad som behandlas:** annonserna kommer från Arbetsförmedlingens öppna
+data. De kan innehålla personuppgifter som arbetsgivaren själv skrivit,
+till exempel namn på en kontaktperson. När arbetsgivaren är en
+privatperson kan annonsen också säga något om personens hälsa, till
+exempel att hen behöver en personlig assistent.
+
+**Varför:** för att visa jobb med låga krav för den som söker jobb.
+
+**Rättslig grund:** berättigat intresse, artikel 6.1 f. Uppgifterna är
+redan publicerade av arbetsgivaren i Platsbanken.
+
+**Så minimeras uppgifterna:**
+- Mejladresser, telefonnummer och personnummer tas bort ur annonstexten
+  innan något sparas.
+- När arbetsgivaren är en privatperson visas varken namnet eller
+  annonstexten, bara "Privatperson". Det avgörs av att Platsbanken
+  saknar organisationsnummer, eller att namnet står som "Efternamn,
+  Förnamn", eller att en enskild firma har ett namn som ser ut som en
+  persons.
+- Bara en kort del av annonstexten visas. Hela annonsen finns i
+  Platsbanken.
+
+**Var uppgifterna finns:** i filerna jobb.js och jobb.json och på
+sidorna per ort, på chansen.nu och i det öppna repot på GitHub.
+
+**Hur länge:** listan skrivs om varje natt. En annons som tagits bort ur
+Platsbanken försvinner från chansen.nu samma natt. Äldre versioner finns
+kvar i historiken på GitHub.
+
+**Rätt att få något borttaget:** den som hittar sitt namn eller annat i
+en annons kan mejla chansen.jobb@gmail.com. Det står på chansen.nu,
+under Jobbannonserna.
+
+---
+
 ## Tekniska och organisatoriska åtgärder
 
 Chansen Admin kräver användarnamn och lösenord. Lösenord sparas som
