@@ -1266,12 +1266,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
       <div class="chips" id="tyck-val" style="margin-bottom:14px"></div>
       <textarea class="tyckf" id="tyck-battre" aria-labelledby="fraga-tyck-battre" placeholder="Skriv gärna mer, om du vill"></textarea>
     </div>
-
-    <div class="steg" data-falt="mejl">
-      <h2 class="cvfraga" id="fraga-tyck-mejl">Vill du ha svar?</h2>
-      <input class="txt tyckf" id="tyck-mejl" aria-labelledby="fraga-tyck-mejl" placeholder="Din mejladress, frivilligt" inputmode="email">
-      <div class="hint">Lämnar du din mejladress sparas den bara för att kunna svara dig. Den raderas automatiskt efter 30 dagar, och det du skrivit blir kvar utan adressen. Vill du få den borttagen tidigare, mejla chansen.jobb@gmail.com. Lämnar du rutan tom vet jag inte vem du är.</div>
-    </div>
+    <!-- Ingen ruta för mejladress. Synpunkterna behöver inte kopplas till
+         någon, och då sparas ingen personuppgift alls. -->
   </div>
 
   <div id="tyck-status" role="status" aria-live="polite" class="rakning"></div>
@@ -1385,7 +1381,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   <p>Vill du få dina personuppgifter och din annons borttagna tidigare, eller veta vad vi har sparat om dig, mejla chansen.jobb@gmail.com så ordnar vi det.</p>
 
   <p><b>Synpunkter.</b> Skickar du in synpunkter via Tyck till sparar vi svaren på frågorna och det du skrivit. Vi sparar också det du själv valt i appen: din ålder, din ort och hur många jobb som visades för dig. Det hjälper oss att förstå synpunkten, till exempel om sidan fungerar sämre för en viss ålder, eller om det finns för få jobb på en viss ort. Vi sparar också vilken version av sidan du använde, så att vi kan hitta fel.</p>
-  <p>Lämnar du en mejladress sparas den bara för att kunna svara dig. Den raderas automatiskt efter 30 dagar, och synpunkten blir kvar utan adressen. Den rättsliga grunden är berättigat intresse, alltså att kunna göra Chansen bättre utifrån det du berättar. Vill du få din synpunkt eller mejladress borttagen tidigare, mejla chansen.jobb@gmail.com.</p>
+  <p>Vi frågar inte efter namn eller mejladress, så synpunkten kan inte kopplas till dig. Skriv därför inget om dig själv i rutan, som ditt namn eller telefonnummer. Den rättsliga grunden är berättigat intresse, alltså att kunna göra Chansen bättre utifrån det du berättar. Har du ändå skrivit något om dig själv och vill få det borttaget, mejla chansen.jobb@gmail.com.</p>
 
   <p><b>Besöksstatistik.</b> Vi använder Cloudflare Web Analytics för att se hur många som besöker sidan. Den använder inga cookies, spårar inte enskilda besökare och sparar inga uppgifter som kan kopplas till dig.</p>
   <p>Med tjänsten GoatCounter räknar vi också hur sidan används: hur många som klickar sig vidare till en annons och vilka annonser det gäller, vilka filter som används, vilken kommun folk söker jobb i, vilka sökningar som inte gav något jobb, vilken åldersgrupp man valt, varifrån man kom till sidan, hur många som kommer tillbaka, svaren på frågan om man hittar något jobb, och om det uppstår tekniska fel. Allt räknas som totaler, till exempel "40 sökte i Halmstad i dag". GoatCounter använder inga kakor och sparar ingenting om vem du är, så inget av det går att koppla till dig.</p>
@@ -1393,6 +1389,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   <p><b>Jobbannonserna.</b> Annonserna kommer från Platsbanken, och det är arbetsgivarna som skriver dem. Chansen tar bort mejladresser, telefonnummer och personnummer ur annonstexterna innan de visas. När arbetsgivaren är en privatperson, till exempel någon som söker en egen personlig assistent, visas varken namnet eller annonstexten, bara "Privatperson". Allt står kvar i originalannonsen i Platsbanken. Vi kan inte läsa varje annons för hand, så något kan slinka igenom. Hittar du ett namn eller något annat som borde tas bort, mejla <a href="mailto:chansen.jobb@gmail.com?subject=Personuppgifter%20i%20en%20annons">chansen.jobb@gmail.com</a> så tar vi bort det.</p>
 
   <p><b>Var sidan ligger.</b> Chansen ligger hos GitHub, som ägs av Microsoft. Som hos alla webbplatser tar GitHub emot din IP-adress när du besöker sidan, eftersom den behövs för att sidan ska kunna skickas till dig. GitHub sparar IP-adressen en tid av säkerhetsskäl, till exempel för att kunna stoppa angrepp mot sidan. Vi kan inte se den och använder den inte. Den rättsliga grunden är berättigat intresse, alltså att sidan ska fungera och vara säker. Läs mer i <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener" target="_blank">GitHubs integritetspolicy</a>.</p>
+
+  <p><b>Registerförteckning.</b> Chansen har en registerförteckning enligt artikel 30 i GDPR. Där står alla personuppgifter Chansen hanterar, varför och hur länge. Den är inte offentlig, eftersom den också beskriver hur Chansens skydd fungerar, och det ska inte kunna användas för att ta sig förbi dem. Den visas för Integritetsskyddsmyndigheten om de frågar. Vill du veta vilka uppgifter vi har om just dig, mejla chansen.jobb@gmail.com.</p>
 
   <p><b>Dina rättigheter.</b> Du har rätt att få veta vilka uppgifter vi har om dig, att få dem rättade eller raderade, och att invända mot behandlingen. Mejla <a href="mailto:chansen.jobb@gmail.com?subject=Personuppgifter">chansen.jobb@gmail.com</a> så fixar vi det. Är du missnöjd med hur vi hanterar dina uppgifter kan du klaga hos Integritetsskyddsmyndigheten, imy.se.</p>
 
@@ -4748,7 +4746,6 @@ function tyckSkicka(){
     saknar: tyck.saknar || "",
     kranglig: tyck.kranglig || "",
     battre: tyck.battre || "",
-    mejl: tyck.mejl || "",
     alder: (typeof svar !== "undefined" && svar.alder) || "",
     // Bara en kommun som finns, aldrig det som skrivits i rutan. Någon
     // kan råka skriva något annat än en ort där.
