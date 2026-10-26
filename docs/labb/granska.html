@@ -1313,7 +1313,8 @@ function ritaStatistik(){
     html += '<div class="stat-kort"><h3>Säsong</h3><p class="under">Jobb som handlar om jul, sommar, vinter och säsong, i natt</p>'
       + ((sasongData.varningar || []).length
           ? (sasongData.varningar || []).map(function(v){
-              return '<p style="margin:0 0 8px;padding:10px 12px;border-radius:12px;background:' + (v.typ === "okar" ? "#fff2eb" : "#f0fae1") + '">' + fly(v.text) + "</p>";
+              // Fast mörk text, annars blir den vit i mörkt läge mot den ljusa rutan.
+              return '<p style="margin:0 0 8px;padding:10px 12px;border-radius:12px;color:#201e1d;background:' + (v.typ === "okar" ? "#fff2eb" : "#f0fae1") + '">' + fly(v.text) + "</p>";
             }).join("")
           : '<p class="stat-not">Inget som ökar just nu.</p>')
       + '<div class="stat-lista" style="margin-top:10px">' + sRader + "</div></div>";
