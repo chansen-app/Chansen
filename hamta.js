@@ -970,7 +970,8 @@ function skrivOrtssidor(jobb, hamtadTid) {
     + '<p>Jobben kommer från Arbetsförmedlingens öppna data. '
     + 'Arbetsförmedlingen står inte bakom sidan, den drivs av en privatperson.</p>\n'
     + '<footer>Uppdaterad ' + datum + '. '
-    + '<a href="https://chansen.nu/">chansen.nu</a></footer>\n'
+    + '<a href="https://chansen.nu/">chansen.nu</a> · '
+    + '<a href="https://chansen.nu/jobb/">Alla orter</a></footer>\n'
     + '</div>\n</body>\n</html>\n';
   }
 
@@ -1395,12 +1396,44 @@ function skrivOrtssidor(jobb, hamtadTid) {
     ]
   })) aldersidor.push(YNGRE_SLUG);
 
+  /* Översikt på chansen.nu/jobb/ med länkar till alla stadssidor, per
+     län. Startsidan länkar hit. Utan den hittade Google stadssidorna
+     bara via sitemap, och tog nästan inte med några av dem.          */
+  const lanLista = Object.keys(orterPerLan).sort((a, b) => a.localeCompare(b, "sv"));
+  const totalt = jobb.filter(j => !j.land).length;
+  fs.writeFileSync("docs/jobb/index.html", sida({
+    titel: "Jobb med låga krav per ort",
+    beskrivning: totalt + " jobb med låga krav i " + orter.length + " orter i Sverige, sorterade per län. "
+      + "Uppdateras varje natt från Platsbanken. Gratis att använda.",
+    url: "https://chansen.nu/jobb/",
+    kropp: '<h1>Jobb med låga krav per ort</h1>\n'
+      + '<p>Just nu finns ' + totalt + ' jobb med låga krav i Sverige. Här är alla orter som har minst '
+      + MINST_JOBB_FOR_EGEN_SIDA + ' av dem, sorterade per län. Siffran visar hur många jobb som finns i orten i dag. '
+      + 'Listan uppdateras varje natt från Platsbanken.</p>\n'
+      + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+      + (aldersidor.length
+        ? '<h2>Jobb för din ålder</h2>\n<p>'
+          + (aldersidor.indexOf(UNGA_SLUG) > -1 ? '<a href="https://chansen.nu/jobb/' + UNGA_SLUG + '.html">Jobb för dig som är 16 eller 17</a>' : '')
+          + (aldersidor.length > 1 ? ' · ' : '')
+          + (aldersidor.indexOf(YNGRE_SLUG) > -1 ? '<a href="https://chansen.nu/jobb/' + YNGRE_SLUG + '.html">Jobb för dig som är 13 till 15</a>' : '')
+          + '</p>\n'
+        : '')
+      + lanLista.map(lan => '<h2>' + fly(lan) + '</h2>\n<p>'
+          + orterPerLan[lan].slice().sort((a, b) => perOrt[b].length - perOrt[a].length)
+            .map(o => '<a href="https://chansen.nu/jobb/' + ortslug(o) + '.html">' + fly(o) + '</a> ' + perOrt[o].length)
+            .join(" · ")
+          + '</p>\n').join("")
+  }));
+
   // sitemap med startsidan, alla ortssidor och alla branschsidor
   let karta = '<?xml version="1.0" encoding="UTF-8"?>\n'
     + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + '  <url>\n    <loc>https://chansen.nu/</loc>\n'
     + '    <lastmod>' + datum + '</lastmod>\n'
-    + '    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n';
+    + '    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n'
+    + '  <url>\n    <loc>https://chansen.nu/jobb/</loc>\n'
+    + '    <lastmod>' + datum + '</lastmod>\n'
+    + '    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n';
   for (const ort of orter) {
     karta += '  <url>\n    <loc>https://chansen.nu/jobb/' + ortslug(ort) + '.html</loc>\n'
       + '    <lastmod>' + datum + '</lastmod>\n'
