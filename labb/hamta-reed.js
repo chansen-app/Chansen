@@ -20,7 +20,7 @@
  */
 
 const fs = require("fs");
-const { tvatta } = require("../personuppgifter");
+const { tvatta, privatperson } = require("../personuppgifter");
 
 const SOK = "https://www.reed.co.uk/api/1.0/search";
 const DETALJ = "https://www.reed.co.uk/api/1.0/jobs/";
@@ -261,7 +261,9 @@ async function kor(){
 
     jobb.push({
       titel,
-      arbetsgivare: d.employerName || r.employerName || "",
+      // Privatperson: inget namn och ingen annonstext. Regeln står i
+      // personuppgifter.js.
+      arbetsgivare: privatperson(d.employerName || r.employerName, "", false) ? "Privatperson" : (d.employerName || r.employerName || ""),
       ort,
       lan: ort,
       omrade: ort,
@@ -269,7 +271,7 @@ async function kor(){
       anstallningsform: r.contractType === "permanent" ? "Permanent"
                       : r.contractType === "temp" ? "Temporary" : "",
       kategori: kategori(titel, text),
-      beskrivning: tvatta(text).slice(0, 400),
+      beskrivning: privatperson(d.employerName || r.employerName, "", false) ? "" : tvatta(text).slice(0, 400),
       lank: d.jobUrl || r.jobUrl || "",
       lon: lon.text,
       lonform: "",

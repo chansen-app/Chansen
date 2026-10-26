@@ -27,7 +27,7 @@
  */
 
 const fs = require("fs");
-const { tvatta } = require("../personuppgifter");
+const { tvatta, privatperson } = require("../personuppgifter");
 
 const BAS = "https://api.adzuna.com/v1/api/jobs/gb/search";
 const PER_SIDA = 50;          // Adzunas tak
@@ -336,7 +336,9 @@ async function kor(){
        prototypsidan kan läsa dem utan ändringar i koden. */
     jobb.push({
       titel,
-      arbetsgivare: (r.company || {}).display_name || "",
+      // Privatperson: inget namn och ingen annonstext. Regeln står i
+      // personuppgifter.js.
+      arbetsgivare: privatperson((r.company || {}).display_name, "", false) ? "Privatperson" : ((r.company || {}).display_name || ""),
       ort: p.ort,
       lan: p.lan,
       omrade: p.omrade,
@@ -345,7 +347,7 @@ async function kor(){
       anstallningsform: r.contract_type === "permanent" ? "Permanent"
                       : r.contract_type === "contract" ? "Contract" : "",
       kategori: kategori((r.category || {}).label, titel, text),
-      beskrivning: tvatta(text).slice(0, 400),
+      beskrivning: privatperson((r.company || {}).display_name, "", false) ? "" : tvatta(text).slice(0, 400),
       lank: r.redirect_url || "",
       lon: (r.salary_min && !r.salary_is_predicted)
         ? Math.round(r.salary_min) + (r.salary_max && r.salary_max !== r.salary_min

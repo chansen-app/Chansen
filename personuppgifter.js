@@ -70,4 +70,31 @@ function tvatta(text) {
   return t.replace(dubbel, ERSATTNING);
 }
 
-module.exports = { hitta, tvatta };
+/* Ser arbetsgivaren ut att vara en privatperson? Det gäller ofta den som
+   anställer en egen personlig assistent, och då säger namnet i annonsen i
+   praktiken att en namngiven person behöver assistans. Det är en uppgift
+   om hälsa, som GDPR skyddar extra. Då visas "Privatperson" och ingen
+   annonstext. Den som vill se allt klickar vidare till originalannonsen.
+
+   - Namn som "Efternamn, Förnamn" är alltid en person. Så skriver
+     Platsbanken privatpersoner.
+   - kraverNummer: källan har alltid organisationsnummer för företag, så
+     saknas det är det en person. Gäller Platsbanken.
+   - Ett svenskt organisationsnummer där tredje och fjärde siffran är 01
+     till 12 är ett personnummer, alltså en enskild firma. Den räknas som
+     privat om namnet ser ut som en persons.                          */
+function privatperson(namn, nummer, kraverNummer) {
+  const n = String(namn || "").trim();
+  const nr = String(nummer || "").replace(/\D/g, "");
+  if (/^[^,]+,\s*[^,]+$/.test(n)) return true;
+  if (kraverNummer && !nr) return true;
+  if (nr.length === 10 || nr.length === 12) {
+    const kort = nr.slice(-10);
+    const manad = Number(kort.slice(2, 4));
+    if (manad >= 1 && manad <= 12
+      && /^[A-ZÅÄÖ][a-zåäöéü-]+( [A-ZÅÄÖ][a-zåäöéü-]+){1,2}$/.test(n)) return true;
+  }
+  return false;
+}
+
+module.exports = { hitta, tvatta, privatperson };
