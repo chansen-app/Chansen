@@ -903,6 +903,96 @@ function kortDatum_(dag){
   return Number(dag.slice(8, 10)) + " " + m[Number(dag.slice(5, 7)) - 1];
 }
 
+/* Målen för Chansen, i tre steg. Varje steg säger vem det är dags att
+   höra av sig till när målen nås. Ändra siffrorna här om målen ändras. */
+var MAL = [
+  { namn: "Steg 1: Det fungerar", till: "skolor, studie- och yrkesvägledare, KAA och bibliotek",
+    besok: 1000, klick: 300, andel: 30, prenumeranter: 100, oppnar: 35, hittade: 1 },
+  { namn: "Steg 2: Det växer", till: "kommuner, lokaltidningar, ungdomsmottagningar och föreningar",
+    besok: 5000, klick: 1500, andel: 30, prenumeranter: 500, oppnar: 30, hittade: 5 },
+  { namn: "Steg 3: Det gör skillnad", till: "sponsorer, stiftelser, större medier och Arbetsförmedlingen lokalt",
+    besok: 20000, klick: 6000, andel: 30, prenumeranter: 2000, oppnar: 30, hittade: 20 }
+];
+
+/* Månadsrapport som går att spara som PDF. Bara summor för de senaste
+   30 dagarna, aldrig något om enskilda besökare. Hur många som öppnar
+   jobbmejlet finns bara i Sender, så det skrivs in för hand.          */
+function rapportPdf(){
+  var d = statData;
+  if (!d || !(d.dagar || []).length){ alert("Statistiken har inte laddats än. Vänta en stund och försök igen."); return; }
+  var idag = new Date().toISOString().slice(0, 10);
+  var fran = dagPlus_(idag, -30);
+  var dagar = d.dagar.filter(function(x){ return x.datum >= fran; });
+  function summa(f){ return dagar.reduce(function(s, x){ return s + Number(x[f] || 0); }, 0); }
+  function h(n){ return dagar.reduce(function(s, x){ return s + Number((x["Händelser"] || {})[n] || 0); }, 0); }
+
+  var besok = summa("Besök"), listor = h("visade-jobb"), klick = h("klick-annons");
+  var andel = listor ? Math.round(100 * klick / listor) : 0;
+  var hittade = h("tyck-snabb-ja");
+  var mejlRad = null;
+  for (var i = d.dagar.length - 1; i >= 0; i--){ if (d.dagar[i]["Mejlstatus"]){ mejlRad = d.dagar[i]["Mejlstatus"]; break; } }
+  if (typeof mejlRad === "string"){ try { mejlRad = JSON.parse(mejlRad); } catch (e) { mejlRad = null; } }
+  var prenumeranter = mejlRad ? Number(mejlRad.active || 0) : null;
+
+  var svar = prompt("Hur många procent öppnade det senaste jobbmejlet? Det står i Sender, under Campaigns. Lämna tomt om du inte vet.", "");
+  var oppnar = svar === null || String(svar).trim() === "" ? null : Number(String(svar).replace(",", ".").replace(/[^0-9.]/g, ""));
+
+  var nu = { besok: besok, klick: klick, andel: andel, prenumeranter: prenumeranter, oppnar: oppnar, hittade: hittade };
+  var namn = { besok: "Besök", klick: "Klick till annonser", andel: "Andel som klickar på ett jobb, av de som ser listan",
+               prenumeranter: "Prenumeranter på jobbmejlet", oppnar: "Andel som öppnar jobbmejlet",
+               hittade: "Har svarat att de hittat ett jobb" };
+  var procent = { andel: true, oppnar: true };
+  function visa(k, v){ return v === null || v === undefined || isNaN(v) ? "saknas" : tal_(v) + (procent[k] ? " %" : ""); }
+
+  // Nästa steg som inte är nått än
+  var nasta = 0;
+  for (var s = 0; s < MAL.length; s++){
+    var klar = Object.keys(namn).every(function(k){ return nu[k] !== null && nu[k] >= MAL[s][k]; });
+    if (klar) nasta = s + 1; else break;
+  }
+
+  var rader = Object.keys(namn).map(function(k){
+    var mal = nasta < MAL.length ? MAL[nasta][k] : MAL[MAL.length - 1][k];
+    var v = nu[k], klart = v !== null && !isNaN(v) && v >= mal;
+    var del = v === null || isNaN(v) ? 0 : Math.min(100, Math.round(100 * v / mal));
+    return "<tr><td>" + fly(namn[k]) + "</td><td class='tal'>" + visa(k, v) + "</td><td class='tal'>" + visa(k, mal) + "</td>"
+      + "<td><div class='spar'><div class='fyll' style='width:" + del + "%'></div></div></td><td>" + (klart ? "Klart" : del + " %") + "</td></tr>";
+  }).join("");
+
+  var stegHtml = MAL.map(function(m, i){
+    return "<p class='" + (i < nasta ? "klart" : (i === nasta ? "nu" : "")) + "'><b>" + fly(m.namn) + "</b>"
+      + (i < nasta ? ", klart" : (i === nasta ? ", här är Chansen nu" : "")) + "<br>Visa för " + fly(m.till) + ".</p>";
+  }).join("");
+
+  var kedja = [["Besök", besok], ["Såg jobblistan", listor], ["Klickade på en annons", klick],
+    ["Öppnade ansökningsbrevet", h("oppnade-ansokan")], ["Markerade att de sökt", h("jobb-sokt")]]
+    .map(function(x){ return "<tr><td>" + x[0] + "</td><td class='tal'>" + tal_(x[1]) + "</td></tr>"; }).join("");
+
+  var html = "<!doctype html><html lang='sv'><head><meta charset='utf-8'><meta name='color-scheme' content='only light'>"
+    + "<title>Chansen, rapport " + idag + "</title><style>"
+    + "body{font-family:system-ui,sans-serif;color:#201e1d;background:#fff;margin:32px;line-height:1.5}"
+    + "h1{font-size:24px;margin:0 0 4px}h2{font-size:17px;margin:26px 0 8px}.under{color:#645c50;margin:0 0 18px}"
+    + "table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:7px 8px;border-bottom:1px solid #e5dccd;text-align:left;vertical-align:middle}"
+    + "th{font-size:12px;color:#645c50;font-weight:600}.tal{text-align:right;white-space:nowrap}"
+    + ".spar{background:#f1e8da;border-radius:99px;height:10px;width:120px}.fyll{background:#ac5e2b;border-radius:99px;height:10px}"
+    + "p.nu{background:#fff2eb;padding:8px 12px;border-radius:10px}p.klart{color:#645c50}"
+    + ".fot{margin-top:28px;font-size:12px;color:#645c50}@media print{body{margin:14mm}button{display:none}}"
+    + "</style></head><body>"
+    + "<button onclick='print()' style='float:right;padding:10px 16px;border-radius:99px;border:0;background:#ac5e2b;color:#fff;font-weight:600'>Spara som PDF</button>"
+    + "<h1>Chansen, rapport</h1><p class='under'>" + kortDatum_(fran) + " till " + kortDatum_(idag) + " " + idag.slice(0, 4) + ", de senaste 30 dagarna. chansen.nu</p>"
+    + "<h2>Mot målen" + (nasta < MAL.length ? ", " + fly(MAL[nasta].namn) : "") + "</h2>"
+    + "<table><tr><th>Vad</th><th class='tal'>Nu</th><th class='tal'>Mål</th><th></th><th></th></tr>" + rader + "</table>"
+    + "<h2>Stegen</h2>" + stegHtml
+    + "<h2>Från besök till ansökan</h2><table>" + kedja + "</table>"
+    + "<p class='fot'>Siffrorna är summor för alla besökare tillsammans, från Cloudflare, GoatCounter och Sender. "
+    + "Inget går att koppla till en enskild person. Prenumeranterna gäller i dag, inte hela perioden.</p>"
+    + "</body></html>";
+
+  var f = window.open("", "_blank");
+  if (!f){ alert("Webbläsaren stoppade rapporten. Tillåt popupfönster för den här sidan och försök igen."); return; }
+  f.document.open(); f.document.write(html); f.document.close();
+}
+
 var STAT_HANDELSER = {
   "visade-jobb": "Visade jobblistan",
   "klick-annons": "Klickade vidare till en annons",
@@ -1158,7 +1248,7 @@ function ritaStatistik(){
   var perioder = [[0, "Sedan start"], [90, "90 dagar"], [30, "30 dagar"], [7, "7 dagar"]];
   var html = '<div class="stat-period">' + perioder.map(function(p){
     return '<button class="' + (statPeriod === p[0] ? "on" : "") + '" onclick="valjStatPeriod(' + p[0] + ')">' + p[1] + "</button>";
-  }).join("") + "</div>";
+  }).join("") + '<button onclick="rapportPdf()">Spara rapport som PDF</button>' + "</div>";
 
   // När statistiken senast samlades in, så att man ser att den är färsk.
   var senastUppd = alla.reduce(function(m, x){ var u = String(x["Uppdaterad"] || ""); return u > m ? u : m; }, "");
