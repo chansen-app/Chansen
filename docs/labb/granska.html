@@ -912,7 +912,7 @@ var MAL = [
     besok: 5000, klick: 1500, andel: 30, prenumeranter: 500, oppnar: 30, hittade: 5 },
   { namn: "Steg 3: Det gör skillnad", till: "sponsorer, stiftelser, större medier och Arbetsförmedlingen lokalt",
     besok: 10000, klick: 3000, andel: 30, prenumeranter: 1000, oppnar: 30, hittade: 10 },
-  { namn: "Stora målet", till: "din förebild, som du lovade att höra av dig till",
+  { namn: "Stora målet", till: "personer som har byggt något stort, för råd om nästa steg",
     besok: 25000, klick: 7500, andel: 30, prenumeranter: 2000, oppnar: 30, hittade: 20 }
 ];
 
@@ -943,7 +943,7 @@ function malKortHtml_(d){
     + '<p class="under">' + tal_(stort.besok) + ' besök och ' + tal_(stort.klick) + ' klick till jobb på en månad. '
     + 'När du når det sparar du rapporten som PDF och hör av dig.</p>'
     + stapel("Besök, senaste 30 dagarna", besok, stort.besok)
-    + stapel("Klick till jobb, senaste 30 dagarna", klick, stort.klick)
+    + stapel("Klick till jobb, senaste 30 dagarna" + (besok ? ", " + Math.round(100 * klick / besok) + " % av besöken" : ""), klick, stort.klick)
     + '<p class="stat-not" style="margin:0 0 12px">Delmål på vägen: '
     + delmal.map(function(b){ return (b <= besok ? "<b>" + tal_(b) + " klart</b>" : tal_(b)); }).join(" · ") + ' besök i månaden.'
     + (nasta ? ' Nästa: ' + tal_(nasta) + '.' : '') + '</p>'
@@ -999,6 +999,10 @@ function rapportPdf(){
                hittade: "Har svarat att de hittat ett jobb" };
   var procent = { andel: true, oppnar: true };
   function visa(k, v){ return v === null || v === undefined || isNaN(v) ? "saknas" : tal_(v) + (procent[k] ? " %" : ""); }
+  // Klick visas också som andel av besöken, men bara i kolumnen Nu.
+  function visaNu(k, v){
+    return visa(k, v) + (k === "klick" && besok && v !== null ? " <span style='color:#645c50;font-size:12px'>(" + Math.round(100 * v / besok) + " % av besöken)</span>" : "");
+  }
 
   // Nästa steg som inte är nått än
   var nasta = 0;
@@ -1011,7 +1015,7 @@ function rapportPdf(){
     var mal = nasta < MAL.length ? MAL[nasta][k] : MAL[MAL.length - 1][k];
     var v = nu[k], klart = v !== null && !isNaN(v) && v >= mal;
     var del = v === null || isNaN(v) ? 0 : Math.min(100, Math.round(100 * v / mal));
-    return "<tr><td>" + fly(namn[k]) + "</td><td class='tal'>" + visa(k, v) + "</td><td class='tal'>" + visa(k, mal) + "</td>"
+    return "<tr><td>" + fly(namn[k]) + "</td><td class='tal'>" + visaNu(k, v) + "</td><td class='tal'>" + visa(k, mal) + "</td>"
       + "<td><div class='spar'><div class='fyll' style='width:" + del + "%'></div></div></td><td>" + (klart ? "Klart" : del + " %") + "</td></tr>";
   }).join("");
 
@@ -1022,7 +1026,8 @@ function rapportPdf(){
 
   var kedja = [["Besök", besok], ["Såg jobblistan", listor], ["Klickade på en annons", klick],
     ["Öppnade ansökningsbrevet", h("oppnade-ansokan")], ["Markerade att de sökt", h("jobb-sokt")]]
-    .map(function(x){ return "<tr><td>" + x[0] + "</td><td class='tal'>" + tal_(x[1]) + "</td></tr>"; }).join("");
+    .map(function(x, i){ return "<tr><td>" + x[0] + "</td><td class='tal'>" + tal_(x[1]) + "</td><td class='tal'>"
+      + (i && besok ? Math.round(100 * x[1] / besok) + " % av besöken" : "") + "</td></tr>"; }).join("");
 
   var html = "<!doctype html><html lang='sv'><head><meta charset='utf-8'><meta name='color-scheme' content='only light'>"
     + "<title>Chansen, rapport " + idag + "</title><style>"
@@ -1254,9 +1259,10 @@ function kedjaHtml_(steg){
   return '<div class="stat-lista">' + steg.map(function(p, i){
     var andel = Math.round(100 * p[1] / forst);
     var fore = i ? steg[i - 1][1] : 0;
-    var extra = i && fore ? " (" + Math.round(100 * p[1] / fore) + " % av förra)" : "";
+    var extra = i && fore ? " (" + Math.round(100 * p[1] / fore) + " % av steget före)" : "";
+    // Antal, och andel av alla besök, så att stegen går att jämföra.
     return '<div class="namn">' + fly(p[0]) + '<span style="color:var(--damp);font-size:12px">' + fly(extra) + "</span></div>"
-      + '<div class="v">' + tal_(p[1]) + '</div>'
+      + '<div class="v">' + tal_(p[1]) + (i ? ' <span style="color:var(--damp);font-size:12px;font-weight:400">' + andel + ' % av besöken</span>' : '') + '</div>'
       + '<div class="stapel"><i style="width:' + (p[1] ? Math.min(100, Math.max(2, andel)) : 0) + '%"></i></div>';
   }).join("") + "</div>";
 }
@@ -1343,7 +1349,8 @@ function ritaStatistik(){
   var rutor = [
     [tal_(besok), "besök", statPeriod ? "senaste " + statPeriod + " dagarna" : "sedan " + kortDatum_(d.start || forstaDag)],
     [tal_(visningar), "sidvisningar", ""],
-    [tal_(klick), "klick till annonser", listor ? Math.round(100 * klick / listor) + " % av de som såg listan" : ""],
+    [tal_(klick), "klick till annonser", (besok ? Math.round(100 * klick / besok) + " % av besöken" : "")
+      + (besok && listor ? ", " : "") + (listor ? Math.round(100 * klick / listor) + " % av de som såg listan" : "")],
     [tal_(jobbNu), "jobb i Sverige i natt", medJobb.length > 1 ? "var " + tal_(medJobb[0]["Jobb Sverige"]) + " första natten" : ""],
     [tal_(inskPeriod.length), "inskickade annonser", inskPeriod.length ? tal_(antalStatus("godkänd")) + " godkända" : ""],
     [tal_(raknaPerDag(d.synpunkter)), "synpunkter", ""],
