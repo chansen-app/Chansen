@@ -911,8 +911,64 @@ var MAL = [
   { namn: "Steg 2: Det växer", till: "kommuner, lokaltidningar, ungdomsmottagningar och föreningar",
     besok: 5000, klick: 1500, andel: 30, prenumeranter: 500, oppnar: 30, hittade: 5 },
   { namn: "Steg 3: Det gör skillnad", till: "sponsorer, stiftelser, större medier och Arbetsförmedlingen lokalt",
-    besok: 20000, klick: 6000, andel: 30, prenumeranter: 2000, oppnar: 30, hittade: 20 }
+    besok: 10000, klick: 3000, andel: 30, prenumeranter: 1000, oppnar: 30, hittade: 10 },
+  { namn: "Stora målet", till: "din förebild, som du lovade att höra av dig till",
+    besok: 25000, klick: 7500, andel: 30, prenumeranter: 2000, oppnar: 30, hittade: 20 }
 ];
+
+/* Rutan Målet högst upp i Statistik: hur nära det stora målet Chansen
+   är de senaste 30 dagarna, och hur man ska tänka och göra för att nå
+   dit. Räknas alltid på 30 dagar, oavsett vilken period som är vald.  */
+function malKortHtml_(d){
+  var idag = new Date().toISOString().slice(0, 10), fran = dagPlus_(idag, -30);
+  var dagar = (d.dagar || []).filter(function(x){ return x.datum >= fran; });
+  function summa(f){ return dagar.reduce(function(s, x){ return s + Number(x[f] || 0); }, 0); }
+  function h(n){ return dagar.reduce(function(s, x){ return s + Number((x["Händelser"] || {})[n] || 0); }, 0); }
+  var besok = summa("Besök"), klick = h("klick-annons");
+  var stort = MAL[MAL.length - 1];
+  var delmal = MAL.map(function(m){ return m.besok; });
+  var nasta = delmal.filter(function(b){ return b > besok; })[0];
+
+  function stapel(namn, v, mal){
+    var del = Math.min(100, Math.round(100 * v / mal));
+    return '<div style="margin:0 0 10px"><div style="display:flex;justify-content:space-between;font-size:13px">'
+      + '<span>' + namn + '</span><b>' + tal_(v) + ' av ' + tal_(mal) + '</b></div>'
+      + '<div style="background:var(--linje);border-radius:99px;height:10px;margin-top:4px">'
+      + '<div style="background:var(--accent);border-radius:99px;height:10px;width:' + del + '%"></div></div></div>';
+  }
+  function lista(rader){ return '<ul style="margin:4px 0 12px;padding-left:20px;font-size:13px;line-height:1.55">'
+    + rader.map(function(r){ return "<li>" + r + "</li>"; }).join("") + "</ul>"; }
+
+  return '<div class="stat-kort"><h3>Målet</h3>'
+    + '<p class="under">' + tal_(stort.besok) + ' besök och ' + tal_(stort.klick) + ' klick till jobb på en månad. '
+    + 'När du når det sparar du rapporten som PDF och hör av dig.</p>'
+    + stapel("Besök, senaste 30 dagarna", besok, stort.besok)
+    + stapel("Klick till jobb, senaste 30 dagarna", klick, stort.klick)
+    + '<p class="stat-not" style="margin:0 0 12px">Delmål på vägen: '
+    + delmal.map(function(b){ return (b <= besok ? "<b>" + tal_(b) + " klart</b>" : tal_(b)); }).join(" · ") + ' besök i månaden.'
+    + (nasta ? ' Nästa: ' + tal_(nasta) + '.' : '') + '</p>'
+    + '<details><summary style="cursor:pointer;font-weight:600">Så ska du tänka</summary>'
+    + lista([
+        "<b>Klick är viktigast.</b> Ett besök är bra, men ett klick på ett jobb betyder att någon faktiskt söker jobb.",
+        "<b>En sak i taget.</b> Gör en sak ordentligt i två veckor. Titta sedan på siffrorna innan du byter.",
+        "<b>Mät allt.</b> Använd en egen kodad länk för varje grupp, skola eller inlägg. Då ser du under Kodord vad som fungerar.",
+        "<b>Behåll det som fungerar.</b> Sluta med det som inte ger besök, även om det känns roligt.",
+        "<b>Var ärlig.</b> Lova aldrig jobb, och blås aldrig upp siffrorna.",
+        "<b>Små steg räknas.</b> Från 1 000 till 25 000 tar tid. Varje delmål är värt att fira."
+      ])
+    + '</details>'
+    + '<details><summary style="cursor:pointer;font-weight:600">Så når du dit</summary>'
+    + lista([
+        "<b>Varje vecka:</b> tre inlägg i lokala Facebookgrupper, ett per ort. Använd kommandot inlagg-ort, och skriv chansen.nu tidigt i texten.",
+        "<b>Varje vecka:</b> mejla två skolor, bibliotek, KAA eller ungdomsmottagningar, med en egen länk till deras ort. Skriv upp dem i kontakter.md och följ upp efter två veckor.",
+        "<b>Varje tisdag:</b> skicka jobbmejlet, och be läsarna dela det med någon som söker jobb.",
+        "<b>När rutan Säsong säger att något ökar:</b> gör ett inlägg om det samma vecka. Utkasten ligger i Chansens sekretess.",
+        "<b>Facebook:</b> fäst ett inlägg högst upp på sidan, med chansen.nu och en mening om vad Chansen är. Använd en egen kodad länk för Facebook.",
+        "<b>Google:</b> titta i Search Console en gång i månaden. Begär indexering av nya sidor.",
+        "<b>Varje månad:</b> spara rapporten som PDF i Chansens sekretess, och jämför med förra månaden. Vad gav mest klick?"
+      ])
+    + '</details></div>';
+}
 
 /* Månadsrapport som går att spara som PDF. Bara summor för de senaste
    30 dagarna, aldrig något om enskilda besökare. Hur många som öppnar
@@ -1297,6 +1353,8 @@ function ritaStatistik(){
     return '<div class="stat-ruta"><div class="tal">' + r[0] + '</div><div class="etikett">' + fly(r[1])
       + "</div>" + (r[2] ? '<div class="extra">' + fly(r[2]) + "</div>" : "") + "</div>";
   }).join("") + "</div>";
+
+  html += malKortHtml_(d);
 
   html += '<div class="stat-kort"><h3>Från besök till ansökan</h3>'
     + '<p class="under">Hur långt folk kommer. Stegen räknas var för sig, så en person kan finnas i flera.</p>'
