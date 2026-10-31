@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # för att spara listan över förra veckans jobb
 
 jobs:
   nyhetsbrev:
@@ -77,3 +77,23 @@ jobs:
         env:
           SENDER_API_TOKEN: ${{ secrets.SENDER_API_TOKEN }}
         run: node skicka-nyhetsbrev.js
+
+      # Sparar vilka jobb som var med, bara som nummer från Platsbanken,
+      # så att nästa veckas mejl tar med högst två av samma jobb.
+      - name: Spara veckans jobb
+        if: steps.tid.outputs.kor == 'ja'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add nyhetsbrev-forra.json
+          if git diff --staged --quiet; then exit 0; fi
+          git commit -m "Jobbmejlet: veckans jobb"
+          for forsok in 1 2 3 4 5; do
+            if ! git pull --rebase --autostash origin main; then
+              git rebase --abort || true
+              git pull --no-rebase -X ours --no-edit origin main
+            fi
+            git push && break
+            if [ "$forsok" = 5 ]; then exit 1; fi
+            sleep 15
+          done

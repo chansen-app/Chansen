@@ -29,6 +29,21 @@ const DAGAR_UPPLAGT = 5;
 const DAGAR_KVAR = 10;
 const DAG = 24 * 60 * 60 * 1000;
 
+/* Förra veckans jobb sparas i nyhetsbrev-forra.json, bara som nummer
+   från Platsbanken. Högst så här många av dem får vara med igen, så att
+   den som läser varje vecka får mest nya jobb. Listan räknas bara om den
+   är högst tio dagar gammal.                                          */
+const FORRA_FIL = "nyhetsbrev-forra.json";
+const MAX_FRAN_FORRA = 2;
+
+function forraVeckan(nu) {
+  try {
+    const f = JSON.parse(fs.readFileSync(FORRA_FIL, "utf8"));
+    if (nu - new Date(f.datum) > 10 * DAG) return new Set();
+    return new Set(f.jobb || []);
+  } catch (e) { return new Set(); }
+}
+
 // Samma regioner och ordning som i mejlet Nathalie gjorde själv i Sender.
 const REGIONER = {
   "Västsverige": ["Västra Götalands län", "Värmlands län"],
@@ -74,7 +89,7 @@ function region(lan) {
   return null;
 }
 
-function valjJobb(jobb, nu) {
+function valjJobb(jobb, nu, forra) {
   const kandidater = jobb.filter(function (j) {
     const upplagt = nu - new Date(j.publicerad);
     const kvar = new Date(j.sistaAnsokningsdag) - nu;
@@ -110,6 +125,10 @@ function valjJobb(jobb, nu) {
   });
   const steg = {};
   let fortsatt = true;
+  let franForra = 0;
+  function hoppaOver(j) {
+    return arbetsgivare[j.arbetsgivare] || (forra.has(nummer(j)) && franForra >= MAX_FRAN_FORRA);
+  }
   while (valda.length < ANTAL && fortsatt) {
     fortsatt = false;
     Object.keys(koer).forEach(function (r) {
@@ -120,9 +139,10 @@ function valjJobb(jobb, nu) {
         const lan = lanen[(steg[r] + lanen.length - 1) % lanen.length];
         if ((perLan[lan] || 0) >= MAX_PER_LAN) continue;
         const ko = koer[r][lan];
-        while (ko.length && arbetsgivare[ko[0].arbetsgivare]) ko.shift();
+        while (ko.length && hoppaOver(ko[0])) ko.shift();
         if (!ko.length) continue;
         const j = ko.shift();
+        if (forra.has(nummer(j))) franForra++;
         valda.push(j);
         perLan[lan] = (perLan[lan] || 0) + 1;
         arbetsgivare[j.arbetsgivare] = true;
@@ -131,7 +151,7 @@ function valjJobb(jobb, nu) {
       }
     });
   }
-  return { valda: valda, antalKandidater: kandidater.length };
+  return { valda: valda, antalKandidater: kandidater.length, franForra: franForra };
 }
 
 // Tar bort orten först i rubriken, till exempel "Göteborg: Cafébiträde".
@@ -155,7 +175,8 @@ function jobbHtml(j) {
 
 const data = laddaJobb();
 const nu = new Date(data.UPPDATERAD);
-const urval = valjJobb(data.JOBB, nu);
+const forra = forraVeckan(nu);
+const urval = valjJobb(data.JOBB, nu, forra);
 const valda = urval.valda;
 
 if (!valda.length) {
@@ -229,7 +250,14 @@ if (process.env.GITHUB_ACTIONS) {
 
 console.log("Nyhetsbrev, " + svenskDatum(new Date()));
 console.log("Jobben hämtades " + String(data.UPPDATERAD).slice(0, 10)
-  + ". " + urval.antalKandidater + " jobb uppfyllde villkoren, " + valda.length + " valdes.");
+  + ". " + urval.antalKandidater + " jobb uppfyllde villkoren, " + valda.length + " valdes, "
+  + urval.franForra + " av dem var med förra veckan.");
+
+// Den här veckans jobb sparas, så att nästa vecka vet vilka som var med.
+fs.writeFileSync(FORRA_FIL, JSON.stringify({
+  datum: new Date(data.UPPDATERAD).toISOString().slice(0, 10),
+  jobb: valda.map(nummer)
+}, null, 1) + "\n");
 console.log("");
 Object.keys(REGIONER).forEach(function (r) {
   const iRegionen = valda.filter(function (j) { return region(j.lan) === r; });
