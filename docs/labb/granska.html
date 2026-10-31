@@ -202,6 +202,13 @@
            autocomplete="current-password">
     <button class="btn ja" type="submit">Logga in</button>
     </form>
+    <!-- Steg två: koden som skickas till mejlen. -->
+    <form id="kodsteg" style="display:none" onsubmit="skickaKod(); return false;">
+      <p>Vi har skickat en kod med sex siffror till din mejl. Den gäller i tio minuter.</p>
+      <input class="nyckel" id="kod" type="text" inputmode="numeric" maxlength="6"
+             placeholder="Kod" autocomplete="one-time-code">
+      <button class="btn ja" type="submit">Fortsätt</button>
+    </form>
     <div class="fel" id="loginfel"></div>
   </div>
 
@@ -271,24 +278,69 @@ function loggaIn(){
     .then(function(r){ return r.json(); })
     .then(function(d){
       if (!d || !d.ok){
-        document.getElementById("loginfel").textContent =
-          (d && d.fel) ? "Fel användarnamn eller lösenord." : "Det gick inte just nu.";
+        document.getElementById("loginfel").textContent = (d && d.text) ? d.text
+          : (d && d.fel) ? "Fel användarnamn eller lösenord." : "Det gick inte just nu.";
         return;
       }
-      biljett = d.biljett;
-      inloggad = d.namn || namn;
-      roll = d.roll || "admin";
-      try {
-        localStorage.setItem("chansen-biljett", biljett);
-        localStorage.setItem("chansen-vem", inloggad);
-        localStorage.setItem("chansen-roll", roll);
-      } catch(e){}
       document.getElementById("losen").value = "";
-      oppna();
+      // Steg två: koden från mejlen.
+      if (d.steg2){
+        fortsatt = d.fortsatt;
+        document.querySelector("#login form").style.display = "none";
+        document.getElementById("kodsteg").style.display = "block";
+        document.getElementById("loginfel").textContent = "";
+        document.getElementById("kod").focus();
+        return;
+      }
+      inloggningKlar_(d, namn);
     })
     .catch(function(){
       document.getElementById("loginfel").textContent = "Det gick inte att nå systemet.";
     });
+}
+
+/* Steg två i inloggningen: koden som kom med mejlen. */
+var fortsatt = "";
+function skickaKod(){
+  var kod = (document.getElementById("kod").value || "").replace(/\D/g, "");
+  if (kod.length !== 6){
+    document.getElementById("loginfel").textContent = "Koden har sex siffror.";
+    return;
+  }
+  document.getElementById("loginfel").textContent = "Kontrollerar...";
+  fetch(API + "?vad=kod&fortsatt=" + encodeURIComponent(fortsatt) + "&kod=" + encodeURIComponent(kod))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d || !d.ok){
+        document.getElementById("loginfel").textContent = (d && d.text) ? d.text : "Det gick inte just nu.";
+        document.getElementById("kod").value = "";
+        // Har koden gått ut, eller är inloggningen spärrad, börjar man om.
+        if (d && (d.fel === "kod-ut" || d.fel === "sparrad")){
+          fortsatt = "";
+          document.getElementById("kodsteg").style.display = "none";
+          document.querySelector("#login form").style.display = "block";
+        }
+        return;
+      }
+      fortsatt = "";
+      inloggningKlar_(d, d.namn);
+    })
+    .catch(function(){
+      document.getElementById("loginfel").textContent = "Det gick inte att nå systemet.";
+    });
+}
+
+function inloggningKlar_(d, namn){
+  biljett = d.biljett;
+  inloggad = d.namn || namn;
+  roll = d.roll || "admin";
+  try {
+    localStorage.setItem("chansen-biljett", biljett);
+    localStorage.setItem("chansen-vem", inloggad);
+    localStorage.setItem("chansen-roll", roll);
+  } catch(e){}
+  document.getElementById("loginfel").textContent = "";
+  oppna();
 }
 
 function oppna(){
