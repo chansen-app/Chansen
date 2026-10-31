@@ -60,15 +60,19 @@ async function anrop(metod, sokvag, kropp) {
   return text ? JSON.parse(text) : {};
 }
 
+/* Senders variabel för länken att avsluta prenumerationen, i det nya
+   sättet att skriva variabler. Måste vara samma som i nyhetsbrev.js. */
+const AVSLUTA = "{{ unsubscribe_link }}";
+
 /* Kollar att mejlet ser rimligt ut. Returnerar vad som är fel, eller null. */
 function kontrollera(html) {
   const jobb = (html.match(/>Se jobbet</g) || []).length;
   if (jobb < MINST_JOBB) return "bara " + jobb + " jobb, minst " + MINST_JOBB + " behövs.";
   // Länken för att avsluta är obligatorisk. Utan den får mejlet inte skickas.
-  if (html.indexOf('href="{$unsubscribe_link}"') < 0) return "länken för att avsluta prenumerationen saknas.";
+  if (html.indexOf('href="' + AVSLUTA + '"') < 0) return "länken för att avsluta prenumerationen saknas.";
   const lankar = html.match(/href="[^"]*"/g) || [];
   const fel = lankar.filter(function (l) {
-    return l !== 'href="{$unsubscribe_link}"' && !/^href="https:\/\/chansen\.nu(\/[^"]*)?"$/.test(l);
+    return l !== 'href="' + AVSLUTA + '"' && !/^href="https:\/\/chansen\.nu(\/[^"]*)?"$/.test(l);
   });
   if (fel.length) return fel.length + " länkar går inte till chansen.nu.";
   if (/@/.test(html.replace(/<[^>]*>/g, ""))) return "mejlet innehåller en mejladress.";
