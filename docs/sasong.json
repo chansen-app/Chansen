@@ -531,9 +531,16 @@
    "sommar": 20,
    "vinter": 25,
    "sasong": 22
+  },
+  "2026-10-31": {
+   "totalt": 1314,
+   "jul": 17,
+   "sommar": 18,
+   "vinter": 25,
+   "sasong": 22
   }
  },
- "uppdaterad": "2026-10-30T11:37:57.494Z",
+ "uppdaterad": "2026-10-31T10:50:33.327Z",
  "sorter": {
   "jul": "Jul och nyår",
   "sommar": "Sommarjobb",
@@ -543,8 +550,8 @@
  "varningar": [
   {
    "sort": "jul",
-   "typ": "okar",
-   "text": "Jul och nyår ökar: i snitt 17 jobb om dagen nu, mot 11 för tre veckor sedan. Dags för inlägg."
+   "typ": "kalender",
+   "text": "Julhandeln börjar anställa. Bra tid för inlägg om extrajobb till jul."
   },
   {
    "sort": "vinter",
