@@ -6,6 +6,21 @@
 <meta name="color-scheme" content="only dark">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
+<!-- Säkerhetsregler. Sidan får bara prata med sig själv och med Googles
+     skript. Skulle någon skicka in en annons med elak kod kan den inte
+     skicka iväg något någon annanstans. -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data:;
+  font-src 'self';
+  connect-src 'self' https://script.google.com https://script.googleusercontent.com;
+  form-action 'none';
+  base-uri 'none';
+  object-src 'none';
+  frame-src 'none'">
+<meta name="referrer" content="no-referrer">
 <title>Chansen Admin</title>
 <link rel="manifest" href="granska.webmanifest">
 <meta name="theme-color" content="#16130f">
@@ -186,6 +201,7 @@
 <div class="topp">
   <span class="namn">Chansen Admin</span>
   <span class="vad">Annonser från arbetsgivare</span>
+  <button class="ut" onclick="loggaUtAlla()" id="utalla" style="display:none">Logga ut överallt</button>
   <button class="ut" onclick="loggaUt()" id="utknapp" style="display:none">Logga ut</button>
 </div>
 
@@ -273,9 +289,7 @@ function loggaIn(){
   }
   document.getElementById("loginfel").textContent = "Kontrollerar...";
 
-  fetch(API + "?vad=logga-in&namn=" + encodeURIComponent(namn)
-            + "&losen=" + encodeURIComponent(losen))
-    .then(function(r){ return r.json(); })
+  skickaInlogg_({ vad: "logga-in", namn: namn, losen: losen })
     .then(function(d){
       if (!d || !d.ok){
         document.getElementById("loginfel").textContent = (d && d.text) ? d.text
@@ -299,6 +313,24 @@ function loggaIn(){
     });
 }
 
+/* Lösenord och kod skickas med POST, i en dold del av anropet. Då står
+   de aldrig i en webbadress, där de kan sparas i loggar. Har skriptet
+   hos Google inte uppdaterats än, svarar det att uppgifter saknas, och
+   då används det gamla sättet en sista gång.                          */
+function skickaInlogg_(data){
+  var kropp = new URLSearchParams();
+  for (var k in data) kropp.append(k, data[k]);
+  return fetch(API, { method: "POST", body: kropp })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d && d.fel === "saknar uppgifter"){
+        var adress = API + "?" + kropp.toString();
+        return fetch(adress).then(function(r){ return r.json(); });
+      }
+      return d;
+    });
+}
+
 /* Steg två i inloggningen: koden som kom med mejlen. */
 var fortsatt = "";
 function skickaKod(){
@@ -308,8 +340,7 @@ function skickaKod(){
     return;
   }
   document.getElementById("loginfel").textContent = "Kontrollerar...";
-  fetch(API + "?vad=kod&fortsatt=" + encodeURIComponent(fortsatt) + "&kod=" + encodeURIComponent(kod))
-    .then(function(r){ return r.json(); })
+  skickaInlogg_({ vad: "kod", fortsatt: fortsatt, kod: kod })
     .then(function(d){
       if (!d || !d.ok){
         document.getElementById("loginfel").textContent = (d && d.text) ? d.text : "Det gick inte just nu.";
@@ -335,9 +366,10 @@ function inloggningKlar_(d, namn){
   inloggad = d.namn || namn;
   roll = d.roll || "admin";
   try {
-    localStorage.setItem("chansen-biljett", biljett);
-    localStorage.setItem("chansen-vem", inloggad);
-    localStorage.setItem("chansen-roll", roll);
+    // Bara tills webbläsaren stängs. Då är man utloggad.
+    sessionStorage.setItem("chansen-biljett", biljett);
+    sessionStorage.setItem("chansen-vem", inloggad);
+    sessionStorage.setItem("chansen-roll", roll);
   } catch(e){}
   document.getElementById("loginfel").textContent = "";
   oppna();
@@ -347,6 +379,7 @@ function oppna(){
   document.getElementById("login").style.display = "none";
   document.getElementById("panel").style.display = "block";
   document.getElementById("utknapp").style.display = "block";
+  document.getElementById("utalla").style.display = "block";
   var v = document.querySelector(".topp .vad");
   if (v && inloggad) {
     v.textContent = inloggad + (roll === "lasare" ? " · läsare" : " · admin");
@@ -370,11 +403,22 @@ function loggaUt(){
     try { fetch(API + "?vad=logga-ut&biljett=" + encodeURIComponent(biljett)); } catch(e){}
   }
   try {
-    localStorage.removeItem("chansen-biljett");
-    localStorage.removeItem("chansen-vem");
-    localStorage.removeItem("chansen-roll");
+    sessionStorage.removeItem("chansen-biljett");
+    sessionStorage.removeItem("chansen-vem");
+    sessionStorage.removeItem("chansen-roll");
   } catch(e){}
   location.reload();
+}
+
+/* Loggar ut alla inloggningar, på alla telefoner och datorer. Bra om
+   en telefon har kommit bort, eller om du fått ett mejl om en
+   inloggning som inte var du.                                       */
+function loggaUtAlla(){
+  if (!confirm("Logga ut överallt?\n\nAlla inloggningar, på alla telefoner och datorer, avslutas. Du får logga in igen med lösenord och kod.")) return;
+  fetch(API + "?vad=logga-ut-alla&biljett=" + encodeURIComponent(biljett))
+    .then(function(r){ return r.json(); })
+    .then(function(){ loggaUt(); })
+    .catch(function(){ loggaUt(); });
 }
 
 /* ── hämta och rita ─────────────────────────────────────────────── */
@@ -887,9 +931,14 @@ document.addEventListener("keydown", function(e){
 (function(){
   var sparad = "", vem = "";
   try {
-    sparad = localStorage.getItem("chansen-biljett") || "";
-    vem = localStorage.getItem("chansen-vem") || "";
-    roll = localStorage.getItem("chansen-roll") || "admin";
+    // Gamla inloggningar sparades så att de överlevde att webbläsaren
+    // stängdes. De tas bort, så att alla måste logga in på nytt.
+    localStorage.removeItem("chansen-biljett");
+    localStorage.removeItem("chansen-vem");
+    localStorage.removeItem("chansen-roll");
+    sparad = sessionStorage.getItem("chansen-biljett") || "";
+    vem = sessionStorage.getItem("chansen-vem") || "";
+    roll = sessionStorage.getItem("chansen-roll") || "admin";
   } catch(e){}
 
   if (!sparad){
@@ -901,6 +950,7 @@ document.addEventListener("keydown", function(e){
   inloggad = vem;
   document.getElementById("panel").style.display = "block";
   document.getElementById("utknapp").style.display = "block";
+  document.getElementById("utalla").style.display = "block";
   var v = document.querySelector(".topp .vad");
   if (v && vem) v.textContent = vem + (roll === "lasare" ? " · läsare" : " · admin");
 
@@ -909,11 +959,12 @@ document.addEventListener("keydown", function(e){
     if (!ok){
       biljett = "";
       try {
-        localStorage.removeItem("chansen-biljett");
-        localStorage.removeItem("chansen-vem");
+        sessionStorage.removeItem("chansen-biljett");
+        sessionStorage.removeItem("chansen-vem");
       } catch(e){}
       document.getElementById("panel").style.display = "none";
       document.getElementById("utknapp").style.display = "none";
+      document.getElementById("utalla").style.display = "none";
       document.getElementById("login").style.display = "block";
     } else {
       hamtaIForvag_();
