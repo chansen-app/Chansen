@@ -194,11 +194,14 @@
   <div id="login" class="ruta" style="display:none">
     <h1>Logga in</h1>
     <p>Du loggas ut automatiskt efter tolv timmar.</p>
+    <!-- Ett formulär, så att Enter loggar in från båda rutorna. -->
+    <form onsubmit="loggaIn(); return false;">
     <input class="nyckel" id="anvandare" type="text" placeholder="Användarnamn"
            autocomplete="username" spellcheck="false" autocapitalize="none">
     <input class="nyckel" id="losen" type="password" placeholder="Lösenord"
            autocomplete="current-password">
-    <button class="btn ja" onclick="loggaIn()">Logga in</button>
+    <button class="btn ja" type="submit">Logga in</button>
+    </form>
     <div class="fel" id="loginfel"></div>
   </div>
 
@@ -297,6 +300,17 @@ function oppna(){
     v.textContent = inloggad + (roll === "lasare" ? " · läsare" : " · admin");
   }
   visa("väntar");
+  hamtaIForvag_();
+}
+
+/* Statistik och synpunkter tar några sekunder att hämta från Google.
+   De börjar hämtas direkt efter inloggningen, så att de oftast är
+   klara när man klickar på fliken.                                  */
+function hamtaIForvag_(){
+  setTimeout(function(){
+    hamtaSynpunkter_();
+    hamtaStatData_();
+  }, 300);
 }
 
 function loggaUt(){
@@ -313,24 +327,36 @@ function loggaUt(){
 
 /* ── hämta och rita ─────────────────────────────────────────────── */
 
+/* Alla annonser hämtas på en gång, och flikarna filtreras här i sidan.
+   Då byts fliken direkt, utan att vänta på Google. Listan hämtas ändå
+   på nytt i bakgrunden varje gång, så att den alltid är aktuell.
+   Annonserna sparas bara medan sidan är öppen, aldrig i telefonen.   */
+var cacheAlla = null;
+
+function urval_(status, rader){
+  return rader.filter(function(o){
+    var st = o["Status"] || "väntar";
+    if (status === "ej") return st === "nekad" || st === "borttagen";
+    if (status) return st === status;
+    return true;
+  });
+}
+
+function visaUrval_(status){
+  allaRader = urval_(status, cacheAlla || []);
+  filtrera();
+}
+
 function hamta(status, klar){
-  /* "ej" finns inte i kalkylarket. Den hämtar alla och behåller de
-     nekade och borttagna. Länderna filtreras här i sidan, så att man
-     kan välja flera på en gång.                                    */
-  var fraga = status === "ej" ? "" : status;
-  var url = API + "?vad=lista&biljett=" + encodeURIComponent(biljett)
-          + (fraga ? "&status=" + encodeURIComponent(fraga) : "");
-  fetch(url)
+  hamtaOversikt();   // samtidigt, inte efter listan
+  if (cacheAlla) visaUrval_(status);
+  fetch(API + "?vad=lista&biljett=" + encodeURIComponent(biljett))
     .then(function(r){ return r.json(); })
     .then(function(d){
       if (!d || !d.ok){ if (klar) klar(false); return; }
       if (klar) klar(true);
-      allaRader = (d.rader || []).filter(function(o){
-        if (status !== "ej") return true;
-        return o["Status"] === "nekad" || o["Status"] === "borttagen";
-      });
-      filtrera();
-      hamtaOversikt();
+      cacheAlla = d.rader || [];
+      if (nuvarande === status) visaUrval_(status);
     })
     .catch(function(){
       if (klar) klar(false);
@@ -456,7 +482,7 @@ function visa(status){
     var kn = document.getElementById(knappId[st]);
     if (kn) kn.className = (st === tand) ? "on" : "";
   }
-  document.getElementById("lista").innerHTML = '<p class="laddar">Hämtar...</p>';
+  if (!cacheAlla) document.getElementById("lista").innerHTML = '<p class="laddar">Hämtar...</p>';
   hamta(status);
 }
 
@@ -594,11 +620,20 @@ function visaSynpunkter(){
     if (kn) kn.className = "";
   });
   document.getElementById("f-synpunkter").className = "on";
-  document.getElementById("lista").innerHTML = '<p class="laddar">Hämtar...</p>';
+  if (synData) ritaSynpunkter_(synData);
+  else document.getElementById("lista").innerHTML = '<p class="laddar">Hämtar...</p>';
+  hamtaSynpunkter_(function(d){ if (nuvarande === "synpunkter") ritaSynpunkter_(d); });
+}
 
+var synData = null;
+function hamtaSynpunkter_(klar){
   fetch(API + "?vad=synpunkter&biljett=" + encodeURIComponent(biljett))
     .then(function(r){ return r.json(); })
-    .then(function(d){
+    .then(function(d){ if (d && d.ok) synData = d; if (klar) klar(d); })
+    .catch(function(){ if (klar) klar(null); });
+}
+
+function ritaSynpunkter_(d){
       if (!d || !d.ok){
         document.getElementById("lista").innerHTML = '<p class="tomt">Det gick inte att hämta.</p>';
         return;
@@ -649,10 +684,6 @@ function visaSynpunkter(){
               : "")
           + "</div>";
       }).join("");
-    })
-    .catch(function(){
-      document.getElementById("lista").innerHTML = '<p class="tomt">Det gick inte att hämta.</p>';
-    });
 }
 
 /* Synpunkten raderas helt, inte bara döljs. Den kan innehålla en
@@ -663,7 +694,7 @@ function raderaSynpunkt(rad){
       + "&rad=" + encodeURIComponent(rad))
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if (d && d.ok) visaSynpunkter();
+      if (d && d.ok) { synData = null; visaSynpunkter(); }
       else alert("Det gick inte: " + ((d && d.fel) || "okänt fel"));
     })
     .catch(function(){ alert("Det gick inte att nå systemet."); });
@@ -690,7 +721,7 @@ function andra(nr, falt){
       + "&varde=" + encodeURIComponent(nytt))
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if (d && d.ok) visa(nuvarande);
+      if (d && d.ok) { cacheAlla = null; statData = null; visa(nuvarande); }
       else alert("Det gick inte: " + ((d && d.fel) || "okänt fel"));
     })
     .catch(function(){ alert("Det gick inte att nå systemet."); });
@@ -706,7 +737,7 @@ function taBort(nr){
       + "&skal=" + encodeURIComponent(skal))
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if (d && d.ok) visa(nuvarande);
+      if (d && d.ok) { cacheAlla = null; statData = null; visa(nuvarande); }
       else alert("Det gick inte: " + ((d && d.fel) || "okänt fel"));
     })
     .catch(function(){ alert("Det gick inte att nå systemet."); });
@@ -771,7 +802,7 @@ function avgor(nr, ja){
   fetch(url)
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if (d && d.ok) visa(nuvarande);
+      if (d && d.ok) { cacheAlla = null; statData = null; visa(nuvarande); }
       else alert("Det gick inte: " + ((d && d.fel) || "okänt fel"));
     })
     .catch(function(){ alert("Det gick inte att nå systemet."); });
@@ -832,6 +863,8 @@ document.addEventListener("keydown", function(e){
       document.getElementById("panel").style.display = "none";
       document.getElementById("utknapp").style.display = "none";
       document.getElementById("login").style.display = "block";
+    } else {
+      hamtaIForvag_();
     }
   });
 })();
@@ -872,23 +905,26 @@ function visaStatistik(){
   if (syn) syn.className = "";
   document.getElementById("f-statistik").className = "on";
   statDolj_(true);
-  document.getElementById("lista").innerHTML = '<p class="laddar">Hämtar statistiken...</p>';
+  if (statData) { ritaStatistik(); }
+  else document.getElementById("lista").innerHTML = '<p class="laddar">Hämtar statistiken...</p>';
 
+  hamtaStatData_(function(d){
+    if (nuvarande !== "statistik") return;
+    if (!d || !d.ok){
+      if (statData) return;   // visar hellre det gamla än ett fel
+      document.getElementById("lista").innerHTML = '<p class="tomt">Det gick inte att hämta statistiken.'
+        + (d && d.fel === "inte inloggad" ? " Logga in igen." : "") + "</p>";
+      return;
+    }
+    ritaStatistik();
+  });
+}
+
+function hamtaStatData_(klar){
   fetch(API + "?vad=statistik&biljett=" + encodeURIComponent(biljett))
     .then(function(r){ return r.json(); })
-    .then(function(d){
-      if (nuvarande !== "statistik") return;
-      if (!d || !d.ok){
-        document.getElementById("lista").innerHTML = '<p class="tomt">Det gick inte att hämta statistiken.'
-          + (d && d.fel === "inte inloggad" ? " Logga in igen." : "") + "</p>";
-        return;
-      }
-      statData = d;
-      ritaStatistik();
-    })
-    .catch(function(){
-      document.getElementById("lista").innerHTML = '<p class="tomt">Det gick inte att hämta statistiken.</p>';
-    });
+    .then(function(d){ if (d && d.ok) statData = d; if (klar) klar(d); })
+    .catch(function(){ if (klar) klar(null); });
 }
 
 function valjStatPeriod(dagar){ statPeriod = dagar; ritaStatistik(); }
