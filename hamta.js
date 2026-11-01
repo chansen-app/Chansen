@@ -535,6 +535,13 @@ const BEMANNING = [
   "hero ","first reserve","academicwork","teamvikarie","vikariepoolen"
 ];
 
+/* Jobb som nämner stöd från Arbetsförmedlingen, till exempel nystartsjobb
+   eller lönebidrag. Ofta går de bara att få för den som har rätt till
+   stödet, så kortet får en etikett. "Nämner", inte "kräver", eftersom
+   en del bara skriver att stödet är välkommet. Hela annonstexten läses.
+   OBS: aldrig "lyft", det fastnar i "tunga lyft".                     */
+const STOD_ORD = /nystartsjobb|anställningsstöd|anstallningsstod|lönebidrag|lonebidrag|lönestöd|lonestod|introduktionsjobb|arbetsstöd|arbetsstod|extratjänst|extratjanst|etableringsjobb|trygghetsanställning|trygghetsanstallning|utvecklingsanställning|utvecklingsanstallning|skyddat arbete|anvisad av arbetsförmedlingen|inskriven (på|hos|vid) arbetsförmedlingen|inskrivna (på|hos|vid) arbetsförmedlingen/i;
+
 function arBemanning(a) {
   const ag = ((a.employer && a.employer.name) || "").toLowerCase();
   if (!ag) return false;
@@ -750,7 +757,9 @@ async function hamtaJobb() {
           lank: a.webpage_url,
           sistaAnsokningsdag: a.application_deadline,
           publicerad: a.publication_date || null,
-          bemanning: arBemanning(a)
+          bemanning: arBemanning(a),
+          // Bara med när det stämmer, så att jobb.js inte blir större.
+          stod: STOD_ORD.test(brodtext) || undefined
         });
       }
       if (term !== forraTerm) {

@@ -1938,6 +1938,8 @@ function kort(j){
   if(j.egen) taggar += '<span class="tag sage">Lagd upp här</span>';
   if(j.land) taggar += '<span class="tag">Utomlands</span>';
   if(j.bemanning) extra += '<span class="tag">Via bemanningsföretag</span>';
+  // Till exempel nystartsjobb eller lönebidrag. Gäller ofta bara den som har rätt till stödet.
+  if(j.stod) extra += '<span class="tag">Nämner stöd från Arbetsförmedlingen</span>';
 
   // hur ny annonsen är
   var pd = dagarSedanPublicerad(j.publicerad);
