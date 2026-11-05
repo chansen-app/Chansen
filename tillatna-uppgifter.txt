@@ -20,7 +20,7 @@ nav.team.arbeidsplassen@nav.no
 
 # Påhittade exempel i formulär och CV-byggaren
 namn@foretaget.se
-alex.bennett@gmail.com
+firstname.lastname@example.com
 040-123456
 07700 900123
 020 7946 0000
