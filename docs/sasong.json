@@ -573,9 +573,16 @@
    "sommar": 17,
    "vinter": 21,
    "sasong": 16
+  },
+  "2026-11-06": {
+   "totalt": 1270,
+   "jul": 13,
+   "sommar": 18,
+   "vinter": 25,
+   "sasong": 15
   }
  },
- "uppdaterad": "2026-11-05T09:39:38.330Z",
+ "uppdaterad": "2026-11-06T12:26:22.861Z",
  "sorter": {
   "jul": "Jul och nyår",
   "sommar": "Sommarjobb",
