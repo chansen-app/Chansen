@@ -355,6 +355,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://chansen.nu/jobb/vimmerby.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://chansen.nu/jobb/varmdo.html</loc>
     <lastmod>2026-11-06</lastmod>
     <changefreq>daily</changefreq>
@@ -476,6 +482,12 @@
   </url>
   <url>
     <loc>https://chansen.nu/jobb/helsingborg-vard-och-omsorg.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://chansen.nu/jobb/hudiksvall-vard-och-omsorg.html</loc>
     <lastmod>2026-11-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
