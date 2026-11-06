@@ -542,6 +542,8 @@ const BEMANNING = [
    OBS: aldrig "lyft", det fastnar i "tunga lyft".                     */
 const STOD_ORD = /nystartsjobb|anställningsstöd|anstallningsstod|lönebidrag|lonebidrag|lönestöd|lonestod|introduktionsjobb|arbetsstöd|arbetsstod|extratjänst|extratjanst|etableringsjobb|trygghetsanställning|trygghetsanstallning|utvecklingsanställning|utvecklingsanstallning|skyddat arbete|anvisad av arbetsförmedlingen|inskriven (på|hos|vid) arbetsförmedlingen|inskrivna (på|hos|vid) arbetsförmedlingen/i;
 
+const SOMMAR_ORD = /sommarjobb|sommarvikari|semestervikari|sommarsäsong|sommarsasong|sommarpersonal|sommarperiod|feriearbete|feriejobb|(över|under) sommaren|jobba i sommar|sommar(en)? 20\d\d/i;
+
 function arBemanning(a) {
   const ag = ((a.employer && a.employer.name) || "").toLowerCase();
   if (!ag) return false;
@@ -759,7 +761,10 @@ async function hamtaJobb() {
           publicerad: a.publication_date || null,
           bemanning: arBemanning(a),
           // Bara med när det stämmer, så att jobb.js inte blir större.
-          stod: STOD_ORD.test(brodtext) || undefined
+          stod: STOD_ORD.test(brodtext) || undefined,
+          // Sommarjobb, för sidorna om sommarjobb. Bara tydliga ord, så att
+          // "vi har öppet på sommaren" inte räknas.
+          sommar: SOMMAR_ORD.test(brodtext) || undefined
         });
       }
       if (term !== forraTerm) {
@@ -1009,7 +1014,10 @@ function skrivOrtssidor(jobb, hamtadTid) {
 
     // Rubriken säger låga krav, inte "utan erfarenhet", eftersom en del jobb
     // ändå kan vilja ha lite erfarenhet.
-    const titel = "Jobb med låga krav i " + ort;
+    // "Lediga jobb", "extrajobb" och "deltid" är det folk skriver i Google.
+    // Extrajobb och deltid står bara med när det finns jobb på deltid.
+    const harDeltid = lista.some(j => /deltid/i.test(j.omfattning || ""));
+    const titel = "Lediga jobb i " + ort + " med låga krav" + (harDeltid ? ", extrajobb och deltid" : "");
     const beskrivning = antal + " jobb i " + ort + " som inte kräver "
       + "flera års erfarenhet, bland annat extrajobb och deltid. "
       + "Uppdateras varje natt från Platsbanken. Gratis att använda.";
@@ -1194,6 +1202,10 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '<h2>Vanliga frågor om jobb i ' + fly(ort) + '</h2>\n'
       + fragorHtml
       + naraHtml
+      + '<h2>Sommarjobb</h2>\n<p>'
+      + (lista.filter(j => j.sommar === true || SOMMAR_ORD.test(j.titel || "")).length >= MINST_JOBB_FOR_EGEN_SIDA
+         ? '<a href="https://chansen.nu/jobb/sommarjobb-' + slug + '.html">Sommarjobb i ' + fly(ort) + '</a> · ' : '')
+      + '<a href="https://chansen.nu/jobb/sommarjobb.html">Sommarjobb i hela Sverige</a></p>\n'
       + (unga ? '<h2>Jobb för din ålder</h2>\n<p><a href="https://chansen.nu/jobb/' + UNGA_SLUG
          + '.html">Jobb för dig som är 16 eller 17</a> · <a href="https://chansen.nu/jobb/' + YNGRE_SLUG
          + '.html">Jobb för dig som är 13 till 15</a></p>\n' : '')
@@ -1407,6 +1419,124 @@ function skrivOrtssidor(jobb, hamtadTid) {
     ]
   })) aldersidor.push(YNGRE_SLUG);
 
+  /* Sidor om sommarjobb. Många unga börjar googla "sommarjobb" och
+     "sommarjobb + ort" i januari, så sidan för hela Sverige finns alltid,
+     även på hösten när det är få jobb. Då hinner Google hitta den.
+     En sida per ort skrivs bara när orten har minst fem sommarjobb, av
+     samma skäl som för ortssidorna. Inget får låta som ett löfte.      */
+  const arSommar = j => !j.land && (j.sommar === true || SOMMAR_ORD.test(j.titel || ""));
+  const sommarjobb = jobb.filter(arSommar).sort(sortera);
+  const ar = new Date().getMonth() >= 8 ? new Date().getFullYear() + 1 : new Date().getFullYear();
+  const sommarPerOrt = {};
+  for (const j of sommarjobb) if (j.ort) (sommarPerOrt[j.ort] = sommarPerOrt[j.ort] || []).push(j);
+  const sommarOrter = Object.keys(sommarPerOrt)
+    .filter(o => sommarPerOrt[o].length >= MINST_JOBB_FOR_EGEN_SIDA)
+    .sort((a, b) => sommarPerOrt[b].length - sommarPerOrt[a].length);
+  const sommarLank = o => "https://chansen.nu/jobb/" + (o ? "sommarjobb-" + ortslug(o) : "sommarjobb") + ".html";
+  const sommarSidor = [];
+
+  function sommarRader(lista, visaOrt) {
+    let ut = "";
+    for (const j of lista.slice(0, 40)) {
+      const id = j.id || (String(j.lank).match(/\/(\d+)$/) || [])[1] || "";
+      ut += '    <li>\n'
+        + '      <a href="https://chansen.nu/#jobb-' + id + '">' + fly(j.titel) + '</a>\n'
+        + '      <p>' + fly(j.arbetsgivare) + (visaOrt && j.ort ? ' i ' + fly(j.ort) : '')
+        + (j.omfattning ? ' · ' + fly(j.omfattning) : '')
+        + (j.kategori ? ' · ' + fly(j.kategori) : '') + '</p>\n'
+        + (j.beskrivning ? '      <p>' + fly(j.beskrivning.slice(0, 180)) + '</p>\n' : '')
+        + '    </li>\n';
+    }
+    return ut;
+  }
+
+  const sommarFragor = ort => {
+    const var_ = ort ? " i " + ort : "";
+    return [
+      {
+        f: "När ska man söka sommarjobb" + var_ + "?",
+        s: "Så tidigt som möjligt. Många arbetsgivare lägger upp sommarjobben mellan januari och mars, "
+          + "och en del tillsätter dem innan sista ansökningsdag. Titta gärna varje vecka från januari."
+      },
+      {
+        f: "Kan man få sommarjobb utan erfarenhet?",
+        s: "Ja, många sommarjobb är till för den som inte har jobbat förut. Chansen visar bara jobb som inte "
+          + "kräver flera års erfarenhet, utbildning eller yrkesbevis. Det betyder inte att du får jobbet, "
+          + "men att du kan söka det."
+      },
+      {
+        f: "Finns det sommarjobb för den som är under 18?",
+        s: "Ja, men det finns regler för hur mycket och när du får jobba. I Chansen kan du välja din ålder, "
+          + "och då visas bara jobb och arbetstider som annonsen visar att du får ha. "
+          + "Din vårdnadshavare måste godkänna att du tar jobbet."
+      },
+      {
+        f: "Har kommunen sommarjobb för unga?",
+        s: "Många kommuner har egna sommarjobb för unga, som ibland kallas feriearbete. De söks oftast "
+          + "direkt hos kommunen och finns inte alltid i Platsbanken. Sök på kommunens webbplats"
+          + (ort ? " för " + ort : "") + " för att se vad som gäller där."
+      },
+      {
+        f: "Vad ska jag skriva i ansökan till ett sommarjobb?",
+        s: "Skriv kort om dig själv, när du kan jobba och varför du vill ha just det jobbet. "
+          + "Har du inte jobbat förut kan du berätta om skola, föreningar eller annat du gjort. "
+          + "I Chansen finns hjälp att göra ett CV och skriva en ansökan."
+      }
+    ];
+  };
+
+  function sommarsida(ort) {
+    const lista = ort ? sommarPerOrt[ort] : sommarjobb;
+    const n = lista.length;
+    const fragor = sommarFragor(ort);
+    const ld = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": fragor.map(q => ({
+        "@type": "Question", "name": q.f,
+        "acceptedAnswer": { "@type": "Answer", "text": q.s }
+      }))
+    }).replace(/</g, "\\u003c");
+    const var_ = ort ? " i " + ort : "";
+    const unga = lista.filter(j => j.minderarigOk === true).length;
+    const intro = n >= MINST_JOBB_FOR_EGEN_SIDA
+      ? 'Just nu finns ' + n + ' sommarjobb' + fly(var_) + ' som inte kräver flera års erfarenhet, '
+        + 'utbildning eller yrkesbevis. '
+        + (unga ? jobbOrdU(unga) + ' går att söka för dig som är under 18. ' : '')
+      : 'Just nu finns få sommarjobb' + fly(var_) + ', eftersom de flesta läggs upp mellan januari och mars. '
+        + 'Här visas de som redan finns, och listan fylls på varje natt. ';
+    const orterHtml = !ort && sommarOrter.length
+      ? '<h2>Sommarjobb per ort</h2>\n<p>' + sommarOrter.map(o =>
+          '<a href="' + sommarLank(o) + '">' + fly(o) + '</a> ' + sommarPerOrt[o].length).join(" · ") + '</p>\n'
+      : '';
+    fs.writeFileSync("docs/jobb/" + (ort ? "sommarjobb-" + ortslug(ort) : "sommarjobb") + ".html", sida({
+      titel: "Sommarjobb " + ar + var_ + " med låga krav",
+      beskrivning: (n ? n + " sommarjobb" : "Sommarjobb") + var_ + " som inte kräver flera års erfarenhet. "
+        + "Tips om när du ska söka och regler för unga. Uppdateras varje natt från Platsbanken.",
+      url: sommarLank(ort),
+      ld,
+      kropp: '<h1>' + fly("Sommarjobb " + ar + var_) + '</h1>\n'
+        + '<p>' + intro
+        + 'Vi kan bara läsa det som står i annonsen, så kolla alltid arbetstider och lön med arbetsgivaren.</p>\n'
+        + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+        + (n ? '<h2>Sommarjobb' + fly(var_) + ' just nu</h2>\n<ul>\n' + sommarRader(lista, !ort) + '</ul>\n'
+            + (n > 40 ? '<p>Och ' + (n - 40) + ' till. <a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
+          : '')
+        + orterHtml
+        + '<h2>Vanliga frågor om sommarjobb' + fly(var_) + '</h2>\n'
+        + fragor.map(q => '<h3>' + fly(q.f) + '</h3>\n<p>' + fly(q.s) + '</p>\n').join("")
+        + '<h2>Fler jobb</h2>\n<p>'
+        + (ort ? '<a href="https://chansen.nu/jobb/' + ortslug(ort) + '.html">Alla jobb i ' + fly(ort) + '</a> · '
+            + '<a href="' + sommarLank() + '">Sommarjobb i hela Sverige</a> · ' : '')
+        + '<a href="https://chansen.nu/jobb/' + UNGA_SLUG + '.html">Jobb för dig som är 16 eller 17</a> · '
+        + '<a href="https://chansen.nu/jobb/' + YNGRE_SLUG + '.html">Jobb för dig som är 13 till 15</a> · '
+        + '<a href="https://chansen.nu/jobb/">Alla orter</a></p>\n'
+    }));
+    sommarSidor.push(sommarLank(ort));
+  }
+  sommarsida();
+  for (const o of sommarOrter) if (orter.indexOf(o) > -1) sommarsida(o);
+
   /* Översikt på chansen.nu/jobb/ med länkar till alla stadssidor, per
      län. Startsidan länkar hit. Utan den hittade Google stadssidorna
      bara via sitemap, och tog nästan inte med några av dem.          */
@@ -1422,6 +1552,9 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + MINST_JOBB_FOR_EGEN_SIDA + ' av dem, sorterade per län. Siffran visar hur många jobb som finns i orten i dag. '
       + 'Listan uppdateras varje natt från Platsbanken.</p>\n'
       + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+      + '<h2>Sommarjobb</h2>\n<p><a href="https://chansen.nu/jobb/sommarjobb.html">Sommarjobb ' + ar + ' i hela Sverige</a>'
+      + sommarOrter.map(o => ' · <a href="' + sommarLank(o) + '">' + fly(o) + '</a>').join("")
+      + '</p>\n'
       + (aldersidor.length
         ? '<h2>Jobb för din ålder</h2>\n<p>'
           + (aldersidor.indexOf(UNGA_SLUG) > -1 ? '<a href="https://chansen.nu/jobb/' + UNGA_SLUG + '.html">Jobb för dig som är 16 eller 17</a>' : '')
@@ -1457,6 +1590,11 @@ function skrivOrtssidor(jobb, hamtadTid) {
   }
   for (const s of aldersidor) {
     karta += '  <url>\n    <loc>https://chansen.nu/jobb/' + s + '.html</loc>\n'
+      + '    <lastmod>' + datum + '</lastmod>\n'
+      + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
+  }
+  for (const url of sommarSidor) {
+    karta += '  <url>\n    <loc>' + url + '</loc>\n'
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
   }
