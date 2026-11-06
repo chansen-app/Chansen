@@ -542,7 +542,31 @@ const BEMANNING = [
    OBS: aldrig "lyft", det fastnar i "tunga lyft".                     */
 const STOD_ORD = /nystartsjobb|anställningsstöd|anstallningsstod|lönebidrag|lonebidrag|lönestöd|lonestod|introduktionsjobb|arbetsstöd|arbetsstod|extratjänst|extratjanst|etableringsjobb|trygghetsanställning|trygghetsanstallning|utvecklingsanställning|utvecklingsanstallning|skyddat arbete|anvisad av arbetsförmedlingen|inskriven (på|hos|vid) arbetsförmedlingen|inskrivna (på|hos|vid) arbetsförmedlingen/i;
 
-const SOMMAR_ORD = /sommarjobb|sommarvikari|semestervikari|sommarsäsong|sommarsasong|sommarpersonal|sommarperiod|feriearbete|feriejobb|(över|under) sommaren|jobba i sommar|sommar(en)? 20\d\d/i;
+/* Sommarjobb. I rubriken räcker fler ord, i annonstexten bara de tydliga.
+   "Under sommaren" och "semestervikariat" i texten tog med fasta jobb och
+   jul- och nyårsvikariat, så de räknas bara i rubriken. Jobb för en
+   sommar som redan har varit räknas inte.                              */
+const SOMMAR_ORD = /sommarjobb|sommarvikari|semestervikari|sommarsäsong|sommarsasong|sommarpersonal|feriearbete|feriejobb|i sommar\b|sommar(en)? 20\d\d/i;
+const SOMMAR_TEXT = /sommarjobb|sommarvikari|sommarsäsong|sommarsasong|sommarpersonal|feriearbete|feriejobb|sommar(en)? 20\d\d/i;
+function nastaSommar() {
+  const d = new Date();
+  return d.getMonth() >= 8 ? d.getFullYear() + 1 : d.getFullYear();
+}
+function arSommarjobb(rubrik, text) {
+  // "pågår till sommaren 2027" betyder att jobbet slutar då, inte ett sommarjobb
+  const bort = s => String(s || "").replace(/(till|fram till|tills|t\.o\.m\.?) sommaren?( 20\d\d)?/gi, "");
+  rubrik = bort(rubrik); text = bort(text);
+  if (/\bjul|nyår|nyar\b|vinter/i.test(rubrik)) return false;
+  if (!SOMMAR_ORD.test(rubrik) && !SOMMAR_TEXT.test(text)) return false;
+  // nämns bara somrar som redan har varit hoppas jobbet över
+  const ar = [...(rubrik + " " + text).matchAll(/sommar(?:en)? (20\d\d)/gi)].map(m => +m[1]);
+  return !ar.length || ar.some(a => a >= nastaSommar());
+}
+// För jobb som redan är hämtade. Egna annonser har ingen flagga, så där
+// läses rubriken och den korta texten.
+function arSommar(j) {
+  return !j.land && (j.sommar === true || arSommarjobb(j.titel, j.beskrivning));
+}
 
 function arBemanning(a) {
   const ag = ((a.employer && a.employer.name) || "").toLowerCase();
@@ -764,7 +788,7 @@ async function hamtaJobb() {
           stod: STOD_ORD.test(brodtext) || undefined,
           // Sommarjobb, för sidorna om sommarjobb. Bara tydliga ord, så att
           // "vi har öppet på sommaren" inte räknas.
-          sommar: SOMMAR_ORD.test(brodtext) || undefined
+          sommar: arSommarjobb(a.headline, a.description ? a.description.text : "") || undefined
         });
       }
       if (term !== forraTerm) {
@@ -1203,7 +1227,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + fragorHtml
       + naraHtml
       + '<h2>Sommarjobb</h2>\n<p>'
-      + (lista.filter(j => j.sommar === true || SOMMAR_ORD.test(j.titel || "")).length >= MINST_JOBB_FOR_EGEN_SIDA
+      + (lista.filter(arSommar).length >= MINST_JOBB_FOR_EGEN_SIDA
          ? '<a href="https://chansen.nu/jobb/sommarjobb-' + slug + '.html">Sommarjobb i ' + fly(ort) + '</a> · ' : '')
       + '<a href="https://chansen.nu/jobb/sommarjobb.html">Sommarjobb i hela Sverige</a></p>\n'
       + (unga ? '<h2>Jobb för din ålder</h2>\n<p><a href="https://chansen.nu/jobb/' + UNGA_SLUG
@@ -1424,9 +1448,8 @@ function skrivOrtssidor(jobb, hamtadTid) {
      även på hösten när det är få jobb. Då hinner Google hitta den.
      En sida per ort skrivs bara när orten har minst fem sommarjobb, av
      samma skäl som för ortssidorna. Inget får låta som ett löfte.      */
-  const arSommar = j => !j.land && (j.sommar === true || SOMMAR_ORD.test(j.titel || ""));
   const sommarjobb = jobb.filter(arSommar).sort(sortera);
-  const ar = new Date().getMonth() >= 8 ? new Date().getFullYear() + 1 : new Date().getFullYear();
+  const ar = nastaSommar();
   const sommarPerOrt = {};
   for (const j of sommarjobb) if (j.ort) (sommarPerOrt[j.ort] = sommarPerOrt[j.ort] || []).push(j);
   const sommarOrter = Object.keys(sommarPerOrt)
