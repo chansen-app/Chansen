@@ -562,6 +562,13 @@ function arSommarjobb(rubrik, text) {
   const ar = [...(rubrik + " " + text).matchAll(/sommar(?:en)? (20\d\d)/gi)].map(m => +m[1]);
   return !ar.length || ar.some(a => a >= nastaSommar());
 }
+// Extrajobb: jobb i Sverige på deltid.
+function arExtrajobb(j) {
+  return !j.land && /deltid/i.test(j.omfattning || "");
+}
+function extraLank(o) {
+  return "https://chansen.nu/jobb/" + (o ? "extrajobb-" + ortslug(o) : "extrajobb") + ".html";
+}
 // För jobb som redan är hämtade. Egna annonser har ingen flagga, så där
 // läses rubriken och den korta texten.
 function arSommar(j) {
@@ -1226,6 +1233,9 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '<h2>Vanliga frågor om jobb i ' + fly(ort) + '</h2>\n'
       + fragorHtml
       + naraHtml
+      + (lista.filter(arExtrajobb).length >= MINST_JOBB_FOR_EGEN_SIDA
+         ? '<h2>Extrajobb</h2>\n<p><a href="' + extraLank(ort) + '">Extrajobb i ' + fly(ort) + '</a> · '
+           + '<a href="' + extraLank() + '">Extrajobb i hela Sverige</a></p>\n' : '')
       + '<h2>Sommarjobb</h2>\n<p>'
       + (lista.filter(arSommar).length >= MINST_JOBB_FOR_EGEN_SIDA
          ? '<a href="https://chansen.nu/jobb/sommarjobb-' + slug + '.html">Sommarjobb i ' + fly(ort) + '</a> · ' : '')
@@ -1560,6 +1570,103 @@ function skrivOrtssidor(jobb, hamtadTid) {
   sommarsida();
   for (const o of sommarOrter) if (orter.indexOf(o) > -1) sommarsida(o);
 
+  /* Sidor om extrajobb. "Extrajobb + ort" är en av de vanligaste
+     sökningarna bland unga och studenter. Här räknas alla jobb på deltid,
+     eftersom det är så Platsbanken anger dem. En sida för hela Sverige
+     och en per ort med minst fem deltidsjobb.                           */
+  const extrajobb = jobb.filter(arExtrajobb).sort(sortera);
+  const extraPerOrt = {};
+  for (const j of extrajobb) if (j.ort) (extraPerOrt[j.ort] = extraPerOrt[j.ort] || []).push(j);
+  const extraOrter = Object.keys(extraPerOrt)
+    .filter(o => extraPerOrt[o].length >= MINST_JOBB_FOR_EGEN_SIDA && orter.indexOf(o) > -1)
+    .sort((a, b) => extraPerOrt[b].length - extraPerOrt[a].length);
+  const extraSidor = [];
+
+  const extraFragor = ort => {
+    const var_ = ort ? " i " + ort : "";
+    return [
+      {
+        f: "Hur många timmar är ett extrajobb?",
+        s: "Det varierar. Ett extrajobb är oftast deltid eller timanställning, till exempel några pass "
+          + "i veckan eller på helger. Hur mycket det gäller står i annonsen, och annars kan du fråga arbetsgivaren."
+      },
+      {
+        f: "Kan man ha extrajobb när man pluggar?",
+        s: "Ja, många extrajobb passar ihop med skola eller studier. Får du studiemedel från CSN finns det "
+          + "en gräns för hur mycket du får tjäna. Kolla den på csn.se innan du tar jobbet."
+      },
+      {
+        f: "Finns det extrajobb" + var_ + " för den som är under 18?",
+        s: "Ja, men det finns regler för hur mycket och när du får jobba. I Chansen kan du välja din ålder, "
+          + "och då visas bara jobb och arbetstider som annonsen visar att du får ha. "
+          + "Din vårdnadshavare måste godkänna att du tar jobbet."
+      },
+      {
+        f: "Behöver man erfarenhet för ett extrajobb?",
+        s: "Inte för alla. Chansen visar bara jobb som inte kräver flera års erfarenhet, utbildning eller "
+          + "yrkesbevis. Det betyder inte att du får jobbet, men att du kan söka det."
+      },
+      {
+        f: "Hur söker man ett extrajobb?",
+        s: "Skriv kort om dig själv och när du kan jobba, till exempel kvällar eller helger. "
+          + "Det är ofta det arbetsgivaren vill veta först. I Chansen finns hjälp att göra ett CV och skriva en ansökan."
+      }
+    ];
+  };
+
+  function extrasida(ort) {
+    const lista = ort ? extraPerOrt[ort] : extrajobb;
+    if (!lista || lista.length < MINST_JOBB_FOR_EGEN_SIDA) return;
+    const n = lista.length;
+    const var_ = ort ? " i " + ort : "";
+    const fragor = extraFragor(ort);
+    const ld = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": fragor.map(q => ({
+        "@type": "Question", "name": q.f,
+        "acceptedAnswer": { "@type": "Answer", "text": q.s }
+      }))
+    }).replace(/</g, "\\u003c");
+    const unga = lista.filter(j => j.minderarigOk === true).length;
+    const kat = {};
+    for (const j of lista) if (j.kategori && j.kategori !== "Övrigt") kat[j.kategori] = (kat[j.kategori] || 0) + 1;
+    const toppText = Object.keys(kat).sort((a, b) => kat[b] - kat[a]).slice(0, 3)
+      .map(k => k.toLowerCase()).join(", ").replace(/, ([^,]*)$/, " samt $1");
+    const orterHtml = !ort && extraOrter.length
+      ? '<h2>Extrajobb per ort</h2>\n<p>' + extraOrter.map(o =>
+          '<a href="' + extraLank(o) + '">' + fly(o) + '</a> ' + extraPerOrt[o].length).join(" · ") + '</p>\n'
+      : '';
+    fs.writeFileSync("docs/jobb/" + (ort ? "extrajobb-" + ortslug(ort) : "extrajobb") + ".html", sida({
+      titel: "Extrajobb" + var_ + ", deltidsjobb med låga krav",
+      beskrivning: n + " extrajobb och deltidsjobb" + var_ + " som inte kräver flera års erfarenhet. "
+        + "Uppdateras varje natt från Platsbanken. Gratis att använda.",
+      url: extraLank(ort),
+      ld,
+      kropp: '<h1>' + fly("Extrajobb" + var_) + '</h1>\n'
+        + '<p>Just nu finns ' + n + ' jobb på deltid' + fly(var_) + ' som inte kräver flera års erfarenhet, '
+        + 'utbildning eller yrkesbevis. '
+        + (toppText ? 'Mest inom ' + fly(toppText) + '. ' : '')
+        + (unga ? jobbOrdU(unga) + ' går att söka för dig som är under 18. ' : '')
+        + 'Vi kan bara läsa det som står i annonsen, så kolla alltid arbetstider och lön med arbetsgivaren.</p>\n'
+        + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+        + '<h2>Extrajobb' + fly(var_) + ' just nu</h2>\n<ul>\n' + sommarRader(lista, !ort) + '</ul>\n'
+        + (n > 40 ? '<p>Och ' + (n - 40) + ' till. <a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
+        + orterHtml
+        + '<h2>Vanliga frågor om extrajobb' + fly(var_) + '</h2>\n'
+        + fragor.map(q => '<h3>' + fly(q.f) + '</h3>\n<p>' + fly(q.s) + '</p>\n').join("")
+        + '<h2>Fler jobb</h2>\n<p>'
+        + (ort ? '<a href="https://chansen.nu/jobb/' + ortslug(ort) + '.html">Alla jobb i ' + fly(ort) + '</a> · '
+            + '<a href="' + extraLank() + '">Extrajobb i hela Sverige</a> · ' : '')
+        + '<a href="' + sommarLank() + '">Sommarjobb</a> · '
+        + '<a href="https://chansen.nu/jobb/' + UNGA_SLUG + '.html">Jobb för dig som är 16 eller 17</a> · '
+        + '<a href="https://chansen.nu/jobb/">Alla orter</a></p>\n'
+    }));
+    extraSidor.push(extraLank(ort));
+  }
+  extrasida();
+  for (const o of extraOrter) extrasida(o);
+
   /* Översikt på chansen.nu/jobb/ med länkar till alla stadssidor, per
      län. Startsidan länkar hit. Utan den hittade Google stadssidorna
      bara via sitemap, och tog nästan inte med några av dem.          */
@@ -1575,6 +1682,11 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + MINST_JOBB_FOR_EGEN_SIDA + ' av dem, sorterade per län. Siffran visar hur många jobb som finns i orten i dag. '
       + 'Listan uppdateras varje natt från Platsbanken.</p>\n'
       + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+      + (extraSidor.length
+        ? '<h2>Extrajobb</h2>\n<p><a href="' + extraLank() + '">Extrajobb i hela Sverige</a>'
+          + extraOrter.map(o => ' · <a href="' + extraLank(o) + '">' + fly(o) + '</a>').join("")
+          + '</p>\n'
+        : '')
       + '<h2>Sommarjobb</h2>\n<p><a href="https://chansen.nu/jobb/sommarjobb.html">Sommarjobb ' + ar + ' i hela Sverige</a>'
       + sommarOrter.map(o => ' · <a href="' + sommarLank(o) + '">' + fly(o) + '</a>').join("")
       + '</p>\n'
@@ -1616,7 +1728,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
   }
-  for (const url of sommarSidor) {
+  for (const url of sommarSidor.concat(extraSidor)) {
     karta += '  <url>\n    <loc>' + url + '</loc>\n'
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
