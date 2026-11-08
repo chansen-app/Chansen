@@ -569,6 +569,13 @@ function arExtrajobb(j) {
 function extraLank(o) {
   return "https://chansen.nu/jobb/" + (o ? "extrajobb-" + ortslug(o) : "extrajobb") + ".html";
 }
+// Jobb där arbetsgivaren själv har angett att erfarenhet inte krävs.
+function arUtanErfarenhet(j) {
+  return !j.land && j.nyborjarvanlig === true;
+}
+function erfLank(o) {
+  return "https://chansen.nu/jobb/" + (o ? "jobb-utan-erfarenhet-" + ortslug(o) : "jobb-utan-erfarenhet") + ".html";
+}
 // För jobb som redan är hämtade. Egna annonser har ingen flagga, så där
 // läses rubriken och den korta texten.
 function arSommar(j) {
@@ -1233,6 +1240,9 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '<h2>Vanliga frågor om jobb i ' + fly(ort) + '</h2>\n'
       + fragorHtml
       + naraHtml
+      + (lista.filter(arUtanErfarenhet).length >= MINST_JOBB_FOR_EGEN_SIDA
+         ? '<h2>Jobb utan erfarenhet</h2>\n<p><a href="' + erfLank(ort) + '">Jobb utan erfarenhet i ' + fly(ort) + '</a> · '
+           + '<a href="' + erfLank() + '">Jobb utan erfarenhet i hela Sverige</a></p>\n' : '')
       + (lista.filter(arExtrajobb).length >= MINST_JOBB_FOR_EGEN_SIDA
          ? '<h2>Extrajobb</h2>\n<p><a href="' + extraLank(ort) + '">Extrajobb i ' + fly(ort) + '</a> · '
            + '<a href="' + extraLank() + '">Extrajobb i hela Sverige</a></p>\n' : '')
@@ -1667,6 +1677,103 @@ function skrivOrtssidor(jobb, hamtadTid) {
   extrasida();
   for (const o of extraOrter) extrasida(o);
 
+  /* Sidor om jobb utan erfarenhet. "Jobb utan erfarenhet + ort" är en av
+     de vanligaste jobbsökningarna. Här kommer bara jobb med där
+     arbetsgivaren själv har angett att erfarenhet inte krävs, så att
+     rubriken stämmer. En sida för hela Sverige och en per ort med minst
+     fem sådana jobb.                                                    */
+  const utanErf = jobb.filter(arUtanErfarenhet).sort(sortera);
+  const erfPerOrt = {};
+  for (const j of utanErf) if (j.ort) (erfPerOrt[j.ort] = erfPerOrt[j.ort] || []).push(j);
+  const erfOrter = Object.keys(erfPerOrt)
+    .filter(o => erfPerOrt[o].length >= MINST_JOBB_FOR_EGEN_SIDA && orter.indexOf(o) > -1)
+    .sort((a, b) => erfPerOrt[b].length - erfPerOrt[a].length);
+  const erfSidor = [];
+
+  function erfsida(ort) {
+    const lista = ort ? erfPerOrt[ort] : utanErf;
+    if (!lista || lista.length < MINST_JOBB_FOR_EGEN_SIDA) return;
+    const n = lista.length;
+    const var_ = ort ? " i " + ort : "";
+    const unga = lista.filter(j => j.minderarigOk === true).length;
+    const utanKort = lista.filter(j => j.korkortKravs === false).length;
+    const del = lista.filter(j => /deltid/i.test(j.omfattning || "")).length;
+    const kat = {};
+    for (const j of lista) if (j.kategori && j.kategori !== "Övrigt") kat[j.kategori] = (kat[j.kategori] || 0) + 1;
+    const toppText = Object.keys(kat).sort((a, b) => kat[b] - kat[a]).slice(0, 3)
+      .map(k => k.toLowerCase()).join(", ").replace(/, ([^,]*)$/, " samt $1");
+    const fragor = [
+      {
+        f: "Vilka jobb kan man få utan erfarenhet" + var_ + "?",
+        s: (toppText ? "Just nu är det mest jobb inom " + toppText + ". " : "")
+          + "Vilka jobb som finns ändras varje natt, så titta gärna igen om du inte hittar något som passar."
+      },
+      {
+        f: "Vad betyder det att erfarenhet inte krävs?",
+        s: "Det betyder att arbetsgivaren själv har skrivit i annonsen att du inte behöver ha gjort jobbet förut. "
+          + "Det kan ändå finnas andra krav, till exempel körkort eller svenska. Läs alltid hela annonsen."
+      },
+      {
+        f: "Hur får man jobb utan erfarenhet?",
+        s: "Sök flera jobb, och skriv om sådant du har gjort, som skola, föreningar eller ideellt arbete. "
+          + "Visa att du vill lära dig. I Chansen finns hjälp att göra ett CV och skriva en ansökan."
+      },
+      {
+        f: "Finns det jobb utan erfarenhet" + var_ + " för den som är under 18?",
+        s: (unga ? "Ja, just nu går " + jobbOrdU(unga) + " att söka för dig som är under 18. "
+                 : "Just nu finns få sådana jobb för dig som är under 18. ")
+          + "I Chansen kan du välja din ålder, och då visas bara jobb och arbetstider som annonsen visar att du får ha. "
+          + "Din vårdnadshavare måste godkänna att du tar jobbet."
+      },
+      {
+        f: "Behöver man körkort?",
+        s: utanKort
+          ? "Inte för alla. I " + jobbOrdU(utanKort) + " står det i annonsen att körkort inte krävs."
+          : "För många av jobben just nu, ja. Läs i annonsen vad som gäller."
+      }
+    ];
+    const ld = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": fragor.map(q => ({
+        "@type": "Question", "name": q.f,
+        "acceptedAnswer": { "@type": "Answer", "text": q.s }
+      }))
+    }).replace(/</g, "\\u003c");
+    const orterHtml = !ort && erfOrter.length
+      ? '<h2>Jobb utan erfarenhet per ort</h2>\n<p>' + erfOrter.map(o =>
+          '<a href="' + erfLank(o) + '">' + fly(o) + '</a> ' + erfPerOrt[o].length).join(" · ") + '</p>\n'
+      : '';
+    fs.writeFileSync("docs/jobb/" + (ort ? "jobb-utan-erfarenhet-" + ortslug(ort) : "jobb-utan-erfarenhet") + ".html", sida({
+      titel: "Jobb utan erfarenhet" + var_ + ", " + n + " lediga jobb",
+      beskrivning: n + " lediga jobb" + var_ + " där arbetsgivaren själv skriver att erfarenhet inte krävs. "
+        + "Uppdateras varje natt från Platsbanken. Gratis att använda.",
+      url: erfLank(ort),
+      ld,
+      kropp: '<h1>' + fly("Jobb utan erfarenhet" + var_) + '</h1>\n'
+        + '<p>Just nu finns ' + n + ' jobb' + fly(var_) + ' där arbetsgivaren själv har skrivit att erfarenhet inte krävs. '
+        + (toppText ? 'Mest inom ' + fly(toppText) + '. ' : '')
+        + (del ? jobbOrdU(del) + ' är på deltid. ' : '')
+        + (unga ? jobbOrdU(unga) + ' går att söka för dig som är under 18. ' : '')
+        + 'Det kan ändå finnas andra krav, så läs alltid hela annonsen.</p>\n'
+        + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+        + '<h2>Jobb utan erfarenhet' + fly(var_) + ' just nu</h2>\n<ul>\n' + sommarRader(lista, !ort) + '</ul>\n'
+        + (n > 40 ? '<p>Och ' + (n - 40) + ' till. <a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
+        + orterHtml
+        + '<h2>Vanliga frågor om jobb utan erfarenhet' + fly(var_) + '</h2>\n'
+        + fragor.map(q => '<h3>' + fly(q.f) + '</h3>\n<p>' + fly(q.s) + '</p>\n').join("")
+        + '<h2>Fler jobb</h2>\n<p>'
+        + (ort ? '<a href="https://chansen.nu/jobb/' + ortslug(ort) + '.html">Alla jobb i ' + fly(ort) + '</a> · '
+            + '<a href="' + erfLank() + '">Jobb utan erfarenhet i hela Sverige</a> · ' : '')
+        + '<a href="' + extraLank() + '">Extrajobb</a> · '
+        + '<a href="' + sommarLank() + '">Sommarjobb</a> · '
+        + '<a href="https://chansen.nu/jobb/">Alla orter</a></p>\n'
+    }));
+    erfSidor.push(erfLank(ort));
+  }
+  erfsida();
+  for (const o of erfOrter) erfsida(o);
+
   /* Översikt på chansen.nu/jobb/ med länkar till alla stadssidor, per
      län. Startsidan länkar hit. Utan den hittade Google stadssidorna
      bara via sitemap, och tog nästan inte med några av dem.          */
@@ -1682,6 +1789,11 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + MINST_JOBB_FOR_EGEN_SIDA + ' av dem, sorterade per län. Siffran visar hur många jobb som finns i orten i dag. '
       + 'Listan uppdateras varje natt från Platsbanken.</p>\n'
       + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+      + (erfSidor.length
+        ? '<h2>Jobb utan erfarenhet</h2>\n<p><a href="' + erfLank() + '">Jobb utan erfarenhet i hela Sverige</a>'
+          + erfOrter.map(o => ' · <a href="' + erfLank(o) + '">' + fly(o) + '</a>').join("")
+          + '</p>\n'
+        : '')
       + (extraSidor.length
         ? '<h2>Extrajobb</h2>\n<p><a href="' + extraLank() + '">Extrajobb i hela Sverige</a>'
           + extraOrter.map(o => ' · <a href="' + extraLank(o) + '">' + fly(o) + '</a>').join("")
@@ -1728,7 +1840,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
   }
-  for (const url of sommarSidor.concat(extraSidor)) {
+  for (const url of sommarSidor.concat(extraSidor, erfSidor)) {
     karta += '  <url>\n    <loc>' + url + '</loc>\n'
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
