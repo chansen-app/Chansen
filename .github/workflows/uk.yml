@@ -13,8 +13,9 @@ name: Hämta brittiska jobb
 # Du kan också starta den för hand under fliken Actions.
 
 on:
-  schedule:
-    - cron: "0 7 * * *"     # 07:00 UTC, alltså 09:00 svensk sommartid
+  # PAUSAD 8 november 2026. Ta bort # på de två raderna nedan för att starta igen.
+#  schedule:
+#    - cron: "0 7 * * *"     # 07:00 UTC, alltså 09:00 svensk sommartid
   workflow_dispatch:
 
 permissions:

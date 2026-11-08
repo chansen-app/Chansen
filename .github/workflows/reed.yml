@@ -13,8 +13,9 @@ name: Hämta brittiska jobb från Reed
 # Du kan också starta den för hand under fliken Actions.
 
 on:
-  schedule:
-    - cron: "30 7 * * *"     # 07:30 UTC, mellan den norska och den brittiska
+  # PAUSAD 8 november 2026. Ta bort # på de två raderna nedan för att starta igen.
+#  schedule:
+#    - cron: "30 7 * * *"     # 07:30 UTC, mellan den norska och den brittiska
   workflow_dispatch:
 
 permissions:
