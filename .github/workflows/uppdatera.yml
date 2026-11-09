@@ -83,3 +83,13 @@ jobs:
             if [ "$forsok" = 5 ]; then exit 1; fi
             sleep 15
           done
+
+      # Berättar för Bing vilka sidor som finns. Väntar först två minuter,
+      # så att GitHub Pages hinner lägga ut de nya sidorna.
+      # Bara adresserna i sitemap skickas, inga personuppgifter.
+      - name: Meddela Bing via IndexNow
+        # Går något fel här är jobben ändå sparade.
+        continue-on-error: true
+        run: |
+          sleep 120
+          node indexnow.js
