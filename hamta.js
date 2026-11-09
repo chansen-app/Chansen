@@ -1047,6 +1047,17 @@ function skrivOrtssidor(jobb, hamtadTid) {
     if (lan) (orterPerLan[lan] = orterPerLan[lan] || []).push(ort);
   }
 
+  // Län som får en egen sida: minst fem jobb, i minst två orter.
+  // Sidorna skrivs längre ned, men ortssidorna behöver veta vilka som finns.
+  const perLanAlla = {};
+  for (const j of jobb) if (!j.land && j.lan) (perLanAlla[j.lan] = perLanAlla[j.lan] || []).push(j);
+  const lanMedSida = {};
+  for (const lan of Object.keys(perLanAlla)) {
+    const orterILan = new Set(perLanAlla[lan].map(j => j.ort).filter(Boolean));
+    if (perLanAlla[lan].length >= MINST_JOBB_FOR_EGEN_SIDA && orterILan.size >= 2) lanMedSida[lan] = true;
+  }
+  const lanLank = lan => "https://chansen.nu/jobb/" + ortslug(lan) + ".html";
+
   for (const ort of orter) {
     const lista = perOrt[ort].slice().sort(
       (a, b) => (b.sortpoang || b.poang || 0) - (a.sortpoang || a.poang || 0));
@@ -1165,8 +1176,10 @@ function skrivOrtssidor(jobb, hamtadTid) {
     const lan = (lista.find(j => j.lan) || {}).lan;
     const nara = (orterPerLan[lan] || []).filter(o => o !== ort)
       .sort((a, b) => perOrt[b].length - perOrt[a].length).slice(0, 6);
-    const naraHtml = nara.length
-      ? '<h2>Jobb i samma län</h2>\n<p>' + nara.map(o =>
+    const naraHtml = nara.length || lanMedSida[lan]
+      ? '<h2>Jobb i samma län</h2>\n<p>'
+        + (lanMedSida[lan] ? '<a href="' + lanLank(lan) + '">Alla jobb i ' + fly(lan) + '</a>' + (nara.length ? ' · ' : '') : '')
+        + nara.map(o =>
           '<a href="https://chansen.nu/jobb/' + ortslug(o) + '.html">' + fly(o) + '</a>').join(" · ")
         + '</p>\n'
       : '';
@@ -1783,6 +1796,91 @@ function skrivOrtssidor(jobb, hamtadTid) {
   erfsida();
   for (const o of erfOrter) erfsida(o);
 
+  /* Sidor per län. En ort får en egen sida först vid fem jobb, så den
+     som googlar "jobb Karlskrona" eller "jobb Blekinge" hittade inget
+     när orten hade färre. Länssidan samlar alla orter i länet, också de
+     små. Ett län där alla jobb finns i en enda ort får ingen sida,
+     eftersom den då skulle bli en kopia av ortssidan, och Google
+     straffar sidor som är nästan likadana.                             */
+  const lanSidor = [];
+  for (const lan of Object.keys(lanMedSida).sort((a, b) => a.localeCompare(b, "sv"))) {
+    const lista = perLanAlla[lan].slice().sort(sortera);
+    const n = lista.length;
+    const iOrt = {};
+    for (const j of lista) if (j.ort) iOrt[j.ort] = (iOrt[j.ort] || 0) + 1;
+    const lanOrter = Object.keys(iOrt).sort((a, b) => iOrt[b] - iOrt[a]);
+
+    const del = lista.filter(j => /deltid/i.test(j.omfattning || "")).length;
+    const ung = lista.filter(j => j.minderarigOk === true).length;
+    const utanErfN = lista.filter(j => j.nyborjarvanlig === true).length;
+    const kat = {};
+    for (const j of lista) if (j.kategori && j.kategori !== "Övrigt") kat[j.kategori] = (kat[j.kategori] || 0) + 1;
+    const toppText = Object.keys(kat).sort((a, b) => kat[b] - kat[a]).slice(0, 3)
+      .map(k => k.toLowerCase()).join(", ").replace(/, ([^,]*)$/, " samt $1");
+    const toppOrter = lanOrter.slice(0, 3);
+    const toppOrterText = toppOrter.map(o => o + " (" + iOrt[o] + ")").join(", ").replace(/, ([^,]*)$/, " och $1");
+
+    const fragor = [
+      {
+        f: "Var i " + lan + " finns flest jobb med låga krav?",
+        s: "Just nu flest i " + toppOrterText + ". Totalt finns jobb i " + lanOrter.length + " orter i länet."
+      },
+      {
+        f: "Finns det deltidsjobb i " + lan + "?",
+        s: del ? "Ja, just nu finns " + jobbOrdU(del) + " på deltid i " + lan + "."
+               : "Just nu finns inga jobb på deltid i " + lan + ". Nya jobb kommer varje natt."
+      },
+      {
+        f: "Finns det jobb i " + lan + " för den som är under 18?",
+        s: (ung ? "Ja, just nu går " + jobbOrdU(ung) + " att söka för dig som är under 18. "
+                : "Just nu finns få sådana jobb för dig som är under 18. ")
+          + "Din vårdnadshavare måste godkänna att du tar jobbet."
+      },
+      {
+        f: "Finns det jobb utan krav på erfarenhet i " + lan + "?",
+        s: utanErfN ? "Ja, i " + jobbOrdU(utanErfN) + " skriver arbetsgivaren själv att erfarenhet inte krävs."
+                    : "Just nu skriver ingen arbetsgivare i länet att erfarenhet inte krävs, men många jobb har ändå låga krav."
+      }
+    ];
+    const ld = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": fragor.map(q => ({
+        "@type": "Question", "name": q.f,
+        "acceptedAnswer": { "@type": "Answer", "text": q.s }
+      }))
+    }).replace(/</g, "\\u003c");
+
+    const url = "https://chansen.nu/jobb/" + ortslug(lan) + ".html";
+    fs.writeFileSync("docs/jobb/" + ortslug(lan) + ".html", sida({
+      titel: "Lediga jobb i " + lan + " med låga krav" + (del ? ", extrajobb och deltid" : ""),
+      beskrivning: n + " jobb i " + lanOrter.length + " orter i " + lan + " som inte kräver flera års erfarenhet. "
+        + "Uppdateras varje natt från Platsbanken. Gratis att använda.",
+      url, ld,
+      kropp: '<h1>' + fly("Jobb med låga krav i " + lan) + '</h1>\n'
+        + '<p>Just nu finns ' + n + ' jobb i ' + lanOrter.length + ' orter i ' + fly(lan) + ' som inte kräver '
+        + 'flera års erfarenhet, utbildning eller yrkesbevis. '
+        + (toppText ? 'Mest inom ' + fly(toppText) + '. ' : '')
+        + (del ? jobbOrdU(del) + ' är på deltid. ' : '')
+        + 'Listan uppdateras varje natt.</p>\n'
+        + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+        + '<h2>Jobb per ort i ' + fly(lan) + '</h2>\n<p>' + lanOrter.map(o =>
+            (orter.indexOf(o) > -1
+              ? '<a href="https://chansen.nu/jobb/' + ortslug(o) + '.html">' + fly(o) + '</a>'
+              : fly(o)) + ' ' + iOrt[o]).join(" · ") + '</p>\n'
+        + '<h2>Jobb i ' + fly(lan) + ' just nu</h2>\n<ul>\n' + sommarRader(lista, true) + '</ul>\n'
+        + (n > 40 ? '<p>Och ' + (n - 40) + ' till. <a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
+        + '<h2>Vanliga frågor om jobb i ' + fly(lan) + '</h2>\n'
+        + fragor.map(q => '<h3>' + fly(q.f) + '</h3>\n<p>' + fly(q.s) + '</p>\n').join("")
+        + '<h2>Fler jobb</h2>\n<p>'
+        + '<a href="' + erfLank() + '">Jobb utan erfarenhet</a> · '
+        + '<a href="' + extraLank() + '">Extrajobb</a> · '
+        + '<a href="' + sommarLank() + '">Sommarjobb</a> · '
+        + '<a href="https://chansen.nu/jobb/">Alla orter</a></p>\n'
+    }));
+    lanSidor.push(url);
+  }
+
   /* Översikt på chansen.nu/jobb/ med länkar till alla stadssidor, per
      län. Startsidan länkar hit. Utan den hittade Google stadssidorna
      bara via sitemap, och tog nästan inte med några av dem.          */
@@ -1818,7 +1916,11 @@ function skrivOrtssidor(jobb, hamtadTid) {
           + (aldersidor.indexOf(YNGRE_SLUG) > -1 ? '<a href="https://chansen.nu/jobb/' + YNGRE_SLUG + '.html">Jobb för dig som är 13 till 15</a>' : '')
           + '</p>\n'
         : '')
-      + lanLista.map(lan => '<h2>' + fly(lan) + '</h2>\n<p>'
+      + (lanSidor.length
+        ? '<h2>Jobb per län</h2>\n<p>' + Object.keys(lanMedSida).sort((a, b) => a.localeCompare(b, "sv"))
+            .map(l => '<a href="' + lanLank(l) + '">' + fly(l) + '</a> ' + perLanAlla[l].length).join(" · ") + '</p>\n'
+        : '')
+      + lanLista.map(lan => '<h2>' + (lanMedSida[lan] ? '<a href="' + lanLank(lan) + '">' + fly(lan) + '</a>' : fly(lan)) + '</h2>\n<p>'
           + orterPerLan[lan].slice().sort((a, b) => perOrt[b].length - perOrt[a].length)
             .map(o => '<a href="https://chansen.nu/jobb/' + ortslug(o) + '.html">' + fly(o) + '</a> ' + perOrt[o].length)
             .join(" · ")
@@ -1849,7 +1951,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
   }
-  for (const url of sommarSidor.concat(extraSidor, erfSidor)) {
+  for (const url of sommarSidor.concat(extraSidor, erfSidor, lanSidor)) {
     karta += '  <url>\n    <loc>' + url + '</loc>\n'
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
