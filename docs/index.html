@@ -1056,8 +1056,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
 <div id="v-mejl" class="dold info">
   <h1 style="font-size:28px;margin-bottom:6px">Få nya jobb till din mejl</h1>
-  <p class="sub">Nya jobb läggs upp varje natt. Vill du ha ett mejl när det kommit
-     fler? Skriv in din adress nedan.</p>
+  <p class="sub">Få ett mejl i veckan med nya jobb med låga ingångskrav.
+     Det är gratis, och du kan avsluta när du vill.</p>
 
   <div id="mejllista" style="margin:22px 0 4px">
     <div id="mejl-plats"></div>
@@ -1947,6 +1947,8 @@ function kort(j){
     if(pd <= 0) taggar += '<span class="tag varm">Ny i dag</span>';
     else if(pd === 1) taggar += '<span class="tag varm">Lades upp i går</span>';
     else if(pd <= 7) extra += '<span class="tag">Lades upp för '+pd+' dagar sedan</span>';
+    // Äldre annonser får datumet, så att man ser hur gammal annonsen är.
+    else extra += '<span class="tag">Lades upp '+svenskDatum(j.publicerad)+'</span>';
   }
 
   var d = dagarKvar(j.sistaAnsokningsdag), dagtext = "";
@@ -2893,7 +2895,8 @@ function laddaMejllista(){
   plats.innerHTML =
     '<a class="btn" href="' + MEJLLISTA_ADRESS + '" target="_blank" '
     + 'rel="noopener" onclick="handelse(\'mejllista-klick\')">Anmäl dig</a>'
-    + '<p class="hint" style="margin-top:12px">Anmälan öppnas i en ny flik.</p>';
+    + '<p class="hint" style="margin-top:12px">Anmälan öppnas i en ny flik. Efter anmälan får du ett mejl '
+    + 'där du bekräftar din adress. Hittar du det inte, kolla skräpposten. Mejlen kommer inte förrän du har bekräftat.</p>';
 }
 
 /* Länk till ett enskilt jobb: chansen.nu/#jobb-31495230
