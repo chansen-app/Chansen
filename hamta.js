@@ -1023,7 +1023,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
     // Anmälan till jobbmejlet. Samma anmälningssida hos Sender som på
     // startsidan, så inga personuppgifter hamnar hos Chansen.
     + '<h2>Få jobbtips varje vecka</h2>\n'
-    + '<p>Varje tisdag kommer ett mejl med nya jobb där arbetsgivaren skriver att det inte krävs '
+    + '<p>Få ett mejl med nya jobb där arbetsgivaren skriver att det inte krävs '
     + 'någon tidigare erfarenhet. Det är gratis, och du kan avsluta när du vill.</p>\n'
     + '<a class="knapp" href="' + MEJLLISTA + '" target="_blank" rel="noopener">Få jobbtips</a>\n'
     + '<h2>Om Chansen</h2>\n'
