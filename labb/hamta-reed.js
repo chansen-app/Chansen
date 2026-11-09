@@ -138,8 +138,10 @@ function rensa(t){
     .replace(/<br\s*\/?>/gi, " ")
     .replace(/<\/p>/gi, " ")
     .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&")
-    .replace(/&pound;/gi, "£").replace(/&[a-z]+;/gi, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&pound;/gi, "£").replace(/&(?!amp;)[a-z]+;/gi, " ")
+    // &amp; sist, så att till exempel &amp;lt; inte städas två gånger
+    .replace(/&amp;/gi, "&")
     .replace(/\s+/g, " ").trim();
 }
 

@@ -75,7 +75,11 @@ function kontrollera(html) {
     return l !== 'href="' + AVSLUTA + '"' && !/^href="https:\/\/chansen\.nu(\/[^"]*)?"$/.test(l);
   });
   if (fel.length) return fel.length + " länkar går inte till chansen.nu.";
-  if (/@/.test(html.replace(/<[^>]*>/g, ""))) return "mejlet innehåller en mejladress.";
+  // Taggar tas bort tills inga finns kvar, så att inget kan gömma sig
+  // i en tagg inuti en annan.
+  let synlig = html, forra;
+  do { forra = synlig; synlig = synlig.replace(/<[^>]*>/g, ""); } while (synlig !== forra);
+  if (/@/.test(synlig)) return "mejlet innehåller en mejladress.";
   return null;
 }
 
