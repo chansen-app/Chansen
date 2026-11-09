@@ -207,10 +207,10 @@ let html = ''
   + 'tidigare erfarenhet, och de lades upp de senaste dagarna. Klicka på "Se jobbet" för att läsa mer och söka.</p>\n'
   + '</td></tr>\n';
 
-/* ENGÅNGSSTYCKE, bara i utskicket 10 november 2026. Kommer inte med
+/* ENGÅNGSSTYCKE, bara i utskicket 9 november 2026. Kommer inte med
    någon annan dag. Ska tas bort efter utskicket.                     */
 const ENGANG = {
-  datum: "2026-11-10",
+  datum: "2026-11-09",
   rubrik: "Veckans nyhet",
   text: "En användare hittade ett jobb på Chansen, sökte det och har nu kallats till intervju. "
     + "Den här sidan finns för just sådana chanser."
