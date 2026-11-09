@@ -909,6 +909,9 @@ async function hamtaJobb() {
    ────────────────────────────────────────────────────────────── */
 
 const MINST_JOBB_FOR_EGEN_SIDA = 5;
+// Anmälningssidan för jobbmejlet hos Sender. Samma som MEJLLISTA_ADRESS
+// i docs/index.html. Byts leverantör måste båda ändras.
+const MEJLLISTA = "https://stats.sender.net/forms/e1w8Oq/view";
 // Adressen till sidan för 16- och 17-åringar, under chansen.nu/jobb/
 const UNGA_SLUG = "jobb-for-16-och-17-aringar";
 const YNGRE_SLUG = "jobb-for-15-aringar";
@@ -1017,6 +1020,12 @@ function skrivOrtssidor(jobb, hamtadTid) {
     + STIL
     + '</head>\n<body>\n<div class="inre">\n'
     + o.kropp
+    // Anmälan till jobbmejlet. Samma anmälningssida hos Sender som på
+    // startsidan, så inga personuppgifter hamnar hos Chansen.
+    + '<h2>Få jobbtips varje vecka</h2>\n'
+    + '<p>Varje tisdag kommer ett mejl med nya jobb där arbetsgivaren skriver att det inte krävs '
+    + 'någon tidigare erfarenhet. Det är gratis, och du kan avsluta när du vill.</p>\n'
+    + '<a class="knapp" href="' + MEJLLISTA + '" target="_blank" rel="noopener">Få jobbtips</a>\n'
     + '<h2>Om Chansen</h2>\n'
     + '<p>Chansen går igenom hela Platsbanken varje natt och sorterar bort allt '
     + 'som kräver utbildning, yrkesbevis eller flera års erfarenhet. Sidan är '
