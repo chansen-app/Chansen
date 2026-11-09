@@ -207,22 +207,6 @@ let html = ''
   + 'tidigare erfarenhet, och de lades upp de senaste dagarna. Klicka på "Se jobbet" för att läsa mer och söka.</p>\n'
   + '</td></tr>\n';
 
-/* ENGÅNGSSTYCKE, bara i utskicket 9 november 2026. Kommer inte med
-   någon annan dag. Ska tas bort efter utskicket.                     */
-const ENGANG = {
-  datum: "2026-11-09",
-  rubrik: "Veckans nyhet",
-  text: "En användare hittade ett jobb på Chansen, sökte det och har nu kallats till intervju. "
-    + "Den här sidan finns för just sådana chanser."
-};
-if (new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Stockholm" }) === ENGANG.datum) {
-  html += LINJE
-    + '<tr><td style="padding:0 40px;' + F + 'text-align:center;color:#201e1d;">\n'
-    + '<p style="margin:0 0 8px;font-size:22px;font-weight:bold;">' + fly(ENGANG.rubrik) + '</p>\n'
-    + '<p style="margin:0;font-size:19px;line-height:1.55;">' + fly(ENGANG.text) + '</p>\n'
-    + '</td></tr>\n';
-}
-
 Object.keys(REGIONER).forEach(function (r) {
   const iRegionen = valda.filter(function (j) { return region(j.lan) === r; });
   if (!iRegionen.length) return;
