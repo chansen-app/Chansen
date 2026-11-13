@@ -580,6 +580,18 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
       box-shadow:0 2px 10px rgba(100,51,18,.10)}
     #snabbval input:focus{outline:none;box-shadow:0 0 0 3px rgba(198,113,57,.25),0 2px 10px rgba(100,51,18,.10)}
     #snabb-fler{font-size:13px;color:#8a7a68;margin-top:10px;text-align:center}
+    /* Frågesidan i samma stil: runda bubblor, rund sökruta, centrerat. */
+    body.jobbforst #v-start h1, body.jobbforst #v-start .sub,
+    body.jobbforst #v-start .hint, body.jobbforst #v-start .avsnitt{text-align:center}
+    body.jobbforst #v-start .fraga{display:block;text-align:center;font-size:16px;font-weight:600;color:#5a4a3c}
+    body.jobbforst #v-start .field{min-height:0}
+    body.jobbforst #v-start .seg{justify-content:center}
+    body.jobbforst #v-start .seg button{background:#fffaf4;border:0;color:#5a4a3c;font-size:14.5px;font-weight:600;
+      padding:11px 18px;box-shadow:0 2px 8px rgba(100,51,18,.10);transition:all .15s}
+    body.jobbforst #v-start .seg button.on{background:#c67139;color:#fff;box-shadow:0 4px 14px rgba(198,113,57,.35)}
+    body.jobbforst #v-start input.txt{border:0;background:#fffaf4;padding:15px 20px;font-size:16px;text-align:center;
+      box-shadow:0 2px 10px rgba(100,51,18,.10)}
+    body.jobbforst #v-start input.txt:focus{outline:none;box-shadow:0 0 0 3px rgba(198,113,57,.25),0 2px 10px rgba(100,51,18,.10)}
   </style>
   <div id="snabbval">
     <div id="snabb-antal" aria-live="polite"></div>
@@ -4763,6 +4775,8 @@ function snabbAlder(a){
   ritaSnabbAlder();
   spara();
   snabbAntal();
+  // Frågesidan ska visa samma ålder om man går dit.
+  try { ritaFragor(); kollaKnappar(); } catch(e){}
   handelse("snabb-alder-" + slug(a));
   visa("alla");
 }
