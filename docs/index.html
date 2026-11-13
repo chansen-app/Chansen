@@ -494,6 +494,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     <label class="fraga" for="ort">Var bor du?</label>
     <input class="txt" id="ort" placeholder="Skriv din kommun" value="" oninput="ortAndrad()">
     <div class="hint">Lämna tomt om du vill se jobb i hela Sverige.</div>
+    <!-- Levande siffra: hur många jobb som finns där man bor, medan man skriver. -->
+    <div id="ort-antal" class="hint" style="font-weight:600;color:var(--accent-800)" aria-live="polite"></div>
   </div>
 
   <div class="field">
@@ -1547,6 +1549,7 @@ function antalIOmrade(omrade){
 // och därför den enda som måste besvaras. Utan den kan man annars gå
 // vidare och få halva listan utan att förstå varför.
 function kollaKnappar(){
+  visaOrtAntal();
   var klar = !!svar.alder;
   ["knapp-visa-1","knapp-visa-2"].forEach(function(id){
     var k = document.getElementById(id);
@@ -1594,8 +1597,43 @@ function ortAndrad(){
   }, 400);
 }
 
+/* Levande siffra under ortsrutan. Räknar på samma sätt som listan:
+   orten man skriver, och åldern om man har valt den. Ingenting sparas,
+   det räknas bara i telefonen. Finns få jobb i kommunen sägs det, så
+   att ingen blir förvånad när listan visar jobb i länet.            */
+function visaOrtAntal(){
+  var el = document.getElementById("ort-antal");
+  if (!el || typeof JOBB === "undefined" || !JOBB.length) return;
+  var falt = document.getElementById("ort");
+  var skrivet = falt ? falt.value.trim() : "";
+  var sok = slat(skrivet);
+  sok = smeknamn[sok] || sok;
+  if (sok.length < 2) sok = "";
+  var harAlder = !!svar.alder, us = underSexton(), ua = underArton();
+  var n = 0;
+  for (var i = 0; i < JOBB.length; i++){
+    var j = JOBB[i];
+    if (sok && slat(j.ort).indexOf(sok) === -1) continue;
+    if (harAlder){
+      if (!matcharAlder(j)) continue;
+      if (us && j.omfattning === "Heltid") continue;
+      if (ua && (j.nattarbete === true || j.land)) continue;
+    }
+    n++;
+  }
+  var plats = sok ? " i " + fly(skrivet.charAt(0).toUpperCase() + skrivet.slice(1)) : " i hela Sverige";
+  var ord = n === 1 ? "1 jobb" : n + " jobb";
+  var text;
+  if (sok && n === 0) text = "Just nu finns inga jobb" + plats + " för din ålder. Då visar vi jobb i närheten.";
+  else if (sok && n < 5) text = "Just nu finns " + ord + plats + (harAlder ? " för din ålder" : "") + ". Vi visar också jobb i närheten.";
+  else text = "Just nu finns " + ord + plats + (harAlder ? " som passar din ålder." : ". Välj din ålder så ser du vilka du kan söka.");
+  if (sok && n === 0 && !harAlder) text = "Just nu finns inga jobb" + plats + ". Då visar vi jobb i närheten.";
+  el.innerHTML = text;
+}
+
 // Ritar bara om områdesknapparna, inte alla frågor.
 function ritaOmraden(){
+  visaOrtAntal();
   var el = document.getElementById("q-omrade");
   if (!el) return;
   el.innerHTML = fragor.omrade.map(function(v){
