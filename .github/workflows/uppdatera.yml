@@ -63,7 +63,7 @@ jobs:
           # sparas här, annars slängs de när körningen är klar.
           # -A tar med sidor som tagits bort, till exempel en ort som
           # inte längre har tillräckligt många jobb.
-          git add -A docs/jobb.json docs/jobb.js docs/jobb docs/sitemap.xml dagens-inlagg.txt docs/sasong.json
+          git add -A docs/jobb.json docs/jobb.js docs/jobb docs/sitemap.xml dagens-inlagg.txt docs/sasong.json docs/sommarbarometer.json
           if git diff --staged --quiet; then
             echo "Inget nytt att spara."
             exit 0

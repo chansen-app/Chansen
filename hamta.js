@@ -582,6 +582,23 @@ function arSommar(j) {
   return !j.land && (j.sommar === true || arSommarjobb(j.titel, j.beskrivning));
 }
 
+/* Samma urval för åldrar som i appen. 16 och 17 år: inget som annonsen
+   säger kräver 18, inget körkortskrav, inget nattarbete och inget
+   utomlands. 13 till 15 år: dessutom bara lätt arbete och bara deltid. */
+const EJ_LATT_ARBETE_ALLA = ["Vård och omsorg", "Industri och produktion", "Lager och logistik", "Städ"];
+function arForUnga(j) {
+  return !j.land && j.minderarigOk === true && j.korkortKravs !== true && j.nattarbete !== true;
+}
+function arForYngre(j) {
+  return arForUnga(j) && EJ_LATT_ARBETE_ALLA.indexOf(j.kategori) === -1 && /deltid/i.test(j.omfattning || "");
+}
+// Sidor per ort och ålder, till exempel jobb-for-16-och-17-aringar-boras.html
+function aldersLank(typ, ort) {
+  return "https://chansen.nu/jobb/" + (typ === "yngre" ? "jobb-for-15-aringar" : "jobb-for-16-och-17-aringar")
+    + (ort ? "-" + ortslug(ort) : "") + ".html";
+}
+const BAROMETER_LANK = "https://chansen.nu/jobb/sommarjobbsbarometern.html";
+
 function arBemanning(a) {
   const ag = ((a.employer && a.employer.name) || "").toLowerCase();
   if (!ag) return false;
@@ -1277,7 +1294,12 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + (lista.filter(arSommar).length >= MINST_JOBB_FOR_EGEN_SIDA
          ? '<a href="https://chansen.nu/jobb/sommarjobb-' + slug + '.html">Sommarjobb i ' + fly(ort) + '</a> · ' : '')
       + '<a href="https://chansen.nu/jobb/sommarjobb.html">Sommarjobb i hela Sverige</a></p>\n'
-      + (unga ? '<h2>Jobb för din ålder</h2>\n<p><a href="https://chansen.nu/jobb/' + UNGA_SLUG
+      + (unga ? '<h2>Jobb för din ålder</h2>\n<p>'
+         + (lista.filter(arForUnga).length >= MINST_JOBB_FOR_EGEN_SIDA
+            ? '<a href="' + aldersLank("unga", ort) + '">Jobb för dig som är 16 eller 17 i ' + fly(ort) + '</a> · ' : '')
+         + (lista.filter(arForYngre).length >= MINST_JOBB_FOR_EGEN_SIDA
+            ? '<a href="' + aldersLank("yngre", ort) + '">Jobb för dig som är 13 till 15 i ' + fly(ort) + '</a> · ' : '')
+         + '<a href="https://chansen.nu/jobb/' + UNGA_SLUG
          + '.html">Jobb för dig som är 16 eller 17</a> · <a href="https://chansen.nu/jobb/' + YNGRE_SLUG
          + '.html">Jobb för dig som är 13 till 15</a></p>\n' : '')
     });
@@ -1588,6 +1610,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
       kropp: '<h1>' + fly("Sommarjobb " + ar + var_) + '</h1>\n'
         + '<p>' + intro
         + 'Vi kan bara läsa det som står i annonsen, så kolla alltid arbetstider och lön med arbetsgivaren.</p>\n'
+        + (ort ? baroRad(ort) : '<p><a href="' + BAROMETER_LANK + '">Sommarjobbsbarometern: sommarjobb per kommun och ålder</a></p>\n')
         + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
         + (n ? '<h2>Sommarjobb' + fly(var_) + ' just nu</h2>\n<ul>\n' + sommarRader(lista, !ort) + '</ul>\n'
             + (n > 40 ? '<p>Och ' + (n - 40) + ' till. <a href="https://chansen.nu/">Se alla i Chansen</a></p>\n' : '')
@@ -1604,8 +1627,185 @@ function skrivOrtssidor(jobb, hamtadTid) {
     }));
     sommarSidor.push(sommarLank(ort));
   }
+
+  /* Sommarjobbsbarometern. Varje natt räknas sommarjobben per kommun:
+     alla, för 16 och 17 år och för 13 till 15 år. Siffrorna sparas i
+     docs/sommarbarometer.json, så att sidan kan visa hur det var för en
+     vecka sedan. Bara antal sparas, inga annonser och inga personer.
+     Filen behåller de senaste 70 dagarna.                            */
+  const baroRakna = lista => [lista.length, lista.filter(arForUnga).length, lista.filter(arForYngre).length];
+  const baroIdag = { "_sverige": baroRakna(sommarjobb) };
+  for (const o of Object.keys(sommarPerOrt)) baroIdag[o] = baroRakna(sommarPerOrt[o]);
+  let baroHistorik = {};
+  try { baroHistorik = JSON.parse(fs.readFileSync("docs/sommarbarometer.json", "utf8")); } catch (e) { /* första natten */ }
+  baroHistorik[datum] = baroIdag;
+  const DAG_MS = 86400000;
+  for (const d of Object.keys(baroHistorik)) {
+    if (new Date(datum) - new Date(d) > 70 * DAG_MS) delete baroHistorik[d];
+  }
+  fs.writeFileSync("docs/sommarbarometer.json", JSON.stringify(baroHistorik) + "\n");
+  // Senaste mätningen som är minst sju dagar gammal.
+  const forraVeckan = Object.keys(baroHistorik).sort()
+    .filter(d => new Date(datum) - new Date(d) >= 7 * DAG_MS).pop();
+  const baroForra = forraVeckan ? baroHistorik[forraVeckan] : null;
+  const forraText = (ort) => {
+    if (!baroForra) return "";
+    const f = baroForra[ort || "_sverige"];
+    const n = f ? f[0] : 0;
+    return " För en vecka sedan " + (n === 1 ? "fanns 1 sommarjobb" : "fanns " + n + " sommarjobb") + (ort ? " här" : "") + ".";
+  };
+  // Raden om barometern på varje ortssida för sommarjobb.
+  const baroRad = ort => {
+    const b = baroIdag[ort];
+    if (!b) return "";
+    return '<p>Sommarjobbsbarometern: ' + jobbOrdU(b[1]) + ' går att söka för dig som är 16 eller 17, och '
+      + jobbOrdU(b[2]) + ' för dig som är 13 till 15.' + fly(forraText(ort)) + ' '
+      + '<a href="' + BAROMETER_LANK + '">Se alla kommuner</a></p>\n';
+  };
+
   sommarsida();
   for (const o of sommarOrter) if (orter.indexOf(o) > -1) sommarsida(o);
+
+  // Sidan för hela Sverige: kommunerna med flest sommarjobb.
+  {
+    const s = baroIdag["_sverige"];
+    const kommuner = Object.keys(sommarPerOrt).sort((a, b) => sommarPerOrt[b].length - sommarPerOrt[a].length || a.localeCompare(b, "sv"));
+    const ortLank = o => sommarOrter.indexOf(o) > -1 && orter.indexOf(o) > -1 ? sommarLank(o)
+      : (orter.indexOf(o) > -1 ? "https://chansen.nu/jobb/" + ortslug(o) + ".html" : "");
+    const rader = kommuner.map(o => {
+      const b = baroIdag[o], l = ortLank(o);
+      const f = baroForra ? ((baroForra[o] || [0])[0]) : null;
+      return '<tr><td>' + (l ? '<a href="' + l + '">' + fly(o) + '</a>' : fly(o)) + '</td>'
+        + '<td>' + b[0] + '</td><td>' + b[1] + '</td><td>' + b[2] + '</td>'
+        + (baroForra ? '<td>' + f + '</td>' : '') + '</tr>\n';
+    }).join("");
+    const fragor = [
+      {
+        f: "Var finns flest sommarjobb just nu?",
+        s: kommuner.length
+          ? "Just nu finns flest i " + kommuner.slice(0, 3).join(", ").replace(/, ([^,]*)$/, " och $1") + ". "
+            + "Listan räknas om varje natt."
+          : "Just nu finns få sommarjobb. De flesta läggs upp mellan januari och mars."
+      },
+      {
+        f: "Hur räknar ni?",
+        s: "Siffrorna gäller annonser i Platsbanken som Chansen bedömer har låga ingångskrav och som är sommarjobb. "
+          + "Det är alltså inte alla jobb i kommunen. Kommunernas egna feriejobb söks oftast direkt hos kommunen "
+          + "och finns sällan med. För 16 och 17 år räknas jobb där annonsen inte säger att man måste vara 18, "
+          + "som inte kräver körkort och inte är på natten. För 13 till 15 år räknas dessutom bara deltid och lätt arbete."
+      },
+      {
+        f: "Får jag använda siffrorna?",
+        s: "Ja, gärna. Skriv att de kommer från Chansens sommarjobbsbarometer, chansen.nu, och vilket datum de gäller."
+      }
+    ];
+    const ld = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": fragor.map(q => ({ "@type": "Question", "name": q.f, "acceptedAnswer": { "@type": "Answer", "text": q.s } }))
+    }).replace(/</g, "\\u003c");
+    fs.writeFileSync("docs/jobb/sommarjobbsbarometern.html", sida({
+      titel: "Sommarjobbsbarometern " + ar + ", sommarjobb per kommun",
+      beskrivning: s[0] + " sommarjobb med låga ingångskrav i Sverige just nu, per kommun och ålder. "
+        + "Räknas om varje natt från Platsbanken.",
+      url: BAROMETER_LANK,
+      ld,
+      kropp: '<style>table{border-collapse:collapse;width:100%;font-size:15px}'
+        + 'th,td{text-align:left;padding:7px 6px;border-bottom:1px solid #d8c8ad}th{font-size:13px;color:#645c50}'
+        + 'td:not(:first-child),th:not(:first-child){text-align:right}</style>\n'
+        + '<h1>' + fly("Sommarjobbsbarometern " + ar) + '</h1>\n'
+        + '<p>Just nu finns ' + s[0] + ' sommarjobb med låga ingångskrav i Sverige. '
+        + s[1] + ' av dem går att söka för dig som är 16 eller 17, och '
+        + s[2] + ' för dig som är 13 till 15.' + fly(forraText()) + '</p>\n'
+        + '<p>Siffrorna räknas om varje natt. De gäller annonser i Platsbanken som Chansen bedömer har låga '
+        + 'ingångskrav, inte alla jobb i Sverige. Uppdaterad ' + datum + '.</p>\n'
+        + '<a class="knapp" href="https://chansen.nu/">Visa jobben i Chansen</a>\n'
+        + (kommuner.length
+          ? '<h2>Kommunerna med flest sommarjobb</h2>\n'
+            + '<table>\n<tr><th>Kommun</th><th>Sommarjobb</th><th>För 16–17</th><th>För 13–15</th>'
+            + (baroForra ? '<th>För en vecka sedan</th>' : '') + '</tr>\n' + rader + '</table>\n'
+          : '<p>Just nu finns få sommarjobb. De flesta läggs upp mellan januari och mars.</p>\n')
+        + '<h2>Vanliga frågor</h2>\n'
+        + fragor.map(q => '<h3>' + fly(q.f) + '</h3>\n<p>' + fly(q.s) + '</p>\n').join("")
+        + '<h2>Fler jobb</h2>\n<p><a href="' + sommarLank() + '">Sommarjobb i hela Sverige</a> · '
+        + '<a href="https://chansen.nu/jobb/' + UNGA_SLUG + '.html">Jobb för dig som är 16 eller 17</a> · '
+        + '<a href="https://chansen.nu/jobb/' + YNGRE_SLUG + '.html">Jobb för dig som är 13 till 15</a> · '
+        + '<a href="https://chansen.nu/jobb/">Alla orter</a></p>\n'
+    }));
+    sommarSidor.push(BAROMETER_LANK);
+  }
+
+  /* Sidor per ort och ålder, till exempel "Jobb för dig som är 16 eller
+     17 i Borås". Bara orter som har en egen sida och minst fem jobb för
+     åldern. Sidan jämför med hur många jobb som finns för den som är 18,
+     så att reglerna blir konkreta.                                    */
+  const ortAldersidor = [];
+  for (const ort of orter) {
+    const alla = perOrt[ort].filter(j => !j.land);
+    for (const typ of ["unga", "yngre"]) {
+      const urval = alla.filter(typ === "unga" ? arForUnga : arForYngre).sort(sortera);
+      if (urval.length < MINST_JOBB_FOR_EGEN_SIDA) continue;
+      const alder = typ === "unga" ? "16 eller 17" : "13 till 15";
+      const h1 = "Jobb för dig som är " + alder + " i " + ort;
+      const n = urval.length;
+      const fragor = [
+        {
+          f: "Hur många jobb finns för " + (typ === "unga" ? "16-åringar" : "15-åringar") + " i " + ort + "?",
+          s: "Just nu " + jobbOrdU(n) + " med låga ingångskrav. För den som är 18 eller äldre finns " + jobbOrdU(alla.length)
+            + " i " + ort + ". Siffrorna räknas om varje natt."
+        },
+        typ === "unga"
+          ? { f: "Får man jobba på kvällen när man är 16?", s: "Som huvudregel inte mellan klockan 22 och 06, och aldrig mellan midnatt och klockan 05." }
+          : { f: "Hur mycket får en 15-åring jobba?", s: "Under en skolvecka högst 12 timmar, och högst 2 timmar en skoldag. Inte mellan klockan 20 och 06." },
+        FORALDER_FRAGA
+      ];
+      const ld = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": fragor.map(q => ({ "@type": "Question", "name": q.f, "acceptedAnswer": { "@type": "Answer", "text": q.s } }))
+      }).replace(/</g, "\\u003c");
+      let rader = "";
+      for (const j of urval.slice(0, 40)) {
+        const id = j.id || (String(j.lank).match(/\/(\d+)$/) || [])[1] || "";
+        rader += '    <li>\n'
+          + '      <a href="https://chansen.nu/#jobb-' + id + '">' + fly(j.titel) + '</a>\n'
+          + '      <p>' + fly(j.arbetsgivare) + (j.omfattning ? ' · ' + fly(j.omfattning) : '')
+          + (j.kategori ? ' · ' + fly(j.kategori) : '') + '</p>\n'
+          + (j.beskrivning ? '      <p>' + fly(j.beskrivning.slice(0, 180)) + '</p>\n' : '')
+          + '    </li>\n';
+      }
+      const url = aldersLank(typ, ort);
+      fs.writeFileSync("docs/jobb/" + url.split("/").pop(), sida({
+        titel: h1 + ", " + n + " jobb med låga krav",
+        beskrivning: n + " jobb med låga ingångskrav i " + ort + " som går att söka när du är " + alder
+          + ". Regler för din ålder och vanliga frågor. Uppdateras varje natt.",
+        url,
+        ld,
+        kropp: '<h1>' + fly(h1) + '</h1>\n'
+          + '<p>Just nu finns ' + jobbOrdU(n) + ' med låga ingångskrav i ' + fly(ort) + ' som går att söka för dig som är '
+          + alder + '. När du har fyllt 18 finns ' + jobbOrdU(alla.length) + ' i ' + fly(ort) + '. '
+          + 'Vi kan bara läsa det som står i annonsen, så kolla alltid arbetsuppgifter och arbetstider med arbetsgivaren.</p>\n'
+          + '<a class="knapp" href="https://chansen.nu/?ort=' + encodeURIComponent(ort) + '">Visa jobben i Chansen</a>\n'
+          + '<h2>Det här gäller i din ålder</h2>\n'
+          + (typ === "unga"
+            ? punkter(["Högst 8 timmar per dag och 40 timmar per vecka",
+                "Som huvudregel ingen arbetstid mellan klockan 22 och 06",
+                "Din vårdnadshavare måste godkänna att du tar jobbet"])
+            : punkter(["Bara lätt arbete, och högst 12 timmar en vecka med skola",
+                "Ingen arbetstid mellan klockan 20 och 06",
+                "Din vårdnadshavare måste godkänna att du tar jobbet"]))
+          + '<p><a href="https://chansen.nu/jobb/' + (typ === "unga" ? UNGA_SLUG : YNGRE_SLUG) + '.html">Alla regler för din ålder</a></p>\n'
+          + '<h2>Jobb du kan söka just nu</h2>\n<ul>\n' + rader + '</ul>\n'
+          + (n > 40 ? '<p>Och ' + (n - 40) + ' till. <a href="https://chansen.nu/?ort=' + encodeURIComponent(ort) + '">Se alla i Chansen</a></p>\n' : '')
+          + '<h2>Vanliga frågor</h2>\n'
+          + fragor.map(q => '<h3>' + fly(q.f) + '</h3>\n<p>' + fly(q.s) + '</p>\n').join("")
+          + '<h2>Fler jobb</h2>\n<p><a href="https://chansen.nu/jobb/' + ortslug(ort) + '.html">Alla jobb i ' + fly(ort) + '</a> · '
+          + '<a href="' + BAROMETER_LANK + '">Sommarjobbsbarometern</a> · '
+          + '<a href="https://chansen.nu/jobb/' + (typ === "unga" ? UNGA_SLUG : YNGRE_SLUG) + '.html">Jobb för din ålder i hela Sverige</a></p>\n'
+      }));
+      ortAldersidor.push(url);
+    }
+  }
 
   /* Sidor om extrajobb. "Extrajobb + ort" är en av de vanligaste
      sökningarna bland unga och studenter. Här räknas alla jobb på deltid,
@@ -1956,7 +2156,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
   }
-  for (const url of sommarSidor.concat(extraSidor, erfSidor, lanSidor)) {
+  for (const url of sommarSidor.concat(extraSidor, erfSidor, lanSidor, ortAldersidor)) {
     karta += '  <url>\n    <loc>' + url + '</loc>\n'
       + '    <lastmod>' + datum + '</lastmod>\n'
       + '    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>\n';
