@@ -556,6 +556,42 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     <button class="lank" onclick="visaVy('start')">Ändra</button>
   </div>
 
+  <!-- Jobben först (test från 13 november 2026). Siffran överst, sedan
+       ålder och ort. Styrs av JOBB_FORST längre ned. Är den false visas
+       den här rutan inte, och sidan fungerar som förut. -->
+  <style>
+    body.jobbforst #hero, body.jobbforst #profil{display:none}
+    #snabbval{display:none;margin:8px 0 22px}
+    body.jobbforst #snabbval{display:block}
+    #snabb-antal{display:flex;align-items:center;justify-content:center;gap:14px;margin:4px 0 24px}
+    #snabb-antal .tal{font-family:Caprasimo,serif;font-size:52px;line-height:1;color:#c67139}
+    #snabb-antal b{display:block;font-size:17px;color:#201e1d;line-height:1.3}
+    #snabb-antal span{display:block;font-size:13px;color:#7a6a58;margin-top:2px;line-height:1.4;max-width:15em}
+    #snabbval .fraga{font-size:15px;font-weight:600;color:#5a4a3c;text-align:center;margin:0 0 10px}
+    #snabbval .bubblor{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+    #snabbval .bubblor button{border:0;border-radius:999px;padding:11px 20px;background:#fffaf4;
+      font:inherit;font-size:15px;font-weight:600;color:#5a4a3c;cursor:pointer;
+      box-shadow:0 2px 8px rgba(100,51,18,.10);transition:all .15s}
+    #snabbval .bubblor button.on{background:#c67139;color:#fff;box-shadow:0 4px 14px rgba(198,113,57,.35)}
+    #snabbval .sok{position:relative}
+    #snabbval .sok svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#a8957f}
+    #snabbval input{width:100%;box-sizing:border-box;border:0;border-radius:999px;
+      padding:15px 20px 15px 46px;font:inherit;font-size:16px;background:#fffaf4;color:#201e1d;
+      box-shadow:0 2px 10px rgba(100,51,18,.10)}
+    #snabbval input:focus{outline:none;box-shadow:0 0 0 3px rgba(198,113,57,.25),0 2px 10px rgba(100,51,18,.10)}
+    #snabb-fler{font-size:13px;color:#8a7a68;margin-top:10px;text-align:center}
+  </style>
+  <div id="snabbval">
+    <div id="snabb-antal" aria-live="polite"></div>
+    <div class="fraga">Hur gammal är du?</div>
+    <div class="bubblor" id="snabb-alder" role="group" aria-label="Hur gammal är du?"></div>
+    <div class="sok">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="snabb-ort" placeholder="Var bor du?" oninput="snabbOrt()" autocomplete="off" aria-label="Var bor du?">
+    </div>
+    <div id="snabb-fler"><button class="lank" onclick="visaVy('start')">Fler val, till exempel utbildning och arbetstider</button></div>
+  </div>
+
   <!-- Stora talet överst. Samma uttryck som affischerna, utan att lägga
        till några extra sidor eller steg. -->
   <div id="hero">
@@ -4682,8 +4718,92 @@ try {
   if (h) h.textContent = RUBRIKER[RUBRIK_VARIANT];
 })();
 
+/* Jobben först. Test från 13 november 2026: nya besökare landar direkt
+   på jobblistan, med siffran, åldern och orten högst upp. Tills man valt
+   ålder visas bara jobb som alla får ta. Sätt till false för att gå
+   tillbaka till startsidan med frågor.                               */
+var JOBB_FORST = true;
+
+var SNABB_ALDRAR = [["Under 16", "Under 16"], ["16 till 17", "16–17"], ["18 eller äldre", "18+"]];
+function ritaSnabbAlder(){
+  var el = document.getElementById("snabb-alder");
+  if (!el) return;
+  el.innerHTML = SNABB_ALDRAR.map(function(a){
+    return '<button class="' + (svar.alder === a[0] ? "on" : "") + '" aria-pressed="' + (svar.alder === a[0])
+      + '" onclick="snabbAlder(\'' + a[0] + '\')">' + a[1] + '</button>';
+  }).join("");
+}
+function storBokstav(v){ v = (v || "").trim(); return v ? v.charAt(0).toUpperCase() + v.slice(1) : ""; }
+// Siffran räknas på samma sätt som listan, så att de alltid stämmer.
+function snabbAntal(){
+  var el = document.getElementById("snabb-antal");
+  if (!el || typeof JOBB === "undefined" || !JOBB.length) return;
+  var snabb = document.getElementById("snabb-ort");
+  var skrivet = snabb ? snabb.value.trim() : "";
+  var sok = slat(skrivet);
+  sok = smeknamn[sok] || sok;
+  if (sok.length < 2) sok = "";
+  var harAlder = !!svar.alder, us = underSexton(), ua = underArton();
+  var n = 0;
+  for (var i = 0; i < JOBB.length; i++){
+    var j = JOBB[i];
+    if (sok && slat(j.ort).indexOf(sok) === -1) continue;
+    if (harAlder && !matcharAlder(j)) continue;
+    if (us && j.omfattning === "Heltid") continue;
+    if (ua && (j.nattarbete === true || j.land)) continue;
+    n++;
+  }
+  var plats = sok ? storBokstav(skrivet) : "hela Sverige";
+  var under = harAlder ? "som passar din ålder" : "som alla får söka. Välj din ålder för att se fler";
+  if (sok && n < 5) under += ". Vi visar också jobb i närheten";
+  el.innerHTML = '<div class="tal">' + n + '</div><div><b>jobb i ' + fly(plats) + '</b><span>' + under + '</span></div>';
+}
+function snabbAlder(a){
+  svar.alder = a;
+  ritaSnabbAlder();
+  spara();
+  snabbAntal();
+  handelse("snabb-alder-" + slug(a));
+  visa("alla");
+}
+var snabbTimer = null;
+function snabbOrt(){
+  if (snabbTimer) clearTimeout(snabbTimer);
+  snabbTimer = setTimeout(function(){
+    var snabb = document.getElementById("snabb-ort");
+    var start = document.getElementById("ort");
+    if (start && snabb) start.value = storBokstav(snabb.value);
+    spara();
+    antalCache = null;
+    snabbAntal();
+    visa("alla");
+  }, 500);
+}
+function startaSnabbval(){
+  document.body.classList.add("jobbforst");
+  var snabb = document.getElementById("snabb-ort");
+  if (snabb) snabb.value = svar.ort || "";
+  ritaSnabbAlder();
+  snabbAntal();
+}
+
+// Har man ändrat svaren på frågesidan ska rutan högst upp visa samma sak.
+var startaListaUtanSnabbval = startaLista;
+startaLista = function(){
+  startaListaUtanSnabbval();
+  if (!JOBB_FORST) return;
+  var snabb = document.getElementById("snabb-ort");
+  if (snabb) snabb.value = svar.ort || "";
+  ritaSnabbAlder();
+  snabbAntal();
+};
+
 if (kollaAdress()) {
   // arbetsgivare kom via direktlänk
+} else if (JOBB_FORST) {
+  startaSnabbval();
+  startaLista();
+  if (!svar.alder) handelse("jobbforst-ny");
 } else if (svar.alder) { startaLista(); } else {
   visaVy("start");
   RUBRIK_VISAD = true;
