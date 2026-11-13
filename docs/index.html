@@ -3101,10 +3101,26 @@ function delaChansen(){
   delaText("Chansen", "Chansen visar jobb med låga krav, som du faktiskt kan söka. Gratis.", CHANSEN_URL);
 }
 
+/* Den som får ett delat jobb hamnar på jobbet hos Chansen, inte direkt
+   i Platsbanken. Där finns knappen till annonsen, och under den alla
+   andra jobb. Orten fylls i, så att listan visar jobb nära jobbet.
+   Åldern fylls inte i, eftersom kompisen kan vara en annan ålder och
+   ska svara själv. ?fran=dela visar i statistiken hur många som kommer
+   via delade jobb. Inget om den som delar följer med.              */
+function delningslank(j){
+  var id = j.id || (String(j.lank || "").match(/(\d{5,})/) || [])[1];
+  if (!id) return CHANSEN_URL + "?fran=dela";
+  var ort = j.ort && !j.land ? "ort=" + encodeURIComponent(j.ort) + "&" : "";
+  return CHANSEN_URL + "?" + ort + "fran=dela#jobb-" + encodeURIComponent(id);
+}
 function delaJobb(lank){
   var j = hittaJobb(decodeURI(lank));
   if (!j) { delaChansen(); return; }
-  delaText(j.titel, j.titel + " hos " + j.arbetsgivare + (j.ort ? " i " + j.ort : "") + ". Hittat via Chansen: " + CHANSEN_URL, sakerLank(j.lank) || CHANSEN_URL);
+  handelse("delade-jobb");
+  delaText(j.titel,
+    "Kolla det här jobbet: " + j.titel + " hos " + j.arbetsgivare + (j.ort ? " i " + j.ort : "")
+      + ". På Chansen finns fler jobb med låga ingångskrav nära dig.",
+    delningslank(j));
 }
 
 // ══════════════ CV ══════════════
