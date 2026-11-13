@@ -606,6 +606,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
       behöver den.
     </div>
     <button class="btn" onclick="delaChansen()">Skicka vidare</button>
+    <!-- För föräldrar som letar åt sitt barn. Länken är märkt p2, så att
+         det syns i statistiken om den används. Se privat/markningar.txt. -->
+    <div style="margin-top:16px;font-size:14px;color:var(--n-700)">
+      Letar du åt ditt barn?
+      <button class="lank" onclick="delaTillBarn()">Skicka jobben till hen</button>
+    </div>
   </div>
 
   <!-- Låg bara på Om-sidan förut, dit nästan ingen går. Här syns den när
@@ -3107,6 +3113,17 @@ function delaChansen(){
    Åldern fylls inte i, eftersom kompisen kan vara en annan ålder och
    ska svara själv. ?fran=dela visar i statistiken hur många som kommer
    via delade jobb. Inget om den som delar följer med.              */
+/* Föräldern skickar jobben till sitt barn. Orten följer med, åldern
+   inte, eftersom barnet ska svara själv. Märkt p2 i statistiken. */
+function delaTillBarn(){
+  handelse("delade-till-barn");
+  var ort = svar.ort ? svar.ort.trim() : "";
+  var url = CHANSEN_URL + "?" + (ort ? "ort=" + encodeURIComponent(ort) + "&" : "") + "fran=p2";
+  delaText("Jobb till dig",
+    "Här är jobb med låga ingångskrav" + (ort ? " i " + ort : "") + ". Välj din ålder, så ser du jobben som passar dig.",
+    url);
+}
+
 function delningslank(j){
   var id = j.id || (String(j.lank || "").match(/(\d{5,})/) || [])[1];
   if (!id) return CHANSEN_URL + "?fran=dela";
