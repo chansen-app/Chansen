@@ -860,10 +860,15 @@ async function hamtaJobb() {
   // Uppgifter som sidan inte använder tas bort ur jobb.js, som mobilen
   // laddar ner. De finns kvar i jobb.json, om de behövs senare.
   const BARA_I_JSON = ["nyborjarskal"];
+  // Ungefärlig mittpunkt för varje kommun, så att sidan kan visa ungefär
+  // hur långt bort ett jobb ligger. Görs med kommunpos.js.
+  let kommunPos = {};
+  try { kommunPos = JSON.parse(fs.readFileSync("docs/kommunpos.json", "utf8")); } catch (e) { /* utan avstånd */ }
   fs.writeFileSync("docs/jobb.js",
     "const UPPDATERAD = \"" + hamtadTid + "\";\n" +
     "const JOBB_HAMTAD = UPPDATERAD;\n" +
     "const KOMMUNLAN = " + JSON.stringify(kommunLan) + ";\n" +
+    "const KOMMUNPOS = " + JSON.stringify(kommunPos) + ";\n" +
     "const JOBB = " + JSON.stringify(jobb, (k, v) => BARA_I_JSON.includes(k) ? undefined : v) + ";");
 
   skrivOrtssidor(jobb, hamtadTid);
