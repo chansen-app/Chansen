@@ -2150,12 +2150,12 @@ function kort(j){
     '<div class="knapprad">'+
       // j.lank och inte lank, eftersom lank kan vara en mejladress för
       // jobb där man söker via mejl. Jobbet letas upp med j.lank.
-      '<button class="mini" onclick="oppnaAnsokan(\''+encodeURI(j.lank)+'\')">Skriv ansökan</button>'+
-      '<button class="mini" onclick="delaJobb(\''+encodeURI(j.lank)+'\')">Dela</button>'+
+      '<button class="mini" onclick="oppnaAnsokan(\''+jsArg(encodeURI(j.lank))+'\')">Skriv ansökan</button>'+
+      '<button class="mini" onclick="delaJobb(\''+jsArg(encodeURI(j.lank))+'\')">Dela</button>'+
       statusknappar(j.lank) +
       // Påminn mig bara när det är minst två dagar kvar att söka.
       (dagarKvar(j.sistaAnsokningsdag) >= 2
-        ? '<button class="mini paminn" onclick="paminnMig(\''+encodeURI(j.lank)+'\')">Påminn mig</button>' : '') +
+        ? '<button class="mini paminn" onclick="paminnMig(\''+jsArg(encodeURI(j.lank))+'\')">Påminn mig</button>' : '') +
       '</div>' +
       '<button class="lank borta" onclick="annonsBorta(\''+fly(annonsId)+'\', this)">Finns annonsen inte längre? Säg till</button>' +
       '</div>';
@@ -2176,8 +2176,8 @@ function statusknappar(lank){
 function statusknapparInre(lank){
   var nu = minaJobb[lank] ? minaJobb[lank].lage : null;
   var ut = "";
-  ut += '<button class="mini'+(nu === "sparad" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sparad" ? "bort" : "sparad")+'\')">'+(nu === "sparad" ? "Sparad" : "Spara")+'</button>';
-  ut += '<button class="mini'+(nu === "sokt" || nu === "svar" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sokt" ? "bort" : "sokt")+'\')">'+(nu === "sokt" || nu === "svar" ? "Sökt" : "Jag har sökt")+'</button>';
+  ut += '<button class="mini'+(nu === "sparad" ? " on" : "")+'" onclick="settStatus(\''+jsArg(lank)+'\',\''+(nu === "sparad" ? "bort" : "sparad")+'\')">'+(nu === "sparad" ? "Sparad" : "Spara")+'</button>';
+  ut += '<button class="mini'+(nu === "sokt" || nu === "svar" ? " on" : "")+'" onclick="settStatus(\''+jsArg(lank)+'\',\''+(nu === "sokt" ? "bort" : "sokt")+'\')">'+(nu === "sokt" || nu === "svar" ? "Sökt" : "Jag har sökt")+'</button>';
   return ut;
 }
 
@@ -2201,13 +2201,13 @@ function minirad(lank, visaSvarsknapp){
   }
   var knappar = "";
   if (s.lage === "sparad"){
-    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'sokt\')">Jag har sökt</button>'+
-              '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+    knappar = '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'sokt\')">Jag har sökt</button>'+
+              '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'bort\')">Ta bort</button>';
   } else if (s.lage === "sokt"){
-    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'svar\')">Fick svar</button>'+
-              '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+    knappar = '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'svar\')">Fick svar</button>'+
+              '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'bort\')">Ta bort</button>';
   } else {
-    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+    knappar = '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'bort\')">Ta bort</button>';
   }
   return '<div class="card">'+pafyll+
     '<div class="titel">'+titel+'</div>'+
@@ -3624,6 +3624,14 @@ var CV_MALLAR = [
 var valdMall = "enkel";
 try { valdMall = localStorage.getItem("chansen-cv-mall") || "enkel"; } catch(e){}
 
+// Gör text säker att lägga inuti '...' i ett onclick. Alla tecken utom
+// vanliga bokstäver, siffror och några få till skrivs som \uXXXX, så att
+// varken citattecken eller & finns kvar som kan smyga in kod.
+function jsArg(s){
+  return String(s == null ? "" : s).replace(/[^A-Za-z0-9\/:._~?=%+-]/g, function(c){
+    return "\\u" + ("000" + c.charCodeAt(0).toString(16)).slice(-4);
+  });
+}
 function sakerLank(u){
   var t = String(u == null ? "" : u).trim();
   // Bara vanliga tecken. Citattecken och liknande i en länk kan användas

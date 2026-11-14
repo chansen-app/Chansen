@@ -1718,7 +1718,7 @@ function kort(j){
      är förvirrande. Finns ett ansökningssätt angivet används det i
      stället, och knappen får en text som säger vad som händer.      */
   var knapptext = "Se annonsen";
-  if (j.ansok && /^(https:|mailto:)/i.test(j.ansok)) {
+  if (j.ansok && /^(https:|mailto:)[^\s"'<>\\`]+$/i.test(j.ansok)) {
     lank = j.ansok;
     knapptext = j.knapptext || (/^mailto:/i.test(j.ansok) ? "Ansök via mejl" : "Till ansökan");
   } else if (j.egen) {
@@ -1767,16 +1767,16 @@ function kort(j){
     '<div class="rad"><a class="btn liten" href="'+fly(lank)+'" target="_blank" rel="noopener noreferrer nofollow" onclick="handelse(\'klick-annons\')">'+knapptext+'</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
     '<div class="knapprad">'+
-      '<button class="mini" onclick="oppnaAnsokan(\''+encodeURI(lank)+'\')">Skriv ansökan</button>'+
-      '<button class="mini" onclick="delaJobb(\''+encodeURI(lank)+'\')">Dela</button>'+
+      '<button class="mini" onclick="oppnaAnsokan(\''+jsArg(encodeURI(lank))+'\')">Skriv ansökan</button>'+
+      '<button class="mini" onclick="delaJobb(\''+jsArg(encodeURI(lank))+'\')">Dela</button>'+
       statusknappar(j.lank) +'</div></div>';
 }
 
 function statusknappar(lank){
   var nu = minaJobb[lank] ? minaJobb[lank].lage : null;
   var ut = "";
-  ut += '<button class="mini'+(nu === "sparad" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sparad" ? "bort" : "sparad")+'\')">'+(nu === "sparad" ? "Sparad" : "Spara")+'</button>';
-  ut += '<button class="mini'+(nu === "sokt" || nu === "svar" ? " on" : "")+'" onclick="settStatus(\''+lank+'\',\''+(nu === "sokt" ? "bort" : "sokt")+'\')">'+(nu === "sokt" || nu === "svar" ? "Sökt" : "Jag har sökt")+'</button>';
+  ut += '<button class="mini'+(nu === "sparad" ? " on" : "")+'" onclick="settStatus(\''+jsArg(lank)+'\',\''+(nu === "sparad" ? "bort" : "sparad")+'\')">'+(nu === "sparad" ? "Sparad" : "Spara")+'</button>';
+  ut += '<button class="mini'+(nu === "sokt" || nu === "svar" ? " on" : "")+'" onclick="settStatus(\''+jsArg(lank)+'\',\''+(nu === "sokt" ? "bort" : "sokt")+'\')">'+(nu === "sokt" || nu === "svar" ? "Sökt" : "Jag har sökt")+'</button>';
   return ut;
 }
 
@@ -1800,13 +1800,13 @@ function minirad(lank, visaSvarsknapp){
   }
   var knappar = "";
   if (s.lage === "sparad"){
-    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'sokt\')">Jag har sökt</button>'+
-              '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+    knappar = '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'sokt\')">Jag har sökt</button>'+
+              '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'bort\')">Ta bort</button>';
   } else if (s.lage === "sokt"){
-    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'svar\')">Fick svar</button>'+
-              '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+    knappar = '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'svar\')">Fick svar</button>'+
+              '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'bort\')">Ta bort</button>';
   } else {
-    knappar = '<button class="mini" onclick="settStatus(\''+lank+'\',\'bort\')">Ta bort</button>';
+    knappar = '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'bort\')">Ta bort</button>';
   }
   return '<div class="card">'+pafyll+
     '<div class="titel">'+titel+'</div>'+
@@ -2942,6 +2942,14 @@ var CV_MALLAR = [
 var valdMall = "enkel";
 try { valdMall = localStorage.getItem("chansen-cv-mall") || "enkel"; } catch(e){}
 
+// Gör text säker att lägga inuti '...' i ett onclick. Alla tecken utom
+// vanliga bokstäver, siffror och några få till skrivs som \uXXXX, så att
+// varken citattecken eller & finns kvar som kan smyga in kod.
+function jsArg(s){
+  return String(s == null ? "" : s).replace(/[^A-Za-z0-9\/:._~?=%+-]/g, function(c){
+    return "\\u" + ("000" + c.charCodeAt(0).toString(16)).slice(-4);
+  });
+}
 function sakerLank(u){
   var t = String(u == null ? "" : u).trim();
   return /^https?:\/\/[^\s"'<>\\`]+$/i.test(t) ? t : "";
