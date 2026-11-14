@@ -591,7 +591,9 @@ function arForUnga(j) {
 }
 function arForYngre(j) {
   // Kassa och kök räknas inte som lätt arbete för 13 till 15 år.
-  return arForUnga(j) && EJ_LATT_ARBETE_ALLA.indexOf(j.kategori) === -1 && /deltid/i.test(j.omfattning || "")
+  // Arbetsgivarnas egna annonser svarar bara på "under 18" och visas
+  // därför inte på sidorna för 13 till 15 år, precis som i appen.
+  return arForUnga(j) && !j.egen && EJ_LATT_ARBETE_ALLA.indexOf(j.kategori) === -1 && /deltid/i.test(j.omfattning || "")
     && !/kassa|kassör|kök|kock|fritös|frityr|grill|pommes/i.test((j.titel || "") + " " + (j.beskrivning || ""));
 }
 // Sidor per ort och ålder, till exempel jobb-for-16-och-17-aringar-boras.html

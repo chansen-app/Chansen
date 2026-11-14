@@ -777,8 +777,10 @@ function ritaSynpunkter_(d){
                     ? '<button class="btn mejl" data-mejl="' + fly(o["Mejl"])
                       + '" onclick="svaraSynpunkt(this.dataset.mejl)">Svara</button>'
                     : "")
-                + '<button class="btn bort" onclick="raderaSynpunkt(' + o._rad
-                + ')">Ta bort</button>'
+                // Tidpunkten följer med så att rätt rad raderas, även om
+                // listan i kalkylarket hunnit ändras sedan den hämtades.
+                + '<button class="btn bort" data-rad="' + o._rad + '" data-tid="' + fly(String(o["Tidpunkt"] || ""))
+                + '" onclick="raderaSynpunkt(this.dataset.rad, this.dataset.tid)">Ta bort</button>'
                 + "</div>"
               : "")
           + "</div>";
@@ -787,10 +789,10 @@ function ritaSynpunkter_(d){
 
 /* Synpunkten raderas helt, inte bara döljs. Den kan innehålla en
    mejladress, och behöver inte sparas när den är läst och åtgärdad. */
-function raderaSynpunkt(rad){
+function raderaSynpunkt(rad, tid){
   if (!confirm("Ta bort den här synpunkten?\n\nDen försvinner helt och går inte att få tillbaka.")) return;
   fetch(API + "?vad=radera-synpunkt&biljett=" + encodeURIComponent(biljett)
-      + "&rad=" + encodeURIComponent(rad))
+      + "&rad=" + encodeURIComponent(rad) + "&tid=" + encodeURIComponent(tid || ""))
     .then(function(r){ return r.json(); })
     .then(function(d){
       if (d && d.ok) { synData = null; visaSynpunkter(); }
@@ -1704,7 +1706,7 @@ function ritaStatistik(){
       }).join("") + "</tbody></table></details>";
 
   html += '<p class="stat-not">Besöken räknas av Cloudflare och är uppskattningar, knapptrycken av GoatCounter. '
-    + "Bara summor per dag sparas, ingenting om enskilda besökare. Uppdateras varje förmiddag.</p>";
+    + "GoatCounter sparar händelser utan IP-adress, och här visas bara summor per dag. Uppdateras varje förmiddag.</p>";
 
   el.innerHTML = html;
 
