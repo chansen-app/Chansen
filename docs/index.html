@@ -2088,7 +2088,7 @@ function kort(j){
      är förvirrande. Finns ett ansökningssätt angivet används det i
      stället, och knappen får en text som säger vad som händer.      */
   var knapptext = "Se annonsen";
-  if (j.ansok && /^(https:|mailto:)/i.test(j.ansok)) {
+  if (j.ansok && /^(https:|mailto:)[^\s"'<>\\`]+$/i.test(j.ansok)) {
     lank = j.ansok;
     knapptext = j.knapptext || (/^mailto:/i.test(j.ansok) ? "Ansök via mejl" : "Till ansökan");
   } else if (j.egen) {
@@ -2145,7 +2145,7 @@ function kort(j){
     (j.beskrivning ? '<div class="beskrivning">'+fly(j.beskrivning)+'</div>' : '')+
     '<div class="taggar">'+taggar+'</div>'+
     (extra ? '<div class="taggar extra">'+extra+'</div>' : '')+
-    '<div class="rad"><a class="btn liten" href="'+lank+'" target="_blank" rel="noopener noreferrer nofollow" data-annons="'+fly(annonsId)+'" data-namn="'+annonsNamn+'" onclick="klickAnnons(this)">'+knapptext+'</a>'+
+    '<div class="rad"><a class="btn liten" href="'+fly(lank)+'" target="_blank" rel="noopener noreferrer nofollow" data-annons="'+fly(annonsId)+'" data-namn="'+annonsNamn+'" onclick="klickAnnons(this)">'+knapptext+'</a>'+
     '<span class="dagar">'+dagtext+'</span></div>'+
     '<div class="knapprad">'+
       // j.lank och inte lank, eftersom lank kan vara en mejladress för
@@ -2489,6 +2489,9 @@ function hamtaBladjobb(){
 (function(){
   var nu = new Date();
   for (var i = JOBB.length - 1; i >= 0; i--){
+    // Ett jobb med en konstig länk visas inte alls. Länken används i
+    // knapparna, och citattecken i den skulle kunna köra kod.
+    if (!sakerLank(JOBB[i].lank)) { JOBB.splice(i, 1); continue; }
     var sista = JOBB[i].sistaAnsokningsdag;
     if (!sista) continue;
     var d = new Date(sista);
@@ -2807,8 +2810,8 @@ function agMejlText(d){
     '  utdrag: "' + (d.utdrag === "Ja" ? "kravs" : "framgar inte") + '",',
     '  minderarigOk: ' + (d.minder === "Nej" ? "false" : "true") + ',',
     '  poang: 9,',
-    '  lank: "' + d.lank + '",',
-    '  sistaAnsokningsdag: "' + d.sista + '"',
+    '  lank: ' + JSON.stringify(String(d.lank || "")) + ',',
+    '  sistaAnsokningsdag: ' + JSON.stringify(String(d.sista || "")),
     "},"
   ].join("\n");
 
@@ -3623,7 +3626,9 @@ try { valdMall = localStorage.getItem("chansen-cv-mall") || "enkel"; } catch(e){
 
 function sakerLank(u){
   var t = String(u == null ? "" : u).trim();
-  return /^https?:\/\//i.test(t) ? t : "";
+  // Bara vanliga tecken. Citattecken och liknande i en länk kan användas
+  // för att smyga in kod på sidan, så en sådan länk godtas inte alls.
+  return /^https?:\/\/[^\s"'<>\\`]+$/i.test(t) ? t : "";
 }
 
 function fly(t){

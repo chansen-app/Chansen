@@ -275,7 +275,7 @@ var valdaLander = [];   // tom betyder alla länder
 function fly(t){
   return String(t == null ? "" : t)
     .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 
 /* ── inloggning ─────────────────────────────────────────────────── */
@@ -771,8 +771,10 @@ function ritaSynpunkter_(d){
           + (roll === "admin"
               ? '<div class="knappar">'
                 + (o["Mejl"]
-                    ? '<button class="btn mejl" onclick="svaraSynpunkt(\'' + fly(o["Mejl"])
-                      + '\')">Svara</button>'
+                    // Mejladressen ligger som data på knappen, aldrig inne i
+                    // koden. Annars kunde någon skicka in en "adress" som kör kod.
+                    ? '<button class="btn mejl" data-mejl="' + fly(o["Mejl"])
+                      + '" onclick="svaraSynpunkt(this.dataset.mejl)">Svara</button>'
                     : "")
                 + '<button class="btn bort" onclick="raderaSynpunkt(' + o._rad
                 + ')">Ta bort</button>'
