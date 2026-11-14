@@ -1235,8 +1235,7 @@ var STAT_HANDELSER = {
   "ort-tom": "Lämnade orten tom",
   "start-snabb": "Valde snabbstart",
   "start-alla-fragor": "Svarade på alla frågor",
-  "soker-heltid": "Söker heltid",
-  "forsta-besoket": "Första besöket"
+  "soker-heltid": "Söker heltid"
 };
 function handelseNamn_(k){
   if (STAT_HANDELSER[k]) return STAT_HANDELSER[k];
@@ -1623,11 +1622,7 @@ function ritaStatistik(){
       + '<div class="stat-lista" style="margin-top:10px">' + sRader + "</div></div>";
   }
 
-  /* Det som byggdes i oktober, samlat. Rubriktestet visar hur stor del
-     av dem som såg varje rubrik som gick vidare till jobben.        */
-  function andel(a, b){ return b ? Math.round(100 * a / b) + " %" : "–"; }
-  var raV = handelse("rubrik-a-visad"), raG = handelse("rubrik-a-vidare");
-  var rbV = handelse("rubrik-b-visad"), rbG = handelse("rubrik-b-vidare");
+  /* Det som byggdes i oktober, samlat. */
   var bortaAlla = dagar.reduce(function(s, x){
     var h = x["Händelser"] || {}, n = 0;
     for (var k in h) if (k.indexOf("annons-borta/") === 0) n += Number(h[k] || 0);
@@ -1635,13 +1630,7 @@ function ritaStatistik(){
   }, 0);
   function rad(namn, varde){ return '<div class="namn">' + namn + '</div><div class="v">' + varde + '</div><div></div>'; }
   html += '<div class="stat-kort"><h3>Nytt i oktober</h3><p class="under">Det som lades till på sidan i oktober</p>'
-    + '<p class="stat-not" style="margin:0 0 6px"><b>Rubriktestet på startsidan.</b> Vilken rubrik får flest att gå vidare till jobben?</p>'
     + '<div class="stat-lista">'
-    + rad("A: Jobb som är värda att söka.", tal_(raG) + " av " + tal_(raV) + ", " + andel(raG, raV))
-    + rad("B: Jobb med låga krav, nära dig.", tal_(rbG) + " av " + tal_(rbV) + ", " + andel(rbG, rbV))
-    + '</div>'
-    + ((raV + rbV) < 200 ? '<p class="stat-not">För få besök än för att säga vilken som vinner. Vänta tills båda har minst 100.</p>' : '')
-    + '<div class="stat-lista" style="margin-top:12px">'
     + rad("Påminn mig", tal_(handelse("paminn-mig")) + " tryck")
     + rad("Rutan om hemskärmen", tal_(handelse("hemskarm-visad")) + " visad, " + tal_(handelse("hemskarm-ja")) + " ja, " + tal_(handelse("hemskarm-inte-nu")) + " inte nu")
     + rad("Hittade du ett jobb? Snabbsvar", tal_(handelse("tyck-snabb-ja")) + " ja, " + tal_(handelse("tyck-snabb-nej")) + " nej, " + tal_(handelse("tyck-snabb-inte-an")) + " inte än")
@@ -1680,10 +1669,6 @@ function ritaStatistik(){
           : '<p class="stat-not">Inget än. Bra, då verkar annonserna stämma.</p>')
     + "</div>"
     + '<div class="stat-kort"><h3>Mejllistan</h3><p class="under">Jobbtips via mejl</p>' + mejlHtml + "</div>"
-    + '<div class="stat-kort"><h3>Nya och återkommande</h3><p class="under">Besök</p>'
-    +   listaHtml_([["Första besöket", handelse("forsta-besoket")], ["Tillbaka inom en vecka", handelse("ater-inom-veckan")],
-          ["Tillbaka inom en månad", handelse("ater-inom-manaden")], ["Tillbaka efter längre tid", handelse("ater-efter-lange")]], 4)
-    + "</div>"
     + '<div class="stat-kort"><h3>Ålder</h3><p class="under">Det man svarat på första frågan</p>'
     +   listaHtml_(slaIhop_(dagar, "Händelser", handelseNamn_, function(k){ return k.indexOf("alder-") !== 0; }), 4)
     + "</div>"
@@ -1694,7 +1679,8 @@ function ritaStatistik(){
     +   listaHtml_(slaIhop_(dagar, "Källor", kallaNamn_), 8) + "</div>"
     + '<div class="stat-kort"><h3>Vad de tryckte på</h3><p class="under">Knapptryck från GoatCounter</p>'
     +   listaHtml_(slaIhop_(dagar, "Händelser", handelseNamn_, function(n){
-          return /^(sida:|ort\/|annons\/|fran\/|larm\/|fel\/|alder-|ater-|forsta-besoket)/.test(n);
+          // Rubriktestet och återbesöken är borttagna. Gamla siffror döljs.
+          return /^(sida:|ort\/|annons\/|fran\/|larm\/|fel\/|alder-|ater-|forsta-besoket|rubrik-)/.test(n);
         }), 10) + "</div>"
     + '<div class="stat-kort"><h3>Mest besökta sidor</h3><p class="under">Sidvisningar</p>'
     +   listaHtml_(slaIhop_(dagar, "Sidor", sidNamn_), 8) + "</div>"
