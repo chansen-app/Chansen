@@ -17,7 +17,7 @@ const path = require("path");
 
 const FILER = [
   "docs/index.html", "docs/widget.html",
-  "docs/labb/norge.html", "docs/labb/uk.html",
+  "labb/sidor/norge.html", "labb/sidor/uk.html",
   "hamta.js", "nyhetsbrev.js", "rapport.js", "sasong.js"
 ];
 

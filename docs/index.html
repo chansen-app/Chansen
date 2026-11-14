@@ -83,17 +83,17 @@
   "inLanguage": "sv-SE",
   "mainEntity": [
     { "@type": "Question", "name": "Hur hittar man jobb utan erfarenhet?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Chansen går igenom hela Platsbanken varje natt och visar bara annonser där ingångskraven är låga. Allt som kräver utbildning, yrkesbevis eller flera års erfarenhet sorteras bort. Du svarar på tre frågor och får jobben i din egen kommun. Sidan är gratis att använda." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Chansen går igenom Platsbanken varje natt och försöker visa bara annonser där ingångskraven är låga. Annonser som kräver utbildning, yrkesbevis eller flera års erfarenhet sorteras bort, så långt det går att se i annonsen. Du svarar på tre frågor och får jobben i din egen kommun. Sidan är gratis att använda." } },
     { "@type": "Question", "name": "Hur mycket får man jobba när man är under 18?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Det beror på ålder och om du går i skolan. Är du under 16 gäller kortare arbetstider och du får inte arbeta sent på kvällen. Är du under 18 får du inte arbeta natt. Chansen döljer automatiskt de jobb du inte får ta, och förklarar reglerna på sidan om arbetstider." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Det beror på ålder och om du går i skolan. Är du under 16 gäller kortare arbetstider och du får inte arbeta sent på kvällen. Är du under 18 får du inte arbeta natt. Chansen försöker dölja de jobb du inte får ta, men kan bara läsa det som står i annonsen. Fråga alltid arbetsgivaren vad som gäller för dig. Reglerna förklaras på sidan om arbetstider." } },
     { "@type": "Question", "name": "Kan man få jobb om man finns i belastningsregistret?",
       "acceptedAnswer": { "@type": "Answer", "text": "Ja, de flesta jobb kräver inget utdrag ur belastningsregistret. Uppgifter gallras dessutom efter en tid. Chansen har en sida som förklarar hur registret fungerar, vilka jobb som kräver utdrag, och vilka vägar in som finns for den som har en dom." } },
     { "@type": "Question", "name": "Vad betyder provision utan grundlön?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Det betyder att hela lönen bygger på vad du säljer. Säljer du inget får du ingenting, även om du arbetat en hel månad. Chansen visar aldrig jobb utan fast lön, och inte heller jobb med rörlig lön där annonsen inte förklarar hur lönen fungerar." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Det betyder att hela lönen bygger på vad du säljer. Säljer du inget får du ingenting, även om du arbetat en hel månad. Chansen försöker sortera bort jobb utan fast lön, och jobb med rörlig lön där annonsen inte förklarar hur lönen fungerar." } },
     { "@type": "Question", "name": "Hur skriver man ett CV när man aldrig jobbat?",
       "acceptedAnswer": { "@type": "Answer", "text": "Räkna med sådant som inte är lönearbete: praktik, föreningsuppdrag, barnvakt, ideellt arbete och skolprojekt. Chansen har en CV-byggare med tre mallar som hjälper dig steg för steg." } },
     { "@type": "Question", "name": "Kostar Chansen något?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Nej. Sidan är gratis att använda. Det du fyller i sparas bara i din egen telefon. Den drivs av en privatperson och bygger på Arbetsförmedlingens öppna data. Arbetsförmedlingen står inte bakom sidan." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Nej. Sidan är gratis att använda. Det du fyller i när du söker jobb sparas bara i din egen telefon. Den drivs av en privatperson och bygger på Arbetsförmedlingens öppna data. Arbetsförmedlingen står inte bakom sidan." } },
     { "@type": "Question", "name": "Var kommer jobben ifrån?",
       "acceptedAnswer": { "@type": "Answer", "text": "Från Arbetsförmedlingens öppna data, alltså samma annonser som finns i Platsbanken. Skillnaden ar att Chansen går igenom alla och bara visar de med laga ingangskrav. Annonserna hämtas varje natt." } }
   ]
@@ -140,7 +140,7 @@
   --accent:#c67139;
   /* Knapparnas toning börjar här. Något mörkare än accentfärgen, så att
      vit text på den ljusaste änden når 4,5:1 som krävs för läsbarhet. */
-  --knapp-start:#ac5e2b; --accent-100:#fff2eb; --accent-700:#8c491a; --accent-800:#643312;
+  --knapp-start:#a85b29; --accent-100:#fff2eb; --accent-700:#8c491a; --accent-800:#643312;
   --sage-100:#f0fae1; --sage-800:#3d472b;
   --n-100:#f9f4ed; --n-300:#dcd3c4; --n-600:#655e52; --n-700:#645c50; --n-800:#474238;
   --heading:"Caprasimo","Cap reserv",system-ui,sans-serif;
@@ -151,7 +151,8 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);fon
 .wrap{max-width:520px;margin:0 auto;padding:26px 18px 40px}
 h1{font-family:var(--heading);font-weight:400;font-size:32px;line-height:1.1;margin:0 0 6px}
 /* Bara startsidans rubrik är h1, för sökmotorernas skull. De andra delarnas
-   huvudrubriker är h2 men ser likadana ut. */
+   huvudrubriker är h2 men ser likadana ut. För skärmläsare är de ändå
+   nivå 1, genom role="heading" och aria-level="1". */
 html body h2.som-h1{font-family:var(--heading);font-weight:400;font-size:32px;line-height:1.1;margin:0 0 6px}
 h2{font-family:var(--heading);font-weight:400;font-size:21px;line-height:1.2;margin:26px 0 8px}
 h3{font-family:var(--heading);font-weight:400;font-size:17px;margin:0 0 6px;
@@ -226,7 +227,7 @@ label/* Frågorna var så små och ljusa att blicken gick direkt till
 .seg button.on{background:linear-gradient(135deg,var(--knapp-start) 0%,var(--accent-800) 100%);border-color:var(--accent-800);color:#fff6ee;box-shadow:0 1px 6px rgba(140,73,26,.28)}
 .antal{display:inline-block;margin-left:6px;font-size:12px;font-weight:700;opacity:.8}
 .seg button.on .antal{opacity:.85}
-input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15px;background:var(--surface);border:1.5px solid var(--n-300);border-radius:999px;color:var(--text)}
+input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15px;background:var(--surface);border:1.5px solid #7d7262;border-radius:999px;color:var(--text)}
 .hint{font-size:13px;color:var(--n-600);margin-top:7px}
 .btn{display:inline-flex;align-items:center;justify-content:center;font-family:var(--heading);font-weight:400;font-size:15px;text-decoration:none;padding:14px 24px;border-radius:999px;background:linear-gradient(135deg,var(--knapp-start) 0%,var(--accent-800) 100%);color:#fff6ee;border:none;cursor:pointer;box-shadow:0 1px 6px rgba(140,73,26,.26)}
 .btn:hover{background:var(--accent-700)}
@@ -268,7 +269,7 @@ input.txt{width:100%;min-height:48px;padding:10px 16px;font:inherit;font-size:15
 .card{background:var(--surface);border-radius:32px;padding:20px;margin-bottom:14px;box-shadow:0 1px 2px rgba(46,43,37,.14);overflow-wrap:break-word;min-width:0}
 .kicker{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-700);margin-bottom:8px}
 .kicker.medel{color:var(--n-600)}
-.titel{font-family:var(--heading);font-weight:400;font-size:20px;line-height:1.2;margin-bottom:4px;overflow-wrap:break-word;word-break:break-word;hyphens:auto}
+.titel{font-family:var(--heading);font-weight:400;font-size:20px;line-height:1.2;margin:0 0 4px;overflow-wrap:break-word;word-break:break-word;hyphens:auto}
 .ag{font-size:14px;color:var(--n-700);margin-bottom:14px}
 #enskilt-innehall .beskrivning{-webkit-line-clamp:unset;line-clamp:unset;max-height:none}
   .beskrivning{font-size:14.5px;line-height:1.5;color:var(--n-700);margin:0 0 12px;
@@ -379,7 +380,7 @@ nav button{font-size:12px;padding:0 4px}
 .cvflik button{flex:1;min-height:48px;border-radius:999px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800)}
 .cvflik button{border-color:var(--accent-100);background:var(--accent-100);color:var(--accent-800)}
 .cvflik button.on{background:linear-gradient(135deg,var(--knapp-start) 0%,var(--accent-800) 100%);border-color:var(--accent-800);color:#fff6ee;box-shadow:0 1px 6px rgba(140,73,26,.28)}
-textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15px;line-height:1.55;background:var(--surface);border:1.5px solid var(--n-300);border-radius:24px;color:var(--text);resize:vertical}
+textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15px;line-height:1.55;background:var(--surface);border:1.5px solid #7d7262;border-radius:24px;color:var(--text);resize:vertical}
 .forslag{font-size:13px;padding:9px 15px;border-radius:999px;border:1.5px solid var(--n-300);background:transparent;color:var(--n-800);cursor:pointer;font-family:var(--body);font-weight:600}
 .forslag.pa{background:linear-gradient(135deg,var(--knapp-start) 0%,var(--accent-800) 100%);border-color:var(--accent-800);color:#fff6ee;box-shadow:0 1px 6px rgba(140,73,26,.28)}
 .forslag:hover{background:var(--accent-100);border-color:var(--accent)}
@@ -388,11 +389,11 @@ textarea.cvf{width:100%;min-height:110px;padding:16px;font:inherit;font-size:15p
 /* Antalet i filterknapparna, så man ser vad som är värt att trycka på.
    Siffran fylls i en stund efter att sidan ritats, så platsen reserveras
    i förväg. Utan det växer knappen, raden bryts om och allt under hoppar. */
-.chips button i{font-style:normal;font-size:12px;opacity:.62;margin-left:6px;
+.chips button i{font-style:normal;font-size:12px;margin-left:6px;
   display:inline-block;min-width:3.1ch;text-align:right}
 
 /* Mindre viktiga taggar, dämpade så kortet går att skanna snabbt. */
-.taggar.extra{margin-top:-2px;opacity:.62}
+.taggar.extra{margin-top:-2px}
 /* Osynlig men tar fortfarande plats, till skillnad från dold. */
 .osynlig{visibility:hidden}
 
@@ -418,7 +419,7 @@ button.lank[onclick*="arbetsgivare"], a.lank[href^="mailto"]{
 .card .rad{margin-top:10px}
 .knapprad{margin-top:10px;gap:8px}
 .knapprad .mini{min-height:34px;padding:6px 12px;font-size:12.5px}
-.taggar.extra .tag{font-size:12px;padding:3px 9px}
+.taggar.extra .tag{font-size:12px;padding:3px 9px;color:var(--n-700)}
 /* På mobilen trycker man med tummen. Knapparna blir därför minst 44
    punkter höga, som rekommendationen säger. Små textlänkar får en
    större osynlig yta runt sig, så de syns likadant men är lättare att
@@ -451,6 +452,10 @@ button.lank[onclick*="arbetsgivare"], a.lank[href^="mailto"]{
 .chips #f-fler{background:transparent;border-style:dashed;color:var(--accent-800)}
 a{color:var(--accent-700)}
 a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent-700);outline-offset:2px}
+/* Exempeltexten i fälten var för ljus att läsa. */
+::placeholder{color:var(--n-600);opacity:1}
+/* Syns inte, men läses upp av skärmläsare. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 #sprak{display:none}
 .visa-sprak #sprak{display:block}
 </style>
@@ -469,15 +474,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 </head>
 <body>
 <div class="wrap">
+<main>
 
 <div id="sprak" style="margin-bottom:18px">
   <div class="ruta" style="font-size:14px">
-    <div style="margin-bottom:6px"><b>Chansen is in Swedish</b></div>
+    <div style="margin-bottom:6px" lang="en"><b>Chansen is in Swedish</b></div>
     <div style="line-height:1.7">
-      You can translate this page with your browser. In Safari, tap <b>aA</b> in the address bar and choose Translate. In Chrome, tap the three dots and choose Translate.<br>
-      <span dir="rtl">يمكنك ترجمة هذه الصفحة من متصفحك.</span><br>
-      Waxaad bogga ku turjumi kartaa browserkaaga.<br>
-      Kannst du diese Seite im Browser übersetzen.
+      <span lang="en">You can translate this page with your browser. In Safari, tap <b>aA</b> in the address bar and choose Translate. In Chrome, tap the three dots and choose Translate.</span><br>
+      <span lang="ar" dir="rtl">يمكنك ترجمة هذه الصفحة من متصفحك.</span><br>
+      <span lang="so">Waxaad bogga ku turjumi kartaa browserkaaga.</span><br>
+      <span lang="de">Kannst du diese Seite im Browser übersetzen.</span>
     </div>
     <button class="lank" style="margin-top:8px" onclick="doljSprak()">OK, dölj det här</button>
   </div>
@@ -488,8 +494,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   <p class="sub">Några snabba frågor. Svaren sparas bara i din telefon.</p>
 
   <div class="field">
-    <label class="fraga">Hur gammal är du?</label>
-    <div class="seg" id="q-alder"></div>
+    <div class="fraga" id="fraga-alder">Hur gammal är du?</div>
+    <div class="seg" id="q-alder" role="group" aria-labelledby="fraga-alder"></div>
     <div class="hint">Är du under 18 finns det jobb och tider du inte får ta enligt lag. Därför behöver vi ditt svar här, resten av frågorna är frivilliga.</div>
   </div>
 
@@ -502,8 +508,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   </div>
 
   <div class="field">
-    <label class="fraga">När kan du jobba?</label>
-    <div class="seg" id="q-nar"></div>
+    <div class="fraga" id="fraga-nar">När kan du jobba?</div>
+    <div class="seg" id="q-nar" role="group" aria-labelledby="fraga-nar"></div>
     <div class="hint">Välj ett eller flera.</div>
   </div>
 
@@ -515,32 +521,32 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   <div class="avsnitt">Det här ger dig bättre träffar</div>
 
   <div class="field">
-    <label class="fraga">Vad söker du för sorts jobb?</label>
-    <div class="seg" id="q-omfattning"></div>
+    <div class="fraga" id="fraga-omfattning">Vad söker du för sorts jobb?</div>
+    <div class="seg" id="q-omfattning" role="group" aria-labelledby="fraga-omfattning"></div>
     <div class="hint">Välj ett eller flera. Väljer du inget visas alla sorter.</div>
   </div>
 
   <div class="field">
-    <label class="fraga">Vad har du för utbildning?</label>
-    <div class="seg" id="q-utbildning"></div>
+    <div class="fraga" id="fraga-utbildning">Vad har du för utbildning?</div>
+    <div class="seg" id="q-utbildning" role="group" aria-labelledby="fraga-utbildning"></div>
     <div class="hint tva">Chansen visar bara jobb med låga ingångskrav, oavsett vad du svarar här. Svaret används för att skriva din ansökan.</div>
   </div>
 
   <div class="field">
-    <label class="fraga">Har du körkort?</label>
-    <div class="seg" id="q-korkort"></div>
+    <div class="fraga" id="fraga-korkort">Har du körkort?</div>
+    <div class="seg" id="q-korkort" role="group" aria-labelledby="fraga-korkort"></div>
     <div class="hint">Med körkort öppnar sig lager, bud och en del sommarjobb.</div>
   </div>
 
   <div class="field">
-    <label class="fraga">Hur mycket har du jobbat tidigare?</label>
-    <div class="seg" id="q-erfarenhet"></div>
+    <div class="fraga" id="fraga-erfarenhet">Hur mycket har du jobbat tidigare?</div>
+    <div class="seg" id="q-erfarenhet" role="group" aria-labelledby="fraga-erfarenhet"></div>
     <div class="hint tva">Även det här används i ansökan. Har du lång erfarenhet syns det i brevet.</div>
   </div>
 
   <div class="field">
-    <label class="fraga">Vad vill du helst jobba med?</label>
-    <div class="seg" id="q-omrade"></div>
+    <div class="fraga" id="fraga-omrade">Vad vill du helst jobba med?</div>
+    <div class="seg" id="q-omrade" role="group" aria-labelledby="fraga-omrade"></div>
     <div class="hint tva">Siffran visar hur många jobb som finns just nu på den ort du skrivit. Väljer du inget visas alla sorters jobb.</div>
   </div>
 
@@ -553,7 +559,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 <div id="v-jobb" class="dold">
   <div class="topprad">
     <div>
-      <h2 class="som-h1" style="font-size:28px">Jobb för dig</h2>
+      <h2 class="som-h1" role="heading" aria-level="1" style="font-size:28px">Jobb för dig</h2>
       <div style="font-size:14px;color:var(--n-700)" id="profil"></div>
     </div>
     <button class="lank" onclick="visaVy('start')">Ändra</button>
@@ -569,19 +575,19 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     #snabb-antal{display:flex;align-items:center;justify-content:center;gap:14px;margin:4px 0 24px}
     #snabb-antal .tal{font-family:Caprasimo,serif;font-size:52px;line-height:1;color:#c67139}
     #snabb-antal b{display:block;font-size:17px;color:#201e1d;line-height:1.3}
-    #snabb-antal span{display:block;font-size:13px;color:#7a6a58;margin-top:2px;line-height:1.4;max-width:15em}
+    #snabb-antal span{display:block;font-size:13px;color:var(--n-600);margin-top:2px;line-height:1.4;max-width:15em}
     #snabbval .fraga{font-size:15px;font-weight:600;color:#5a4a3c;text-align:center;margin:0 0 10px}
     #snabbval .bubblor{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
     #snabbval .bubblor button{border:0;border-radius:999px;padding:11px 20px;background:#fffaf4;
       font:inherit;font-size:15px;font-weight:600;color:#5a4a3c;cursor:pointer;
       box-shadow:0 2px 8px rgba(100,51,18,.10);transition:all .15s}
-    #snabbval .bubblor button.on{background:#c67139;color:#fff;box-shadow:0 4px 14px rgba(198,113,57,.35)}
+    #snabbval .bubblor button.on{background:var(--knapp-start);color:#fff;box-shadow:0 4px 14px rgba(198,113,57,.35)}
     #snabbval .sok{position:relative}
     #snabbval .sok svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#a8957f}
-    #snabbval input{width:100%;box-sizing:border-box;border:0;border-radius:999px;
+    #snabbval input{width:100%;box-sizing:border-box;border:1.5px solid #7d7262;border-radius:999px;
       padding:15px 20px 15px 46px;font:inherit;font-size:16px;background:#fffaf4;color:#201e1d;
       box-shadow:0 2px 10px rgba(100,51,18,.10)}
-    #snabbval input:focus{outline:none;box-shadow:0 0 0 3px rgba(198,113,57,.25),0 2px 10px rgba(100,51,18,.10)}
+    #snabbval input:focus{outline:2px solid var(--accent-700);outline-offset:2px;box-shadow:0 0 0 3px rgba(198,113,57,.25),0 2px 10px rgba(100,51,18,.10)}
     #snabb-fler{font-size:13px;color:#8a7a68;margin-top:10px;text-align:center}
     /* Frågesidan i samma stil: runda bubblor, rund sökruta, centrerat. */
     body.jobbforst #v-start h1, body.jobbforst #v-start .sub,
@@ -591,10 +597,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     body.jobbforst #v-start .seg{justify-content:center}
     body.jobbforst #v-start .seg button{background:#fffaf4;border:0;color:#5a4a3c;font-size:14.5px;font-weight:600;
       padding:11px 18px;box-shadow:0 2px 8px rgba(100,51,18,.10);transition:all .15s}
-    body.jobbforst #v-start .seg button.on{background:#c67139;color:#fff;box-shadow:0 4px 14px rgba(198,113,57,.35)}
-    body.jobbforst #v-start input.txt{border:0;background:#fffaf4;padding:15px 20px;font-size:16px;text-align:center;
+    body.jobbforst #v-start .seg button.on{background:var(--knapp-start);color:#fff;box-shadow:0 4px 14px rgba(198,113,57,.35)}
+    body.jobbforst #v-start input.txt{border:1.5px solid #7d7262;background:#fffaf4;padding:15px 20px;font-size:16px;text-align:center;
       box-shadow:0 2px 10px rgba(100,51,18,.10)}
-    body.jobbforst #v-start input.txt:focus{outline:none;box-shadow:0 0 0 3px rgba(198,113,57,.25),0 2px 10px rgba(100,51,18,.10)}
+    body.jobbforst #v-start input.txt:focus{outline:2px solid var(--accent-700);outline-offset:2px;box-shadow:0 0 0 3px rgba(198,113,57,.25),0 2px 10px rgba(100,51,18,.10)}
   </style>
   <div id="snabbval">
     <div id="snabb-antal" aria-live="polite"></div>
@@ -645,7 +651,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     <button id="f-fler" type="button" aria-expanded="false" onclick="vaxlaFlerFilter()">Fler filter ▾</button>
   </div>
 
-  <div class="rakning dold" id="rakning" role="status" aria-live="polite"></div>
+  <div class="rakning sr-only" id="rakning" role="status" aria-live="polite"></div>
   <div id="gammaldata" class="dold"></div>
   <div id="notis"></div>
   <div id="lista"></div>
@@ -689,25 +695,25 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 </div>
 
 <div id="v-mina" class="dold">
-  <h2 class="som-h1">Sparade jobb</h2>
+  <h2 class="som-h1" role="heading" aria-level="1">Sparade jobb</h2>
   <p class="sub">De du sparat, de du sökt, och de du fått svar på.</p>
   <div id="mina-innehall"></div>
 </div>
 
 <div id="v-ansokan" class="dold">
   <button class="lank" onclick="visaVy('jobb')">Tillbaka till jobben</button>
-  <h2 class="som-h1" style="margin-top:16px;font-size:30px" id="a-rubrik">Din ansökan</h2>
+  <h2 class="som-h1" role="heading" aria-level="1" style="margin-top:16px;font-size:30px" id="a-rubrik">Din ansökan</h2>
   <div style="font-size:15px;color:var(--n-700);margin-bottom:20px" id="a-jobb"></div>
 
   <div class="field" style="margin-bottom:16px">
     <label class="fraga" for="namn">Ditt namn, till underskriften</label>
-    <input class="txt" id="namn" placeholder="För- och efternamn" value="" oninput="namnAndrat()">
+    <input class="txt" id="namn" autocomplete="name" placeholder="För- och efternamn" value="" oninput="namnAndrat()">
   </div>
 
   <div class="field" style="margin-bottom:16px">
-    <label class="fraga">Vad stämmer in på dig?</label>
+    <div class="fraga" id="fraga-egenskaper">Vad stämmer in på dig?</div>
     <div class="hint" style="margin-bottom:10px">Tryck på det som passar, så skrivs brevet om. Du kan välja flera, men högst tre används åt gången.</div>
-    <div class="chips" id="a-egenskaper"></div>
+    <div class="chips" id="a-egenskaper" role="group" aria-labelledby="fraga-egenskaper"></div>
   </div>
 
   <textarea id="a-text" style="width:100%;min-height:420px;padding:20px;font:inherit;font-size:15px;line-height:1.6;background:var(--surface);border:1.5px solid var(--n-300);border-radius:28px;color:var(--text);resize:vertical" aria-label="Din ansökningstext"></textarea>
@@ -730,12 +736,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 </div>
 
 <div id="v-cv" class="dold">
-  <h2 class="som-h1">CV</h2>
+  <h2 class="som-h1" role="heading" aria-level="1">CV</h2>
   <p class="sub">Vad som ska stå, vad som inte ska stå, och en mall du fyller i här.</p>
 
   <div class="cvflik">
-    <button id="c-guide" class="on" onclick="cvVisa('guide')">Guide</button>
-    <button id="c-bygg" onclick="cvVisa('bygg')">Bygg ditt CV</button>
+    <button id="c-guide" class="on" aria-pressed="true" onclick="cvVisa('guide')">Guide</button>
+    <button id="c-bygg" aria-pressed="false" onclick="cvVisa('bygg')">Bygg ditt CV</button>
   </div>
 
   <div id="cv-guide" class="info">
@@ -786,25 +792,25 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
     <div class="cvsteg dold" data-falt="namn">
       <h2 class="cvfraga" id="fraga-cv-namn">Vad heter du?</h2>
-      <input class="txt cvf" id="cv-namn" aria-labelledby="fraga-cv-namn" placeholder="För- och efternamn">
+      <input class="txt cvf" id="cv-namn" autocomplete="name" aria-labelledby="fraga-cv-namn" placeholder="För- och efternamn">
     </div>
 
     <div class="cvsteg dold" data-falt="ort">
       <h2 class="cvfraga" id="fraga-cv-ort">Var bor du?</h2>
-      <input class="txt cvf" id="cv-ort" aria-labelledby="fraga-cv-ort" placeholder="Malmö">
+      <input class="txt cvf" id="cv-ort" autocomplete="address-level2" aria-labelledby="fraga-cv-ort" placeholder="Malmö">
       <div class="hint">Bara orten. Skriv aldrig din fullständiga adress i ett CV.</div>
     </div>
 
     <div class="cvsteg dold" data-falt="tel">
       <h2 class="cvfraga" id="fraga-cv-tel">Ditt telefonnummer</h2>
-      <input class="txt cvf" id="cv-tel" aria-labelledby="fraga-cv-tel" placeholder="07...">
+      <input class="txt cvf" id="cv-tel" type="tel" autocomplete="tel" aria-labelledby="fraga-cv-tel" placeholder="07...">
       <div class="hint">Det här är hur de når dig. Dubbelkolla siffrorna.</div>
       <div class="cv-varning dold" id="cv-tel-varning" role="status" aria-live="polite"></div>
     </div>
 
     <div class="cvsteg dold" data-falt="mejl">
       <h2 class="cvfraga" id="fraga-cv-mejl">Din mejladress</h2>
-      <input class="txt cvf" id="cv-mejl" aria-labelledby="fraga-cv-mejl" placeholder="fornamn.efternamn@...">
+      <input class="txt cvf" id="cv-mejl" type="email" autocomplete="email" aria-labelledby="fraga-cv-mejl" placeholder="fornamn.efternamn@...">
       <div class="hint">Har du en med smeknamn i, skaffa en med ditt namn. Det tar två minuter.</div>
       <div class="cv-varning dold" id="cv-mejl-varning" role="status" aria-live="polite"></div>
     </div>
@@ -919,13 +925,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
 
 <div id="v-hjalp" class="dold">
-  <h2 class="som-h1">Hjälp</h2>
+  <h2 class="som-h1" role="heading" aria-level="1">Hjälp</h2>
   <p class="sub">Så söker du jobb, vad du får jobba under 18, och hur registerutdrag fungerar.</p>
 
   <div class="cvflik" style="margin-bottom:24px">
-    <button id="h-soka" class="on" onclick="hjalpVisa('soka')">Söka jobb</button>
-    <button id="h-tider" onclick="hjalpVisa('tider')">Arbetstider</button>
-    <button id="h-utdrag" onclick="hjalpVisa('utdrag')">Registret</button>
+    <button id="h-soka" class="on" aria-pressed="true" onclick="hjalpVisa('soka')">Söka jobb</button>
+    <button id="h-tider" aria-pressed="false" onclick="hjalpVisa('tider')">Arbetstider</button>
+    <button id="h-utdrag" aria-pressed="false" onclick="hjalpVisa('utdrag')">Registret</button>
   </div>
 
 <div id="hjalp-soka" class="info">
@@ -1122,7 +1128,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 </div>
 
 <div id="v-mejl" class="dold info">
-  <h2 class="som-h1" style="font-size:28px;margin-bottom:6px">Få nya jobb till din mejl</h2>
+  <h2 class="som-h1" role="heading" aria-level="1" style="font-size:28px;margin-bottom:6px">Få nya jobb till din mejl</h2>
   <p class="sub">Få ett mejl i veckan med nya jobb med låga ingångskrav.
      Det är gratis, och du kan avsluta när du vill.</p>
 
@@ -1131,7 +1137,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   </div>
 
   <div class="hint" style="max-width:34em">
-    Vi sparar bara din mejladress, inget annat. Inget namn, ingen ålder, inget om
+    Vi sparar din mejladress, och tidpunkt och IP-adress när du anmäler dig. Inget namn, ingen ålder, inget om
     vilka jobb du tittat på. Du måste vara minst 13 år för att anmäla dig själv.
     Varje mejl har en länk där du avslutar med ett klick.
   </div>
@@ -1144,7 +1150,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 <div id="v-arbetsgivare" class="dold info">
     <!-- Bara till för dig själv. Visas med chansen.nu/#arbetsgivare?blad=1 -->
     <div class="rakning dold" id="bladstatus" style="margin-bottom:14px"></div>
-    <h2 class="som-h1" style="font-size:28px;margin-bottom:6px">Lägg upp ett jobb</h2>
+    <h2 class="som-h1" role="heading" aria-level="1" style="font-size:28px;margin-bottom:6px">Lägg upp ett jobb</h2>
     <p class="sub">Gratis. För dig som söker personal och inte kräver erfarenhet. Din annons visas för alla som söker jobb i din kommun.</p>
 
     <p>Fyll i formuläret nedan och tryck skicka. Annonsen kommer direkt till oss, du behöver inte mejla något själv.</p>
@@ -1162,12 +1168,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     <div id="ag-formular">
     <div class="field">
       <label class="fraga" for="ag-foretag">Företagets namn</label>
-      <input class="txt agf" id="ag-foretag" placeholder="Företaget AB">
+      <input class="txt agf" id="ag-foretag" autocomplete="organization" placeholder="Företaget AB">
     </div>
 
     <div class="field">
       <label class="fraga" for="ag-orgnr">Organisationsnummer</label>
-      <input class="txt agf" id="ag-orgnr" placeholder="999999-0006" inputmode="numeric">
+      <input class="txt agf" id="ag-orgnr" aria-describedby="ag-orgnr-svar" placeholder="999999-0006" inputmode="numeric">
       <div class="hint" id="ag-orgnr-svar"></div>
     </div>
 
@@ -1178,7 +1184,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
     <div class="field">
       <label class="fraga" for="ag-beskrivning">Vad ska man göra? Tre rader räcker</label>
-      <textarea class="cvf agf" id="ag-beskrivning" placeholder="Kassa, påfyllning av varor och kundfrågor. Vi lär upp på plats."></textarea>
+      <textarea class="cvf agf" id="ag-beskrivning" aria-describedby="ag-beskrivning-svar" placeholder="Kassa, påfyllning av varor och kundfrågor. Vi lär upp på plats."></textarea>
       <div class="hint">Skriv vad jobbet innebär och vad som faktiskt krävs för att klara det. Var hellre för tydlig än för vag, den som söker ska veta vad hen tackar ja till.</div>
       <div class="hint" id="ag-beskrivning-svar"></div>
     </div>
@@ -1189,8 +1195,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     </div>
 
     <div class="field">
-      <label class="fraga">Omfattning</label>
-      <div class="seg" id="ag-omfattning"></div>
+      <div class="fraga" id="fraga-ag-omfattning">Omfattning</div>
+      <div class="seg" id="ag-omfattning" role="group" aria-labelledby="fraga-ag-omfattning"></div>
       <div class="hint">Välj ett eller flera. Gäller annonsen både helg och kväll, kryssa i båda.</div>
     </div>
 
@@ -1201,61 +1207,61 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     </div>
 
     <div class="field">
-      <label class="fraga">Finns kollektivavtal?</label>
-      <div class="seg" id="ag-avtal"></div>
+      <div class="fraga" id="fraga-ag-avtal">Finns kollektivavtal?</div>
+      <div class="seg" id="ag-avtal" role="group" aria-labelledby="fraga-ag-avtal"></div>
       <div class="hint">Inget krav, men bra för den som söker att veta.</div>
     </div>
 
     <div class="field">
-      <label class="fraga">Anställningsform</label>
-      <div class="seg" id="ag-form"></div>
+      <div class="fraga" id="fraga-ag-form">Anställningsform</div>
+      <div class="seg" id="ag-form" role="group" aria-labelledby="fraga-ag-form"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Kategori</label>
-      <div class="seg" id="ag-kategori"></div>
+      <div class="fraga" id="fraga-ag-kategori">Kategori</div>
+      <div class="seg" id="ag-kategori" role="group" aria-labelledby="fraga-ag-kategori"></div>
       <div id="ag-annat-ruta" class="dold" style="margin-top:12px">
         <input class="txt agf" id="ag-annat" aria-label="Vilken bransch" placeholder="Skriv vilken bransch det är">
       </div>
     </div>
 
     <div class="field">
-      <label class="fraga">Lön</label>
-      <div class="seg" id="ag-lonform"></div>
+      <div class="fraga" id="fraga-ag-lonform">Lön</div>
+      <div class="seg" id="ag-lonform" role="group" aria-labelledby="fraga-ag-lonform"></div>
       <div id="ag-belopp-ruta" class="dold" style="margin-top:12px">
-        <input class="txt agf" id="ag-belopp" aria-label="Lön i kronor" placeholder="Belopp i kronor, t.ex. 145" inputmode="numeric">
+        <input class="txt agf" id="ag-belopp" aria-describedby="ag-lon-svar" aria-label="Lön i kronor" placeholder="Belopp i kronor, t.ex. 145" inputmode="numeric">
       </div>
       <div class="hint" id="ag-lon-svar">Obligatoriskt. Vi publicerar inte jobb utan lön, och inte provision utan grundlön.</div>
     </div>
 
     <div class="field">
-      <label class="fraga">Krävs utdrag ur belastningsregistret?</label>
-      <div class="seg" id="ag-utdrag"></div>
+      <div class="fraga" id="fraga-ag-utdrag">Krävs utdrag ur belastningsregistret?</div>
+      <div class="seg" id="ag-utdrag" role="group" aria-labelledby="fraga-ag-utdrag"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Får någon under 18 utföra jobbet?</label>
-      <div class="seg" id="ag-minder"></div>
+      <div class="fraga" id="fraga-ag-minder">Får någon under 18 utföra jobbet?</div>
+      <div class="seg" id="ag-minder" role="group" aria-labelledby="fraga-ag-minder"></div>
     </div>
 
     <div class="avsnitt">Kraven för jobbet</div>
     <p class="hint" style="margin-top:-8px">Chansen visar bara jobb med låga ingångskrav. Det är hela poängen med sidan, så vi publicerar inte annonser som kräver erfarenhet eller utbildning.</p>
 
     <div class="field">
-      <label class="fraga">Krävs tidigare erfarenhet av liknande arbete?</label>
-      <div class="seg" id="ag-erfarenhet"></div>
+      <div class="fraga" id="fraga-ag-erfarenhet">Krävs tidigare erfarenhet av liknande arbete?</div>
+      <div class="seg" id="ag-erfarenhet" role="group" aria-labelledby="fraga-ag-erfarenhet"></div>
       <div class="hint" id="ag-erfarenhet-svar"></div>
     </div>
 
     <div class="field">
-      <label class="fraga">Krävs utbildning, yrkesbevis eller behörighet?</label>
-      <div class="seg" id="ag-behorighet"></div>
+      <div class="fraga" id="fraga-ag-behorighet">Krävs utbildning, yrkesbevis eller behörighet?</div>
+      <div class="seg" id="ag-behorighet" role="group" aria-labelledby="fraga-ag-behorighet"></div>
       <div class="hint" id="ag-behorighet-svar"></div>
     </div>
 
     <div class="field">
       <label class="fraga" for="ag-lank">Länk dit man ansöker</label>
-      <input class="txt agf" id="ag-lank" placeholder="https://foretaget.se/jobb">
+      <input class="txt agf" id="ag-lank" aria-describedby="ag-lank-svar" placeholder="https://foretaget.se/jobb">
       <div class="hint" id="ag-lank-svar"></div>
     </div>
 
@@ -1272,16 +1278,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
     <div class="field">
       <label class="fraga" for="ag-mejl">Din mejladress</label>
-      <input class="txt agf" id="ag-mejl" placeholder="namn@foretaget.se" inputmode="email">
+      <input class="txt agf" id="ag-mejl" type="email" autocomplete="email" placeholder="namn@foretaget.se" inputmode="email">
       <div class="hint" id="ag-mejl-svar">Använder vi bara för att kontakta dig. Visas inte i appen.</div>
     </div>
 
     <div class="field">
       <label class="fraga" for="ag-kontakt">Ditt namn</label>
-      <input class="txt agf" id="ag-kontakt" placeholder="Namn, och telefon om du vill">
+      <input class="txt agf" id="ag-kontakt" autocomplete="name" placeholder="Namn, och telefon om du vill">
       <div class="hint">Telefonnummer är frivilligt. Vi hör av oss på mejl, och sparar så lite som möjligt om dig.</div>
     </div>
 
+    <div class="hint" style="line-height:1.6;margin-bottom:12px"><b>Villkor för arbetsgivare.</b> Genom att skicka annonsen intygar du att jobbet finns, att uppgifterna stämmer och att du har rätt att lägga upp den för företaget. Annonsen ska följa lagen, bland annat diskrimineringslagen och Arbetsmiljöverkets regler för minderåriga. Chansen får granska, korta, ändra rubrik eller kategori, neka eller ta bort annonsen utan att ange skäl. Du ansvarar för annonsens innehåll och för anställningen. Tjänsten är kostnadsfri, och det finns ingen garanti för hur många som ser annonsen.</div>
     <div id="ag-status" role="status" aria-live="polite" class="rakning"></div>
     <button class="btn block" id="ag-skicka" onclick="agSkicka()">Skicka annonsen</button>
     <div class="hint" style="text-align:center">Annonsen skickas direkt till oss. Vi hör av oss på mejladressen du angett.</div>
@@ -1316,7 +1323,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   </div>
 
 <div id="v-tyck" class="dold">
-  <h2 class="som-h1">Tyck till</h2>
+  <h2 class="som-h1" role="heading" aria-level="1">Tyck till</h2>
   <p class="sub">Tre korta frågor, under en minut. Bara den första behöver du svara på.</p>
 
   <div class="tyckstapel"><i id="tyck-fyll"></i></div>
@@ -1340,6 +1347,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
          någon, och då sparas ingen personuppgift alls. -->
   </div>
 
+  <div class="hint" style="margin:0 0 12px">Med svaret skickas den ålder och kommun du valt. Skriv inga namn eller andra personuppgifter.</div>
   <div id="tyck-status" role="status" aria-live="polite" class="rakning"></div>
   <button class="btn block" id="tyck-nasta" onclick="tyckNasta()">Nästa</button>
   <button class="lank" onclick="tyckHoppa()" id="tyck-hoppa"
@@ -1361,28 +1369,28 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     #v-syv .rad3{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:18px}
     #v-syv .rad3 button{border:0;border-radius:999px;padding:10px 16px;background:#fffaf4;font:inherit;font-size:14.5px;
       font-weight:600;color:#5a4a3c;cursor:pointer;box-shadow:0 2px 8px rgba(100,51,18,.10)}
-    #v-syv .rad3 button.on{background:#c67139;color:#fff;box-shadow:0 4px 14px rgba(198,113,57,.35)}
-    #v-syv label{display:block;text-align:center;font-size:16px;font-weight:600;color:#5a4a3c;margin:0 0 10px}
-    #v-syv input{width:100%;box-sizing:border-box;border:0;border-radius:999px;padding:14px 20px;font:inherit;font-size:16px;
+    #v-syv .rad3 button.on{background:var(--knapp-start);color:#fff;box-shadow:0 4px 14px rgba(198,113,57,.35)}
+    #v-syv label,#v-syv .fraga{display:block;text-align:center;font-size:16px;font-weight:600;color:#5a4a3c;margin:0 0 10px}
+    #v-syv input{width:100%;box-sizing:border-box;border:1.5px solid #7d7262;border-radius:999px;padding:14px 20px;font:inherit;font-size:16px;
       background:#fffaf4;text-align:center;box-shadow:0 2px 10px rgba(100,51,18,.10);margin-bottom:18px}
-    #v-syv input:focus{outline:none;box-shadow:0 0 0 3px rgba(198,113,57,.25),0 2px 10px rgba(100,51,18,.10)}
+    #v-syv input:focus{outline:2px solid var(--accent-700);outline-offset:2px;box-shadow:0 0 0 3px rgba(198,113,57,.25),0 2px 10px rgba(100,51,18,.10)}
     #syv-resultat{background:#fffaf4;border-radius:24px;padding:22px;text-align:center;box-shadow:0 2px 10px rgba(100,51,18,.08)}
     #syv-antal{font-family:Caprasimo,serif;font-size:44px;color:#c67139;line-height:1}
     #syv-lank{word-break:break-all;font-size:14px;background:#f5ead8;border-radius:12px;padding:10px 12px;margin:14px 0}
     #syv-qr{display:flex;justify-content:center;margin:14px 0}
     #syv-qr svg, #syv-qr img{width:180px;height:180px}
   </style>
-  <h2 class="som-h1" style="text-align:center">Länk till dina elever</h2>
+  <h2 class="som-h1" role="heading" aria-level="1" style="text-align:center">Länk till dina elever</h2>
   <p class="sub" style="text-align:center">Välj vad eleverna ska se. Du får en länk och en QR-kod som visar rätt jobb direkt, och som uppdateras varje natt.</p>
 
   <label for="syv-ort">Ort</label>
   <input id="syv-ort" placeholder="Skriv kommunen" oninput="syvUppdatera()" autocomplete="off">
 
-  <label>Ålder</label>
-  <div class="rad3" id="syv-alder"></div>
+  <div class="fraga" id="fraga-syv-alder">Ålder</div>
+  <div class="rad3" id="syv-alder" role="group" aria-labelledby="fraga-syv-alder"></div>
 
-  <label>Typ av jobb</label>
-  <div class="rad3" id="syv-typ"></div>
+  <div class="fraga" id="fraga-syv-typ">Typ av jobb</div>
+  <div class="rad3" id="syv-typ" role="group" aria-labelledby="fraga-syv-typ"></div>
 
   <label for="syv-skola">Skola</label>
   <input id="syv-skola" list="syv-skolor" placeholder="Börja skriva skolans namn" oninput="syvSkolaAndrad()" autocomplete="off" maxlength="80">
@@ -1414,7 +1422,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 </div>
 
 <div id="v-om" class="dold info">
-  <h2 class="som-h1">Om Chansen</h2>
+  <h2 class="som-h1" role="heading" aria-level="1">Om Chansen</h2>
   <p class="sub">Vad tjänsten gör, hur den fungerar och hur dina uppgifter hanteras.</p>
 
   <h2>Vad Chansen är</h2>
@@ -1423,7 +1431,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
   <h2>Varför Chansen finns</h2>
   <p>Platsbanken innehåller tiotusentals jobbannonser, men många kräver flera års erfarenhet, även för arbeten som går att lära sig på kort tid. Kraven framgår sällan av rubriken, och den som söker behöver därför läsa varje annons för att upptäcka dem.</p>
-  <p>Chansen gör den sorteringen. Varje natt går tjänsten igenom alla annonser och sorterar bort de som kräver utbildning, yrkesbevis eller lång erfarenhet. Kvar blir jobb med låga ingångskrav.</p>
+  <p>Chansen gör den sorteringen. Varje natt går tjänsten igenom annonserna och sorterar bort de som kräver utbildning, yrkesbevis eller lång erfarenhet, så långt det går att se i annonsen. Kvar blir jobb med låga ingångskrav.</p>
 
   <h2>Det här kan du göra</h2>
   <ul>
@@ -1449,7 +1457,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   <ul>
     <li>Chansen frågar aldrig om etnicitet, kön, hälsa, religion eller brottshistorik.</li>
     <li>Det som visas beskriver vad annonsen kräver, aldrig den som söker.</li>
-    <li>Är du under 18 visas inte jobb som lagen inte tillåter för din ålder, till exempel nattarbete. Inte heller jobb utomlands, jobb där annonsen kräver att man har fyllt 18 eller jobb som kräver körkort visas, om du inte har svarat att du har körkort. Är du under 16 visas bara deltid och lätt arbete. Har du inte valt ålder visas bara jobb som alla får ta.</li>
+    <li>Är du under 18 försöker Chansen dölja jobb som inte är tillåtna för din ålder, till exempel nattarbete. Inte heller jobb utomlands, jobb där annonsen kräver att man har fyllt 18 eller jobb som kräver körkort visas, om du inte har svarat att du har körkort. Är du under 16 visas bara deltid och jobb som ser ut att vara lätt arbete. Har du inte valt ålder visas bara jobb som alla får ta. Chansen kan bara läsa det som står i annonsen och kan missa något. Fråga alltid arbetsgivaren vilka arbetsuppgifter och arbetstider som gäller för dig.</li>
     <li>Chansen lovar aldrig att du får ett jobb och räknar inte ut sannolikheter.</li>
     <li>Tjänsten är kostnadsfri och kommer alltid att vara det för den som söker jobb.</li>
   </ul>
@@ -1480,7 +1488,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   <p><b>Ändringar.</b> Tjänsten drivs av en privatperson och kan ändras eller avslutas. Om tjänsten avslutas meddelas det på sidan.</p>
 
   <h2>Cookies</h2>
-  <p>Chansen använder inga cookies, varken egna eller från tredje part. Därför finns ingen cookieruta.</p>
+  <p>Chansen använder inga cookies, varken egna eller från tredje part. Dina svar, sparade jobb och ditt CV sparas i webbläsarens lagring, bara för att funktionerna ska fungera. Inget av det används för statistik.</p>
 
   <h2>Licens och källa</h2>
   <p>Annonserna är Arbetsförmedlingens öppna data, hämtade via API:et JobSearch från <a href="https://data.arbetsformedlingen.se" target="_blank" rel="noopener">data.arbetsformedlingen.se</a>. Datan är licensierad under <b>CC0</b> och får användas, bearbetas och spridas fritt. Chansen anger ändå källan, eftersom du ska kunna se var jobben kommer ifrån.</p>
@@ -1491,19 +1499,23 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 
   <p><b>Om du söker jobb.</b> Dina svar, dina sparade jobb, ditt CV och datumet för ditt senaste besök lagras i din egen webbläsare och skickas aldrig till Chansen. Om du rensar webbläsarens data raderas uppgifterna.</p>
 
-  <p><b>Mejllistan.</b> Om du anmäler dig sparas din mejladress hos Sender, som sköter utskicken för Chansens räkning. Chansen har ett personuppgiftsbiträdesavtal med Sender. Adressen används endast för att skicka information om nya jobb och lämnas aldrig ut till någon annan. Den rättsliga grunden är ditt samtycke, och du kan när som helst återkalla det genom att avsluta prenumerationen via länken i varje utskick. Du måste vara minst 13 år för att anmäla dig själv. Sender registrerar även tidpunkt och IP-adress vid anmälan, för att kunna visa att du själv har anmält dig. Du bekräftar anmälan via mejl. Anmälningar som inte bekräftas raderas efter 30 dagar.</p>
+  <p><b>Mejllistan.</b> Om du anmäler dig sparas din mejladress hos Sender, som sköter utskicken för Chansens räkning. Chansen har ett personuppgiftsbiträdesavtal med Sender. Adressen används endast för att skicka information om nya jobb och lämnas aldrig ut till någon annan. Den sparas tills du avslutar prenumerationen. Den rättsliga grunden är ditt samtycke, och du kan när som helst återkalla det genom att avsluta prenumerationen via länken i varje utskick. Du måste vara minst 13 år för att anmäla dig själv. Sender registrerar även tidpunkt och IP-adress vid anmälan, för att kunna visa att du själv har anmält dig. Du bekräftar anmälan via mejl. Anmälningar som inte bekräftas raderas efter 30 dagar.</p>
 
-  <p><b>Om du lägger upp ett jobb.</b> Chansen sparar de uppgifter du lämnar: företagets namn och organisationsnummer, uppgifter om jobbet samt ditt namn, din mejladress och, om du anger det, ditt telefonnummer. Uppgifterna lagras i ett kalkylark hos Google som bara Chansen har tillgång till. De används för att kontrollera att företaget finns, för att kunna kontakta dig om annonsen och för att publicera den. Den rättsliga grunden är berättigat intresse. Dina kontaktuppgifter publiceras aldrig.</p>
+  <p><b>Om du lägger upp ett jobb.</b> Chansen sparar de uppgifter du lämnar: företagets namn och organisationsnummer, uppgifter om jobbet samt ditt namn, din mejladress och, om du anger det, ditt telefonnummer. Uppgifterna lagras i ett kalkylark hos Google som bara Chansen har tillgång till. De används för att kontrollera att företaget finns, för att kunna kontakta dig om annonsen och för att publicera den. Den rättsliga grunden är berättigat intresse. Ditt namn, din mejladress och ditt telefonnummer publiceras aldrig. Det du själv skriver i fältet Kontakt för den som söker visas i annonsen. Har du enskild firma är organisationsnumret ditt personnummer. Det används bara för att kontrollera företaget och publiceras inte.</p>
 
   <p><b>Lagringstid.</b> Nekas eller tas annonsen bort raderas annonsen och dina personuppgifter samma natt. En publicerad annons raderas natten efter sista ansökningsdag, och saknas sista ansökningsdag raderas den efter 90 dagar. Raderingen sker automatiskt.</p>
 
-  <p><b>Synpunkter.</b> Om du skickar in synpunkter via Tyck till sparas dina svar och det du har skrivit. Dessutom sparas den ålder och ort du har valt, hur många jobb som visades för dig och vilken version av sidan du använde. Orten sparas bara om den är en svensk kommun. Formuläret frågar inte efter namn eller mejladress. Skriv därför inga personuppgifter i textrutan. Den rättsliga grunden är berättigat intresse, att kunna förbättra tjänsten.</p>
+  <p><b>Synpunkter.</b> Om du skickar in synpunkter via Tyck till sparas dina svar och det du har skrivit. Dessutom sparas den ålder och ort du har valt, hur många jobb som visades för dig och vilken version av sidan du använde. Orten sparas bara om den är en svensk kommun. Formuläret frågar inte efter namn eller mejladress. Skriv därför inga personuppgifter i textrutan. Svaren lagras i samma kalkylark hos Google och raderas efter 12 månader. Den rättsliga grunden är berättigat intresse, att kunna förbättra tjänsten.</p>
 
-  <p><b>Besöksstatistik.</b> Chansen använder Cloudflare Web Analytics och GoatCounter för att se hur tjänsten används, till exempel antal besök, vilka filter som används, vilka kommuner det söks i och hur många som går vidare till en annons. Uppgifterna sparas bara som totaler för alla besökare. Inga cookies används, och statistiken kan inte kopplas till dig.</p>
+  <p><b>Om du arbetar på en skola eller kommun.</b> Chansen kan mejla dig i din yrkesroll för att berätta om tjänsten. Då sparas ditt namn, din jobbadress, var du arbetar och när ni har haft kontakt. Uppgifterna kommer från din arbetsgivares webbplats eller från dig själv, och de finns aldrig på chansen.nu. Den rättsliga grunden är berättigat intresse, att berätta om en kostnadsfri tjänst för dem som hjälper andra att hitta jobb. Uppgifterna tas bort efter ett år utan kontakt, eller direkt om du ber om det. Du kan alltid invända, till exempel genom att svara "nej tack" på mejlet.</p>
+
+  <p><b>Besöksstatistik.</b> Chansen använder Cloudflare Web Analytics och GoatCounter för att se hur tjänsten används, till exempel antal besök, vilka filter som används, vilka kommuner det söks i och hur många som går vidare till en annons. Uppgifterna sparas bara som totaler för alla besökare. Inga cookies används. Cloudflare och GoatCounter tar emot din IP-adress när sidan laddas, men sparar den inte och visar den inte för Chansen. Den rättsliga grunden är berättigat intresse, att se hur tjänsten används.</p>
 
   <p><b>Jobbannonserna.</b> Mejladresser, telefonnummer och personnummer tas bort ur annonstexterna innan de visas. När arbetsgivaren är en privatperson visas endast "Privatperson". Hittar du ändå personuppgifter i en annons, kontakta <a href="mailto:chansen.jobb@gmail.com?subject=Personuppgifter%20i%20en%20annons">chansen.jobb@gmail.com</a> så tas de bort.</p>
 
   <p><b>Var sidan ligger.</b> Chansen ligger hos GitHub, som ägs av Microsoft. GitHub tar emot din IP-adress när du besöker sidan och sparar den en tid av säkerhetsskäl. Chansen har inte tillgång till den. Den rättsliga grunden är berättigat intresse, att sidan ska fungera och vara säker. Läs mer i <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener" target="_blank">GitHubs integritetspolicy</a>.</p>
+
+  <p><b>Överföring utanför EU.</b> Google, GitHub och Cloudflare kan behandla uppgifter i USA. Det sker med stöd av EU:s beslut om skyddsnivån i USA (Data Privacy Framework) och EU:s standardavtalsklausuler.</p>
 
   <p><b>Länkar till andra webbplatser.</b> När du följer en länk från Chansen gäller den webbplatsens egna regler för personuppgifter och cookies.</p>
 
@@ -1515,6 +1527,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   <p>Har du hittat ett fel, en annons som verkar falsk eller har du ett förslag? Kontakta <a href="mailto:chansen.jobb@gmail.com?subject=Chansen">chansen.jobb@gmail.com</a>. Felaktiga annonser tas bort så snart som möjligt.</p>
   <p>Vill du lämna synpunkter på tjänsten? <button class="lank" onclick="tyckOppna()">Tyck till</button></p>
 </div>
+</main>
 
 <footer style="margin-top:34px;font-size:12px;color:var(--n-600);text-align:center;line-height:1.6">
 Jobbannonserna kommer från Arbetsförmedlingens öppna data, API:et JobSearch.<br>
@@ -1556,7 +1569,7 @@ version 140</footer>
 
 <button id="upp" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Till toppen">&#8593;</button>
 
-<nav>
+<nav aria-label="Meny">
   <button id="n-jobb" class="on" onclick="visaVy('jobb')">Jobb</button>
   <button id="n-mina" onclick="visaVy('mina')">Sparade</button>
   <button id="n-cv" onclick="visaVy('cv')">CV</button>
@@ -1665,19 +1678,28 @@ function ritaFragor(){
   }
 }
 
+/* Knapparna ritas om varje gång man väljer. Då tappas fokus, och den som
+   använder tangentbordet hamnar högst upp på sidan. Fokus läggs därför
+   tillbaka på knappen på samma plats. */
+function ritaKnappar(el, html){
+  var i = Array.prototype.indexOf.call(el.children, document.activeElement);
+  el.innerHTML = html;
+  if (i > -1 && el.children[i]) el.children[i].focus();
+}
+
 function ritaFragorInre(){
   for (var falt in fragor){
     var el = document.getElementById("q-" + falt);
     if (!el) continue;
-    el.innerHTML = fragor[falt].map(function(v){
+    ritaKnappar(el, fragor[falt].map(function(v){
       var pa = flerval[falt] ? (svar[falt] || []).indexOf(v) > -1 : svar[falt] === v;
       var etikett = v;
       if (falt === "omrade"){
         var n = antalIOmrade(v);
         if (n !== null) etikett = v + ' <span class="antal">' + n + '</span>';
       }
-      return '<button class="'+(pa ? "on" : "")+'" onclick="valj(\''+falt+'\',\''+v.replace(/'/g,"")+'\')">'+etikett+'</button>';
-    }).join("");
+      return '<button class="'+(pa ? "on" : "")+'" aria-pressed="'+pa+'" onclick="valj(\''+falt+'\',\''+v.replace(/'/g,"")+'\')">'+etikett+'</button>';
+    }).join(""));
   }
 }
 
@@ -1735,12 +1757,12 @@ function ritaOmraden(){
   visaOrtAntal();
   var el = document.getElementById("q-omrade");
   if (!el) return;
-  el.innerHTML = fragor.omrade.map(function(v){
+  ritaKnappar(el, fragor.omrade.map(function(v){
     var pa = (svar.omrade || []).indexOf(v) > -1;
     var n = antalIOmrade(v);
     var etikett = (n === null) ? v : v + ' <span class="antal">' + n + '</span>';
-    return '<button class="'+(pa ? "on" : "")+'" onclick="valj(\'omrade\',\''+v.replace(/'/g,"")+'\')">'+etikett+'</button>';
-  }).join("");
+    return '<button class="'+(pa ? "on" : "")+'" aria-pressed="'+pa+'" onclick="valj(\'omrade\',\''+v.replace(/'/g,"")+'\')">'+etikett+'</button>';
+  }).join(""));
 }
 
 function valj(falt, varde){
@@ -1786,7 +1808,9 @@ function visaVy(vy, franBakat){
   }
   var nk = ["jobb","mina","cv","hjalp","om"];
   for (var k = 0; k < nk.length; k++){
-    document.getElementById("n-" + nk[k]).className = (vy === nk[k]) ? "on" : "";
+    var nkn = document.getElementById("n-" + nk[k]);
+    nkn.className = (vy === nk[k]) ? "on" : "";
+    if (vy === nk[k]) nkn.setAttribute("aria-current", "page"); else nkn.removeAttribute("aria-current");
   }
   if (vy === "mina") ritaMina();
   if (vy === "cv") oppnaCV();
@@ -1794,7 +1818,14 @@ function visaVy(vy, franBakat){
   if (vy === "arbetsgivare") agStarta();
   if (vy === "mejl") laddaMejllista();
   window.scrollTo(0,0);
+  // Fliken får vyns namn, och fokus flyttas till rubriken, så att den som
+  // använder skärmläsare hör att sidan bytts. Inte när sidan just laddats.
+  if (!grundTitel) grundTitel = document.title;
+  var rub = document.getElementById("v-" + vy).querySelector("h1,h2,h3");
+  document.title = (vy === "start" || vy === "jobb" || !rub) ? grundTitel : "Chansen: " + rub.textContent;
+  if (vyFokus && rub){ rub.tabIndex = -1; rub.focus({ preventScroll: true }); }
 }
+var grundTitel = "", vyFokus = false;
 
 // Vilken vy syns just nu?
 function synligVy(){
@@ -1855,8 +1886,6 @@ function startaLista(){
   var efterat = function(){
     spara();
     handelse("visade-jobb");
-    // Rubriktestet: räknas en gång, för den som såg startsidan.
-    if (RUBRIK_VISAD && !RUBRIK_RAKNAD) { handelse("rubrik-" + RUBRIK_VARIANT + "-vidare"); RUBRIK_RAKNAD = true; }
     // vet vi om folk går vidare direkt eller svarar på allt först?
     var extra = (svar.utbildning ? 1 : 0) + (svar.korkort ? 1 : 0)
               + (svar.erfarenhet ? 1 : 0) + ((svar.omrade && svar.omrade.length) ? 1 : 0);
@@ -1893,6 +1922,11 @@ function matcharAlder(j){
   if (svar.alder === "Under 16"){
     // Bara lätt arbete är tillåtet i den åldern.
     if (EJ_LATT_ARBETE.indexOf(j.kategori) > -1) return false;
+    // Kassa och kök räknas inte som lätt arbete för 13 till 15 år.
+    if (/kassa|kassör|kök|kock|fritös|frityr|grill|pommes/i.test((j.titel || "") + " " + (j.beskrivning || ""))) return false;
+    // Arbetsgivarna svarar bara på om någon under 18 får göra jobbet,
+    // inte om det passar 13 till 15 år. Deras annonser visas därför från 16.
+    if (j.egen) return false;
     // Bara deltid. Heltid är oftast 40 timmar i veckan, och i den här
     // åldern får man jobba högst 35 timmar, och bara på lov. Står det
     // ingen omfattning går det inte att avgöra, och då visas jobbet inte.
@@ -2139,7 +2173,7 @@ function kort(j){
 
   return '<div class="card">'+
     '<div class="kicker'+(top ? "" : " medel")+'">'+etikett+'</div>'+
-    '<div class="titel">'+titel+'</div>'+
+    '<h2 class="titel">'+titel+'</h2>'+
     '<div class="ag">'+arbetsgivare+(ort ? ' &middot; '+ort : '')+(j.egen ? ' &middot; <b>lagd upp av arbetsgivaren</b>' : '')+'</div>'+
     (j.kontaktSokande ? '<div class="ag" style="margin-top:-8px">Kontakt: '+fly(j.kontaktSokande)+'</div>' : '')+
     (j.beskrivning ? '<div class="beskrivning">'+fly(j.beskrivning)+'</div>' : '')+
@@ -2210,7 +2244,7 @@ function minirad(lank, visaSvarsknapp){
     knappar = '<button class="mini" onclick="settStatus(\''+jsArg(lank)+'\',\'bort\')">Ta bort</button>';
   }
   return '<div class="card">'+pafyll+
-    '<div class="titel">'+titel+'</div>'+
+    '<h3 class="titel">'+titel+'</h3>'+
     '<div class="ag">'+ag+(borta ? ' &middot; annonsen är borttagen' : '')+'</div>'+
     '<div class="rad"><a class="btn liten" href="'+sakerLank(lank)+'" target="_blank" rel="noopener noreferrer nofollow">Se annonsen</a></div>'+
     '<div class="knapprad">'+knappar+'</div></div>';
@@ -2535,7 +2569,7 @@ function hjalpVisa(del){
     var el = document.getElementById("hjalp-" + d);
     if (el) el.className = (d === del) ? "info" : "dold info";
     var kn = document.getElementById("h-" + d);
-    if (kn) kn.className = (d === del) ? "on" : "";
+    if (kn){ kn.className = (d === del) ? "on" : ""; kn.setAttribute("aria-pressed", d === del); }
   }
   window.scrollTo(0,0);
 }
@@ -2606,10 +2640,10 @@ function agRita(){
   for (var f in AG_VAL){
     var el = document.getElementById("ag-" + f);
     if (!el) continue;
-    el.innerHTML = AG_VAL[f].map(function(v){
+    ritaKnappar(el, AG_VAL[f].map(function(v){
       var pa = AG_FLERVAL[f] ? ((ag[f] || []).indexOf(v) > -1) : (ag[f] === v);
-      return '<button class="' + (pa ? "on" : "") + '" onclick="agValj(\'' + f + '\',\'' + v.replace(/'/g,"") + '\')">' + v + '</button>';
-    }).join("");
+      return '<button class="' + (pa ? "on" : "") + '" aria-pressed="' + pa + '" onclick="agValj(\'' + f + '\',\'' + v.replace(/'/g,"") + '\')">' + v + '</button>';
+    }).join(""));
   }
   agKolla();
 }
@@ -2636,6 +2670,10 @@ function agValj(f, v){
 function agFalt(id){
   var el = document.getElementById("ag-" + id);
   return el ? el.value.trim() : "";
+}
+function agOgiltig(id, fel){
+  var el = document.getElementById("ag-" + id);
+  if (el) el.setAttribute("aria-invalid", fel);
 }
 
 // Samma standard som den automatiska filtreringen. Annars kan en annons
@@ -2730,6 +2768,13 @@ function agKolla(){
     lonSvar.textContent = "Bra. Skriv gärna vilket avtal i beskrivningen.";
     lonSvar.style.color = "var(--n-600)";
   }
+
+  // Skärmläsare säger att fältet är fel. Förklaringen står i rutan under
+  // fältet, som är kopplad med aria-describedby.
+  agOgiltig("beskrivning", hittade.length > 0);
+  agOgiltig("orgnr", problem.indexOf("organisationsnummer") > -1);
+  agOgiltig("lank", problem.indexOf("länk") > -1);
+  agOgiltig("belopp", problem.indexOf("lönebelopp") > -1);
 
   var kravda = [["foretag","företagets namn"],["orgnr","organisationsnummer"],["titel","jobbets namn"],
                 ["ort","ort"],["lank","länk"],["mejl","mejladress"],["kontakt","kontaktuppgifter"]];
@@ -3016,13 +3061,21 @@ function visaHemskarm(){
       document.getElementById("hemskarm-ok").textContent = "Lägg till";
     }
     document.getElementById("hemskarm").className = "";
+    // Fokus in i rutan, och tillbaka dit man var när den stängs.
+    hemskarmFran = document.activeElement;
+    document.getElementById("hemskarm-ok").focus();
     handelse("hemskarm-visad");
   } catch(e){}
 }
+var hemskarmFran = null;
+document.getElementById("hemskarm").addEventListener("keydown", function(e){
+  if (e.key === "Escape") hemskarmSvar("inte-nu");
+});
 
 function hemskarmSvar(svarat){
   try { localStorage.setItem("chansen-hemskarm", svarat); } catch(e){}
   document.getElementById("hemskarm").className = "dold";
+  if (hemskarmFran && hemskarmFran.focus) hemskarmFran.focus();
   handelse("hemskarm-" + svarat);
   if (svarat === "ja" && installeraHandelse) {
     installeraHandelse.prompt();
@@ -3030,27 +3083,9 @@ function hemskarmSvar(svarat){
   }
 }
 
-/* Räknar hur många som kommer tillbaka, utan att lagra något om personen.
-   Enda som sparas är ett datum i den egna telefonen. Ingen identifierare,
-   inget som lämnar enheten, och siffran blir bara en summa i statistiken. */
-function raknaBesok(){
-  try {
-    var NYCKEL = "chansen-senast";
-    var idag = new Date().toISOString().slice(0, 10);
-    var senast = localStorage.getItem(NYCKEL);
-
-    if (!senast){
-      handelse("forsta-besoket");
-    } else if (senast !== idag){
-      var dagar = Math.round(
-        (new Date(idag) - new Date(senast)) / 86400000);
-      if (dagar <= 7)       handelse("ater-inom-veckan");
-      else if (dagar <= 30) handelse("ater-inom-manaden");
-      else                  handelse("ater-efter-lange");
-    }
-    localStorage.setItem(NYCKEL, idag);
-  } catch(e){ /* privat läge eller fullt utrymme, strunt samma */ }
-}
+// Rubriktestet och räkningen av återbesök är borttagna. Det de sparade
+// i telefonen tas bort här, så att inget sparas bara för statistik.
+try { localStorage.removeItem("chansen-rubrik"); localStorage.removeItem("chansen-senast"); } catch(e){}
 
 /* Mejllistan ligger hos en extern tjänst, just nu Sender.
 
@@ -3110,7 +3145,7 @@ function jobbFranAdressen(){
 
   if (!j){
     el.innerHTML =
-      '<h2 class="som-h1" style="font-size:26px;margin-bottom:8px">Jobbet finns inte kvar</h2>'
+      '<h2 class="som-h1" role="heading" aria-level="1" style="font-size:26px;margin-bottom:8px">Jobbet finns inte kvar</h2>'
       + '<p class="sub">Annonsen har troligen tagits bort eller gått ut. '
       + 'Men det finns fler.</p>'
       + '<button class="btn" onclick="location.hash=\'\'; visaVy(\'start\')">'
@@ -3359,6 +3394,8 @@ function cvVisa(del){
   document.getElementById("cv-bygg").className = del === "bygg" ? "" : "dold";
   document.getElementById("c-guide").className = del === "guide" ? "on" : "";
   document.getElementById("c-bygg").className = del === "bygg" ? "on" : "";
+  document.getElementById("c-guide").setAttribute("aria-pressed", del === "guide");
+  document.getElementById("c-bygg").setAttribute("aria-pressed", del === "bygg");
   if (del === "bygg") { cvSteg = forstaOfyllda(); ritaSteg(); }
   window.scrollTo(0,0);
 }
@@ -3734,10 +3771,10 @@ function valjMall(m){
 function ritaMallval(){
   var el = document.getElementById("cv-mallval");
   if (!el) return;
-  el.innerHTML = CV_MALLAR.map(function(par){
+  ritaKnappar(el, CV_MALLAR.map(function(par){
     return '<button class="forslag' + (par[0] === valdMall ? ' pa' : '') +
-      '" onclick="valjMall(\'' + par[0] + '\')">' + par[1] + '</button>';
-  }).join("");
+      '" aria-pressed="' + (par[0] === valdMall) + '" onclick="valjMall(\'' + par[0] + '\')">' + par[1] + '</button>';
+  }).join(""));
 }
 
 function ritaForhandsvisning(){
@@ -4097,11 +4134,11 @@ function ritaEgenskaper(){
   /* Knapparna byggs utan onclick i texten. JSON.stringify gav dubbla
      citattecken som bröt attributet, och då hände ingenting när man
      tryckte. Nu kopplas klicket på i koden i stället.              */
-  el.innerHTML = EGENSKAPER.map(function(g, i){
+  ritaKnappar(el, EGENSKAPER.map(function(g, i){
     var pa = valdaEgenskaper.indexOf(g.kort) > -1;
     return '<button type="button" data-i="' + i + '" class="' + (pa ? "on" : "")
-      + '">' + fly(g.kort) + "</button>";
-  }).join("");
+      + '" aria-pressed="' + pa + '">' + fly(g.kort) + "</button>";
+  }).join(""));
 
   var knappar = el.querySelectorAll("button");
   for (var k = 0; k < knappar.length; k++){
@@ -4268,6 +4305,8 @@ function raknaFilter(iOmradet){
       if (kn){
         var i_ = kn.querySelector("i");
         if (i_) i_.textContent = antalPer[ai];
+        // Annars läses det upp som "Bäst chans383".
+        kn.setAttribute("aria-label", kn.firstChild.nodeValue + ", " + antalPer[ai] + " jobb");
       }
     }
   };
@@ -4719,7 +4758,6 @@ window.addEventListener("hashchange", kollaAdress);
 // Chansen på hemskärmen sitta kvar på en gammal version i dagar.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
-  raknaBesok();
     navigator.serviceWorker.register("sw.js").then(function (reg) {
       reg.addEventListener("updatefound", function () {
         var ny = reg.installing;
@@ -4775,26 +4813,6 @@ if ("serviceWorker" in navigator) {
   } catch(e){}
 })();
 
-/* Rubriktest. Varannan ny besökare får rubrik A, varannan rubrik B, och
-   samma besökare får alltid samma. I statistiken syns hur många som såg
-   varje rubrik och hur många av dem som gick vidare till jobben. Det
-   enda som sparas är bokstaven, i den egna telefonen.
-   Byt text i RUBRIKER för att testa något nytt.                     */
-var RUBRIKER = {
-  a: "Jobb som är värda att söka.",
-  b: "Jobb med låga krav, nära dig."
-};
-var RUBRIK_VARIANT = "a", RUBRIK_VISAD = false, RUBRIK_RAKNAD = false;
-try {
-  RUBRIK_VARIANT = localStorage.getItem("chansen-rubrik") || (Math.random() < 0.5 ? "a" : "b");
-  if (!RUBRIKER[RUBRIK_VARIANT]) RUBRIK_VARIANT = "a";
-  localStorage.setItem("chansen-rubrik", RUBRIK_VARIANT);
-} catch(e){}
-(function(){
-  var h = document.getElementById("start-rubrik");
-  if (h) h.textContent = RUBRIKER[RUBRIK_VARIANT];
-})();
-
 /* Jobben först. Test från 13 november 2026: nya besökare landar direkt
    på jobblistan, med siffran, åldern och orten högst upp. Tills man valt
    ålder visas bara jobb som alla får ta. Sätt till false för att gå
@@ -4805,10 +4823,10 @@ var SNABB_ALDRAR = [["Under 16", "Under 16"], ["16 till 17", "16–17"], ["18 el
 function ritaSnabbAlder(){
   var el = document.getElementById("snabb-alder");
   if (!el) return;
-  el.innerHTML = SNABB_ALDRAR.map(function(a){
+  ritaKnappar(el, SNABB_ALDRAR.map(function(a){
     return '<button class="' + (svar.alder === a[0] ? "on" : "") + '" aria-pressed="' + (svar.alder === a[0])
       + '" onclick="snabbAlder(\'' + a[0] + '\')">' + a[1] + '</button>';
-  }).join("");
+  }).join(""));
 }
 function storBokstav(v){ v = (v || "").trim(); return v ? v.charAt(0).toUpperCase() + v.slice(1) : ""; }
 // Siffran räknas på samma sätt som listan, så att de alltid stämmer.
@@ -4886,9 +4904,9 @@ var FILTER_FRAN_LANK = { "sommar": "sasong", "deltid": "deltid", "nyborjare": "n
 var syvVal = { alder: "", typ: "" };
 
 function syvKnappar(id, lista, nyckel){
-  document.getElementById(id).innerHTML = lista.map(function(a){
-    return '<button class="' + (syvVal[nyckel] === a[0] ? "on" : "") + '" onclick="syvVal.' + nyckel + '=\'' + a[0] + '\';syvUppdatera()">' + a[1] + '</button>';
-  }).join("");
+  ritaKnappar(document.getElementById(id), lista.map(function(a){
+    return '<button class="' + (syvVal[nyckel] === a[0] ? "on" : "") + '" aria-pressed="' + (syvVal[nyckel] === a[0]) + '" onclick="syvVal.' + nyckel + '=\'' + a[0] + '\';syvUppdatera()">' + a[1] + '</button>';
+  }).join(""));
 }
 /* Skolans hemliga kod. Den skapas av skriptet hos Google, som sparar
    kopplingen mellan kod och skola i fliken Skolkoder. Länken innehåller
@@ -4950,13 +4968,22 @@ function syvVisaKlar(){
   document.getElementById("syv-steg").className = "dold";
   document.getElementById("syv-klar").className = "";
   var qr = qrcode(0, "M"); qr.addData(syvLankText()); qr.make();
-  document.getElementById("syv-qr").innerHTML = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+  document.getElementById("syv-qr").innerHTML = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true, title: "QR-kod till länken för eleverna" });
+}
+// Fältet som är fel markeras för skärmläsare och får fokus.
+function syvFel(id){
+  ["syv-ort","syv-skola"].forEach(function(f){
+    var el = document.getElementById(f);
+    if (f === id){ el.setAttribute("aria-invalid", "true"); el.setAttribute("aria-describedby", "syv-status"); el.focus(); }
+    else { el.removeAttribute("aria-invalid"); el.removeAttribute("aria-describedby"); }
+  });
 }
 function syvSkapa(){
   var status = document.getElementById("syv-status");
-  if (!syvKommun()) { status.textContent = "Skriv kommunen först."; return; }
+  if (!syvKommun()) { status.textContent = "Skriv kommunen först."; syvFel("syv-ort"); return; }
   var skola = syvRiktigSkola();
-  if (!skola) { status.textContent = "Välj skolan i listan som visas när du skriver."; return; }
+  if (!skola) { status.textContent = "Välj skolan i listan som visas när du skriver."; syvFel("syv-skola"); return; }
+  syvFel("");
   document.getElementById("syv-skola").value = skola;
   status.textContent = "Skapar länken…";
   var kropp = new URLSearchParams();
@@ -5017,8 +5044,8 @@ function syvAffisch(){
       : syvVal.alder === "18" ? ", för dig som är 18 eller äldre."
       : ", sorterade efter din ålder.");
   var qr = qrcode(0, "M"); qr.addData(syvLankText()); qr.make();
-  var svg = qr.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
-  var steg = [["Skanna koden", "med kameran i mobilen"], ["Se jobben", "som passar dig, nära dig"], ["Sök direkt", "nya jobb varje natt"]];
+  var svg = qr.createSvgTag({ cellSize: 8, margin: 2, scalable: true, title: "QR-kod till länken för eleverna" });
+  var steg = [["Skanna koden", "med kameran i mobilen"], ["Se jobben", "som passar dig, nära dig"], ["Sök direkt", "listan uppdateras varje natt"]];
   // Typsnitten hämtas från samma ställe som sidan, så att de alltid finns.
   var typsnitt = function(f){ return new URL(f, document.baseURI).href; };
   var html = '<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>Chansen affisch</title><style>'
@@ -5050,7 +5077,7 @@ function syvAffisch(){
     + '</style></head><body><div class="sida">'
     + '<div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>'
     + '<div class="inne">'
-    + '<div class="fran">Gratis, och nya jobb varje natt</div>'
+    + '<div class="fran">Gratis, och uppdateras varje natt</div>'
     + '<h1><span>' + esc(forsta) + '</span>nära dig</h1>'
     + '<div class="under">' + esc(under) + '</div>'
     + '<div class="qrdel"><div class="qr">' + svg + '</div><div class="lapp">Skanna här</div></div>'
@@ -5096,9 +5123,8 @@ if (kollaAdress()) {
   if (!svar.alder) handelse("jobbforst-ny");
 } else if (svar.alder) { startaLista(); } else {
   visaVy("start");
-  RUBRIK_VISAD = true;
-  handelse("rubrik-" + RUBRIK_VARIANT + "-visad");
 }
+vyFokus = true;   // från och med nu byts vyer bara när någon trycker
 // Rutan om hemskärmen kommer efter en stund, när man hunnit titta på jobben.
 setTimeout(visaHemskarm, 8000);
 window.addEventListener("scroll", function(){

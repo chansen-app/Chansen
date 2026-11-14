@@ -590,7 +590,9 @@ function arForUnga(j) {
   return !j.land && j.minderarigOk === true && j.korkortKravs !== true && j.nattarbete !== true;
 }
 function arForYngre(j) {
-  return arForUnga(j) && EJ_LATT_ARBETE_ALLA.indexOf(j.kategori) === -1 && /deltid/i.test(j.omfattning || "");
+  // Kassa och kök räknas inte som lätt arbete för 13 till 15 år.
+  return arForUnga(j) && EJ_LATT_ARBETE_ALLA.indexOf(j.kategori) === -1 && /deltid/i.test(j.omfattning || "")
+    && !/kassa|kassör|kök|kock|fritös|frityr|grill|pommes/i.test((j.titel || "") + " " + (j.beskrivning || ""));
 }
 // Sidor per ort och ålder, till exempel jobb-for-16-och-17-aringar-boras.html
 function aldersLank(typ, ort) {
@@ -1040,7 +1042,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
     + '<meta property="og:url" content="' + o.url + '">\n'
     + (o.ld ? '<script type="application/ld+json">' + o.ld + '</script>\n' : '')
     + STIL
-    + '</head>\n<body>\n<div class="inre">\n'
+    + '</head>\n<body>\n<div class="inre">\n<main>\n'
     + o.kropp
     // Anmälan till jobbmejlet. Samma anmälningssida hos Sender som på
     // startsidan, så inga personuppgifter hamnar hos Chansen.
@@ -1054,7 +1056,7 @@ function skrivOrtssidor(jobb, hamtadTid) {
     + 'gratis att använda. Det du fyller i sparas bara i din egen telefon.</p>\n'
     + '<p>Jobben kommer från Arbetsförmedlingens öppna data. '
     + 'Arbetsförmedlingen står inte bakom sidan, den drivs av en privatperson.</p>\n'
-    + '<footer>Uppdaterad ' + datum + '. '
+    + '</main>\n<footer>Uppdaterad ' + datum + '. '
     + '<a href="https://chansen.nu/">chansen.nu</a> · '
     + '<a href="https://chansen.nu/jobb/">Alla orter</a></footer>\n'
     + '</div>\n</body>\n</html>\n';

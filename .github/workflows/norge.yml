@@ -13,8 +13,9 @@ name: Hämta norska jobb
 # Du kan också starta den för hand under fliken Actions på GitHub.
 
 on:
-  schedule:
-    - cron: "0 6 * * *"     # 06:00 UTC, alltså 08:00 svensk sommartid
+  # PAUSAD 14 november 2026, sidan är nedtagen. Ta bort # på de två raderna nedan för att starta igen.
+#  schedule:
+#    - cron: "0 6 * * *"     # 06:00 UTC, alltså 08:00 svensk sommartid
   workflow_dispatch:
 
 permissions:
