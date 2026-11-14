@@ -1355,6 +1355,64 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   </div>
 </div>
 
+
+<div id="v-syv" class="dold info">
+  <style>
+    #v-syv .rad3{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:18px}
+    #v-syv .rad3 button{border:0;border-radius:999px;padding:10px 16px;background:#fffaf4;font:inherit;font-size:14.5px;
+      font-weight:600;color:#5a4a3c;cursor:pointer;box-shadow:0 2px 8px rgba(100,51,18,.10)}
+    #v-syv .rad3 button.on{background:#c67139;color:#fff;box-shadow:0 4px 14px rgba(198,113,57,.35)}
+    #v-syv label{display:block;text-align:center;font-size:16px;font-weight:600;color:#5a4a3c;margin:0 0 10px}
+    #v-syv input{width:100%;box-sizing:border-box;border:0;border-radius:999px;padding:14px 20px;font:inherit;font-size:16px;
+      background:#fffaf4;text-align:center;box-shadow:0 2px 10px rgba(100,51,18,.10);margin-bottom:18px}
+    #v-syv input:focus{outline:none;box-shadow:0 0 0 3px rgba(198,113,57,.25),0 2px 10px rgba(100,51,18,.10)}
+    #syv-resultat{background:#fffaf4;border-radius:24px;padding:22px;text-align:center;box-shadow:0 2px 10px rgba(100,51,18,.08)}
+    #syv-antal{font-family:Caprasimo,serif;font-size:44px;color:#c67139;line-height:1}
+    #syv-lank{word-break:break-all;font-size:14px;background:#f5ead8;border-radius:12px;padding:10px 12px;margin:14px 0}
+    #syv-qr{display:flex;justify-content:center;margin:14px 0}
+    #syv-qr svg, #syv-qr img{width:180px;height:180px}
+  </style>
+  <h2 class="som-h1" style="text-align:center">Länk till dina elever</h2>
+  <p class="sub" style="text-align:center">Välj vad eleverna ska se. Du får en länk och en QR-kod som visar rätt jobb direkt, och som uppdateras varje natt.</p>
+
+  <label for="syv-ort">Ort</label>
+  <input id="syv-ort" placeholder="Skriv kommunen" oninput="syvUppdatera()" autocomplete="off">
+
+  <label>Ålder</label>
+  <div class="rad3" id="syv-alder"></div>
+
+  <label>Typ av jobb</label>
+  <div class="rad3" id="syv-typ"></div>
+
+  <label for="syv-skola">Skola</label>
+  <input id="syv-skola" list="syv-skolor" placeholder="Börja skriva skolans namn" oninput="syvSkolaAndrad()" autocomplete="off" maxlength="80">
+  <datalist id="syv-skolor"></datalist>
+  <!-- Robotfälla: syns inte för människor. Fylls den i sparas inget. -->
+  <input id="syv-webbplats" tabindex="-1" autocomplete="off" aria-hidden="true"
+         style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+
+  <div id="syv-resultat">
+    <div id="syv-antal">–</div>
+    <div id="syv-antaltext" style="font-weight:600;margin-top:6px"></div>
+    <div id="syv-steg">
+      <button class="btn" style="margin-top:16px" onclick="syvSkapa()">Skapa länk</button>
+      <div id="syv-status" class="hint" style="margin-top:10px" role="status" aria-live="polite"></div>
+    </div>
+    <div id="syv-klar" class="dold">
+      <div style="font-weight:600;margin-top:14px">Länken är klar</div>
+      <div id="syv-qr"></div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn" onclick="syvKopiera()">Kopiera länken</button>
+        <button class="btn" onclick="syvAffisch()">Affisch att skriva ut</button>
+        <button class="mini" onclick="syvLaddaQr()">Spara QR-koden</button>
+        <button class="mini" onclick="syvTesta()">Testa länken</button>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:14px">Skolan får en egen kod i länken. Länken innehåller bara ort, ålder, typ av jobb och koden.
+      Ingenting om eleverna sparas. Skolan väljs ur Skolverkets register över skolor.</p>
+  </div>
+</div>
+
 <div id="v-om" class="dold info">
   <h2 class="som-h1">Om Chansen</h2>
   <p class="sub">Vad tjänsten gör, hur den fungerar och hur dina uppgifter hanteras.</p>
@@ -1720,10 +1778,10 @@ function visaVy(vy, franBakat){
       catch (e) { /* vissa lägen tillåter inte pushState, då fungerar allt som förut */ }
     }
   }
-  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare","mejl","enskilt","tyck"];
+  var vyer = ["start","jobb","mina","ansokan","cv","hjalp","om","arbetsgivare","mejl","enskilt","tyck","syv"];
   for (var i = 0; i < vyer.length; i++){
     var el = document.getElementById("v-" + vyer[i]);
-    var bas = (vyer[i] === "om") ? "info" : "";
+    var bas = (vyer[i] === "om" || vyer[i] === "syv") ? "info" : "";
     el.className = (vy === vyer[i]) ? bas : (bas + " dold").trim();
   }
   var nk = ["jobb","mina","cv","hjalp","om"];
@@ -4622,6 +4680,7 @@ function kollaAdress(){
   if (location.hash === "#arbetsgivare") { visaVy("arbetsgivare"); return true; }
   // chansen.nu/#cv öppnar CV-byggaren direkt, till exempel från en affisch
   if (location.hash === "#cv") { visaVy("cv"); return true; }
+  if (location.hash === "#syv") { visaVy("syv"); if (document.readyState === "complete") setTimeout(syvStarta, 0); else window.addEventListener("load", syvStarta); return true; }
   if (/^#jobb-[\wåäöÅÄÖ-]+$/.test(location.hash || "")) return jobbFranAdressen();
   return false;
 }
@@ -4798,12 +4857,223 @@ function startaSnabbval(){
 var startaListaUtanSnabbval = startaLista;
 startaLista = function(){
   startaListaUtanSnabbval();
+  if (LANK_FILTER) { var f = LANK_FILTER; LANK_FILTER = ""; setTimeout(function(){ visaInre(f); visa(aktuellLista.length ? f : "alla"); }, 50); }
   if (!JOBB_FORST) return;
   var snabb = document.getElementById("snabb-ort");
   if (snabb) snabb.value = svar.ort || "";
   ritaSnabbAlder();
   snabbAntal();
 };
+
+/* PROTOTYP: länkar för syv */
+var SYV_ALDRAR = [["", "Alla åldrar"], ["u16", "Under 16"], ["16-17", "16–17"], ["18", "18+"]];
+var SYV_TYPER = [["", "Alla jobb"], ["sommar", "Sommar och säsong"], ["deltid", "Extrajobb, deltid"]];
+var ALDER_FRAN_LANK = { "u16": "Under 16", "16-17": "16 till 17", "18": "18 eller äldre" };
+var FILTER_FRAN_LANK = { "sommar": "sasong", "deltid": "deltid", "nyborjare": "nyborjare" };
+var syvVal = { alder: "", typ: "" };
+
+function syvKnappar(id, lista, nyckel){
+  document.getElementById(id).innerHTML = lista.map(function(a){
+    return '<button class="' + (syvVal[nyckel] === a[0] ? "on" : "") + '" onclick="syvVal.' + nyckel + '=\'' + a[0] + '\';syvUppdatera()">' + a[1] + '</button>';
+  }).join("");
+}
+/* Skolans hemliga kod. Den skapas av skriptet hos Google, som sparar
+   kopplingen mellan kod och skola i fliken Skolkoder. Länken innehåller
+   bara koden, aldrig skolans namn. */
+var syvSkolkod = "";
+/* Skolor per kommun, från Skolverkets öppna register. Bara en skola i
+   listan går att välja, så man kan inte skriva vad som helst. */
+var SKOLOR = {};
+/* Skolorna och QR-biblioteket hämtas först när sidan för syv öppnas,
+   så att vanliga besökare inte behöver ladda dem. */
+function syvStarta(){
+  syvUppdatera();
+  if (typeof qrcode === "undefined") {
+    var s = document.createElement("script");
+    s.src = "qrcode.min.js";
+    document.head.appendChild(s);
+  }
+  if (!Object.keys(SKOLOR).length) {
+    fetch("skolor.json").then(function(r){ return r.json(); })
+      .then(function(d){ SKOLOR = d; syvSkolorFor = null; syvUppdatera(); })
+      .catch(function(){});
+  }
+}
+function syvKommun(){
+  var ort = document.getElementById("syv-ort").value.trim().toLowerCase();
+  for (var k in SKOLOR) if (k.toLowerCase() === ort) return k;
+  return "";
+}
+function syvRiktigSkola(){
+  var kommun = syvKommun(), namn = document.getElementById("syv-skola").value.trim().toLowerCase();
+  var lista = SKOLOR[kommun] || [];
+  for (var i = 0; i < lista.length; i++) if (lista[i].toLowerCase() === namn) return lista[i];
+  return "";
+}
+var syvSkolorFor = null;
+function syvFyllSkolor(){
+  var kommun = syvKommun();
+  if (kommun === syvSkolorFor) return;
+  syvSkolorFor = kommun;
+  document.getElementById("syv-skolor").innerHTML = (SKOLOR[kommun] || []).map(function(n){
+    return '<option value="' + n.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;") + '">';
+  }).join("");
+}
+function syvSkolaAndrad(){
+  syvSkolkod = "";
+  document.getElementById("syv-klar").className = "dold";
+  document.getElementById("syv-steg").className = "";
+}
+function syvLankText(){
+  var ort = document.getElementById("syv-ort").value.trim();
+  var delar = [];
+  if (ort) delar.push("ort=" + encodeURIComponent(storBokstav(ort)));
+  if (syvVal.alder) delar.push("alder=" + syvVal.alder);
+  if (syvVal.typ) delar.push("visa=" + syvVal.typ);
+  delar.push("fran=s-" + syvSkolkod);
+  return "https://chansen.nu/?" + delar.join("&");
+}
+function syvVisaKlar(){
+  document.getElementById("syv-steg").className = "dold";
+  document.getElementById("syv-klar").className = "";
+  var qr = qrcode(0, "M"); qr.addData(syvLankText()); qr.make();
+  document.getElementById("syv-qr").innerHTML = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+}
+function syvSkapa(){
+  var status = document.getElementById("syv-status");
+  if (!syvKommun()) { status.textContent = "Skriv kommunen först."; return; }
+  var skola = syvRiktigSkola();
+  if (!skola) { status.textContent = "Välj skolan i listan som visas när du skriver."; return; }
+  document.getElementById("syv-skola").value = skola;
+  status.textContent = "Skapar länken…";
+  var kropp = new URLSearchParams();
+  kropp.append("sort", "skolkod");
+  kropp.append("skola", skola);
+  kropp.append("ort", document.getElementById("syv-ort").value.trim());
+  kropp.append("webbplats", document.getElementById("syv-webbplats").value);
+  fetch(SKICKA_URL, { method: "POST", body: kropp })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d && d.ok && /^[a-z0-9]{6}$/.test(d.kod || "")) { syvSkolkod = d.kod; status.textContent = ""; syvVisaKlar(); return; }
+      status.textContent = (d && d.text) || "Det gick inte att skapa länken just nu. Försök igen om en stund.";
+    })
+    .catch(function(){ status.textContent = "Det gick inte att skapa länken just nu. Försök igen om en stund."; });
+}
+// Räknar med samma regler som listan: låtsas vara eleven en kort stund.
+function syvRakna(){
+  var spar = { alder: svar.alder, ort: svar.ort };
+  var ortFalt = document.getElementById("ort"), sparOrt = ortFalt ? ortFalt.value : "";
+  svar.alder = ALDER_FRAN_LANK[syvVal.alder] || "";
+  svar.ort = document.getElementById("syv-ort").value.trim();
+  if (ortFalt) ortFalt.value = svar.ort;
+  antalCache = null;
+  var lista = document.getElementById("lista"), sparHtml = lista.innerHTML;
+  visaInre(FILTER_FRAN_LANK[syvVal.typ] || "alla");
+  var n = aktuellLista.length;
+  lista.innerHTML = sparHtml;
+  svar.alder = spar.alder; svar.ort = spar.ort; if (ortFalt) ortFalt.value = sparOrt; antalCache = null;
+  return n;
+}
+function syvUppdatera(){
+  syvKnappar("syv-alder", SYV_ALDRAR, "alder");
+  syvKnappar("syv-typ", SYV_TYPER, "typ");
+  syvFyllSkolor();
+  var n = syvRakna();
+  var ort = document.getElementById("syv-ort").value.trim();
+  document.getElementById("syv-antal").textContent = n;
+  document.getElementById("syv-antaltext").textContent = "jobb visas just nu" + (ort ? " i " + storBokstav(ort) : " i hela Sverige");
+  // Har länken redan skapats ritas QR-koden om med de nya valen. Koden är densamma.
+  if (syvSkolkod) syvVisaKlar();
+}
+function syvKopiera(){
+  var t = syvLankText();
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(function(){ beromDelning("Länken är kopierad."); }).catch(function(){ prompt("Kopiera länken:", t); });
+  else prompt("Kopiera länken:", t);
+}
+/* Affisch i A4 med skolans QR-kod. Öppnas i ett nytt fönster och skrivs
+   ut, eller sparas som PDF. Ingen siffra för antal jobb, eftersom tryckt
+   material inte ska ha siffror som ändras. Ingen emoji och inga
+   rubriker i versaler. QR-koden är cirka 72 mm, på vit botten. */
+function syvAffisch(){
+  var ort = storBokstav(document.getElementById("syv-ort").value.trim());
+  var esc = function(t){ return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;"); };
+  var forsta = syvVal.typ === "sommar" ? "Sommarjobb" : syvVal.typ === "deltid" ? "Extrajobb" : "Jobb";
+  var under = "Jobb med låga ingångskrav" + (ort ? " i " + ort : "")
+    + (syvVal.alder === "u16" ? ", för dig som är under 16."
+      : syvVal.alder === "16-17" ? ", för dig som är 16 eller 17."
+      : syvVal.alder === "18" ? ", för dig som är 18 eller äldre."
+      : ", sorterade efter din ålder.");
+  var qr = qrcode(0, "M"); qr.addData(syvLankText()); qr.make();
+  var svg = qr.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
+  var steg = [["Skanna koden", "med kameran i mobilen"], ["Se jobben", "som passar dig, nära dig"], ["Sök direkt", "nya jobb varje natt"]];
+  // Typsnitten hämtas från samma ställe som sidan, så att de alltid finns.
+  var typsnitt = function(f){ return new URL(f, document.baseURI).href; };
+  var html = '<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>Chansen affisch</title><style>'
+    + '@font-face{font-family:Caprasimo;src:url("' + typsnitt("caprasimo.woff2") + '") format("woff2")}'
+    + '@font-face{font-family:Figtree;src:url("' + typsnitt("figtree.woff2") + '") format("woff2");font-weight:300 900}'
+    + '@page{size:A4;margin:0}*{box-sizing:border-box;margin:0;padding:0}'
+    + 'html,body{width:210mm;height:297mm;background:#f5ead8;color:#201e1d;font-family:Figtree,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    + '.sida{position:relative;height:297mm;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center}'
+    + '.ring{position:absolute;border-radius:50%}'
+    + '.r1{width:150mm;height:150mm;background:#efd3b8;top:-62mm;right:-58mm}'
+    + '.r2{width:95mm;height:95mm;background:#f0c9a6;bottom:38mm;left:-48mm}'
+    + '.r3{width:16mm;height:16mm;background:#c67139;top:158mm;right:24mm;opacity:.9}'
+    + '.inne{position:relative;padding:20mm 18mm 0;display:flex;flex-direction:column;align-items:center;flex:1}'
+    + '.fran{background:#fffaf4;border-radius:999px;padding:3mm 7mm;font-size:12.5pt;font-weight:700;color:#8c491a;box-shadow:0 1mm 3mm rgba(100,51,18,.10)}'
+    + 'h1{font-family:Caprasimo,serif;font-weight:400;font-size:64pt;line-height:.98;margin:9mm 0 6mm;color:#201e1d}'
+    + 'h1 span{color:#c67139;display:block}'
+    + '.under{font-size:17pt;line-height:1.35;max-width:150mm;color:#3d342c;text-wrap:balance}'
+    + '.qrdel{position:relative;margin:13mm 0 0}'
+    + '.qr{background:#fff;border-radius:9mm;padding:7mm;box-shadow:0 2mm 7mm rgba(100,51,18,.16)}'
+    + '.qr svg{width:72mm;height:72mm;display:block}'
+    + '.lapp{position:absolute;top:-6mm;right:-14mm;transform:rotate(8deg);background:#c67139;color:#fff;font-weight:800;font-size:14pt;border-radius:999px;padding:2.5mm 6mm;box-shadow:0 1.5mm 4mm rgba(198,113,57,.35)}'
+    + '.steg{display:flex;gap:6mm;margin:13mm 0 0;justify-content:center}'
+    + '.s{width:50mm;display:flex;flex-direction:column;align-items:center}'
+    + '.nr{width:11mm;height:11mm;border-radius:50%;background:#643312;color:#f5ead8;font-family:Caprasimo,serif;font-size:15pt;line-height:11mm;margin-bottom:2.5mm}'
+    + '.s b{font-size:14pt;color:#201e1d}.s small{font-size:11pt;color:#6b5b4d;margin-top:1mm}'
+    + '.fot{position:relative;width:100%;background:#643312;color:#f5ead8;padding:9mm 18mm 10mm;margin-top:auto}'
+    + '.adress{font-family:Caprasimo,serif;font-size:32pt;line-height:1}'
+    + '.fot p{font-size:10.5pt;opacity:.85;margin-top:3mm}'
+    + '</style></head><body><div class="sida">'
+    + '<div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>'
+    + '<div class="inne">'
+    + '<div class="fran">Gratis, och nya jobb varje natt</div>'
+    + '<h1><span>' + esc(forsta) + '</span>nära dig</h1>'
+    + '<div class="under">' + esc(under) + '</div>'
+    + '<div class="qrdel"><div class="qr">' + svg + '</div><div class="lapp">Skanna här</div></div>'
+    + '<div class="steg">' + steg.map(function(s, i){
+        return '<div class="s"><div class="nr">' + (i + 1) + '</div><b>' + s[0] + '</b><small>' + s[1] + '</small></div>';
+      }).join("") + '</div>'
+    + '</div>'
+    + '<div class="fot"><div class="adress">chansen.nu</div>'
+    + '<p>Chansen drivs av en privatperson, inte av Arbetsförmedlingen.</p></div>'
+    + '</div><script>document.fonts.ready.then(function(){ setTimeout(function(){ window.print(); }, 300); });<\/script></body></html>';
+  var w = window.open("", "_blank");
+  if (!w) { beromDelning("Tillåt popupfönster för att öppna affischen."); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+function syvLaddaQr(){
+  var qr = qrcode(0, "M"); qr.addData(syvLankText()); qr.make();
+  var a = document.createElement("a");
+  a.href = qr.createDataURL(10, 4); a.download = "chansen-qr.gif"; a.click();
+}
+// I prototypen öppnas länken i samma fil i stället för på chansen.nu.
+function syvTesta(){
+  var fil = location.href.split("?")[0].split("#")[0];
+  window.open(fil + syvLankText().replace("https://chansen.nu/", ""), "_blank");
+}
+
+/* 2. Stöd för länken: ?alder=16-17 och ?visa=sommar. Åldern sparas som
+   om eleven valt den själv, och typen av jobb väljs i listan. */
+var LANK_FILTER = "";
+(function(){
+  try {
+    var a = /[?&]alder=([^&#]+)/.exec(location.search);
+    if (a && ALDER_FRAN_LANK[a[1]]) { svar.alder = ALDER_FRAN_LANK[a[1]]; spara(); }
+    var v = /[?&]visa=([^&#]+)/.exec(location.search);
+    if (v && FILTER_FRAN_LANK[v[1]]) LANK_FILTER = FILTER_FRAN_LANK[v[1]];
+  } catch(e){}
+})();
 
 if (kollaAdress()) {
   // arbetsgivare kom via direktlänk

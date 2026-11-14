@@ -1590,6 +1590,10 @@ function ritaStatistik(){
   // Kodord, till exempel ab12, översätts till skolans namn. Vad koderna
   // betyder sparas bara i den här telefonen, aldrig på GitHub.
   var kodord = kodord_();
+  // Skolkoder från fliken Skolkoder, till exempel s-h4x9q2. De skapas när
+  // syv gör en länk på chansen.nu/#syv, och visas här med skolans namn.
+  var skolkoder = d.skolkoder || {};
+  for (var sk in skolkoder) if (!kodord[sk]) kodord[sk] = skolkoder[sk];
   /* Säsong: hämtas från chansen.nu/sasong.json, som nattkörningen skriver.
      Visar när jul, sommar, vinter eller säsongsjobb börjar öka.     */
   if (sasongData === null) {
